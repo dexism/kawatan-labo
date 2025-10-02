@@ -1,0 +1,293 @@
+{
+  "//": "========================================",
+  "//": "==    ポジションスキル定義             ==",
+  "//": "========================================",
+
+  "//": "---------- アリス (AL) ----------",
+  "AL-01": {
+    "name": "少女", "category": "補助", 
+    "tags": ["対話判定", "ラピッド"],
+    "description": "対象の姉妹1人と対話判定を行う（バトルパート以外）。", 
+    "description_raw": "対象の姉妹1人と対話判定を行う。",
+    "source": { "book": "基本ルールブック", "page": 67 }, 
+    "timing": "ラピッド", "cost": 0, "range": "0",
+    "effects": [{ "ref": "PERFORM_DIALOGUE_CHECK", "params": { "target": "sister" } }]
+  },
+  "AL-02": {
+    "name": "癒し", "category": "支援", 
+    "tags": ["支援", "オート", "対話判定"],
+    "description": "他者から自身への対話判定に+1の修正。", 
+    "description_raw": "他の姉妹からの、自身に対する対話判定は全て出目+1される。",
+    "source": { "book": "基本ルールブック", "page": 67 }, 
+    "timing": "オート", "cost": "なし", "range": "効果参照",
+    "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "dialogueCheckBonus_received", "value": 1, "duration": "permanent" } }]
+  },
+  "AL-03": {
+    "name": "負けない心", "category": "支援", 
+    "tags": ["支援", "オート", "対話判定"],
+    "description": "自身の対話判定に+1の修正。", 
+    "description_raw": "対話判定において、出目+1してよい。",
+    "source": { "book": "基本ルールブック", "page": 67 }, 
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "dialogueCheckBonus", "value": 1, "duration": "permanent" } }]
+  },
+  "AL-04": {
+    "name": "お姫様", "category": "補助", 
+    "tags": ["コスト補正", "ダメージ"],
+    "description": "自身がダメージを受けた際、姉妹1人の次アクションコストを-1。", 
+    "description_raw": "自身がダメージを受けた際のみ使用可。対象の他の姉妹1体の次の「アクション」のコスト-1(最低0)。",
+    "source": { "book": "基本ルールブック", "page": 67 }, 
+    "timing": "ダメージ", "cost": 0, "range": "0～1",
+    "effects": [{ "ref": "REDUCE_NEXT_ACTION_COST", "params": { "target": "sister", "value": 1 } }]
+  },
+  "AL-05": {
+    "name": "楽園の天使", "category": "移動", 
+    "tags": ["配置変更", "ラピッド"],
+    "description": "自身の配置を「楽園」に変更する（「移動」ではない）。", 
+    "description_raw": "現在の位置に関係なく「楽園」に配置を変更する。この効果は「移動」ではない。",
+    "source": { "book": "基本ルールブック", "page": 67 }, 
+    "timing": "ラピッド", "cost": 2, "range": "自身",
+    "effects": [{ "ref": "TELEPORT_TO_AREA", "params": { "target": "self", "area": "楽園" } }]
+  },
+
+  "//": "---------- ホリック (HL) ----------",
+  "HL-01": {
+    "name": "加速する狂気", "category": "支援", 
+    "tags": ["支援", "オート"],
+    "description": "発狂状態の未練がある際、自身の攻撃判定に+1。", 
+    "description_raw": "バトルパートで発狂状態の未練がある際、攻撃判定+1。",
+    "source": { "book": "基本ルールブック", "page": 67 }, 
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "attackCheckBonus", "value": 1, "duration": "while_madness_active" } }]
+  },
+  "HL-02": {
+    "name": "衝動", "category": "補助", 
+    "tags": ["コスト補正", "狂気点操作", "オート"],
+    "description": "1ターンに1回、マニューバのコストを行動値の代わりに狂気点1で支払う。", 
+    "description_raw": "１ターンに１回、自身が使用するマニューバの宣言時、通常のコストを支払う代わりに、任意の未練に狂気点１点を加えることでコストとしてもよい。",
+    "source": { "book": "基本ルールブック", "page": 67, "errata": "1.6.1" }, 
+    "timing": "オート", "cost": "効果参照", "range": "自身",
+    "effects": [{ "ref": "PAY_COST_WITH_MADNESS", "params": { "limit_per_turn": 1 } }]
+  },
+  "HL-03": {
+    "name": "修羅", "category": "支援", 
+    "tags": ["支援", "ジャッジ", "狂気点操作"],
+    "description": "自身の判定に+3の修正を行う。コストとして狂気点1点が必要。", 
+    "description_raw": "コストとして、あなたは任意の未練に狂気点1点を加える。支援3。",
+    "source": { "book": "基本ルールブック", "page": 67 }, 
+    "timing": "ジャッジ", "cost": "狂気点1", "range": "自身",
+    "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "target": "self_roll", "value": 3 } }]
+  },
+  "HL-04": {
+    "name": "業怒", "category": "強化", 
+    "tags": ["強化", "ダメージ", "狂気点操作"],
+    "description": "自身の与ダメージを+2する。コストとして狂気点1点が必要。", 
+    "description_raw": "自身が与えたダメージに対してのみ使用可。コストとして、あなたは任意の未練に狂気点1点を加える。与ダメージ+2",
+    "source": { "book": "基本ルールブック", "page": 67 }, 
+    "timing": "ダメージ", "cost": "狂気点1", "range": "自身",
+    "effects": [{ "ref": "INCREASE_DEALT_DAMAGE", "params": { "value": 2 } }]
+  },
+  "HL-05": {
+    "name": "奈落の引力", "category": "移動", 
+    "tags": ["コスト補正", "オート", "移動"],
+    "description": "「奈落」方向への自身の移動マニューバのコストを-1。", 
+    "description_raw": "バトルパートにおいて、現在位置から「奈落」方向への移動マニューバを自身を対象として宣言する際、そのマニューバのコストが－１（最低０）される。",
+    "source": { "book": "基本ルールブック", "page": 67, "errata": "1.6.1" }, 
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "effects": [{ "ref": "REDUCE_MOVE_COST", "params": { "direction": "奈落", "value": 1 } }]
+  },
+
+  "//": "---------- オートマトン (AM) ----------",
+  "AM-01": {
+    "name": "援護", "category": "支援", 
+    "tags": ["コスト補正", "オート", "支援"],
+    "description": "1ターンに1回、射程内の姉妹が宣言したアクションのコストを、自身の行動値1を代わりに支払うことで0にする。", 
+    "description_raw": "１ターンに１回、射程内の他の姉妹が「アクション」マニューバを宣言した際、合意の上で自身の現在行動値を１減らす代わり、宣言されたマニューバのコストを０としてよい。",
+    "source": { "book": "基本ルールブック", "page": 68, "errata": "1.6.1" }, 
+    "timing": "オート", "cost": "効果参照", "range": "0～1",
+    "effects": [{ "ref": "PAY_COST_FOR_ALLY", "params": { "cost_to_performer": 1, "target_maneuver_timing": "アクション", "limit_per_turn": 1 } }]
+  },
+  "AM-02": {
+    "name": "無茶", "category": "補助", 
+    "tags": ["振り直し", "損傷", "オート"],
+    "description": "任意の基本パーツ1つを損傷することで、判定を振りなおす。", 
+    "description_raw": "コストとして、あなたは任意の基本パーツを1つ損傷する。行動判定・攻撃判定・切断判定において、サイコロを振りなおしてよい。",
+    "source": { "book": "基本ルールブック", "page": 68 }, 
+    "timing": "オート", "cost": "損傷1", "range": "自身",
+    "effects": [{ "ref": "REROLL_DICE", "params": { "cost_type": "damage_basic_part", "target_roll": ["行動判定", "攻撃判定", "切断判定"] } }]
+  },
+  "AM-03": {
+    "name": "氷の心", "category": "補助", 
+    "tags": ["狂気判定", "オート"],
+    "description": "自身の狂気判定に+1の修正。", 
+    "description_raw": "狂気判定+1",
+    "source": { "book": "基本ルールブック", "page": 68 }, 
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "madnessCheckBonus", "value": 1, "duration": "permanent" } }]
+  },
+  "AM-04": {
+    "name": "私は人形", "category": "補助", 
+    "tags": ["発狂無視", "オート"],
+    "description": "バトルパートの1ターン目のみ、あらゆる発狂状態の効果を無視する。", 
+    "description_raw": "バトルパートでは1ターン目のみ、あらゆる「発狂状態」の効果を無視してよい。",
+    "source": { "book": "基本ルールブック", "page": 68 }, 
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "effects": [{ "ref": "IGNORE_MADNESS_EFFECT", "params": { "duration_turn": 1 } }]
+  },
+  "AM-05": {
+    "name": "煉獄の檻", "category": "行動値", 
+    "tags": ["行動値", "オート", "修復"],
+    "description": "ターン終了時に「煉獄」にいれば、次ターン開始時に最大行動値まで回復する。", 
+    "description_raw": "バトルパートでターン終了時「煉獄」にいるなら、行動値がマイナスに達していても、次ターン開始時の行動値回復において最大行動値まで回復してよい。",
+    "source": { "book": "基本ルールブック", "page": 68, "errata": "1.6.1" }, 
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "effects": [{ "ref": "RECOVER_TO_MAX_AP", "params": { "condition": "at_rengoku_on_turn_end" } }]
+  },
+
+  "//": "---------- ジャンク (JK) ----------",
+  "JK-01": {
+    "name": "随行", "category": "移動", 
+    "tags": ["移動", "ラピッド"],
+    "description": "他の姉妹が移動マニューバを使用した際に、自身も「移動1」を行う。", 
+    "description_raw": "他の姉妹が移動マニューバを使用した際のみ使用可。移動1。",
+    "source": { "book": "基本ルールブック", "page": 67 }, 
+    "timing": "ラピッド", "cost": 0, "range": "自身",
+    "effects": [{ "ref": "MOVE_ON_ALLY_MOVE", "params": { "distance": 1 } }]
+  },
+  "JK-02": {
+    "name": "半壊", "category": "補助", 
+    "tags": ["狂気点操作", "オート"],
+    "description": "ターン終了時と「たからもの」破損時の狂気点増加を受けない。", 
+    "description_raw": "バトルパートにおけるターン終了時、「たからもの」を破損した際、いずれも狂気点の増加を受けない。",
+    "source": { "book": "基本ルールブック", "page": 67 }, 
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "effects": [
+        { "ref": "NEGATE_MADNESS_GAIN", "params": { "trigger": "turn_end" } },
+        { "ref": "NEGATE_MADNESS_GAIN", "params": { "trigger": "treasure_break" } }
+    ]
+  },
+  "JK-03": {
+    "name": "地獄の住人", "category": "支援", 
+    "tags": ["支援", "オート"],
+    "description": "「地獄」にいる際、自身の攻撃判定に+1。", 
+    "description_raw": "バトルパートで「地獄」にいる際、攻撃判定+1",
+    "source": { "book": "基本ルールブック", "page": 67 }, 
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "attackCheckBonus", "value": 1, "duration": "while_in_area", "area": "地獄" } }]
+  },
+  "JK-04": {
+    "name": "足掻く", "category": "支援", 
+    "tags": ["支援", "オート", "振り直し"],
+    "description": "狂気点で判定を振りなおす際、出目に+1。", 
+    "description_raw": "狂気点で判定を振りなおす際、出目が+1される。",
+    "source": { "book": "基本ルールブック", "page": 67 }, 
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "rerollBonus_by_madness", "value": 1, "duration": "permanent" } }]
+  },
+  "JK-05": {
+    "name": "奈落への抗い", "category": "補助", 
+    "tags": ["コスト補正", "オート"],
+    "description": "「奈落」にいる際、アクションマニューバのコストが-1(最低1)。", 
+    "description_raw": "バトルパートで「奈落」にいる際、全てのアクションマニューバのコストが-1される(最低1)。",
+    "source": { "book": "基本ルールブック", "page": 67 }, 
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "effects": [{ "ref": "REDUCE_ACTION_COST", "params": { "value": 1, "minimum": 1, "condition": "while_in_area", "area": "奈落" } }]
+  },
+
+  "//": "---------- コート (CT) ----------",
+  "CT-01": {
+    "name": "助言", "category": "補助", 
+    "tags": ["支援", "妨害", "ジャッジ"],
+    "description": "射程内の判定に対し、+1の支援か-1の妨害を行う。", 
+    "description_raw": "支援1か妨害1。",
+    "source": { "book": "基本ルールブック", "page": 68 }, 
+    "timing": "ジャッジ", "cost": 0, "range": "0～2",
+    "effects": [{ "ref": "CHOICE_JUDGE_MOD", "params": { "options": [{ "type": "支援", "value": 1 }, { "type": "妨害", "value": -1 }] } }]
+  },
+  "CT-02": {
+    "name": "冷静", "category": "補助", 
+    "tags": ["行動判定", "オート"],
+    "description": "自身の行動判定に+1の修正。", 
+    "description_raw": "行動判定において、出目+1してよい。",
+    "source": { "book": "基本ルールブック", "page": 68 }, 
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "skillCheckBonus", "value": 1, "duration": "permanent" } }]
+  },
+  "CT-03": {
+    "name": "看破", "category": "妨害", 
+    "tags": ["妨害", "ラピッド"],
+    "description": "射程内の「ラピッド」「ダメージ」「ジャッジ」マニューバ1つの効果を打ち消す。", 
+    "description_raw": "対象の「ラピッド」「ダメージ」「ジャッジ」マニューバ1つの効果を打ち消す。",
+    "source": { "book": "基本ルールブック", "page": 68 }, 
+    "timing": "ラピッド", "cost": 0, "range": "0～3",
+    "effects": [{ "ref": "CANCEL_MANEUVER", "params": { "target_timing": ["ラピッド", "ダメージ", "ジャッジ"] } }]
+  },
+  "CT-04": {
+    "name": "作戦", "category": "補助", 
+    "tags": ["配置変更", "オート"],
+    "description": "バトルパート開始時、敵配置を見てから味方ドール1体の配置を変更できる。", 
+    "description_raw": "バトルパート開始時、あなたは敵配置を見てから、味方ドール1体の配置を「奈落」以外の望むエリアに変更してもよい。",
+    "source": { "book": "基本ルールブック", "page": 68 }, 
+    "timing": "オート", "cost": "なし", "range": "効果参照",
+    "effects": [{ "ref": "CHANGE_ALLY_PLACEMENT", "params": { "trigger": "battle_start", "exclude_area": ["奈落"] } }]
+  },
+  "CT-05": {
+    "name": "先読み", "category": "補助", 
+    "tags": ["コスト補正", "アクション"],
+    "description": "対象が次に使うアクションのコストを-1(最低0)。重複可。", 
+    "description_raw": "対象が次に使う「アクション」のコストを-1(最低0)する。",
+    "source": { "book": "基本ルールブック", "page": 68 }, 
+    "timing": "アクション", "cost": 1, "range": "0～1",
+    "effects": [{ "ref": "REDUCE_NEXT_ACTION_COST", "params": { "target": "character", "value": 1, "stackable": true } }]
+  },
+
+  "//": "---------- ソロリティ (SR) ----------",
+  "SR-01": {
+    "name": "号令", "category": "補助", 
+    "tags": ["ラピッド使用", "ラピッド", "攻撃"],
+    "description": "姉妹全員が、望む攻撃マニューバ1つを「ラピッド」として使用できる。", 
+    "description_raw": "あなたを含む舞台上の姉妹全員、望む攻撃マニューバ1つを「ラピッド」で使用してよい。",
+    "source": { "book": "サプリメント：箱庭の物語", "page": 30 }, 
+    "timing": "ラピッド", "cost": 2, "range": "すべて",
+    "effects": [{ "ref": "ALLOW_MANEUVER_AS_TIMING", "params": { "target": "all_sisters_inclusive", "maneuver_category": "攻撃", "as_timing": "ラピッド" } }]
+  },
+  "SR-02": {
+    "name": "克己心", "category": "補助", 
+    "tags": ["狂気判定", "対話判定", "オート"],
+    "description": "自身が発狂状態なら、狂気判定と対話判定に+1。", 
+    "description_raw": "自身が発狂状態なら、狂気判定+1、対話判定+1",
+    "source": { "book": "サプリメント：箱庭の物語", "page": 30 }, 
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "effects": [
+        { "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "madnessCheckBonus", "value": 1, "duration": "while_madness_active" } },
+        { "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "dialogueCheckBonus", "value": 1, "duration": "while_madness_active" } }
+    ]
+  },
+  "SR-03": {
+    "name": "花園の集い", "category": "移動", 
+    "tags": ["配置変更", "ラピッド"],
+    "description": "姉妹全員の配置を「花園」に変更する（「移動」ではない）。", 
+    "description_raw": "あなたを含む舞台上にいる姉妹は全員、現在位置に関係なく「花園」に配置を変更する。この効果は「移動」ではない。",
+    "source": { "book": "サプリメント：箱庭の物語", "page": 30 }, 
+    "timing": "ラピッド", "cost": 2, "range": "姉妹",
+    "effects": [{ "ref": "TELEPORT_TO_AREA", "params": { "target": "all_sisters_inclusive", "area": "花園" } }]
+  },
+  "SR-04": {
+    "name": "内緒話", "category": "補助", 
+    "tags": ["対話判定", "オート"],
+    "description": "バトルパート開始/終了時、任意の姉妹1体と互いに対話判定を行える。", 
+    "description_raw": "あなたはバトルパート開始時と終了時、任意の姉妹1体(自身を除く)を自由に選び、互いに対話判定を行ってもよい。",
+    "source": { "book": "サプリメント：箱庭の物語", "page": 30 }, 
+    "timing": "オート", "cost": "なし", "range": "姉妹",
+    "effects": [{ "ref": "PERFORM_DIALOGUE_CHECK_MUTUAL", "params": { "trigger": ["battle_start", "battle_end"] } }]
+  },
+  "SR-05": {
+    "name": "優雅", "category": "補助", 
+    "tags": ["対話判定", "オート", "振り直し"],
+    "description": "狂気点で判定を振りなおす際、任意の姉妹1体に自身への対話判定をさせてもよい。", 
+    "description_raw": "自身が狂気点で判定を振りなおす際、任意の姉妹1体(自身を除く)を自由に選び、あなたへの対話判定をさせてよい。",
+    "source": { "book": "サプリメント：箱庭の物語", "page": 30 }, 
+    "timing": "オート", "cost": "なし", "range": "姉妹",
+    "effects": [{ "ref": "TRIGGER_ALLY_DIALOGUE_CHECK", "params": { "trigger": "reroll_by_madness" } }]
+  }
+}

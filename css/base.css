@@ -1,0 +1,262 @@
+/* ================================
+   1. 基本スタイル (全体共通)
+================================ */
+html, body {
+  width:  100%;
+  height: 100%; /* htmlとbody要素自体に高さを与える */
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: sans-serif;
+  font-size: 1.0rem;
+  background-color: var(--color-background);
+  color:            var(--color-text);
+}
+body.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+h2 {
+  margin-bottom: 4px;
+  font-size: 1.0rem;
+}
+
+/* ================================
+ * @description CSSカスタムプロパティ（変数）を定義します。
+================================ */
+:root {
+  accent-color: auto; /* ブラウザ/OSのアクセントカラーを自動で採用 */
+
+  --header-width: 100px;
+  --cell-width:    40px;
+  --cell-height:   40px;
+  --right-width:  300px;
+  /* Sizing & Spacing */
+  --spacing-small:         5px;
+  --spacing-medium:       10px;
+  --border-radius-small:   5px;
+  --border-radius-medium: 10px;
+
+  --list-item-size: 100px;
+  /* Font Sizes */
+  --font-size-small:      12px;
+  --font-size-medium:     14px;
+  --font-size-large:      16px;
+  /* Colors */
+  --color-0:            #000;
+  --color-1:            #111;
+  --color-2:            #222;
+  --color-3:            #333;
+  --color-4:            #444;
+  --color-5:            #555;
+  --color-6:            #666;
+  --color-7:            #777;
+  --color-8:            #888;
+  --color-9:            #999;
+  --color-a:            #aaa;
+  --color-b:            #bbb;
+  --color-c:            #ccc;
+  --color-d:            #ddd;
+  --color-e:            #eee;
+  --color-f:            #fff;
+  --color-shadow:       rgba(0, 0, 0, 0.5);
+  /* エリアカラー */
+  --color-naraku:   #500;
+  --color-jigoku:   #300;
+  --color-rengoku:  #111;
+  --color-hanazono: #222;
+  --color-rakuen:   #444;
+/* ================================
+  　ライトモード
+================================ */
+  --color-text:         var(--color-3);
+  --color-text-2:       var(--color-5);
+  --color-text-3:       var(--color-1);
+  --color-text-light:   var(--color-e);
+  --color-text-muted:   var(--color-7);
+  --color-background:   var(--color-e);
+  --color-panel:        var(--color-c); /* パネルの背景 */
+  --color-surface-1:    var(--color-d); /* パネルやカードの背景 */
+  --color-surface-2:    var(--color-e); /* メニューやモーダルの背景 */
+  --color-surface-dark: var(--color-a); /* 宣言リストの背景 */
+  --color-log-bg:       var(--color-f);
+  --color-border:       var(--color-a);
+  --color-accent-red:   #c33;
+  --color-accent-gold:  gold;
+  --color-accent-cyan:  cyan;
+  --color-accent-blue:  #36c;
+  --color-card:         var(--color-d);
+  --color-title-text:   var(--color-d);
+  --color-title-bg:     #700;
+  --color-sub-text:     var(--color-6);
+  --color-sub-bg:       var(--color-c);
+  --color-btn-text:     var(--color-8);
+  --color-btn-bg:       var(--color-f);
+  --color-level-1:      rgba(0, 0, 0, 0.1); 
+  --color-level-3:      rgba(0, 0, 0, 0.3); 
+  --color-level-f:      rgba(255, 255, 255, 0.5); 
+  /* カテゴリ色分け */
+  --color-move:         #aed6f1;
+  --color-attack:       #f5b7b1;
+  --color-defense:      #a3e4d7;
+  --color-support:      #d7bde2;
+  --color-debuff:       #f9e79f;
+  --color-action-boost: #a2d9ce;
+  --color-heal:         #f5cba7;
+  --color-utility:      #d5d8dc;
+  --color-sacrifice:    #e6b0aa;
+  --color-other:        #abb2b9;
+}
+
+/* ================================
+ 　 ダークモード (手動設定用)
+   <html> タグに data-theme="dark" が付いたときに適用される
+================================ */
+html[data-theme="dark"] {
+    /* Dark Mode Variables */
+    --color-text:         var(--color-d);
+    --color-text-2:       var(--color-b);
+    --color-text-3:       var(--color-e);
+    --color-text-light:   var(--color-1);
+    --color-text-muted:   var(--color-8);
+    --color-background:   var(--color-1);
+    --color-panel:        var(--color-3);
+    --color-surface-1:    var(--color-5);
+    --color-surface-2:    var(--color-4);
+    --color-surface-dark: var(--color-2);
+    --color-log-bg:       var(--color-0);
+    --color-border:       var(--color-6);
+    --color-accent-red:   #ff5555;
+    --color-accent-gold:  #ffd700;
+    --color-accent-cyan:  #00ffff;
+    --color-accent-blue:  #58a6ff;
+    --color-card:         var(--color-6);
+    --color-title-text:   var(--color-a);
+    --color-title-bg:     #511;
+    --color-sub-text:     var(--color-8);
+    --color-sub-bg:       #200;
+    --color-btn-text:     var(--color-c);
+    --color-btn-bg:       var(--color-0);
+    --color-level-1:      rgba(255, 255, 255, 0.1); 
+    --color-level-3:      rgba(255, 255, 255, 0.3); 
+    --color-level-f:      rgba(0, 0, 0, 0.8); 
+
+    /* カテゴリ色分け */
+    --color-move:         #3a6b8c;
+    --color-attack:       #a65c58;
+    --color-defense:      #3d7f73;
+    --color-support:      #7a5b86;
+    --color-debuff:       #a68f3a;
+    --color-action-boost: #3d7c70;
+    --color-heal:         #a6784a;
+    --color-utility:      #6b6e72;
+    --color-sacrifice:    #8c5c58;
+    --color-other:        #5a6066;
+}
+
+/* ================================
+ 　 ダークモード (システム依存用)
+   OSがダークモードで、かつ<html>タグにdata-theme属性が「ない」場合に適用される
+================================ */
+@media (prefers-color-scheme: dark) { 
+  html:not([data-theme]) {
+    /* Dark Mode Variables (上記と全く同じ内容をコピー) */
+    --color-text:         var(--color-d);
+    --color-text-2:       var(--color-b);
+    --color-text-3:       var(--color-e);
+    --color-text-light:   var(--color-1);
+    --color-text-muted:   var(--color-8);
+    --color-background:   var(--color-1);
+    --color-panel:        var(--color-3);
+    --color-surface-1:    var(--color-5);
+    --color-surface-2:    var(--color-4);
+    --color-surface-dark: var(--color-2);
+    --color-log-bg:       var(--color-0);
+    --color-border:       var(--color-6);
+    --color-accent-red:   #ff5555;
+    --color-accent-gold:  #ffd700;
+    --color-accent-cyan:  #00ffff;
+    --color-accent-blue:  #58a6ff;
+    --color-card:         var(--color-6);
+    --color-title-text:   var(--color-a);
+    --color-title-bg:     #511;
+    --color-sub-text:     var(--color-8);
+    --color-sub-bg:       #200;
+    --color-btn-text:     var(--color-c);
+    --color-btn-bg:       var(--color-0);
+    /* カテゴリ色分け */
+    --color-move:         #3a6b8c;
+    --color-attack:       #a65c58;
+    --color-defense:      #3d7f73;
+    --color-support:      #7a5b86;
+    --color-debuff:       #a68f3a;
+    --color-action-boost: #3d7c70;
+    --color-heal:         #a6784a;
+    --color-utility:      #6b6e72;
+    --color-sacrifice:    #8c5c58;
+    --color-other:        #5a6066;
+  }
+}
+/* base.css の末尾に追加 */
+
+/* ================================
+   スクロールバーのカスタムスタイル
+================================ */
+
+/* モダンブラウザ向け (Firefoxなど) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-text-muted) var(--color-surface-dark);
+}
+
+/* Webkit系ブラウザ向け (Chrome, Safari, Edgeなど) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--color-surface-dark);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-text-muted);
+  border-radius: 4px;
+  border: 2px solid var(--color-surface-dark);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-text-2);
+}
+
+/* dice3d.css または base.css に追加 */
+
+#dice3d-container {
+    position: fixed; /* 画面に固定 */
+    background-color: rgba(0, 0, 0, 0.3);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9998; /* 他のUIより手前、モーダルよりは奥に配置 */
+    
+    /* 初期状態では非表示にし、クリックイベントを透過させる */
+    display: none;
+    pointer-events: none;
+}
+
+#dice3d-container.is-visible {
+    display: block;
+    /* 投擲中は背景をクリックできないようにする */
+    pointer-events: auto;
+}
+
+/* 3Dキャンバス自体のスタイル */
+#dice3d-container canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}

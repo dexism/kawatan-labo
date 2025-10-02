@@ -1,0 +1,153 @@
+
+
+
+
+
+{
+    "//": "========================================",
+    "//": "==    汎用効果定義データベース v2.0   ==",
+    "//": "========================================",
+    
+    "//": "---------- 攻撃関連 ----------",
+
+    "GENERIC_ATTACK": {
+        "name": "汎用攻撃",
+        "description": "基本的な攻撃処理。攻撃判定を行い、命中時にダメージと追加効果を適用する。",
+        "actions": [{
+        "action_type": "attack_roll",
+        "attack_type": "$params.attack_type",
+        "damage": "$params.damage",
+        "attack_bonus": "$params.attack_bonus",
+        "defense_piercing": "$params.defense_piercing",
+        "on_hit": "$params.on_hit"
+        }]
+    },
+    "COUNTER_ATTACK": {
+        "name": "カウンター攻撃",
+        "description": "トリガーとなった攻撃の実行者に対して反撃する。",
+        "actions": [{
+        "action_type": "attack_roll",
+        "target": "triggering_character",
+        "attack_type": "$params.attack_type",
+        "damage": "$params.damage"
+        }]
+    },
+
+    "//": "---------- ダメージ・防御関連 ----------",
+
+    "INCREASE_DAMAGE_DEALT": {
+        "name": "与ダメージ増加",
+        "description": "自身が与えるダメージを増加させる。",
+        "actions": [{ "action_type": "modify_damage_dealt", "value": "$params.value", "condition": "$params.condition" }]
+    },
+    "INCREASE_DAMAGE_TAKEN": {
+        "name": "被ダメージ増加（脆弱）",
+        "description": "自身が受けるダメージを増加（乗算）させる。",
+        "actions": [{ "action_type": "modify_damage_taken", "multiplier": "$params.multiplier", "condition": "$params.condition_damage_type" }]
+    },
+    "GENERIC_DEFENSE": {
+        "name": "汎用防御",
+        "description": "自身が受けるダメージを減少させる。",
+        "actions": [{ "action_type": "modify_damage_taken", "value": "$params.value", "limit_per_damage": "$params.limit_per_damage" }]
+    },
+
+    "//": "---------- 判定関連 ----------",
+
+    "GENERIC_JUDGE_MOD": {
+        "name": "汎用判定修正",
+        "description": "指定された判定にプラス（支援）またはマイナス（妨害）の修正を加える。",
+        "actions": [{ "action_type": "modify_roll", "target": "$params.target", "value": "$params.value", "condition": "$params.condition" }]
+    },
+    "REROLL_DICE": {
+        "name": "ダイス振り直し",
+        "description": "指定された種類の判定を振り直す。",
+        "actions": [{ "action_type": "reroll_dice", "target_roll": "$params.target_roll" }]
+    },
+
+    "//": "---------- 移動関連 ----------",
+
+    "MOVE_CHARACTER": {
+        "name": "キャラクター移動",
+        "description": "対象を指定された距離・方向に移動させる。",
+        "actions": [{
+        "action_type": "move_character",
+        "target": "$params.target",
+        "distance": "$params.distance",
+        "direction": "$params.direction",
+        "ignore_move_debuff": "$params.ignore_move_debuff"
+        }]
+    },
+    "GENERIC_MOVE_DEBUFF": {
+        "name": "汎用移動妨害",
+        "description": "対象の移動距離を減少させる。",
+        "actions": [{ "action_type": "modify_move_distance", "value": "$params.value" }]
+    },
+    "REDUCE_MOVE_COST": {
+        "name": "移動コスト減少",
+        "description": "特定の方向への移動コストを減少させる。",
+        "actions": [{ "action_type": "modify_maneuver_cost", "value": "$params.value", "condition_direction": "$params.direction" }]
+    },
+
+    "//": "---------- ステータス・コスト関連 ----------",
+
+    "APPLY_BUFF": {
+        "name": "バフ/デバフ適用",
+        "description": "対象のステータスを永続または一時的に変更する。",
+        "actions": [{
+        "action_type": "apply_buff",
+        "target": "$params.target",
+        "stat": "$params.stat",
+        "value": "$params.value",
+        "duration": "$params.duration",
+        "condition": "$params.condition"
+        }]
+    },
+    "REDUCE_ACTION_COST": {
+        "name": "アクションコスト減少",
+        "description": "特定の条件下でアクションマニューバのコストを減少させる。",
+        "actions": [{ "action_type": "modify_maneuver_cost", "value": "$params.value", "minimum": "$params.minimum", "condition": "$params.condition" }]
+    },
+    
+    "//": "---------- 回復・修復関連 ----------",
+
+    "REPAIR_PART": {
+        "name": "パーツ修復",
+        "description": "損傷したパーツを指定された種類・数だけ修復する。",
+        "actions": [{ "action_type": "repair_part", "target": "$params.target", "part_type": "$params.part_type", "count": "$params.count" }]
+    },
+    "REDUCE_MADNESS_POINTS": {
+        "name": "狂気点減少",
+        "description": "指定された未練の狂気点を減少させる。",
+        "actions": [{ "action_type": "reduce_madness", "value": "$params.value", "target_regret": "$params.target_regret" }]
+    },
+
+    "//": "---------- ネクロニカキーワード効果（主にon_hitで呼び出される） ----------",
+
+    "EXPLOSION": { 
+        "name": "爆発", "description": "隣接部位に追加ダメージ。", "actions": [{ "action_type": "deal_damage", "target": "adjacent_part", "value": "source_damage" }] 
+    },
+    "SEVERANCE": { 
+        "name": "切断", "description": "命中部位に切断判定。", "actions": [{ "action_type": "severance_roll", "target": "hit_location" }] 
+    },
+    "TUMBLE": { 
+        "name": "転倒", "description": "対象の行動値を-2。", "actions": [{ "action_type": "modify_action_value", "target": "current_target", "value": -2 }] 
+    },
+    "AREA_ATTACK": { 
+        "name": "全体攻撃", "description": "対象エリア内の全キャラクターに効果を適用。", "actions": [{ "action_type": "apply_to_area" }] 
+    },
+    "CHAIN_ATTACK_1": { 
+        "name": "連撃1", "description": "同じ攻撃をもう一度行う。", "actions": [{ "action_type": "chain_attack", "count": 1 }] 
+    },
+    "CHAIN_ATTACK_2": { 
+        "name": "連撃2", "description": "同じ攻撃を2回まで追加で行う。", "actions": [{ "action_type": "chain_attack", "count": 2 }] 
+    },
+
+    "//": "---------- その他・特殊処理 ----------",
+
+    "WAIT": { 
+        "name": "待機", "description": "何もせず手番を終了する。", "actions": [{ "action_type": "wait" }] 
+    },
+    "MERGE_LEGION_UNITS": { 
+        "name": "レギオン合流", "description": "同名レギオン部隊を統合する。", "actions": [{ "action_type": "merge_legion" }] 
+    }
+}

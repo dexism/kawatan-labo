@@ -1,0 +1,376 @@
+/* ================================
+   1. ダイスローラー
+================================ */
+.dice-roller {
+  position: fixed;
+  top:    30px;
+  left:   20px;
+  width:  50px;
+  height: 50px;
+  background-color: var(--color-surface-1);
+  border-radius: 50%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  align-content:   center;
+  font-size: 30px;
+  cursor: grab;
+  user-select: none;
+  z-index: 900;
+  box-shadow: 2px 2px 8px black;
+  transition: all 0.2s ease-out;
+}
+.dice-roller:hover {
+  background-color:        #dff;
+  border:        2px solid cyan;
+  box-shadow: 0px 0px 10px cyan;
+  transform: scale(1.1);
+}
+.dice-roller:active {
+  cursor: grabbing;
+}
+/* ================================
+   2. マニューバ詳細カード
+================================ */
+.maneuver-card {
+  position: fixed;
+  width: 300px;
+  background: var(--color-background);
+  background-color: transparent;
+  border-radius: 5px;
+  pointer-events: none;
+  display: flex;
+  font-size: 12px;
+  font-weight: bold;
+  z-index: 2000;
+}
+.card-category-bar {
+  flex-shrink: 0;
+  width: 24px;
+  height: 72px;
+  left: -40px;
+  writing-mode: sideways-lr ;
+  text-orientation: mixed;
+  text-align: center;
+  color: var(--color-text-3);
+  font-weight: bold;
+  font-size: 16px;
+  padding: 3px;
+  border-radius: 5px 0 0 5px;
+}
+.card-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 3px 3px 8px black;
+}
+.card-source-header {
+  border-radius: 0 5px 0 0;
+  background-color: var(--color-text-3);
+  color:            var(--color-text-light);
+  font-weight: bold;
+  font-size: 14px;
+  padding: 4px 8px 0 8px;
+}
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 8px 4px 8px;
+  font-weight: bold;
+  background-color: var(--color-text-3);
+  color:            var(--color-text-light);
+}
+.card-location-text {
+  font-weight: bold;
+  font-size: 16px;
+}
+.card-maneuver-name {
+  font-size: 18px;
+}
+.card-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  text-align: center;
+  background-color: var(--color-panel);
+  font-weight: bold;
+  font-size: 14px;
+}
+.card-stats > div {
+  padding: 4px;
+}
+.card-stats > div span {
+  font-weight: bold;
+  margin-right: 4px;
+  font-size: 12px;
+  color: #c33;
+}
+.card-row {
+  padding: 6px;
+  background-color: var(--color-background);
+  border-radius: 0 0 5px 5px;
+
+  padding: 4px 8px; /* パディングを調整 */
+  font-size: 12px;
+  background-color: var(--color-surface-2); /* 背景色を少し変更 */
+  border-top: 1px solid var(--color-border); /* 各行の間に線を追加 */
+}
+.card-row:last-child {
+    border-radius: 0 0 5px 5px; /* 最後の行だけ角を丸める */
+}
+.card-row strong {
+  /* display: block; */
+  color: #c33;
+  /* margin-bottom: 2px; */
+  /* display: block; を削除 */
+  font-size: 12px;
+  color: var(--color-accent-red); /* CSS変数を使用 */
+  margin-right: 8px; /* 右側に余白を追加 */
+  font-weight: bold;
+}
+/* ================================
+   3. 全てのポップアップメニュー
+================================ */
+/* ================================
+  マニューバメニュー
+================================ */
+/*
+#maneuverMenu {
+  background-color: var(--color-background);
+  color:            var(--color-text-muted);
+  padding:     10px;
+  margin:      10px;
+  font-size:   14px;
+  font-weight: bold;
+  z-index:   1000;
+  max-height:  90%;
+  max-width:  100%;
+  min-width:  300px;
+  overflow-y: auto;
+  box-sizing: border-box;
+  box-shadow: 0 0 8px black;
+  border-radius: 5px;
+
+  position: fixed;
+  bottom: 0;
+  left:   0;
+  opacity: 0.5;
+  transform:
+    translate(0, 80%)
+    scale(1);
+  visibility: hidden;
+  transition:
+    opacity    0.2s ease-out,
+    transform  0.2s ease-out,
+    visibility 0.2s;
+}
+
+#maneuverMenu.is-visible {
+  visibility: visible; 
+  opacity: 1;
+  transform:
+    translate(0, 0)
+    scale(1);
+  transition:
+    opacity    0.2s ease-out,
+    transform  0.2s ease-out,
+    visibility 0.2s;
+}
+.maneuver-menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 10px;
+    background-color: var(--color-surface-1);
+    border-bottom: 0px solid var(--color-border);
+    border-radius: 5px;
+outline: 1px dashed red;
+}
+.maneuver-menu-title-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.maneuver-menu-sheet-btn {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    line-height: 1;
+    padding: 2px;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    border-radius: 5px;
+    transition: all 0.2s;
+}
+.maneuver-menu-sheet-btn:hover {
+    background-color: rgba(0, 0, 0, 0.2);
+    color: var(--color-text);
+    transform: scale(1.1);
+}
+.maneuver-menu-title {
+    font-weight: bold;
+    font-size: 14px;
+}
+.maneuver-menu-close-btn {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    line-height: 1;
+    padding: 0 5px;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+.maneuver-menu-close-btn:hover {
+    color: var(--color-text);
+    background-color: rgba(0, 0, 0, 0.2);
+}
+#maneuverMenu .accordion-container {
+  background-color: var(--color-background);
+  margin: 5px;
+}
+.maneuver-category-title {
+  font-weight: bold;
+  width: calc(100% - 10PX);
+  padding: 5px 0 5px 10px;
+  margin: 0;
+  color: var(--color-text-3);
+  border-radius: 5px 5px 0 0;
+}
+.maneuver-item {
+  padding: 5px;
+  margin:  5px;
+  cursor: pointer;
+  border-radius: 5px;
+  background-color: var(--color-text-light);
+  background-color: transparent;
+  outline: 2px solid gold;
+}
+.maneuver-item:not(.is-masked):hover {
+  background-color:  gold;
+  color:             black;
+}
+.maneuver-item.is-masked {
+  background-color: var(--color-panel);
+  outline: none;
+  cursor: not-allowed;
+  pointer-events: auto;
+}
+.maneuver-item.is-masked:hover {
+    background-color: var(--color-surface-1);
+}
+.maneuver-item.is-damaged {
+  color: var(--color-accent-red);
+  text-decoration: line-through;
+}
+*/
+.simple-menu-modal-backdrop {
+    justify-content: center;
+    align-items: center;
+}
+.simple-menu-modal-content {
+    width: 90%;
+    max-width: 200px;
+    max-height: 90%;
+}
+.simple-menu-modal-body {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 5px;
+    padding: 10px;
+}
+/* メニュー項目のスタイルは既存のものを流用 */
+.simple-menu-modal-body .maneuver-item {
+    min-width: 60%;
+    text-align: center;
+    margin: 5px;
+    padding: 5px 20px;
+    border-radius: 10px;
+    background-color: #444;
+    color:            #eee;
+    border: 2px solid #888;
+}
+.simple-menu-modal-body .maneuver-item.area-color-naraku {   background-color: var(--color-naraku); }
+.simple-menu-modal-body .maneuver-item.area-color-jigoku {   background-color: var(--color-jigoku); }
+.simple-menu-modal-body .maneuver-item.area-color-rengoku {  background-color: var(--color-rengoku); }
+.simple-menu-modal-body .maneuver-item.area-color-hanazono { background-color: var(--color-hanazono); }
+.simple-menu-modal-body .maneuver-item.area-color-rakuen {   background-color: var(--color-rakuen); }
+
+/* ホバー時の色を少し明るくする */
+.simple-menu-modal-body .maneuver-item:not(.is-masked):hover {
+    background-color:  gold;
+    color:             black;
+}
+
+/* 無効化されたボタンのスタイル */
+.simple-menu-modal-body .maneuver-item.is-masked {
+    outline: none;
+    background-color: transparent;
+    color: var(--color-text-muted);
+    /* filter: grayscale(80%);*/
+}
+/* --- カテゴリ色分け --- */
+.category-color-move {         background-color: var(--color-move); }
+.category-color-attack {       background-color: var(--color-attack); }
+.category-color-defense {      background-color: var(--color-defense); }
+.category-color-support {      background-color: var(--color-support); }
+.category-color-debuff {       background-color: var(--color-debuff); }
+.category-color-action-boost { background-color: var(--color-action-boost); }
+.category-color-heal {         background-color: var(--color-heal); }
+.category-color-utility {      background-color: var(--color-utility); }
+.category-color-sacrifice {    background-color: var(--color-sacrifice); }
+.category-color-other {        background-color: var(--color-other); }
+
+/* マニューバ項目のフレックスボックス設定 */
+.maneuver-item {
+    display: flex;
+    align-items: center;
+}
+
+.maneuver-item-content {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* アイコンとテキストの間のスペース */
+}
+
+/* アイコンの共通スタイル */
+.maneuver-icon {
+    font-size: 1.2em;
+}
+
+/* チェックボックスのスタイル調整 */
+.maneuver-checkbox {
+    /* デフォルトのチェックボックスの外観をリセット */
+    appearance: none;
+    -webkit-appearance: none;
+    
+    /* ボックスのサイズと形 */
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--color-text-muted);
+    border-radius: 3px;
+    
+    /* 配置調整 */
+    position: relative;
+    cursor: pointer;
+    flex-shrink: 0; /* 縮まないようにする */
+}
+
+/* チェックが入った時のスタイル */
+.maneuver-checkbox:checked {
+    background-color: var(--color-accent-blue);
+    border-color: var(--color-accent-blue);
+}
+
+/* チェックマーク（::after疑似要素で作成） */
+.maneuver-checkbox:checked::after {
+    content: '✔';
+    font-size: 14px;
+    color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}

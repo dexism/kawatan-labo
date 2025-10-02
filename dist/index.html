@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>『永い後日談のネクロニカ』バトルパート支援ツール 7.10.1.15</title>
+
+<!-- Favicon設定 -->
+<link rel="icon" href="/assets/favicon-cJD5s49M.ico" type="image/x-icon">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon-CghyILkK.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/icon-192-T2NPbqgy.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/assets/icon-512-HStAJffo.png">
+
+<!-- 分割した外部スタイルシートの読み込み -->
+
+  <script type="module" crossorigin src="/assets/index-DylLk95h.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-B1TysXWz.css">
+</head>
+<body>
+<div id="dice3d-container"></div>
+
+<!-- ヘッダー -->
+<header class="app-header">
+  <h1>
+    <span class="responsive-item">■ 『<span class="hide-on-mobile">永い後日談の</span>ネクロニカ』バトルパート支援ツール</span>
+    <span class="hide-on-mobile"> - 基本動作確認版</span>
+  </h1>
+</header>
+
+<!-- メインコンテンツ -->
+<main class="main-container">
+
+  <!-- 左列 -->
+  <div class="left-column">
+  
+    <!-- 手駒エリアコンテンツ -->
+    <aside class="grid-area-enemy-panel">
+      <div class="section">
+        <div class="char-area-wrapper" id="enemyAreaWrapper">
+          <div class="char-container" id="enemyContainer"></div>
+        </div>
+        <span class="hide-on-mobile"><h2 class="section-title">▲ ネクロマンサーの手駒</h2></span>
+      </div>
+    </aside>
+
+    <!-- ② 舞台見取図コンテンツ -->
+    <aside class="grid-area-battle-panel">
+        <div class="battle-wrap battle-grid-scroll-wrapper" id="battleWrap"></div>
+    </aside>
+
+    <!-- ③ 姉妹エリアコンテンツ -->
+    <aside class="grid-area-pc-panel">
+      <div class="section">
+        <span class="hide-on-mobile"><h2 class="section-title">▼ 姉妹ドール</h2></span>
+        <div class="char-area-wrapper" id="pcAreaWrapper">
+          <div class="char-container" id="pcContainer"></div>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+  <!-- /main -->
+
+  <!-- 右列 -->
+  <div class="right-column">
+
+    <!-- バトルステータス表示パネル -->
+    <aside class="grid-area-status-panel">
+      <div class="section status" id="statusArea">
+        <span class="hide-on-mobile"><h2 class="section-title">バトルステータス</h2></span>
+        <div class="status-grid">
+          <div class="status-item">
+            <div class="status-label">勝利条件</div>
+            <div id="victoryCondition" class="status-value">敵全てを破壊せよ</div>
+          </div>
+          <div class="status-item">
+            <div class="status-label">ターン</div>
+            <div id="turnIndicator" class="status-value">-</div>
+          </div>
+          <div class="status-item hide-on-mobile">
+            <div class="status-label">カウント</div>
+            <div id="countIndicator" class="status-value">-</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+      
+    <!-- タイミング表示パネル -->
+    <aside class="grid-area-timing-panel">
+      <div class="section status" id="timingArea">
+        <div class="phase-control-wrapper">
+          <div class="indicator-container">
+            <div id="actionPhaseIndicator" class="phase-indicator">アクション<span class="hide-on-mobile"><br>タイミング</span></div>
+            <div id="rapidPhaseIndicator" class="phase-indicator">ラピッド<span class="hide-on-mobile"><br>タイミング</span></div>
+            <div id="judgePhaseIndicator" class="phase-indicator">ジャッジ<span class="hide-on-mobile"><br>タイミング</span></div>
+            <div id="damagePhaseIndicator" class="phase-indicator">ダメージ<span class="hide-on-mobile"><br>タイミング</span></div>
+          </div>
+          <div class="control-container hide-on-mobile">
+            <button id="startBattleBtn" class="phase-btn">戦闘開始</button>
+            <div id="inBattleControls" class="in-battle-controls">
+              <button id="countdownBtn" class="phase-btn">カウントダウン</button>
+              <button id="endTurnBtn" class="phase-btn">ターン終了</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ラピッド宣言パネル -->
+    <aside class="grid-area-rapid-panel">
+      <div class="section accordion-container is-closed" id="rapidDeclarationArea">
+          <h2 class="section-title accordion-header">ラピッド宣言はありません</h2>
+          <div class="accordion-content">
+              <div id="rapidDeclarationList" class="action-queue-list is-stack-style"></div>
+          </div>
+      </div>
+    </aside>
+    
+    <!-- ジャッジ宣言 ★★★ -->
+    <aside class="grid-area-judge-panel">
+      <div class="section accordion-container is-closed" id="judgeDeclarationArea">
+          <h2 class="section-title accordion-header">ジャッジ宣言はありません</h2>
+
+          <div class="accordion-content">
+              <div id="judgeDeclarationList" class="action-queue-list"></div>
+          </div>
+      </div>
+    </aside>
+
+    <!-- アクション宣言パネル -->
+    <aside class="grid-area-action-panel">
+      <div class="section accordion-container is-closed" id="actionDeclarationArea">
+        <h2 class="section-title accordion-header">アクション宣言はありません</h2>
+
+        <div class="accordion-content">
+            <div id="actionDeclarationList" class="action-queue-list">
+            </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ダメージ処理パネル -->
+    <aside class="grid-area-damage-panel">
+      <div class="section accordion-container is-closed" id="damageProcessingArea">
+        <h2 class="section-title accordion-header">ダメージ処理はありません</h2>
+
+        <div class="accordion-content">
+            <div id="damageProcessingList" class="action-queue-list">
+            </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ログパネル -->
+    <aside class="grid-area-log-panel">
+      <div class="section log" id="log">
+        <h2 class="section-title">ログ</h2>
+        <div id="logEntries" class="log-entries-container" style="height: 300px;"></div>
+      </div>
+    </aside>
+
+    <!-- 設定パネル -->
+    <aside class="grid-area-settings-panel">
+      <div class="section accordion-container is-closed" id="settingsArea">
+        <h2 class="section-title accordion-header">設定</h2>
+
+        <div class="section settings accordion-content" id="settingsArea">
+          <h2 class="section-title">セッション接続</h2>
+          <div class="settings-content">
+            <div class="theme-switcher-container">
+              <label>
+                <input type="radio" name="conect-switcher" value="ncMode" checked>
+                <span>NCモード</span>
+              </label>
+              <label>
+                <input type="radio" name="conect-switcher" value="plMode">
+                <span>PLモード</span>
+              </label>
+            </div>
+          </div>
+
+          <h2 class="section-title">ダイスロール</h2>
+          <div class="settings-content">
+            <div class="theme-switcher-container">
+              <label>
+                <input type="radio" name="diceroll-switcher" value="manual">
+                <span>手動</span>
+              </label>
+              <label>
+                <input type="radio" name="diceroll-switcher" value="nc">
+                <span>NC自動</span>
+              </label>
+              <label>
+                <input type="radio" name="diceroll-switcher" value="auto" checked>
+                <span>自動</span>
+              </label>
+            </div>
+          </div>
+
+          <h2 class="section-title">テーマ</h2>
+          <div class="settings-content">
+            <div class="theme-switcher-container">
+              <label>
+                <input type="radio" name="theme-switcher" value="light">
+                <span>ライト</span>
+              </label>
+              <label>
+                <input type="radio" name="theme-switcher" value="dark">
+                <span>ダーク</span>
+              </label>
+              <label>
+                <input type="radio" name="theme-switcher" value="system" checked>
+                <span>システム</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+  </div>
+
+</main>
+
+<!-- フッター -->
+<footer class="app-footer">
+  <div class="credit-info">
+    <span class="responsive-item">本ツールは「神谷涼」及び「インコグ・ラボ」が権利を有する『永い後日談のネクロニカ』の二次創作です。</span><span class="hide-on-mobile"> | </span>
+    <span class="responsive-item">原作・著作権は原作者および権利者に帰属します。</span><span class="hide-on-mobile"> | </span>
+    <span class="responsive-item">本ツールは非公式であり、商用利用はしていません。</span><span class="hide-on-mobile"> | </span>
+    <span class="responsive-item">© 2025 かわたん.</span>
+  </div>
+  <div class="version-info" id="version-info"></div>
+</footer>
+
+<!-- 画面上にオーバーレイされるUI要素 -->
+<!-- ウェルカムモーダル -->
+<div id="welcomeModal" class="modal-backdrop">
+  <div class="modal-content welcome-modal-content">
+    <div class="modal-header-sub">『ネクロニカ』バトルパート支援ツール</div>
+    <div class="modal-header-main">■ ツールをご利用の前に ■</div>
+    <div class="modal-body welcome-modal-body">
+      <p>
+        <strong>本ツールは『永い後日談のネクロニカ』の二次創作物です。</strong><br>
+        「神谷涼」及び「インコグ・ラボ」が権利を有する原作TRPGのルールブックを所有している方のセッション支援を目的としています。
+      </p>
+      <hr>
+      <p>
+        <strong>【開発中のバージョンです】</strong><br>
+        本ツールは現在開発中のため、予期せぬ不具合や未実装の機能が含まれる可能性があります。あらかじめご了承ください。
+      </p>
+      <hr>
+      <p>
+        <strong>【フィードバックを歓迎します】</strong><br>
+        操作感に関するご意見、不具合のご報告、機能のご要望などがございましたら、以下の連絡先までお気軽にご連絡いただけますと幸いです。
+      </p>
+      <ul class="contact-info-list">
+        <li><strong>Mail:</strong> dexism1024@google.com</li>
+        <li><strong>Discord:</strong> kawatantan</li>
+      </ul>
+      <div class="author-signature">制作: かわたん</div>
+    </div>
+    <div class="modal-footer">
+      <button id="closeWelcomeModalBtn" class="welcome-modal-close-btn">確認して利用を開始する</button>
+    </div>
+  </div>
+</div>
+
+<div id="diceRoller" class="dice-roller">🎲</div>
+<div id="maneuverCard" class="maneuver-card" style="display:none;"></div>
+<div id="maneuverMenu"></div>
+<div id="simpleMenuModal" class="modal-backdrop simple-menu-modal-backdrop">
+  <div class="modal-content simple-menu-modal-content">
+    <div class="modal-header">
+      <h3 id="simpleMenuModalTitle"></h3>
+      <button id="closeSimpleMenuModalBtn" class="close-btn">&times;</button>
+    </div>
+    <div id="simpleMenuModalBody" class="modal-body simple-menu-modal-body"></div>
+    <div id="simpleMenuModalFooter" class="modal-footer" style="display: none;"></div>
+  </div>
+</div>
+<div id="undeadListModal" class="modal-backdrop">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>アンデッドを選択</h3>
+      <button id="closeModalBtn" class="close-btn">&times;</button>
+    </div>
+    <div class="modal-body" id="undeadListContainer"></div>
+  </div>
+</div>
+<div id="damageModal" class="modal-backdrop">
+  <div class="modal-content" style="max-width: 600px;">
+    <div class="modal-header">
+      <h3 id="damageModalTitle">パーツ損傷処理</h3>
+      <button id="closeDamageModalBtn" class="close-btn">&times;</button>
+    </div>
+    <div class="modal-body" id="damageModalBody">
+      <div id="damageModalInfo" style="margin-bottom: 15px; text-align: center; font-weight: bold;"></div>
+      <div id="partsGridContainer"></div>
+    </div>
+    <div id="damageModalFooter" style="text-align: right; margin-top: 15px;">
+        <button id="confirmDamageBtn" class="card-action-btn">損傷を確定</button>
+    </div>
+  </div>
+</div>
+<div id="madnessModal" class="modal-backdrop">
+  <div class="modal-content" style="max-width: 700px;">
+    <div class="modal-header">
+      <h3>ターン終了処理：狂気点の追加</h3>
+    </div>
+    <div class="modal-body" id="madnessModalBody" style="display: flex; flex-direction: column; gap: 15px;"></div>
+    <div id="madnessModalFooter" style="text-align: right;">
+        <button id="confirmMadnessBtn" class="card-action-btn">次のターンへ</button>
+    </div>
+  </div>
+</div>
+<div id="interruptionWindow" class="interruption-window" style="display:none;">
+    <div id="interruptionHeader" class="interruption-header">
+        <h4>割り込み処理</h4>
+    </div>
+    <div id="interruptionBody" class="interruption-body"></div>
+    <div class="interruption-footer">
+        <button id="skipInterruptionBtn" class="card-action-btn">割り込まない</button>
+    </div>
+</div>
+<div id="toast-notification" class="toast-notification"></div>
+
+<!-- 外部JavaScriptファイルの読み込み -->
+
+
+<script src="//accaii.com/nbpst/script.js" async></script><noscript><img src="//accaii.com/nbpst/script?guid=on"></noscript>
+</body>
+</html>

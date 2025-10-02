@@ -1,0 +1,902 @@
+/**
+ * @file ui-manager.js
+ * @description UIの描画、更新、DOM操作全般を担当するモジュール。
+ */
+
+/*
+ * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
+ */
+export const version = "1.12.68";
+
+import * as charManager from './character-manager.js';
+import * as battleLogic from './battle-logic.js';
+import * as interactionManager from './interaction-manager.js';
+import * as data from './data-handler.js';
+import { getCategoryClass } from './ui-helpers.js';
+
+let toastTimer = null;
+const rows = ["奈落", "地獄", "煉獄", "花園", "楽園"];
+const cols = Array.from({ length: 26 }, (_, i) => 20 - i);
+
+export function initialize() { console.log("UI Manager initialized."); }
+
+// ===================================================================================
+//  UI構築 / 描画関数 (Build / Render)
+// ===================================================================================
+export function buildGrid() {
+  document.documentElement.style.setProperty('--col-count', cols.length);
+  document.documentElement.style.setProperty('--row-count', rows.length);
+  const battleWrap = document.getElementById('battleWrap');
+  battleWrap.innerHTML = '';
+  const topLeft = document.createElement('div');
+  topLeft.className = 'current-action-cell';
+  topLeft.id = 'currentActionValue';
+  battleWrap.appendChild(topLeft);
+  cols.forEach((cv, c) => {
+    const h = document.createElement('div');
+    h.className = 'col-header'; h.textContent = cv; h.dataset.col = String(cv);
+    h.style.gridColumn = (c + 2).toString(); h.style.gridRow = '1';
+    battleWrap.appendChild(h);
+  });
+
+  const areaClassMap = {
+    '奈落': 'naraku',
+    '地獄': 'jigoku',
+    '煉獄': 'rengoku',
+    '花園': 'hanazono',
+    '楽園': 'rakuen'
+  };
+
+  rows.forEach((rv, r) => {
+    const h = document.createElement('div');
+    h.className = 'row-header';
+    
+    const areaSlug = areaClassMap[rv];
+    if (areaSlug) {
+      h.classList.add(`area-color-${areaSlug}`);
+    }
+    
+    h.textContent = rv;
+    h.style.gridColumn = '1'; h.style.gridRow = (r + 2).toString();
+    battleWrap.appendChild(h);
+  });
+
+  rows.forEach((rv, r) => {
+    cols.forEach((cv, c) => {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+
+      const areaSlug = areaClassMap[rv];
+      if (areaSlug) {
+        cell.classList.add(`cell-area-${areaSlug}`);
+      }
+
+      if (cv === 0) cell.classList.add('col-zero');
+      else if (cv < 0) cell.classList.add('col-negative');
+      cell.dataset.row = String(r); cell.dataset.col = String(cv);
+      cell.style.gridColumn = (c + 2).toString(); cell.style.gridRow = (r + 2).toString();
+      battleWrap.appendChild(cell);
+    });
+  });
+}
+
+export function showToastNotification(message, duration = 2000) {
+    const toast = document.getElementById('toast-notification');
+    if (!toast) return;
+
+    if (toastTimer) {
+        clearTimeout(toastTimer);
+    }
+
+    toast.innerHTML = message;
+    toast.classList.add('is-visible');
+
+    toastTimer = setTimeout(() => {
+        toast.classList.remove('is-visible');
+        toastTimer = null;
+    }, duration);
+}
+
+export function renderCharacterCards() {
+    const allCharacters = charManager.getCharacters(); // ★ 全キャラを取得
+    const pcs = allCharacters.filter(c => c.type === 'pc');
+    const enemies = allCharacters.filter(c => c.type === 'enemy');
+    renderCharacterGroup(document.getElementById('pcContainer'), pcs, 'pc');
+    renderCharacterGroup(document.getElementById('enemyContainer'), enemies, 'enemy');
+    updateMarkers();
+    interactionManager.setupCharacterEventListeners();
+}
+
+function renderCharacterGroup(container, characters, type) {
+  container.innerHTML = '';
+  const isSetupPhase = !battleLogic.getBattleState().isStarted;
+
+  characters.forEach(char => {
+    const card = createCharacterCard(char, isSetupPhase);
+    container.appendChild(card);
+  });
+
+  if (isSetupPhase) {
+    const addCard = document.createElement('div');
+    addCard.className = 'add-char-card';
+    const typeText = (type === 'pc') ? '姉妹ドール' : 'NCの手駒';
+    addCard.innerHTML = `<div class="add-char-text">${typeText}</div><div class="add-char-plus">+</div><div class="add-char-text">アンデッドを追加</div>`;
+    container.appendChild(addCard);
+  }
+}
+
+function createCharacterCard(char, isSetupPhase) {
+    let statusOverlayClasses = '';
+    if (char.isMentallyBroken) statusOverlayClasses += ' status-mental-collapse';
+    if (char.isDestroyed) statusOverlayClasses += ' status-destroyed';
+    if (char.hasWithdrawn) statusOverlayClasses += ' status-withdrawn';
+
+    let cardExtraClasses = '';
+    if (char.isDestroyed || char.hasWithdrawn) {
+        cardExtraClasses += ' is-inactive';
+    }
+
+    const card = document.createElement('div');
+    card.className = `char ${cardExtraClasses.trim()}`;
+    card.dataset.id = char.id;
+    
+    const setupPhaseActions = `
+        <div class="card-actions-overlay">
+            <div class="card-action-row">
+                <button class="card-action-btn" data-action="place">移動</button>
+                <button class="card-action-btn" data-action="details">詳細</button>
+                <button class="card-action-btn" data-action="delete">削除</button>
+            </div>
+            <div class="card-action-row">
+                <button class="card-action-btn" data-action="move-left">←</button>
+                <button class="card-action-btn" data-action="move-right">→</button>
+            </div>
+        </div>`;
+
+    let madnessHtml = '';
+    if (char.regrets && char.regrets.length > 0) {
+        const madnessLines = char.regrets.map(regret => {
+            const points = regret.points || 0;
+            let line = '';
+            for (let i = 0; i < 4; i++) {
+                line += (i < points) ? '◆' : '◇';
+            }
+            const madnessClass = (points >= 4) ? 'is-madness' : '';
+            return `<div class="${madnessClass}">${line}</div>`;
+        }).join('');
+        madnessHtml = `<div class="char-madness">${madnessLines}</div>`;
+    }
+
+    let partsStatusHtml = '';
+    if (char.partsStatus) {
+        let lines = '';
+        
+        if (char.category === 'ドール' || char.category === 'サヴァント') {
+            const locations = ['head', 'arms', 'torso', 'legs', 'body'];
+            const locationNames = { head: '頭', arms: '腕', torso: '胴', legs: '脚', body: '他' };
+            const treasureName = char.treasure;
+
+            lines = locations.map(loc => {
+                if (!char.partsStatus[loc] || char.partsStatus[loc].length === 0) return '';
+                
+                const sortedParts = char.partsStatus[loc]
+                  .map(part => {
+                    const maneuver = data.getManeuverByName(part.name);
+                    const isBasicPart = maneuver && maneuver.id && maneuver.id.startsWith('BP-');
+                    const isTreasure = part.name === treasureName;
+                    return { part, isBasicPart, isTreasure, damaged: part.damaged };
+                  })
+                  .sort((a, b) => {
+                    if (a.isTreasure !== b.isTreasure) return a.isTreasure ? -1 : 1;
+                    if (a.isBasicPart !== b.isBasicPart) { return a.isBasicPart ? 1 : -1; }
+                    if (a.damaged !== b.damaged) { return a.damaged ? -1 : 1; }
+                    return 0;
+                  });
+                
+                const symbols = sortedParts.map(item => {
+                    if (item.isTreasure) {
+                        return item.damaged ? '☆' : '★';
+                    }
+                    if (item.isBasicPart) {
+                        return item.damaged ? '□' : '■';
+                    }
+                    return item.damaged ? '〇' : '●';
+                }).join('');
+
+                if (loc === 'body' && !char.partsStatus[loc].some(p => p.name !== treasureName)) {
+                    return '';
+                }
+
+                return `<div>${symbols}：${locationNames[loc]}</div>`;
+            }).filter(line => line !== '').join('');
+        
+        } else if (char.category === 'ホラー') {
+            const allParts = Object.values(char.partsStatus).flat();
+            const basicParts = [];
+            const enhancementParts = [];
+            allParts.forEach(part => {
+                const maneuver = data.getManeuverByName(part.name);
+                if (maneuver && maneuver.id && maneuver.id.startsWith('BP-')) {
+                    basicParts.push(part);
+                } else {
+                    enhancementParts.push(part);
+                }
+            });
+
+            let enhancementLine = '';
+            if (enhancementParts.length > 0) {
+                const damagedCount = enhancementParts.filter(p => p.damaged).length;
+                const symbols = '〇'.repeat(damagedCount) + '●'.repeat(enhancementParts.length - damagedCount);
+                enhancementLine = `<div>${symbols}：強</div>`;
+            }
+
+            let basicLine = '';
+            if (basicParts.length > 0) {
+                const damagedCount = basicParts.filter(p => p.damaged).length;
+                const symbols = '□'.repeat(damagedCount) + '■'.repeat(basicParts.length - damagedCount);
+                basicLine = `<div>${symbols}：基</div>`;
+            }
+            
+            lines = basicLine + enhancementLine;
+
+        } else if (char.category === 'レギオン') {
+            const stackCount = char.isDestroyed ? 0 : char.stackCount;
+            const lineCount = Math.ceil(stackCount / 10);
+            const lineArray = [];
+            
+            for (let i = 0; i < lineCount; i++) {
+                const start = i * 10;
+                const countInLine = Math.min(stackCount - start, 10);
+                if (countInLine > 0) {
+                    lineArray.push(`<div>${'●'.repeat(countInLine)}：</div>`);
+                }
+            }
+            lines = lineArray.reverse().join('');
+        }
+
+        if (lines) {
+            partsStatusHtml = `<div class="char-parts-status">${lines}</div>`;
+        }
+    }
+
+    const isLegion = char.category === 'レギオン';
+    let topRightHtml = '';
+    if (isLegion) {
+        const stackCount = char.isDestroyed ? 0 : char.stackCount;
+        topRightHtml = `<div class="char-stack-count">${stackCount}体</div>`;
+    } else {
+        const undamagedPartsCount = char.isDestroyed ? 0 : Object.values(char.partsStatus).flat().filter(p => !p.damaged).length;
+        topRightHtml = `<div class="char-parts-count">${undamagedPartsCount}</div>`;
+    }
+    
+    const actionValueDisplay = `
+        <div class="char-action-display">
+            <div class="char-action-value">${char.actionValue}</div>
+            <div class="char-action-subtext">行動値</div>
+            <div class="char-action-subtext">最大:${char.maxActionValue}</div>
+        </div>
+    `;
+
+    const areaClassMap = { '奈落': 'naraku', '地獄': 'jigoku', '煉獄': 'rengoku', '花園': 'hanazono', '楽園': 'rakuen' };
+    const areaClass = `area-color-${areaClassMap[char.area] || ''}`;
+
+    card.innerHTML = `
+        <div class="char-status-overlays ${statusOverlayClasses.trim()}">
+            <div class="status-tape status-tape-mental-collapse">BREAKDOWN 精神崩壊 BREAKDOWN</div>
+            <div class="status-tape status-tape-destroyed">DESTROYED 完全破壊 DESTROYED</div>
+            <div class="status-tape status-tape-withdrawn">ESCAPE 戦場離脱 ESCAPE</div>
+        </div>
+        <div class="char-img-container">
+            <div class="damage-prompt-container"></div> 
+            <div class="char-area-name ${areaClass}">${char.area}</div>
+            <div class="char-name-overlay">${char.name}</div>
+            ${topRightHtml}
+            ${actionValueDisplay}
+            ${madnessHtml} 
+            ${partsStatusHtml} 
+            <img src="${char.img}" alt="${char.name}">
+        </div>
+        <div class="char-stats">
+        </div>
+        ${isSetupPhase ? setupPhaseActions : ''}
+    `;
+    return card;
+}
+
+function placeMarker(char) {
+    if (!char) return;
+    const { actionValue, area, id, name, img, stackCount } = char;
+    const battleWrap = document.getElementById('battleWrap');
+    const r = rows.indexOf(area);
+    if (r === -1) return;
+    const cell = battleWrap.querySelector(`.cell[data-row="${r}"][data-col="${actionValue}"]`);
+    if (!cell) return;
+    const marker = document.createElement('span');
+    marker.className = 'marker';
+    marker.dataset.id = id;
+    marker.dataset.name = name;
+    const imgEl = new Image();
+    imgEl.src = img;
+    imgEl.className = 'marker-img';
+    imgEl.alt = name;
+    marker.appendChild(imgEl);
+    if (char.category === 'レギオン' && stackCount > 1) {
+        const stackDiv = document.createElement('div');
+        stackDiv.className = 'marker-stack-count';
+        stackDiv.textContent = `x${stackCount}`;
+        marker.appendChild(stackDiv);
+    }
+
+    cell.appendChild(marker);
+}
+
+export function scrollToFirstCharacter(characters) {
+    if (!characters || characters.length === 0) return;
+    const firstCharacterId = characters[0].id;
+    const targetCard = document.querySelector(`.char[data-id="${firstCharacterId}"]`);
+    if (!targetCard) return;
+    targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+}
+
+export function addLog(message) {
+    const logArea = document.getElementById('logEntries');
+    if (!logArea) return;
+    const entry = document.createElement('div');
+    entry.className = 'log-entry';
+    entry.innerHTML = message;
+    logArea.appendChild(entry);
+    logArea.scrollTop = logArea.scrollHeight;
+}
+
+export function showMadnessModal() {
+    const modal = document.getElementById('madnessModal');
+    const body = document.getElementById('madnessModalBody');
+    body.innerHTML = '';
+    const pcs = charManager.getCharacters().filter(c => c.type === 'pc' && !c.isDestroyed && !c.hasWithdrawn);
+
+    if (pcs.length === 0) {
+        battleLogic.proceedToNextTurn();
+        return;
+    }
+
+    pcs.forEach(pc => {
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'pc-regret-group';
+        groupDiv.dataset.pcId = pc.id;
+        groupDiv.innerHTML = `<h4>${pc.name}の未練 (1つ選択)</h4>`;
+        
+        pc.regrets.forEach(regret => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'regret-item';
+            itemDiv.dataset.regretId = regret.id;
+            itemDiv.textContent = `${regret.name} (狂気点: ${regret.points})`;
+            groupDiv.appendChild(itemDiv);
+        });
+        body.appendChild(groupDiv);
+    });
+
+    modal.classList.add('is-visible');
+    interactionManager.setupMadnessModalEventListeners(pcs);
+}
+
+export function updateSingleCharacterCard(characterId) {
+    const character = charManager.getCharacterById(characterId);
+    if (!character) return;
+    const oldCard = document.querySelector(`.char[data-id="${characterId}"]`);
+    if (oldCard) {
+        const isSetupPhase = !battleLogic.getBattleState().isStarted;
+        const newCard = createCharacterCard(character, isSetupPhase);
+        oldCard.replaceWith(newCard);
+        interactionManager.setupCharacterEventListeners();
+    }
+}
+export function updateMarkers() {
+    const battleWrap = document.getElementById('battleWrap');
+    battleWrap.querySelectorAll('.marker').forEach(m => m.remove());
+    const charactersOnBoard = charManager.getCharacters().filter(c => !c.isDestroyed && !c.hasWithdrawn); 
+    charactersOnBoard.forEach(char => {
+        placeMarker(char);
+    });
+    interactionManager.setupCharacterEventListeners();
+}
+
+export function updateBattleStatusUI() {
+    const { isStarted, turn, count, activeActors, shouldScrollToCount } = battleLogic.getBattleState();
+    
+    const timingArea = document.getElementById('timingArea');
+    const battleWrap = document.getElementById('battleWrap');
+
+    if (timingArea) {
+        if (isStarted) {
+            timingArea.classList.remove('setup-phase');
+            timingArea.classList.add('battle-phase');
+            battleWrap.classList.remove('setup-phase');
+        } else {
+            timingArea.classList.add('setup-phase');
+            timingArea.classList.remove('battle-phase');
+            battleWrap.classList.add('setup-phase');
+        }
+    }
+
+    const oldTurnText = document.getElementById('turnIndicator').textContent;
+    if (String(turn) !== oldTurnText && isStarted) {
+        addLog(`【ターン ${turn} 開始】`);
+    }
+    
+    const turnIndicator = document.getElementById('turnIndicator');
+    const countIndicator = document.getElementById('countIndicator');
+    const cavEl = document.getElementById('currentActionValue');
+
+    if (!isStarted) {
+        turnIndicator.textContent = '-';
+        countIndicator.textContent = '-';
+        cavEl.textContent = `カウント -`;
+        document.querySelectorAll('.highlight-char').forEach(card => card.classList.remove('highlight-char'));
+        battleWrap.querySelectorAll('.highlight-col').forEach(el => el.classList.remove('highlight-col'));
+        updatePhaseUI(battleLogic.getBattleState());
+        return;
+    }
+    
+    turnIndicator.textContent = turn;
+    countIndicator.textContent = count;
+    cavEl.textContent = `カウント ${count}`;
+
+    document.querySelectorAll('.char').forEach(card => {
+        card.classList.toggle('highlight-char', activeActors.some(c => c.id === card.dataset.id));
+    });
+
+    battleWrap.querySelectorAll('.highlight-col').forEach(el => el.classList.remove('highlight-col'));
+    battleWrap.querySelectorAll(`.cell[data-col="${count}"], .col-header[data-col="${count}"]`).forEach(el => el.classList.add('highlight-col'));
+
+    if (shouldScrollToCount) {
+        const scrollWrapper = document.querySelector('.battle-grid-scroll-wrapper');
+        const targetColHeader = battleWrap.querySelector(`.col-header[data-col="${count}"]`);
+        const rowHeader = battleWrap.querySelector('.row-header');
+
+        if (scrollWrapper && targetColHeader && rowHeader) {
+            const rowHeaderWidth = rowHeader.offsetWidth;
+            const targetOffsetLeft = targetColHeader.offsetLeft;
+            const scrollToPosition = targetOffsetLeft - rowHeaderWidth;
+
+            scrollWrapper.scrollTo({
+                left: scrollToPosition,
+                behavior: 'smooth'
+            });
+        }
+        battleLogic.clearScrollFlag();
+    }
+
+    if (activeActors.length > 0) {
+        scrollToFirstCharacter(activeActors);
+    }
+
+    updatePhaseUI(battleLogic.getBattleState());
+    updateAllQueuesUI();
+}
+
+export function updateCharacterHighlights(activeActors) {
+    const activeActorIds = new Set(activeActors.map(actor => actor.id));
+    document.querySelectorAll('.char').forEach(card => {
+        card.classList.toggle('highlight-char', activeActorIds.has(card.dataset.id));
+    });
+}
+
+export function updatePhaseUI(state) {
+    if (!state) return;
+    const { phase, actionQueue, activeActors, count } = state; // ★ count を追加
+
+    const indicators = {
+        action: document.getElementById('actionPhaseIndicator'),
+        rapid: document.getElementById('rapidPhaseIndicator'),
+        judge: document.getElementById('judgePhaseIndicator'),
+        damage: document.getElementById('damagePhaseIndicator'),
+    };
+    
+    Object.values(indicators).forEach(ind => ind.classList.remove('active'));
+
+    if (activeActors.length > 0) {
+        indicators.action.classList.add('active');
+    }
+
+    if (actionQueue.length > 0) {
+        indicators.rapid.classList.add('active');
+        indicators.judge.classList.add('active');
+    }
+    
+    if (phase === 'JUDGE_RESOLUTION' || phase === 'ACTION_RESOLUTION') {
+        indicators.judge.classList.add('active');
+    }
+    if (phase === 'DAMAGE_RESOLUTION') {
+        indicators.damage.classList.add('active');
+    }
+    
+    const countdownBtn = document.getElementById('countdownBtn');
+    const endTurnBtn = document.getElementById('endTurnBtn');
+
+    countdownBtn.disabled = true;
+    endTurnBtn.disabled = true;
+
+    if (phase === 'COUNT_END') {
+        countdownBtn.disabled = false;
+    } else if (phase === 'TURN_END_PREPARATION') {
+        endTurnBtn.disabled = false;
+    }
+}
+
+export function updateAllQueuesUI() {
+    const { actionQueue, rapidQueue, judgeQueue, damageQueue } = battleLogic.getBattleState();
+    updateQueueUI('actionDeclarationList', actionQueue, "アクション宣言");
+    updateQueueUI('rapidDeclarationList', rapidQueue, "ラピッド宣言");
+    updateQueueUI('judgeDeclarationList', judgeQueue, "ジャッジ宣言");
+    updateDamageQueueUI(damageQueue);
+    document.querySelectorAll('.damage-prompt-button').forEach(btn => btn.remove());
+    const damageSummary = {};
+    damageQueue.forEach(damage => {
+        if (!damage.applied) {
+            const targetId = damage.target.id;
+            if (!damageSummary[targetId]) damageSummary[targetId] = 0;
+            damageSummary[targetId] += damage.amount;
+        }
+    });
+    for (const targetId in damageSummary) {
+        if (damageSummary[targetId] > 0) createDamagePrompt(targetId, damageSummary[targetId]);
+    }
+    document.getElementById('actionDeclarationArea').classList.toggle('is-closed', actionQueue.length === 0);
+    document.getElementById('rapidDeclarationArea').classList.toggle('is-closed', rapidQueue.length === 0);
+    document.getElementById('judgeDeclarationArea').classList.toggle('is-closed', judgeQueue.length === 0);
+    document.getElementById('damageProcessingArea').classList.toggle('is-closed', damageQueue.length === 0);
+}
+
+function updateQueueUI(elementId, queue, headerText) {
+    const listEl = document.getElementById(elementId);
+    if (!listEl) return;
+    const container = listEl.closest('.accordion-container');
+    const header = container ? container.querySelector('.accordion-header') : null;
+    if (!header) return;
+    const state = battleLogic.getBattleState();
+    const isRapidActive = state.phase === 'RAPID_RESOLUTION';
+    const isJudgeActive = state.phase === 'JUDGE_RESOLUTION';
+    const isActionActive = state.phase === 'ACTION_RESOLUTION';
+    const hasUncheckedRapids = state.rapidQueue.some(r => !r.checked);
+    const hasUncheckedJudges = state.judgeQueue.some(j => !j.checked);
+    let textSpan = header.querySelector('span');
+    if (!textSpan) {
+        const originalText = header.textContent;
+        header.innerHTML = '';
+        textSpan = document.createElement('span');
+        textSpan.textContent = originalText;
+        header.appendChild(textSpan);
+    }
+    if (queue.length === 0) {
+        listEl.innerHTML = ''; 
+        textSpan.textContent = headerText + "はありません";
+    } else {
+        textSpan.textContent = headerText;
+        listEl.innerHTML = ''; 
+        queue.forEach((declaration, index) => {
+            const labelEl = document.createElement('label');
+            labelEl.className = 'action-queue-item';
+            let isDisabled = false;
+            if (elementId === 'rapidDeclarationList') isDisabled = !isRapidActive;
+            else if (elementId === 'judgeDeclarationList') isDisabled = !isJudgeActive || hasUncheckedRapids;
+            else if (elementId === 'actionDeclarationList') isDisabled = !isActionActive || hasUncheckedRapids || hasUncheckedJudges;
+            if (declaration.checked) isDisabled = true;
+            if (isDisabled) labelEl.classList.add('is-disabled');
+            if (declaration.checked) labelEl.classList.add('is-checked');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = declaration.checked;
+
+            // チェックボックスはただの飾りとし、クリックイベントは labelEl に設定する
+            checkbox.disabled = true;
+
+            // is-disabled クラスが付いていない（＝クリック可能）な場合のみ、クリックイベントを設定
+            if (!isDisabled) {
+                if (elementId === 'rapidDeclarationList') {
+                    labelEl.onclick = () => interactionManager.handleRapidItemClick(index);
+                } else if (elementId === 'judgeDeclarationList') {
+                    labelEl.onclick = () => interactionManager.handleJudgeItemClick(index);
+                } else if (elementId === 'actionDeclarationList') {
+                    labelEl.onclick = () => interactionManager.handleActionItemClick(index);
+                }
+            }
+
+            labelEl.appendChild(checkbox);
+            const textContentSpan = document.createElement('span');
+            let text = `<b>${declaration.performer.name}</b>: 【${declaration.summary.name}】`;
+            if (declaration.target) text += ` → <b>${declaration.target.name}</b>`;
+            textContentSpan.innerHTML = text;
+            labelEl.appendChild(textContentSpan);
+            listEl.appendChild(labelEl);
+        });
+    }
+}
+
+function updateDamageQueueUI(queue) {
+    const listEl = document.getElementById('damageProcessingList');
+    if (!listEl) return;
+    const container = listEl.closest('.accordion-container');
+    const header = container ? container.querySelector('.accordion-header') : null;
+    const isDamageActive = battleLogic.getBattleState().phase === 'DAMAGE_RESOLUTION';
+    if (queue.length === 0) {
+        listEl.innerHTML = '';
+        if (header) header.textContent = "ダメージ処理はありません";
+    } else {
+        if (header) header.textContent = "ダメージ処理";
+        listEl.innerHTML = '';
+        queue.forEach((damage, index) => {
+            const labelEl = document.createElement('label');
+            labelEl.className = 'action-queue-item damage-item';
+            const isDisabled = !isDamageActive || damage.applied;
+            if (isDisabled) labelEl.classList.add('is-disabled');
+            if (damage.applied) labelEl.classList.add('is-checked');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = damage.applied;
+            checkbox.disabled = true;
+            const textSpan = document.createElement('span');
+            textSpan.innerHTML = `<b>${damage.target.name}</b>: ${damage.location}: <b>${damage.amount}</b>点`;
+            if (!damage.applied && !isDisabled) {
+                labelEl.onclick = () => interactionManager.handleDamageItemClick(index);
+            }
+            labelEl.appendChild(checkbox);
+            labelEl.appendChild(textSpan);
+            listEl.appendChild(labelEl);
+        });
+    }
+}
+
+export function createDamagePrompt(targetId, damageAmount) {
+    const targetCard = document.querySelector(`.char[data-id="${targetId}"]`);
+    if (!targetCard) return;
+
+    const container = targetCard.querySelector('.damage-prompt-container');
+    let button = container.querySelector('.damage-prompt-button');
+    
+    if (button) {
+        const currentDamage = parseInt(button.dataset.damage, 10);
+        const newDamage = currentDamage + damageAmount;
+        button.dataset.damage = newDamage;
+        button.textContent = `ダメージ ${newDamage}`;
+    } else {
+        button = document.createElement('button');
+        button.className = 'damage-prompt-button';
+        button.dataset.damage = damageAmount;
+        button.textContent = `ダメージ ${damageAmount}`;
+        button.onclick = (e) => {
+            e.stopPropagation();
+            // 何もしない
+        };
+        button.style.pointerEvents = 'none'; // クリックイベント自体を無効化
+        container.appendChild(button);
+    }
+}
+
+export function removeDamagePrompt(characterId) {
+    const targetCard = document.querySelector(`.char[data-id="${characterId}"]`);
+    if (targetCard) {
+        const button = targetCard.querySelector('.damage-prompt-button');
+        if (button) button.remove();
+    }
+}
+
+export function checkBattleStartCondition() {
+    const startButton = document.getElementById('startBattleBtn');
+    if (!startButton) return; // ★ 修正
+    const allCharacters = charManager.getCharacters();
+    const hasPcs = allCharacters.some(c => c.type === 'pc');
+    const hasEnemies = allCharacters.some(c => c.type === 'enemy');
+
+    startButton.disabled = !(hasPcs && hasEnemies);
+}
+
+export function showManeuverCard(baseElementRect, itemRect, character, maneuverObj) {
+    const cardEl = document.getElementById('maneuverCard');
+    const maneuver = maneuverObj.data;
+
+    const categoryName = maneuver.category === '行動値増加' ? '行動値' : maneuver.category || 'その他';
+    const categoryClass = `category-color-${getCategoryClass(categoryName)}`;
+    
+    // 1. 出典元と箇所のテキストを取得（以前のヘルパー関数をここに統合）
+    const sourceText = getManeuverSourceText(maneuver);
+    const locationText = getPartLocationText(maneuver, character);
+
+    // 2. ルールブック情報の整形
+    let rulebookInfo = '';
+    if (maneuver.source) {
+        rulebookInfo = maneuver.source.book || '';
+        if (maneuver.source.page) {
+            rulebookInfo += ` (p${maneuver.source.page})`;
+        }
+        if (maneuver.source.errata) {
+            rulebookInfo += `, エラッタ ${maneuver.source.errata}`;
+        }
+    }
+
+    // 3. HTMLの組み立て
+    cardEl.innerHTML = `
+        <div class="card-category-bar ${categoryClass}">${categoryName}</div>
+        <div class="card-content">
+            <div class="card-source-header">
+                ${sourceText}
+            </div>
+            <div class="card-header">
+                <span class="card-location-text">${locationText}</span>
+                <span class="card-maneuver-name">【${maneuver.name}】</span>
+            </div>
+            <div class="card-stats">
+                <div><span>T</span>${maneuver.timing}</div>
+                <div><span>C</span>${maneuver.cost}</div>
+                <div><span>R</span>${maneuver.range}</div>
+            </div>
+            <div class="card-row"><strong>効果</strong> ${maneuver.description || '---'}</div>
+            <div class="card-row"><strong>説明</strong> ${maneuver.description_raw || '---'}</div>
+            <div class="card-row"><strong>出典</strong> ${rulebookInfo || '---'}</div>
+        </div>
+    `;
+
+    cardEl.style.display = 'flex';
+    const cardRect = cardEl.getBoundingClientRect();
+    let left = 20;
+    let top = itemRect.top + 60;
+    if (top + cardRect.height > window.innerHeight) { top = 20; }
+    if (top < 10) top = 20;
+    cardEl.style.left = `${left}px`;
+    cardEl.style.top = `${top}px`;
+}
+
+function getManeuverSourceText(maneuver) {
+    // IDがなければ"不明"と表示
+    if (!maneuver.id) return '不明';
+    const coreData = data.getCoreData();
+    const id = maneuver.id;
+    const prefix = id.substring(0, 2);
+    // --- ポジションスキルの判定 ---
+    if (coreData.positions[prefix]) {
+        return `ポジションスキル：${coreData.positions[prefix].name}`;
+    }
+    // --- クラススキルの判定 ---
+    if (coreData.classes[prefix]) {
+        if (id.endsWith('-SP')) return `特化スキル：${coreData.classes[prefix].name}`;
+        return `クラススキル：${coreData.classes[prefix].name}`;
+    }
+    // --- 基本パーツの判定 ---
+    if (prefix === 'BP') return '基本パーツ';
+    // --- 強化パーツの判定 ---
+    const enhType = id.substring(0, 1), enhLevel = id.substring(1, 2);
+    if (coreData.enhancementTypes[enhType] && ['1', '2', '3'].includes(enhLevel)) {
+        return `強化パーツ：${enhLevel}レベル${coreData.enhancementTypes[enhType].name}`;
+    }
+    // --- 手駒専用パーツの判定 ---
+    if (id.startsWith('P')) {
+        const maliceLevel = parseInt(id.substring(1, 2), 10) / 2;
+        return `手駒専用パーツ：悪意${maliceLevel}`;
+    }
+    // --- 手駒専用スキルの判定 ---
+    if (coreData.pawnSkills[prefix]) {
+        return coreData.pawnSkills[prefix].name;
+    }
+    // --- 一般動作の判定 (core-data.jsonに追加した場合) ---
+    // if (coreData.commonAction && coreData.commonAction[prefix]) {
+    if (coreData.commonAction[prefix]) {
+        return coreData.commonAction[prefix].name;
+    }
+    return 'スキル';
+}
+
+function getPartLocationText(maneuver, character) {
+    if (!maneuver.id || !character.partsStatus) return '';
+    const locationMap = { head: '頭', arms: '腕', torso: '胴', legs: '脚', body: '体' };
+    for (const loc in character.partsStatus) {
+        if (character.partsStatus[loc].some(p => p.name === maneuver.name)) {
+            return `${locationMap[loc] || '体'}：`;
+        }
+    }
+    return 'スキル：';
+}
+
+export function hideManeuverCard() {
+    document.getElementById('maneuverCard').style.display = 'none';
+}
+
+export function displayVersionInfo(versionInfo) {
+    const versionContainer = document.getElementById('version-info');
+    if (versionContainer && versionInfo) {
+        const displayOrder = [
+            'app', 
+            'battle-logic', 
+            'ui-manager', 
+            'interaction-manager', 
+            'character-manager', 
+            'settings-manager', 
+            'menu-builder', 
+            'data-handler', 
+            'ui-helpers', 
+            'dice-roller', 
+            'dice-3d', 
+            'character-converter'
+        ];
+        
+        const versionHtml = displayOrder
+            .map(key => `<span class="responsive-item">${key}: v${versionInfo[key] || 'N/A'}</span>`)
+            .join('<span class="hide-on-mobile"> | </span>');
+
+        versionContainer.innerHTML = versionHtml;
+    }
+}
+
+/**
+ * 画面中央に汎用モーダルを表示する
+ * @param {object} options - モーダルの設定
+ * @param {string} options.title - モーダルのタイトル
+ * @param {Array<object>} [options.items] - 表示するメニュー項目の配列 {label, isDisabled, onClick}
+ * @param {string} [options.bodyHtml] - ボディに直接挿入するHTML文字列
+ * @param {string} [options.footerHtml] - フッターに直接挿入するHTML文字列
+ * @param {function(modal, closeFn)} [options.onRender] - モーダルが描画された後に実行されるコールバック関数
+ */
+export function showModal(options) {
+    const modal = document.getElementById('simpleMenuModal');
+    const modalTitle = document.getElementById('simpleMenuModalTitle');
+    const modalBody = document.getElementById('simpleMenuModalBody');
+    const modalFooter = document.getElementById('simpleMenuModalFooter');
+    const closeBtn = document.getElementById('closeSimpleMenuModalBtn');
+
+    if (!modal || !modalTitle || !modalBody || !modalFooter || !closeBtn) return;
+    
+    // --- 1. 初期化 ---
+    modalTitle.textContent = options.title || '';
+    modalBody.innerHTML = options.bodyHtml || '';
+    modalFooter.innerHTML = options.footerHtml || '';
+    modalFooter.style.display = options.footerHtml ? 'block' : 'none';
+
+    // bodyHtml の内容に応じて特別なクラスを付与する
+    modalBody.classList.remove('attack-confirm-body'); // 念のためリセット
+    if (options.bodyHtml && options.bodyHtml.includes('attack-confirm-summary')) {
+        modalBody.classList.add('attack-confirm-body');
+    }
+
+    // --- 2. メニュー項目を生成 (itemsオプションがある場合) ---
+    if (options.items) {
+        options.items.forEach(itemData => {
+            const itemEl = document.createElement('div');
+            if (itemData.isTitle) {
+                // (タイトル項目の処理は変更なし)
+            } else {
+                itemEl.textContent = itemData.label;
+                itemEl.classList.add('maneuver-item');
+                
+                // itemDataに 'class' プロパティがあれば、それをクラスとして追加する
+                if (itemData.class) {
+                    itemEl.classList.add(...itemData.class.split(' '));
+                }
+
+                if (itemData.isDisabled) {
+                    itemEl.classList.add('is-masked');
+                }
+                itemEl.onclick = () => {
+                    if (itemData.isDisabled) return;
+                    closeModal(); // 先にモーダルを閉じる
+                    if (itemData.onClick) {
+                        itemData.onClick(); // 渡された関数を実行
+                    }
+                };
+            }
+            modalBody.appendChild(itemEl);
+        });
+    }
+
+    // --- 3. 閉じるイベントを設定 ---
+    const closeModal = () => modal.classList.remove('is-visible');
+    closeBtn.onclick = closeModal;
+    modal.onclick = (e) => {
+        if (e.target === modal) closeModal();
+    };
+
+    // --- 4. 描画後のコールバックを実行 (onRenderオプションがある場合) ---
+    if (options.onRender) {
+        options.onRender(modal, closeModal);
+    }
+
+    // --- 5. モーダルを表示 ---
+    modal.classList.add('is-visible');
+}

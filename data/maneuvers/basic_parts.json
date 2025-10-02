@@ -1,0 +1,131 @@
+{
+  "//": "========================================",
+  "//": "==    一般動作と基本パーツの定義     ==",
+  "//": "========================================",
+
+  "//": "---------- 一般動作 (Common Actions) ----------",
+  "CA-01": {
+    "name": "待機", "category": "一般", 
+    "tags": ["アクション"],
+    "description": "マニューバを使用せず、行動値を1点消費して手番を終了する。",
+    "description_raw": "マニューバを使用せず、待機を宣言してもかまいません。待機したなら、行動値は1点減少します。",
+    "source": { "book": "基本ルールブック", "page": 104 },
+    "timing": "アクション", "cost": 1, "range": "自身",
+    "effects": [{ "ref": "WAIT", "params": {} }]
+  },
+  "CA-02": {
+    "name": "任意", "category": "一般", 
+    "tags": ["アクション"],
+    "description": "NCの裁定に基づき、任意の行動値コストを支払って特殊な行動を行う。",
+    "description_raw": "戦闘中でも、敵のマニューバや、状況によって任意判定は発生します。",
+    "source": { "book": "基本ルールブック", "page": 107 },
+    "timing": "アクション", "cost": "任意", "range": "自身",
+    "effects": [{ "ref": "ARBITRARY_ACTION", "params": {} }]
+  },
+
+  "//": "---------- 基本パーツ (Basic Parts) ----------",
+  "BP-01": {
+    "name": "のうみそ", "category": "行動値", "allowedLocations": "頭",
+    "tags": ["行動値", "オート"],
+    "description": "最大行動値+2", 
+    "description_raw": "最大行動値+2。",
+    "source": { "book": "基本ルールブック", "page": 81 }, 
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "maxActionValue", "value": 2, "duration": "permanent_while_undamaged" } }]
+  },
+  "BP-02": {
+    "name": "めだま", "category": "行動値", "allowedLocations": "頭",
+    "tags": ["行動値", "オート"],
+    "description": "最大行動値+1", 
+    "description_raw": "最大行動値+1。",
+    "source": { "book": "基本ルールブック", "page": 81 }, 
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "maxActionValue", "value": 1, "duration": "permanent_while_undamaged" } }]
+  },
+  "BP-03": {
+    "name": "あご", "category": "攻撃", "allowedLocations": "頭",
+    "tags": ["攻撃", "アクション"],
+    "description": "肉弾攻撃1", 
+    "description_raw": "肉弾攻撃1。",
+    "source": { "book": "基本ルールブック", "page": 81 }, 
+    "timing": "アクション", "cost": 2, "range": "0",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 1 } }]
+  },
+  "BP-04": {
+    "name": "こぶし", "category": "攻撃", "allowedLocations": "腕",
+    "tags": ["攻撃", "アクション"],
+    "description": "肉弾攻撃1", 
+    "description_raw": "肉弾攻撃1。",
+    "source": { "book": "基本ルールブック", "page": 80 }, 
+    "timing": "アクション", "cost": 2, "range": "0",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 1 } }]
+  },
+  "BP-05": {
+    "name": "うで", "category": "支援", "allowedLocations": "腕",
+    "tags": ["支援", "ジャッジ"],
+    "description": "支援1", 
+    "description_raw": "支援1。",
+    "source": { "book": "基本ルールブック", "page": 80 }, 
+    "timing": "ジャッジ", "cost": 1, "range": "0",
+    "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "target": "any_roll", "value": 1 } }]
+  },
+  "BP-06": {
+    "name": "かた", "category": "移動", "allowedLocations": "腕",
+    "tags": ["移動", "アクション"],
+    "description": "移動1", 
+    "description_raw": "移動1。",
+    "source": { "book": "基本ルールブック", "page": 80 }, 
+    "timing": "アクション", "cost": 4, "range": "自身",
+    "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": 1, "direction": "performer_choice" } }]
+  },
+  "BP-07": {
+    "name": "せぼね", "category": "補助", "allowedLocations": "胴",
+    "tags": ["補助", "アクション", "コスト補正"],
+    "description": "同ターン内の次のカウントで使うマニューバ1つのコスト-1(最低0)", 
+    "description_raw": "同ターン内の次のカウントで使うマニューバ1つのコスト-1(最低0)する。",
+    "source": { "book": "基本ルールブック", "page": 81 }, 
+    "timing": "アクション", "cost": 1, "range": "自身",
+    "effects": [{ "ref": "REDUCE_NEXT_MANEUVER_COST", "params": { "value": 1, "minimum": 0, "count": 1 } }]
+  },
+  "BP-08": {
+    "name": "はらわた", "category": "その他", "allowedLocations": "胴",
+    "tags": ["オート"],
+    "description": "効果なし", 
+    "description_raw": "なし",
+    "source": { "book": "基本ルールブック", "page": 81 }, 
+    "timing": "オート", "cost": "なし", "range": "なし",
+    "effects": []
+  },
+  "BP-09": {
+    "name": "ほね", "category": "移動", "allowedLocations": "脚",
+    "tags": ["移動", "アクション"],
+    "description": "移動1", 
+    "description_raw": "移動1。",
+    "source": { "book": "基本ルールブック", "page": 80 }, 
+    "timing": "アクション", "cost": 3, "range": "自身",
+    "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": 1, "direction": "performer_choice" } }]
+  },
+  "BP-10": {
+    "name": "あし", "category": "妨害", "allowedLocations": "脚",
+    "tags": ["妨害", "ジャッジ"],
+    "description": "妨害1", 
+    "description_raw": "妨害1。",
+    "source": { "book": "基本ルールブック", "page": 80 }, 
+    "timing": "ジャッジ", "cost": 1, "range": "0",
+    "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "target": "any_roll", "value": -1 } }]
+  },
+
+  "//": "---------- たからもの (Treasure) ----------",
+  "TR-00": {
+    "name": "たからもの", "category": "たからもの", "allowedLocations": "任意",
+    "tags": ["修復", "オート", "狂気点操作", "破壊"],
+    "description": "バトルパート終了時、任意の未練の狂気点を1点減らす。損傷すると失われる。",
+    "description_raw": "たからもの。バトルパート終了時、任意の未練１つを選んで狂気点を１点減らす。このパーツは損傷時に所持パーツから取り除く。",
+    "source": { "book": "基本ルールブック", "page": 56, "errata": "1.6.1" }, 
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "effects": [
+      { "ref": "REDUCE_MADNESS_POINTS", "params": { "value": 1, "trigger": "battle_end", "target_regret": "any" } },
+      { "ref": "REMOVE_PART_ON_DAMAGE", "params": { "target": "this_part" } }
+    ]
+  }
+}

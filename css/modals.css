@@ -1,0 +1,933 @@
+/* ===============================
+   Utility: Modal
+   id="undeadListModal" アンデッド選択フォーム
+   id="damageModal"     パーツ損傷処理フォーム
+   id="madnessModal"    狂気点追加フォーム
+  +-------------------------------
+  | .modal-backdrop 画面全体を覆う半透明の背景
+  | (id="undeadListModal", "damageModal", etc.)
+  | +-----------------------------
+  | | .modal-content ダイアログ本体
+  | | +---------------------------
+  | | | .modal-header
+  | | | <h3>FORM TITLE
+  | | | <button class="close-btn">
+  | | +---------------------------
+  | | | .modal-body
+  | | | (id="undeadListContainer", "damageModalBody", etc.)
+  | | +---------------------------
+  | | | .modal-footer (任意) 下部のボタンエリア
+  | | | (id="damageModalFooter", etc.)
+  | | | (「確定」「キャンセル」などのボタン)
+  | | +---------------------------
+  | +-----------------------------
+  +-------------------------------
+================================ */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    background-color: var(--color-shadow);
+    backdrop-filter:         blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    z-index: 1000;
+    
+    display: flex;
+    justify-content: center; /* 水平方向 */
+    align-items: center;     /* 垂直方向 */
+    padding: 20px;             /* 画面の端からの余白 */
+    box-sizing: border-box;    /* paddingをwidth/heightに含める */
+    
+    /* 表示/非表示のアニメーション */
+    opacity: 0;
+    visibility: hidden;
+    transition:
+        opacity 0.2s ease,
+        visibility 0.2s;
+
+    /* 非表示時はクリックイベントを無効化 */
+    pointer-events: none; 
+}
+/* JavaScriptで display: flex が指定されたときのスタイル */
+.modal-backdrop.is-visible {
+    opacity: 1;
+    visibility: visible;
+    /* 表示時はクリックイベントを有効化 */
+    pointer-events: auto;
+}
+.modal-content {
+    background-color: var(--color-surface-dark);
+    color:            var(--color-text);
+    border-radius: 10px;
+    overflow: hidden; /* 角丸を有効にするために必要 */
+    box-shadow: 0 0 10px var(--color-shadow);
+
+    /* サイズ定義 */
+    width: 90%;
+    max-width: 700px; /* モーダルの最大幅 */
+    max-height: 90%;
+    height: auto;
+    margin: 0;
+    padding: 10px;
+    gap: 0;
+    box-sizing: border-box;
+
+    display: flex;
+    flex-direction: column;
+    /* flex-wrap: nowrap; */
+    align-content: stretch;
+    justify-content: flex-start;
+    align-items: stretch;
+
+    position: absolute;
+    pointer-events: auto;
+
+    /* 初期状態：少し下にあり、透明 */
+    transform: translateY(80%);
+    opacity: 0.2;
+    transition:
+        transform 0.2s ease-out,
+        opacity   0.2s ease-out;
+    padding: 10px;
+}
+/* モーダル表示時に、コンテンツをスライドインさせる */
+.modal-backdrop.is-visible .modal-content {
+    transform: translateY(0);
+    opacity: 0.9;
+}
+.modal-header {
+    display: flex;
+    /* 
+    flex-direction: column; 
+    flex-wrap: nowrap; 
+    align-content: center;
+    */
+    justify-content: space-between; 
+    align-items: center;    
+    box-sizing: border-box;  
+    margin:  0;
+    padding: 0;
+
+    border: none;
+    color: var(--color-text);
+    height: 40px;
+}
+.modal-header h2 {
+    width: 100%;
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-align: center;
+}
+.modal-header h3 {
+    font-size: 1rem;
+    font-weight: bold;
+    padding: 10px;
+}
+/* 右上の「×」 */
+.close-btn {
+    background:none;
+    border: none;
+    color: var(--color-text);
+    font-size: 20px;
+    text-align: center;
+    width: 40px;
+    height: 40px;
+    margin: 0;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 50%;
+}
+.close-btn:hover {
+    background-color: var(--color-level-1);
+    transition: all 0.2s;
+}
+/* フッターと閉じるボタンのスタイル */
+.modal-footer {
+    text-align: center;
+    margin: 0;
+    padding: 10px;
+    border: none;
+}
+.modal-body {
+    flex-grow: 1;
+    overflow-y: auto;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, var(--list-item-size));
+    padding: 0px;
+    font-size: 0.9rem;
+    justify-content: center;
+}
+.modal-body hr,
+.modal-content hr {
+    width: 90%;
+    border: 1px solid var(--color-level-3);
+}
+/* ===============================
+   6. モーダル
+   Utility: Modal
+   id="undeadListModal" アンデッド選択フォーム
+   id="damageModal"     パーツ損傷処理フォーム
+   id="madnessModal"    狂気点追加フォーム
+=============================== */   
+
+/* ================================
+   アンデッド選択モーダル
+================================ */
+.undead-filter-container {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    gap: 5px;
+    padding: 10px;
+}
+.filter-btn {
+    width: 100px;
+    padding: 2px;
+    background-color: var(--color-level-f);
+    color:            var(--color-btn-text);
+    border: 2px solid transparent;
+    border-radius: 40px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+.filter-btn:hover {
+    border-color:        gold;
+    box-shadow: 0 0 10px gold;
+}
+.filter-btn.active {
+    background-color:    gold;
+    box-shadow: 0 0 10px gold;
+    color:               black;
+}
+.undead-list-container {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    grid-template-columns: repeat(auto-fill, var(--list-item-size));
+    gap: 5px;
+    padding: 5px;
+    overflow-y: auto;
+    justify-content: space-evenly;
+
+    border-radius: 10px;
+    background-color: var(--color-level-f);
+    box-shadow: 0 0 7px inset black;
+}
+.undead-list-item {
+    width: var(--list-item-size);
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    justify-content: center;
+}
+.undead-list-item:hover {
+    background-color: var(--color-text-muted);
+    background-color: gold;
+    color:            black;
+    transition: all 0.2s;
+}
+.undead-list-item img {
+    width: var(--list-item-size);
+    height: var(--list-item-size);
+    aspect-ratio: 1 / 1;
+    object-fit: contain;
+}
+.undead-list-item-name {
+    font-weight: bold;
+    font-size: 14px;
+}
+/* ================================
+   パーツ損傷モーダル
+================================ */
+#damageModal .modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+#partsGridContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.part-location-group {
+    display: flex;
+    align-items: flex-start;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: var(--color-surface-1);
+}
+/* 箇所 */
+.part-location-group h4 {
+    flex-shrink: 0;
+    width: 30px;
+    margin: 5px 10px 0 0;
+    text-align: center;
+    font-size: 20px;
+    border-bottom: none;
+    color: var(--color-text)
+}
+.parts-wrapper {
+    flex-grow: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+/* パーツ */
+.part-item {
+    width: 100px;
+    padding: 4px;
+    border-radius: 20px;
+    border:3px solid  #eee;
+    background-color: #eee;
+    color:            #333;
+    cursor: pointer;
+    text-align: center;
+    font-size: 12px;
+    font-weight: bold;
+}
+.part-item:hover {
+    border-color:gold;
+}
+/* 損傷パーツ */
+.part-item.is-damaged {
+    border:3px solid  #d33;
+    background-color: #bbb;
+    color:            #d33;
+    text-decoration: line-through;
+    cursor: not-allowed;
+}
+/* 選択パーツ */
+.part-item.is-selected {
+    border-color:     gold;
+    background-color: gold;
+}
+/* ================================
+   狂気点追加モーダル
+================================ */
+#madnessModal .modal-body {
+    height: auto;
+    margin: 0;
+    padding: 0;
+    gap: 0;
+    box-sizing: border-box;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-content: stretch;
+    justify-content: flex-start;
+    align-items: stretch;
+}
+.pc-regret-group {
+    background-color: var(--color-surface-1);
+    border: none;
+    border-radius: 10px;
+    padding: 10px 10px 0 10px;
+    gap: 5px;
+}
+.pc-regret-group h4 {
+    margin: 0 0 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--color-border);
+}
+.regret-item {
+    padding: 5px 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    background-color: var(--color-log-bg);
+    border: none;
+    
+    cursor: pointer;
+}
+.regret-item:hover {
+    background-color:  gold;
+    color:             black;
+    outline: 2px solid gold;
+}
+.regret-item.is-selected {
+    background-color: var(--color-accent-red);
+    color:            white;
+}
+/* ================================
+   キャラクターシートモーダル専用スタイル
+================================ */
+.sheet-modal-content {
+    display: flex; /* gridを解除 */
+    box-sizing: border-box;
+}
+.sheet-modal-body {
+    padding: 10px;
+    font-size: 14px;
+    display: flex;
+    justify-content: center; /* 水平方向 */
+    align-items: flex-start;     /* 垂直方向 */
+    flex-direction: column;
+    min-width: 300px;
+    align-items: start;
+    align-content: start;
+    max-height: 90%;
+    box-sizing: border-box;
+}
+.sheet-grid-container {
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+        "image"
+        "header"
+        "basic"
+        "hint"
+        "enhancement"
+        "memory"
+        "regrets"
+        "skills"
+        "parts"
+        "personal";
+    gap: 5px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+/* image コンテナ =========================================== */
+.sheet-img { 
+    grid-area: image;
+    position: relative;
+    align-items: center;
+    margin: 0;
+    padding: 10px;
+}
+.sheet-img img { 
+    width:  calc(3 * var(--list-item-size));
+    height: calc(3 * var(--list-item-size));
+    aspect-ratio: 1 / 1;
+    object-fit: contain;
+
+    border-radius: 5px;
+}
+.sheet-edit-image-btn {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.7);
+    color:            white;
+    border: 2px solid white;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s;
+}
+.sheet-edit-image-btn:hover {
+    background-color: gold;
+    color:            black;
+    border-color: gold;
+}
+/* header コンテナ =========================================== */
+.sheet-header { 
+    grid-area: header; 
+    padding: 10px;
+}
+.sheet-link-btn {
+    justify-content: end;
+    text-decoration: none; /* 下線を削除 */
+    background-color: rgba(0, 0, 0, 0.7);
+    color:            white;
+    border: 2px solid white;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s;
+}
+.sheet-link-btn:hover {
+    background-color: gold;
+    color:            black;
+    border-color:     gold;
+}
+.sheet-char-title {
+    position: relative;
+/*    top: 0;
+    left: 50%;
+    transform: translateX(-50%);*/
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    margin: 5px;
+    padding: 5px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 14px;
+/*    white-space: nowrap;*/
+/*    max-width: 90%;*/
+/*    overflow: hidden;
+    text-overflow: ellipsis;*/
+}
+/* basic コンテナ =========================================== */
+.sheet-basic-info { 
+    grid-area: basic; 
+    padding: 10px;
+}
+
+.sheet-hint { 
+    grid-area: hint; 
+    padding: 10px;
+}
+
+
+
+
+.sheet-list-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+.sheet-list-table th, .sheet-list-table td {
+    border-bottom: 1px solid var(--color-border);
+    padding: 8px;
+    text-align: left;
+}
+.sheet-list-table th {
+    background-color: var(--color-surface-1);
+    position: sticky;
+    top: 0;
+}
+.sheet-list-table tbody tr:hover {
+    background-color: gold;
+    color: black;
+    cursor: pointer;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+.sheet-enhancement { 
+    grid-area: enhancement; 
+}
+.sheet-memory { 
+    grid-area: memory; 
+}
+.sheet-regrets { 
+    grid-area: regrets; 
+}
+.sheet-skills { 
+    grid-area: skills; 
+}
+.sheet-parts { 
+    grid-area: parts; 
+}
+.sheet-personal-data {
+    grid-area: personal;
+}
+.sheet-section {
+    background:       var(--color-surface-1);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 14px;
+}
+.sheet-section h4 {
+    border-bottom: 1px solid var(--color-border);
+    margin: 0;
+    font-size: 20px;
+}
+.sheet-input-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+}
+.sheet-input-group label {
+    min-width: 70px;
+    padding: 5px;
+    font-weight: bold;
+    text-align: right;
+}
+.sheet-input-group select,
+.sheet-input-group input,
+.sheet-textarea {
+/*    width: 100%;*/
+    background: var(--color-background);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: 5px;
+    padding: 3px;
+/*    box-sizing: border-box;*/
+}
+.sheet-parts-grid {
+    font-size: 1rem;
+    grid-template-columns: 1fr;
+}
+.part-list-item { 
+    font-size: 14px; 
+    margin: 5px;
+    padding: 5px;
+    border-radius: 5px;
+    background-color: var(--color-surface-2);
+}
+.part-list-item .type { 
+    font-weight: bold; 
+    color: var(--color-text-muted); 
+    width: 80px;
+}
+.sheet-textarea {
+    resize: vertical; /* 縦方向のみリサイズ可能に */
+    resize: inset; /* 縦方向のみリサイズ可能に */
+    margin: 5px;
+    width: calc(100% - 15px);
+    height: 300px;
+    min-height: 100px;
+}
+/* ================================
+   シンプルメニューモーダル専用のレイアウト上書き
+================================ */
+#simpleMenuModalBody {
+    /* display: grid; を上書き */
+    display: flex;
+    flex-direction: column; /* 縦方向に並べる */
+    align-content: center;
+    align-items: center;   /* 幅を親に合わせる */
+    gap: 0;
+    margin: 0;
+    padding: 0;
+}
+
+#simpleMenuModalBody .maneuver-item {
+    width: auto; /* 幅を自動調整 */
+    text-align: center;
+}
+/* ================================
+   シンプルメニューモーダル - フッターと入力フォーム
+================================ */
+#simpleMenuModalFooter {
+    display: flex;
+    margin: 0;
+    padding: 10px;
+    border: none;
+}
+.action-cost-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+.action-cost-selector {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    width: auto;
+
+    margin: 10px;
+    padding: 10px;
+    box-sizing: border-box;
+
+    display: grid; /* flexからgridに変更 */
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr; 
+    margin-bottom: 5px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    /* overflow: hidden; */
+}
+.action-cost-selector label {
+    padding: 10px 15px;
+    border: 2px solid gold;
+    background-color: var(--color-level-1);
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s;
+    overflow: hidden; 
+}
+.action-cost-selector label:hover {
+    background-color: gold;
+}
+.action-cost-selector input[type="radio"] {
+    display: none;    
+}
+.action-cost-selector input[type="radio"]:checked + span {
+    background-color: gold;
+    color:            black;
+}
+/* --- インポートボタン --- */
+.import-container {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 10px;
+    border-bottom: 1px solid var(--color-level-1);
+    text-align: center;
+}
+/* 「保管所から取り込み」 */
+/* 「読込み」 */
+.import-btn {
+    width: 200px;
+    justify-content: center;
+    margin: 0;
+    padding: 10px;
+    box-sizing: border-box;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: gold;
+    color:            black;
+    border: none;
+}
+.import-btn:hover {
+    opacity: 0.9;
+}
+/* --- ID入力モーダル --- */
+.modal-input-text {
+    width: 100%;
+    padding: 10px;
+    font-size: 1.2rem;
+    box-sizing: border-box;
+    text-align: center;
+    background-color: var(--color-background);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: 5px;
+}
+.modal-note {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    text-align: center;
+    margin-top: 10px;
+    min-height: 1.2em;
+}
+/* ================================
+   ダメージモーダル専用のレイアウト上書き
+================================ */
+#damageModalBody {
+    /* 汎用の grid レイアウトを上書きし、縦積みの flex レイアウトに変更 */
+    display: flex;
+    flex-direction: column; /* 要素を縦に並べる */
+    gap: 15px; /* テキストとパーツ一覧の間に隙間を設ける */
+    
+    /* 他の .modal-body から継承したくないスタイルをリセット */
+    grid-template-columns: none;
+    justify-content: normal;
+}
+/* ================================
+   ダメージモーダル - ハイライト機能
+================================ */
+.part-location-group.is-highlighted {
+    box-shadow: 0 0 10px gold;
+    border: 2px solid    yellow;
+}
+/* ================================
+   画像選択モーダル専用スタイル
+================================ */
+.image-select-grid {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    grid-template-columns: repeat(auto-fill, var(--list-item-size));
+    gap: 5px;
+    padding: 27px 26px;
+    overflow-y: auto;
+    justify-content: space-evenly;
+}
+.image-select-item {
+    width: var(--list-item-size);
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    justify-content: center;
+
+    border: 2px solid transparent;
+}
+.image-select-item:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color:     gold;
+    transform: scale(1.5);
+}
+.image-select-item img {
+    width:  var(--list-item-size);
+    height: var(--list-item-size);
+    aspect-ratio: 1 / 1;
+    object-fit: contain;
+}
+/* ================================
+   保管所リストモーダル専用スタイル
+================================ */
+.import-method-selector {
+    margin: 10px;
+    padding: 0;
+    box-sizing: border-box;
+
+    display: grid; /* flexからgridに変更 */
+    grid-template-columns: 1fr 1fr 1fr; /* 3つの均等な列を作成 */
+    margin-bottom: 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 20px;
+    overflow: hidden;
+}
+.import-method-selector input[type="radio"] {
+    display: none;
+}
+.import-method-selector label {
+    flex: 1;
+    text-align: center;
+    padding: 8px;
+    background-color: var(--color-surface-1);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.import-method-selector input[type="radio"]:checked + label {
+    background-color: gold;
+    color: black;
+}
+.sheet-list-container {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+
+.pc-name-in-list {
+    font-size: 0.9em; /* 少し小さく */
+    color: var(--color-text-muted); /* 少し薄い色に */
+}
+
+.sheet-list-table tbody tr:hover .pc-name-in-list {
+    color: black; /* ホバー時は白っぽく */
+}
+#import-by-id-content .import-btn {
+    width: 100%;
+    margin-top: 10px;
+}
+.loader {
+    text-align: center;
+    padding: 20px;
+}
+
+/* modals.css に追加 */
+
+.local-image-upload-container {
+    grid-column: 1 / -1; /* グリッドレイアウト全体に広がるように */
+    padding: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--color-border);
+    text-align: center;
+
+    display: flex; /* Flexboxを有効化 */
+    flex-direction: column; /* 要素を縦に並べる */
+    align-items: center; /* 中央揃え */
+    gap: 10px; /* 要素間の隙間 */
+}
+
+
+.local-image-upload-btn {
+    background-color: var(--color-accent-blue);
+    color: var(--color-text-light);
+    border: none;
+    border-radius: 5px;
+    padding: 8px 15px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.local-image-upload-btn:hover {
+    background-color: var(--color-accent-cyan);
+    color: black;
+}
+
+/* 画像グリッドの親要素が .modal-body ではなくなったため、スタイルを調整 */
+#simpleMenuModal .image-select-grid {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 10px;
+    overflow-y: auto;
+    justify-content: center;
+    max-height: 60vh; /* 高さに制限を設けてスクロールさせる */
+}
+
+.image-upload-note {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    text-align: center;
+    margin: 8px 0 0 0; /* 上の要素との間に少し余白を設ける */
+    padding: 0;
+}
+
+/* ボタンをグループ化するためのコンテナ */
+.button-group {
+    display: flex;
+    gap: 10px; /* ボタン間の隙間 */
+}
+
+/* 新しい「画像キャッシュ消去」ボタンのスタイル */
+.local-image-clear-btn {
+    background-color: var(--color-accent-red);
+    color: var(--color-text-light);
+    border: none;
+    border-radius: 5px;
+    padding: 8px 15px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.local-image-clear-btn:hover {
+    opacity: 0.8;
+}
+/* ================================
+   攻撃確認モーダル専用スタイル
+================================ */
+.attack-confirm-summary {
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-align: center;
+    padding: 10px;
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 10px;
+}
+
+.attack-confirm-section {
+    margin-bottom: 10px;
+}
+
+.attack-confirm-section .section-header {
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    margin-bottom: 5px;
+    padding-left: 5px;
+}
+
+.modifier-list {
+    background-color: var(--color-surface-1);
+    border-radius: 5px;
+    padding: 8px;
+    font-size: 14px;
+}
+
+.modifier-item {
+    padding: 2px 0;
+}
+
+.modifier-none {
+    color: var(--color-text-muted);
+    font-style: italic;
+    text-align: center;
+}
+
+/* 汎用モーダルのボディの display: grid を上書き */
+#simpleMenuModalBody.attack-confirm-body {
+    display: block;
+}

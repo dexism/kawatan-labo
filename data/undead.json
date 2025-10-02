@@ -1,0 +1,431 @@
+{
+  "//": "========================================",
+  "//": "== アンデッドデータベース            ==",
+  "//": "========================================",
+  "//": "このファイルは、ドールや手駒のテンプレートを定義します。",
+  "//": "戦闘開始前に、このリストからキャラクターを選択し、戦場に配置します。",
+  "//": "========================================",
+
+  "doll_001": {
+    "name": "つぎはぎアリス",
+    "description": "アリス（ステーシー・バロック）",
+    "img": "images/doll/doll_101.png",
+    "initialArea": "煉獄",
+    "category": "ドール",
+    "position": "アリス",
+    "mainClass": "ステーシー",
+    "subClass": "ロマネスク",
+    "skills": ["少女", "平気", "死に続け", "円舞曲"],
+    "enhancementValue": {
+      "bonus": "武装", "武装": 2, "変異": 1, "改造": 2
+    },
+    "parts": {
+      "head": ["のうみそ", "めだま", "あご", "リフレックス", "アクセサリー"],
+      "arms": ["こぶし", "うで", "かた", "肉切り包丁", "合金トランク"],
+      "torso": ["せぼね", "はらわた", "はらわた", "つぎはぎ", "スチールボーン"],
+      "legs": ["ほね", "ほね", "あし"],
+      "body": []
+    },
+    "baseActionValue": 6, "malice": null, "treasure": "アクセサリー", "regrets": []
+  },
+  "doll_002": {
+    "name": "のけものホリック",
+    "description": "ホリック（ゴシック・バロック）",
+    "img": "images/doll/doll_102.png",
+    "initialArea": "煉獄",
+    "category": "ドール",
+    "position": "ホリック",
+    "mainClass": "ゴシック",
+    "subClass": "バロック",
+    "skills": ["修羅", "捕食者", "舌なめずり", "狂鬼"],
+    "enhancementValue": {
+      "bonus": "変異", "武装": 0, "変異": 4, "改造": 1
+    },
+    "parts": {
+      "head": ["のうみそ", "めだま", "あご", "けもみみ", "アドレナリン"],
+      "arms": ["こぶし", "うで", "かた", "かぎづめ"],
+      "torso": ["せぼね", "はらわた", "はらわた"],
+      "legs": ["ほね", "ほね", "あし", "しっぽ", "けもあし", "誰かの手"],
+      "body": []
+    },
+    "baseActionValue": 6, "malice": null, "treasure": "誰かの手", "regrets": []
+  },
+  "doll_003": {
+    "name": "すてねこオートマトン",
+    "description": "オートマトン（タナトス・ステーシー）",
+    "img": "images/doll/doll_103.png",
+    "initialArea": "煉獄",
+    "category": "ドール",
+    "position": "オートマトン",
+    "mainClass": "タナトス",
+    "subClass": "ステーシー",
+    "skills": ["無茶", "死神", "災禍", "失敗作"],
+    "enhancementValue": {
+      "bonus": "変異", "武装": 2, "変異": 2, "改造": 1
+    },
+    "parts": {
+      "head": ["のうみそ", "めだま", "あご", "リミッター", "おおあな", "ほとけかずら"],
+      "arms": ["こぶし", "うで", "かた", "日本刀", "鉄球鎖", "ぬいぐるみ"],
+      "torso": ["せぼね", "はらわた", "はらわた"],
+      "legs": ["ほね", "ほね", "あし"],
+      "body": []
+    },
+    "baseActionValue": 6, "malice": null, "treasure": "ぬいぐるみ", "regrets": []
+  },
+  "doll_004": {
+    "name": "きぐるいジャンク",
+    "description": "ジャンク（バロック・ステーシー）",
+    "img": "images/doll/doll_104.png",
+    "initialArea": "煉獄",
+    "category": "ドール",
+    "position": "ジャンク",
+    "mainClass": "バロック",
+    "subClass": "ステーシー",
+    "skills": ["半壊", "歪極", "怪力", "庇う"],
+    "enhancementValue": {
+      "bonus": "武装", "武装": 2, "変異": 3, "改造": 0
+    },
+    "parts": {
+      "head": ["のうみそ", "めだま", "あご", "カンフー", "きもちいいくすり"],
+      "arms": ["こぶし", "うで", "かた", "よぶんなうで", "本"],
+      "torso": ["せぼね", "はらわた", "はらわた", "しんぞう", "やせぎす"],
+      "legs": ["ほね", "ほね", "あし", "仕込みブーツ"],
+      "body": []
+    },
+    "baseActionValue": 6, "malice": null, "treasure": "本", "regrets": []
+  },  
+  "doll_005": {
+    "name": "ひきがねコート",
+    "description": "コート（レクイエム特化）",
+    "img": "images/doll/doll_105.png",
+    "initialArea": "花園",
+    "category": "ドール",
+    "position": "コート",
+    "mainClass": "レクイエム",
+    "subClass": "レクイエム",
+    "skills": ["冷静", "銃神", "集中", "魔弾"],
+    "enhancementValue": {
+      "bonus": "改造", "武装": 4, "変異": 0, "改造": 1
+    },
+    "parts": {
+      "head": ["のうみそ", "めだま", "あご", "カンフー", "ボルトヘッド"],
+      "arms": ["こぶし", "うで", "かた", "二丁拳銃", "狙撃ライフル", "アンデッドガン"],
+      "torso": ["せぼね", "はらわた", "はらわた", "小さなアンデッド"],
+      "legs": ["ほね", "ほね", "あし"],
+      "body": []
+    },
+    "baseActionValue": 6, "malice": null, "treasure": "小さなアンデッド", "regrets": []
+  },
+  "doll_006": {
+    "name": "しかばねソロリティ",
+    "description": "ソロリティ（ロマネスク・タナトス）",
+    "img": "images/doll/doll_106.png",
+    "initialArea": "煉獄",
+    "category": "ドール",
+    "position": "ソロリティ",
+    "mainClass": "ロマネスク",
+    "subClass": "タナトス",
+    "skills": ["号令", "死の舞踏", "愛撫", "殺劇"],
+    "enhancementValue": {
+      "bonus": "武装", "武装": 2, "変異": 0, "改造": 3
+    },
+    "parts": {
+      "head": ["のうみそ", "めだま", "あご", "アドレナリン", "エンバーミング"],
+      "arms": ["こぶし", "うで", "かた", "チェーンソー"],
+      "torso": ["せぼね", "はらわた", "はらわた", "有刺鉄線", "かわいい衣装"],
+      "legs": ["ほね", "ほね", "あし", "スパイク"],
+      "body": []
+    },
+    "baseActionValue": 6, "malice": null, "treasure": "かわいい衣装", "regrets": []
+  },
+
+  "//": "========================================",
+  "//": "== 手駒 (Pieces)                       ==",
+  "//": "========================================",
+  "piece_101": {
+    "name": "ゾンビ",
+    "description": "何ら強化を受けていない基本的なアンデッド。量産しやすいためか、よく見かける。",
+    "img": "images/pieces/pieces_101.png",
+    "category": "レギオン",
+    "position": "ゾンビ",
+    "skills": ["レギオン", "合流"],
+    "parts": { "body": ["ひきさく", "よろめく", "むらがる"] },
+    "baseActionValue": 8,
+    "malice": 0.2
+  },
+  "piece_102": {
+    "name": "ソルジャー",
+    "description": "装備を与えられ、最低限の戦術を仕込まれたゾンビ。集団での戦闘力は侮れない。",
+    "img": "images/pieces/pieces_102.png",
+    "category": "レギオン",
+    "position": "ソルジャー",
+    "skills": ["レギオン", "合流"],
+    "parts": { "body": ["一斉射撃", "よろめく", "むらがる"] },
+    "baseActionValue": 8,
+    "malice": 0.4
+  },
+  "piece_103": {
+    "name": "ナイトメア",
+    "description": "自我の崩壊したドールやサヴァントの失敗作。その存在はドールたちの心を軋ませる。",
+    "img": "images/pieces/pieces_103.png",
+    "category": "レギオン",
+    "position": "ナイトメア",
+    "skills": ["レギオン", "合流"],
+    "parts": { "body": ["うわごと", "よろめく", "むらがる"] },
+    "baseActionValue": 8,
+    "malice": 0.4
+  },
+  "piece_104": {
+    "name": "マガドリ",
+    "description": "アンデッド化した鳥の群れ。野生化し、無差別にアンデッドを襲うものも多い。",
+    "img": "images/pieces/pieces_104.png",
+    "category": "レギオン",
+    "position": "マガドリ",
+    "skills": ["レギオン", "合流"],
+    "parts": { "body": ["ついばむ", "はばたき"] },
+    "baseActionValue": 9,
+    "malice": 0.4
+  },
+  "piece_201": {
+    "name": "グール",
+    "description": "他アンデッドの肉体組織を捕食するアンデッド。野生化したものも多い。",
+    "img": "images/pieces/pieces_201.png",
+    "category": "ホラー",
+    "position": "グール",
+    "skills": ["ホラー"],
+    "parts": { "body": ["かみつきあご", "ほね", "ゆがんだうで", "のうみそ", "はらわた"] },
+    "baseActionValue": 6,
+    "malice": 2.0
+  },
+  "piece_202": {
+    "name": "ハウンド",
+    "description": "アンデッドの軍用犬。半ば機械化された強靭な体で機敏な襲撃を繰り返す。",
+    "img": "images/pieces/pieces_202.png",
+    "category": "ホラー",
+    "position": "ハウンド",
+    "skills": ["ホラー"],
+    "parts": { "body": ["セイバートゥース", "けもあし", "強化脊髄", "しっぽ", "はらわた"] },
+    "baseActionValue": 6,
+    "malice": 2.0
+  },
+    "piece_203": {
+    "name": "スナイパー",
+    "description": "遠距離からの狙撃に特化したアンデッド兵士。優秀な支援要員。",
+    "img": "images/pieces/pieces_203.png",
+    "category": "ホラー",
+    "position": "スナイパー",
+    "skills": ["ホラー"],
+    "parts": {
+      "body": ["狙撃ライフル", "ほね", "スコープ", "死の手", "のうみそ", "はらわた"] },
+    "baseActionValue": 6,
+    "malice": 3.0
+  },
+  "piece_204": {
+    "name": "ヘビトンボ",
+    "description": "代表的な巨大昆虫。群れで飛び回る全長3メートルほどの肉食トンボ。",
+    "img": "images/pieces/pieces_204.png",
+    "category": "ホラー",
+    "position": "ヘビトンボ",
+    "skills": ["ホラー"],
+    "parts": { "body": ["おおあご", "はね", "よぶんなはね", "外骨格", "中枢神経", "脚"] },
+    "baseActionValue": 6,
+    "malice": 3.0
+  },
+  "piece_205": {
+    "name": "ブッチャー",
+    "description": "巨漢型の接近戦アンデッド。巨大な鉈を振り回し、敵を解体する。",
+    "img": "images/pieces/pieces_205.png",
+    "category": "ホラー",
+    "position": "ブッチャー",
+    "skills": ["ホラー"],
+    "parts": {
+        "body": ["大鉈", "ほね", "アーマースキン", "怪力", "のうみそ", "はらわた", "はらわた", "はらわた"] },
+    "baseActionValue": 6,
+    "malice": 4.0
+  },
+  "piece_206": {
+    "name": "マタンゴ",
+    "description": "アンデッドの体に宿り増殖する寄生キノコ。動くものに反応して近づいてくる。",
+    "img": "images/pieces/pieces_206.png",
+    "category": "ホラー",
+    "position": "マタンゴ",
+    "skills": ["ホラー"],
+    "parts": { "body": ["寄生胞子", "よろめくあし", "しびとだけ", "不動", "反射行動", "きのこ", "きのこ"] },
+    "baseActionValue": 6,
+    "malice": 4.0
+  },
+  "piece_207": {
+    "name": "リフトバイス",
+    "description": "有機エンジンにより今も動き続ける作業機械。頑丈さ破壊力共に侮れない。",
+    "img": "images/pieces/pieces_207.png",
+    "category": "ホラー",
+    "position": "リフトバイス",
+    "skills": ["ホラー"],
+    "parts": { "body": ["クラッシュバイス", "キャタピラ", "モーターギア", "強化装甲", "メインエンジン", "サブエンジン", "装甲板", "装甲板"] },
+    "baseActionValue": 6,
+    "malice": 4.0
+  },
+  "piece_208": {
+    "name": "マッドガッサー",
+    "description": "アンデッドの肉体組織を壊死させる特殊なガスを散布するアンデッド。",
+    "img": "images/pieces/pieces_208.png",
+    "category": "ホラー",
+    "position": "マッドガッサー",
+    "skills": ["ホラー"],
+    "parts": { "body": ["分解ガス", "ほね", "自動制御装置", "対策装備", "のうみそ", "はらわた", "はらわた"] },
+    "baseActionValue": 6,
+    "malice": 5.0
+  },
+  "piece_209": {
+    "name": "バブルヘッド",
+    "description": "引火性ガスで体を膨らませ、半ば浮遊しながら行動する自爆型アンデッド。",
+    "img": "images/pieces/pieces_209.png",
+    "category": "ホラー",
+    "position": "バブルヘッド",
+    "skills": ["ホラー"],
+    "parts": { "body": ["かぎづめ", "ほね", "ゾンビボム", "うきぶくろ", "のうみそ", "はらわた"] },
+    "baseActionValue": 6,
+    "malice": 5.0
+  },
+  "piece_210": {
+    "name": "ドラッグイーター",
+    "description": "ドールの体を奪って自我を補完しようとする、頭だけの不完全サヴァント。",
+    "img": "images/pieces/pieces_210.png",
+    "category": "ホラー",
+    "position": "ドラッグイーター",
+    "skills": ["ホラー"],
+    "parts": { "body": ["にくむち", "触肢", "エンバーミング", "視界共有", "のうみそ", "めだま", "アドレナリン"] },
+    "baseActionValue": 6,
+    "malice": 5.0
+  },
+  "piece_211": {
+    "name": "バンシー",
+    "description": "ネクロマンサーの悪意により、精神を念入りに崩壊させられた元ドール。",
+    "img": "images/pieces/pieces_211.png",
+    "category": "ホラー",
+    "position": "バンシー",
+    "skills": ["ホラー"],
+    "parts": { "body": ["狂気の歌", "ほね", "呪い髪", "ちみどろ", "のうみそ", "めだま", "しんぞう", "はらわた", "はらわた"] },
+    "baseActionValue": 6,
+    "malice": 6.0
+  },
+  "piece_212": {
+    "name": "ラフレシア",
+    "description": "動くものを盲目的に襲う肉食植物。振り回される触手は大きな脅威となる。",
+    "img": "images/pieces/pieces_212.png",
+    "category": "ホラー",
+    "position": "ラフレシア",
+    "skills": ["ホラー"],
+    "parts": { "body": ["攻性触手", "触肢", "伸縮触手", "肉厚", "捕縛触手", "根肢", "反射行動", "はなびら", "はなびら"] },
+    "baseActionValue": 6,
+    "malice": 6.0
+  },
+  "piece_213": {
+    "name": "ミートシュレッダー",
+    "description": "有機エンジンで動き回り、アンデッドをかき集め潰す巨大ミンチマシン。",
+    "img": "images/pieces/pieces_213.png",
+    "category": "ホラー",
+    "position": "ミートシュレッダー",
+    "skills": ["ホラー"],
+    "parts": { "body": ["シュレッダー", "多脚戦車", "スクレーパー", "正面装甲", "突進", "オートバランサー", "メインエンジン", "サブエンジン", "装甲板"] },
+    "baseActionValue": 6,
+    "malice": 7.0
+  },
+  "piece_214": {
+    "name": "オチムシャ",
+    "description": "強力な剣術を技能移植され、肉体も強化された接近戦用アンデッド。",
+    "img": "images/pieces/pieces_214.png",
+    "category": "ホラー",
+    "position": "オチムシャ",
+    "skills": ["ホラー"],
+    "parts": { "body": ["名刀", "ほね", "鎧具足", "戦闘感覚", "のうみそ", "殺戮本能", "アドレナリン", "リフレックス", "しんぞう", "はらわた"] },
+    "baseActionValue": 6,
+    "malice": 8.0
+  },
+  "piece_215": {
+    "name": "シデムシ",
+    "description": "最強級の巨大昆虫。全長10メートル以上の低い知性さえ持つムカデ。",
+    "img": "images/pieces/pieces_215.png",
+    "category": "ホラー",
+    "position": "シデムシ",
+    "skills": ["ホラー"],
+    "parts": { "body": ["怪物の顎", "節足", "粘液塊", "強化外骨格", "突進", "平気", "巨体", "中枢神経", "めだま", "常時飢餓", "はらわた"] },
+    "baseActionValue": 6,
+    "malice": 9.0
+  },
+  "piece_216": {
+    "name": "モンスター",
+    "description": "不死性を追い求め作られた巨漢アンデッド。おそろしく頑強な体を持つ。",
+    "img": "images/pieces/pieces_216.png",
+    "category": "ホラー",
+    "position": "モンスター",
+    "skills": ["ホラー"],
+    "parts": { "body": ["怪物の腕", "ほね", "ボルトヘッド", "肉の盾", "アーマースキン", "スチールボーン", "強化筋肉", "リミッター", "のうみそ", "アドレナリン", "リフレックス", "はらわた", "はらわた", "はらわた"] },
+    "baseActionValue": 6,
+    "malice": 10.0
+  },
+  "savant_301": {
+    "name": "ネメシス",
+    "description": "クセのない外見と能力を誇る汎用兵士型サヴァント。",
+    "img": "images/pieces/pieces_301.png",
+    "category": "サヴァント",
+    "position": "ネメシス",
+    "skills": [],
+    "parts": {
+        "head": ["のうみそ", "めだま", "カンフー", "あご", "死人指揮"],
+        "arms": ["こぶし", "かた", "肉切り包丁", "二丁拳銃", "うで"],
+        "torso": ["せぼね", "庇う", "しんぞう", "はらわた", "はらわた"],
+        "legs": ["ほね", "ほね", "あし"]
+    },
+    "baseActionValue": 6,
+    "malice": 9.0
+  },
+  "savant_302": {
+    "name": "キメラ",
+    "description": "強い生命力を持つ前線タイプの異形サヴァント。",
+    "img": "images/pieces/pieces_302.png",
+    "category": "サヴァント",
+    "position": "キメラ",
+    "skills": [],
+    "parts": {
+        "head": ["のうみそ", "めだま", "狂鬼", "あご"],
+        "arms": ["かぎづめ", "うで", "よぶんなうで", "怪力"],
+        "torso": ["やぶれひまく", "しんぞう", "はらわた", "はらわた"],
+        "legs": ["はりつき", "どくばり", "あし", "不動", "しっぽ"]
+    },
+    "baseActionValue": 6,
+    "malice": 10.0
+  },
+  "savant_303": {
+    "name": "バルキリー",
+    "description": "ほとんど人体の原型をとどめない、冒涜的に機械化された飛行サヴァント。",
+    "img": "images/pieces/pieces_303.png",
+    "category": "サヴァント",
+    "position": "バルキリー",
+    "skills": [],
+    "parts": {
+        "head": ["スコープS", "リミッター", "めだま"],
+        "arms": ["うで"],
+        "torso": ["レーザービーム", "スチールボーン", "突進", "人工知能", "エンジン", "リフレックス", "ブースター", "アドレナリン"],
+        "legs": ["フローター", "ヒートブロウ", "ホバー", "装甲板"]
+    },
+    "baseActionValue": 6,
+    "malice": 10.0
+  },
+  "savant_304": {
+    "name": "ゾンビクイーン",
+    "description": "無数のアンデッドを率いるネクロマンサーの腹心。暫定的にだがネクロマンサーの力を使える。",
+    "img": "images/pieces/pieces_304.png",
+    "category": "サヴァント",
+    "position": "ゾンビクイーン",
+    "skills": [],
+    "parts": {
+        "head": ["亡者の目覚め", "選ばれし美貌", "選ばれし唇", "選ばれし脳", "選ばれし瞳"],
+        "arms": ["死者融合", "操り人形糸", "奴隷の献身", "選ばれし手", "選ばれし指先"],
+        "torso": ["選ばれし肌", "選ばれし心臓", "選ばれし骨格", "選ばれし臓腑", "麗しきドレス"],
+        "legs": ["女王の歩み", "選ばれし脚", "円舞曲"]
+    },
+    "baseActionValue": 6,
+    "malice": 14.0
+  }
+}

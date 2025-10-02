@@ -1,0 +1,224 @@
+/* ================================
+   2. ページ全体のレイアウト構造
+================================ */
+body {
+  display: grid;
+  grid-template-areas:
+    "header"
+    "main"
+    "footer";
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr auto;
+  align-content: start;
+}
+/* --- 共通 --- */
+.hide-on-mobile {
+  display: inline;
+}
+/* --- ヘッダー・フッター --- */
+.app-header {
+  grid-area: header;
+  background-color:        var(--color-title-bg);
+  color:                   var(--color-title-text);
+  /* border-bottom: 1px solid var(--color-border); */
+  margin: 0;
+  padding: 5px 10px;
+  box-sizing: border-box;
+  box-shadow: 0 0 10px black;
+  z-index: 70;
+  font-size: 0.9rem;
+}
+.app-header h1 {
+  font-size: 0.9rem;
+  margin: 0;
+  padding: 0;
+}
+.app-footer {
+  grid-area: footer;
+  background-color:     var(--color-sub-bg);
+  color:                var(--color-sub-text);
+  /* border-top: 1px solid var(--color-border); */
+  margin: 0;
+  padding: 10px;
+  box-sizing: border-box;
+  text-align: center;
+  font-size: 0.6rem;
+  box-shadow: 0 0 10px black;
+  z-index: 90;
+}
+.credit-info {
+  font-size: 0.6rem;
+}
+.version-info {
+  font-size: 0.5rem;
+}
+/* ================================
+  メインコンテナとエリア分割
+================================ */
+.main-container {
+  grid-area: main;
+  display: grid;
+  grid-template-columns: 1fr var(--right-width);
+  grid-template-rows: 1fr;
+  grid-template-areas: "left right";
+  gap: 0;
+  margin:  0;
+  padding: 0;
+  box-sizing: border-box;
+  flex: 1;
+  flex-shrink: 0;
+  flex-direction: column;
+  min-width: 0;
+  align-items: start;
+  grid-auto-rows: auto;
+  align-content: start;
+  height: 100%;
+}
+.left-column {
+  grid-area: left;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto 1fr;
+  grid-template-areas:
+    "enemy"
+    "battle"
+    "player";
+  height: 100%;
+  margin:  0;
+  padding: 0;
+  box-sizing: border-box;
+}
+.right-column {
+  grid-area: right;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto auto auto auto auto 1fr auto;
+  grid-template-areas:
+    "status"
+    "timing"
+    "rapid"
+    "judge"
+    "action"
+    "damage"
+    "log"
+    "settings";
+  align-content: start;
+  /* border-left: 1px solid var(--color-border); */
+  /* border-radius: 10px 0 0 10px; */
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  box-shadow: 0 0 10px black;
+  height: 100%;
+  z-index: 60;
+}
+/* ================================
+  グリッドコンテンツ
+================================ */
+.grid-area-enemy-panel {
+  grid-area: enemy;
+  min-width: 0;
+  margin:  0;
+  padding: 0;
+  box-sizing: border-box;
+}
+.grid-area-battle-panel {
+  grid-area: battle;
+  align-self: stretch;
+  min-width: 0;
+  margin:  0;
+  padding: 0 5px;
+  box-sizing: border-box;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+.grid-area-pc-panel {
+  grid-area: player;
+  min-width: 0;
+  height: 100%;
+  margin:  0;
+  padding: 0;
+  box-sizing: border-box;
+}
+.grid-area-status-panel {
+  grid-area: status;
+  z-index: 80;
+}
+.grid-area-timing-panel {
+  grid-area: timing;
+  z-index: 90;
+  border-bottom: 1px solid var(--color-border);
+}
+.grid-area-rapid-panel {
+    grid-area: rapid;
+}
+.grid-area-judge-panel {
+    grid-area: judge;
+}
+.grid-area-action-panel {
+    grid-area: action;
+}
+.grid-area-damage-panel {
+    grid-area: damage;
+}
+.grid-area-log-panel {
+    grid-area: log;
+    align-self: stretch;
+    height: 100%;
+    z-index: 90;
+}
+/* ================================
+   SP対応 (画面幅768px以下)
+================================ */
+@media screen and (max-width: 768px) {
+  .app-header {
+    box-shadow: none;
+    z-index: 90;
+  }
+  .app-header h1 {
+    font-size: 0.7rem;
+  }
+  .main-container {
+    display: grid;
+    grid-template-areas:
+      "status"
+      "enemy"
+      "battle"
+      "rapid"
+      "judge"
+      "action"
+      "damage"
+      "player"
+      "timing"
+      "log";
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    align-content: start;
+    width: 100%;
+    min-width: 0;
+  }
+  .grid-area-status-panel {
+    position: sticky;
+    top: 0;
+    box-shadow: 0 0 10px black;
+    /* border-radius: 0 0 10px 10px; */
+  }
+  .grid-area-timing-panel {
+    position: sticky;
+    bottom: 0;
+    border: none;
+    box-shadow: 0 0 10px black;
+    /* border-radius: 10px 10px 0 0; */
+  }
+  .left-column,
+  .right-column {
+    display: contents; /* ラッパーを消して孫要素を直接扱う */
+  }
+  .responsive-item {
+    display: block;
+  }
+  /* スマホ表示では非表示にする */
+  .hide-on-mobile {
+    display: none;
+  }
+}

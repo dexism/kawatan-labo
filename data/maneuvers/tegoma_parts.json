@@ -1,0 +1,218 @@
+{
+  "//": "========================================",
+  "//": "==    手駒専用パーツの定義           ==",
+  "//": "========================================",
+
+  "//": "---------- 悪意点 1 (P2) ----------",
+  "P2-01": {
+    "name": "ひきさく", "category": "攻撃", 
+    "tags": ["攻撃", "アクション", "連撃"],
+    "description": "肉弾攻撃1。同エリアのゾンビ10体につき連撃+1。", 
+    "description_raw": "肉弾攻撃1+連撃[同エリアのゾンビの数÷10](切捨て)",
+    "source": { "book": "基本ルールブック", "page": 141 }, 
+    "timing": "アクション", "cost": 2, "range": "0",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 1, "on_hit_dynamic": { "type": "CHAIN_ATTACK_BY_ALLY_COUNT", "ally_name": "ゾンビ" } } }]
+  },
+  "P2-02": {
+    "name": "むらがる", "category": "妨害", 
+    "tags": ["移動妨害", "ラピッド"],
+    "description": "射程0の対象に移動妨害1。", 
+    "description_raw": "移動妨害1",
+    "source": { "book": "基本ルールブック", "page": 141 }, 
+    "timing": "ラピッド", "cost": 0, "range": "0",
+    "effects": [{ "ref": "GENERIC_MOVE_DEBUFF", "params": { "value": -1 } }]
+  },
+  "P2-03": {
+    "name": "第二形態", "category": "補助", 
+    "tags": ["変身", "オート", "損傷"],
+    "description": "損傷時、自身を消し、別の手駒を配置する。追加手駒の悪意は半分。", 
+    "description_raw": "このパーツの損傷時、自身を舞台から取り除き、予め用意した別の手駒（行動値は現カウント－１）を同エリアか隣接エリアに配置。合計悪意に手駒本来の半分（切り上げ）を加える。",
+    "source": { "book": "基本ルールブック", "page": 141, "errata": "1.6.1" }, 
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "effects": [{ "ref": "TRANSFORM", "params": { "trigger": "on_this_part_damaged" } }]
+  },
+  "P2-04": {
+    "name": "肉漁り虫", "category": "補助", 
+    "tags": ["増援", "アクション"],
+    "description": "コストとしてレギオン5体を消費し、ヘビトンボ1体を増援する。", 
+    "description_raw": "増援1(ヘビトンボ)。対象エリアの任意のレギオンを5体減らす。",
+    "source": { "book": "基本ルールブック", "page": 141 }, 
+    "timing": "アクション", "cost": 2, "range": "0～1",
+    "effects": [{ "ref": "SUMMON_UNIT", "params": { "unit_name": "ヘビトンボ", "count": 1, "cost_type": "sacrifice_legion", "cost_value": 5 } }]
+  },
+
+  "//": "---------- 悪意点 1.5 (P3) ----------",
+  "P3-01": {
+    "name": "一斉射撃", "category": "攻撃", 
+    "tags": ["攻撃", "アクション", "連撃"],
+    "description": "射撃攻撃2。同エリアのソルジャー10体につき連撃+1。", 
+    "description_raw": "射撃攻撃2+連撃[同エリアのソルジャーの数÷10](切捨て)",
+    "source": { "book": "基本ルールブック", "page": 141 }, 
+    "timing": "アクション", "cost": 3, "range": "0～1",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "射撃", "damage": 2, "on_hit_dynamic": { "type": "CHAIN_ATTACK_BY_ALLY_COUNT", "ally_name": "ソルジャー" } } }]
+  },
+  "P3-02": {
+    "name": "うわごと", "category": "攻撃", 
+    "tags": ["攻撃", "アクション", "連撃", "狂気点操作"],
+    "description": "精神攻撃1。同エリアのナイトメア10体につき連撃+1。", 
+    "description_raw": "精神攻撃1+連撃[同エリアのナイトメアの数÷10](切捨て)",
+    "source": { "book": "基本ルールブック", "page": 141 }, 
+    "timing": "アクション", "cost": 3, "range": "0",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "精神", "damage": 1, "on_hit_dynamic": { "type": "CHAIN_ATTACK_BY_ALLY_COUNT", "ally_name": "ナイトメア" } } }]
+  },
+  "P3-03": {
+    "name": "フローター", "category": "妨害", 
+    "tags": ["妨害", "オート"],
+    "description": "自身が受ける肉弾・白兵攻撃の判定を-1する。", 
+    "description_raw": "自身を対象とする肉弾攻撃・白兵攻撃の判定値-1、全体攻撃では、自身に対する判定値のみ-1",
+    "source": { "book": "基本ルールブック", "page": 141 }, 
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "defenseCheckBonus", "value": -1, "duration": "permanent_while_undamaged", "condition": ["肉弾攻撃", "白兵攻撃"] } }]
+  },
+  "P3-04": {
+    "name": "突進", "category": "攻撃", 
+    "tags": ["攻撃", "ラピッド", "移動"],
+    "description": "自身の移動時に使用可。移動前後のエリアの対象1体に肉弾攻撃3。", 
+    "description_raw": "自身の移動時に使用可。移動前か移動後のエリアの対象1体に、肉弾攻撃3",
+    "source": { "book": "基本ルールブック", "page": 141 }, 
+    "timing": "ラピッド", "cost": 1, "range": "効果参照",
+    "effects": [{ "ref": "ATTACK_ON_MOVE", "params": { "attack_type": "肉弾", "damage": 3 } }]
+  },
+  "P3-05": {
+    "name": "楽園の蹂躙", "category": "移動", 
+    "tags": ["コスト補正", "オート", "移動"],
+    "description": "「楽園」方向への自身の移動マニューバのコストを-1。", 
+    "description_raw": "バトルパートにおいて、現在位置から「楽園」方向への移動マニューバを自身を対象として宣言する際、そのマニューバのコストが－１（最低０）される。",
+    "source": { "book": "基本ルールブック", "page": 142, "errata": "1.6.1" }, 
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "effects": [{ "ref": "REDUCE_MOVE_COST", "params": { "direction": "楽園", "value": 1 } }]
+  },
+  "P3-06": {
+    "name": "死人指揮", "category": "支援", 
+    "tags": ["支援", "ジャッジ"],
+    "description": "射程内の他者の判定に+2の支援を行う。", 
+    "description_raw": "支援2、自身には使用不可",
+    "source": { "book": "基本ルールブック", "page": 142 }, 
+    "timing": "ジャッジ", "cost": 0, "range": "0～1",
+    "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "target": "other_roll", "value": 2 } }]
+  },
+  "P3-07": {
+    "name": "死者融合", "category": "補助", 
+    "tags": ["増援", "アクション"],
+    "description": "コストとしてレギオンを1d10体消費し、ブッチャー1体を増援する。", 
+    "description_raw": "増援1(ブッチャー)。対象エリアの任意のレギオンをサイコロの出目分だけ減らす",
+    "source": { "book": "基本ルールブック", "page": 142 }, 
+    "timing": "アクション", "cost": 2, "range": "0～1",
+    "effects": [{ "ref": "SUMMON_UNIT", "params": { "unit_name": "ブッチャー", "count": 1, "cost_type": "sacrifice_legion", "cost_value_dice": "1d10" } }]
+  },
+  "P3-08": {
+    "name": "操り人形糸", "category": "攻撃", 
+    "tags": ["攻撃", "アクション", "切断", "連撃"],
+    "description": "白兵攻撃1+切断。ゾンビ10体につき連撃+1。", 
+    "description_raw": "白兵攻撃1+切断+連撃[対象エリアのゾンビの数÷10]（切捨て）",
+    "source": { "book": "基本ルールブック", "page": 142 }, 
+    "timing": "アクション", "cost": 3, "range": "0～1",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 1, "on_hit": ["SEVERANCE"], "on_hit_dynamic": { "type": "CHAIN_ATTACK_BY_ALLY_COUNT", "ally_name": "ゾンビ" } } }]
+  },
+  "P3-09": {
+    "name": "長い腕", "category": "補助", 
+    "tags": ["射程補正", "オート"],
+    "description": "肉弾・白兵攻撃マニューバの射程を+1。", 
+    "description_raw": "肉弾・白兵攻撃マニューバの射程を+1してもよい",
+    "source": { "book": "基本ルールブック", "page": 142 }, 
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "rangeBonus", "value": 1, "duration": "permanent_while_undamaged", "condition": ["肉弾攻撃", "白兵攻撃"] } }]
+  },
+  "P3-10": {
+    "name": "長い脚", "category": "補助", 
+    "tags": ["移動距離補正", "オート"],
+    "description": "移動マニューバの移動距離を+1。", 
+    "description_raw": "移動マニューバの移動距離を+1してもよい",
+    "source": { "book": "基本ルールブック", "page": 142 }, 
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "moveDistanceBonus", "value": 1, "duration": "permanent_while_undamaged", "condition": "移動" } }]
+  },
+  "P3-11": {
+    "name": "精神汚染", "category": "攻撃", 
+    "tags": ["攻撃", "アクション", "狂気点操作"],
+    "description": "射程0～1の対象に「精神攻撃1」。", 
+    "description_raw": "精神攻撃1",
+    "source": { "book": "基本ルールブック", "page": 142 }, 
+    "timing": "アクション", "cost": 3, "range": "0～1",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "精神", "damage": 1 } }]
+  },
+  "P3-12": {
+    "name": "不動", "category": "防御", 
+    "tags": ["防御", "オート", "転倒", "移動"],
+    "description": "「転倒」「移動」の効果を無効化できる。", 
+    "description_raw": "「転倒」「移動」を無効化できる",
+    "source": { "book": "基本ルールブック", "page": 142, "errata": "1.6.1" }, 
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "effects": [{ "ref": "NEGATE_STATUS_EFFECT", "params": { "effects_to_negate": ["転倒", "移動"], "optional": true } }]
+  },
+
+  "//": "---------- 悪意点 2 (P4) ----------",
+  "P4-01": {
+    "name": "屍肉の盾", "category": "防御", 
+    "tags": ["防御", "ダメージ"],
+    "description": "同エリアのレギオンを任意数減らし、その数だけダメージを減少させる。", 
+    "description_raw": "同エリアのレギオンを任意の数だけ減らし、減らした数だけダメージを減少させる。この効果は1ターンに何度でも使用できる",
+    "source": { "book": "基本ルールブック", "page": 143 }, 
+    "timing": "ダメージ", "cost": 1, "range": "自身",
+    "effects": [{ "ref": "DEFEND_BY_SACRIFICE", "params": { "unit_type": "legion", "ratio": 1 } }]
+  },
+  "P4-02": {
+    "name": "対策装備", "category": "防御", 
+    "tags": ["防御", "オート", "全体攻撃"],
+    "description": "自身と味方の「全体攻撃」によるダメージを無効化する。", 
+    "description_raw": "自身と味方の「全体攻撃」によるダメージ無効",
+    "source": { "book": "基本ルールブック", "page": 143 }, 
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "effects": [{ "ref": "IMMUNITY", "params": { "damage_type": "全体攻撃", "source": "ally" } }]
+  },
+  "P4-03": {
+    "name": "狂気の歌", "category": "攻撃", 
+    "tags": ["攻撃", "アクション", "全体攻撃", "狂気点操作"],
+    "description": "射程0のエリアにいる敵全体に「精神攻撃1」。", 
+    "description_raw": "精神攻撃1+全体攻撃",
+    "source": { "book": "基本ルールブック", "page": 143 }, 
+    "timing": "アクション", "cost": 3, "range": "0",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "精神", "damage": 1, "on_hit": ["AREA_ATTACK"] } }]
+  },
+  "P4-04": {
+    "name": "亡者の目覚め", "category": "補助", 
+    "tags": ["増援", "アクション"],
+    "description": "射程0～1のエリアにゾンビを1d10体増援する。", 
+    "description_raw": "増援d10(ゾンビ)",
+    "source": { "book": "基本ルールブック", "page": 143 }, 
+    "timing": "アクション", "cost": 3, "range": "0～1",
+    "effects": [{ "ref": "SUMMON_UNIT", "params": { "unit_name": "ゾンビ", "count_dice": "1d10" } }]
+  },
+  "P4-05": {
+    "name": "つながれた体", "category": "移動", 
+    "tags": ["移動", "オート"],
+    "description": "同エリアの他の手駒全てが、自身の移動に追従する。", 
+    "description_raw": "バトルパートで対象の手駒が移動した際、自動的に同じエリアにいる他の手駒も全て同じ移動先へ移動する(コスト不要)",
+    "source": { "book": "基本ルールブック", "page": 143 }, 
+    "timing": "オート", "cost": "なし", "range": "0",
+    "effects": [{ "ref": "ALLY_FOLLOW_MOVE", "params": { "target": "other_pieces_in_area" } }]
+  },
+  "P4-06": {
+    "name": "肉の拘束", "category": "防御", 
+    "tags": ["防御", "オート", "転倒", "移動"],
+    "description": "同エリアの手駒全てが「転倒」「移動」を無効化できる。", 
+    "description_raw": "バトルパートで同エリアにいる手駒は全て「転倒」「移動」を無効化してもよい",
+    "source": { "book": "基本ルールブック", "page": 143 }, 
+    "timing": "オート", "cost": "なし", "range": "0",
+    "effects": [{ "ref": "GRANT_IMMUNITY_TO_AREA", "params": { "effects_to_grant": ["転倒", "移動"], "target_type": "piece" } }]
+  },
+  "P4-07": {
+    "name": "死者暴走", "category": "補助", 
+    "tags": ["増援", "アクション"],
+    "description": "コストとしてレギオン1体を消費し、グール1体を増援する。", 
+    "description_raw": "増援1(グール)。対象エリアの任意のレギオンを1体減らす",
+    "source": { "book": "基本ルールブック", "page": 143 }, 
+    "timing": "アクション", "cost": 2, "range": "0～1",
+    "effects": [{ "ref": "SUMMON_UNIT", "params": { "unit_name": "グール", "count": 1, "cost_type": "sacrifice_legion", "cost_value": 1 } }]
+  }
+}
