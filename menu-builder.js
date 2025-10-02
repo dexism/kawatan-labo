@@ -885,7 +885,7 @@ function showImportCharacterModal(type, charManagerInstance) {
             const importCharacter = async (sheetId) => {
                 try {
                     closeFn();
-                    ui.showToastNotification(`ID: ${sheetId} を読込み中...`, 3000);
+                    ui.showToastNotification(`ID: ${sheetId} を読込み中...`, 2000);
                     const sourceData = await fetchVampireBloodSheet(sheetId);
                     const convertedData = convertVampireBloodSheet(sourceData);
                     if (convertedData) {
@@ -894,7 +894,7 @@ function showImportCharacterModal(type, charManagerInstance) {
                         charManagerInstance.addCharacterFromObject(convertedData, type);
                         ui.renderCharacterCards();
                         ui.checkBattleStartCondition();
-                        ui.showToastNotification(`「${convertedData.name}」を読み込みました。`, 3000);
+                        ui.showToastNotification(`「${convertedData.name}」を読み込みました。`, 2000);
                     } else { throw new Error('データの変換に失敗しました。'); }
                 } catch (error) { alert(`エラー: ${error.message}`); }
             };
@@ -1037,7 +1037,7 @@ function showImportCharacterModalWithId(type, charManagerInstance, sheetId) {
                 charManagerInstance.addCharacterFromObject(convertedData, type);
                 ui.renderCharacterCards();
                 ui.checkBattleStartCondition();
-                ui.showToastNotification(`「${convertedData.name}」を読み込みました。`, 3000);
+                ui.showToastNotification(`「${convertedData.name}」を読み込みました。`, 2000);
             } else {
                 throw new Error('データの変換に失敗しました。');
             }
@@ -1210,7 +1210,7 @@ function showImageSelectionModal(characterToUpdate, closeDetailsModalFn) {
                 clearCacheBtn.onclick = () => {
                     if (confirm('ローカルに保存した画像をすべて消去します。よろしいですか？')) {
                         clearLocalImageCache();
-                        ui.showToastNotification('画像キャッシュを消去しました。', 3000);
+                        ui.showToastNotification('画像キャッシュを消去しました。', 2000);
                         // モーダルを再描画して、消去された状態を反映する
                         closeImageSelectFn();
                         showImageSelectionModal(characterToUpdate, closeDetailsModalFn);

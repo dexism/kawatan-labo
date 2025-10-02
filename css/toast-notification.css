@@ -18,7 +18,7 @@
     font-weight: bold;
     text-align: center;
     
-    z-index: 9999; /* 常に最前面に表示 */
+    z-index: 9998; /* 常に最前面に表示 */
     pointer-events: none; /* ★★★ マウスイベントを透過させる ★★★ */
     
     /* 表示・非表示のアニメーション設定 */

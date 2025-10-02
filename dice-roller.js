@@ -189,7 +189,7 @@ export function performDiceRoll(rollData) {
             // 3Dダイスを振る
             roll3DDice((resultValue) => {
                 const finalResultText = `🎲 1D10 ＞ ${resultValue}`;
-                showToastNotification(finalResultText, 4000);
+                showToastNotification(finalResultText, 2000);
                 
                 if (callback) {
                     callback(finalResultForCallback, hitLocation, resultText);
@@ -221,7 +221,7 @@ export function performDiceRoll(rollData) {
     addLog(resultText);
 
     if ((typeof rollData === 'object' && rollData.showToast) || (typeof rollData === 'string')) { 
-        showToastNotification(resultText, 4000);
+        showToastNotification(resultText, 2000);
     }
 
     if (callback) {
