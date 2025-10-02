@@ -69,8 +69,9 @@ document.addEventListener('DOMContentLoaded', async () => {
  */
 function initializeApp() {
   const LATEST_UPDATE_NOTES = `
-    <div class="modal-header modal-header-sub">📢主な更新内容:7.10.1.15</div>
+    <div class="modal-header modal-header-sub">📢主な更新内容:7.10.2.20</div>
     <div class="modal-body welcome-modal-body">
+      <p>◆ 試しに<strong>ダイスが転がる</strong>ようにしてみましたが、動作が怪しいです。
       <p>◆ ジャッジウィンドウで<strong>適用されている支援、妨害を確認</strong>できるようになりました。
       <p>◆ <strong>支援</strong>がダイスロールに適用できるようになりました。
       <p>◆ ユーザーが<strong>画像を追加</strong>できるようになりました。
