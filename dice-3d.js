@@ -164,7 +164,7 @@ export function rollDice(callback) {
 function loadDiceModel() {
     const fbxLoader = new FBXLoader();
     const texLoader = new THREE.TextureLoader();
-    const basePath = 'models/';
+    const basePath = '/models/';
     const modelFile = 'Dice_10.fbx';
     const textureFiles = {
         map: 'Dice_10_Albedo.png',

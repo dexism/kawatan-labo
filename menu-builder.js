@@ -1161,10 +1161,10 @@ function showImageSelectionModal(characterToUpdate, closeDetailsModalFn) {
     }
 
     const presetImagePaths = [
-        'images/doll/doll_01.png', 'images/doll/doll_02.png', 'images/doll/doll_03.png', 
-        'images/doll/doll_04.png', 'images/doll/doll_05.png', 'images/doll/doll_06.png', 
-        'images/doll/doll_12.png', 'images/doll/doll_13.png', 'images/doll/doll_14.png', 
-        'images/doll/doll_15.png', 'images/doll/doll_16.png', 'images/doll/doll_17.png'
+        '/images/doll/doll_01.png', '/images/doll/doll_02.png', '/images/doll/doll_03.png', 
+        '/images/doll/doll_04.png', '/images/doll/doll_05.png', '/images/doll/doll_06.png', 
+        '/images/doll/doll_12.png', '/images/doll/doll_13.png', '/images/doll/doll_14.png', 
+        '/images/doll/doll_15.png', '/images/doll/doll_16.png', '/images/doll/doll_17.png'
     ];
     const dynamicImagePaths = data.getAllCharacterImagePaths();
     

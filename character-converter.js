@@ -29,7 +29,7 @@ export function convertVampireBloodSheet(sourceData) {
         converted.description = `${sourceData.data_title || ''} | ${sourceData.Position_Name || ''}（${sourceData.MCLS_Name || ''}・${sourceData.SCLS_Name || ''}）`;
         // converted.name = sourceData.data_title || '名称未設定';
         // converted.description = `${sourceData.Position_Name || ''}（${sourceData.MCLS_Name || ''}・${sourceData.SCLS_Name || ''}）`;
-        converted.img = "images/noimage.png";
+        converted.img = "/images/noimage.png";
         converted.category = "ドール";
         converted.initialArea = "煉獄";
         converted.baseActionValue = 6;

@@ -43,20 +43,20 @@ export async function loadAllData() {
     ];
 
     // 各ファイルへのfetchリクエストを生成
-    const maneuverPromises = maneuverFiles.map(file => fetch(`data/maneuvers/${file}`).then(res => res.json()));
+    const maneuverPromises = maneuverFiles.map(file => fetch(`/data/maneuvers/${file}`).then(res => res.json()));
     
     const [
       hintRes,
       regretRes, takaramonoRes, memoryRes, undeadRes, coreRes, effectsDbRes,
       ...maneuverResults
     ] = await Promise.all([
-      fetch('data/hint.json'),
-      fetch('data/regret.json'), 
-      fetch('data/takaramono.json'),
-      fetch('data/memory_fragments.json'), 
-      fetch('data/undead.json'),
-      fetch('data/core-data.json'), 
-      fetch('data/effects_db.json'),
+      fetch('/data/hint.json'),
+      fetch('/data/regret.json'), 
+      fetch('/data/takaramono.json'),
+      fetch('/data/memory_fragments.json'), 
+      fetch('/data/undead.json'),
+      fetch('/data/core-data.json'), 
+      fetch('/data/effects_db.json'),
       ...maneuverPromises
     ]);
 
