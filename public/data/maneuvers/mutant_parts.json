@@ -1,0 +1,290 @@
+{
+  "//": "========================================",
+  "//": "==    強化パーツ：変異 の定義        ==",
+  "//": "========================================",
+
+  "//": "--- レベル1 変異 (M1) ---",
+  "M1-01": {
+    "name": "うじむし", "category": "修復", "allowedLocations": "任意",
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "tags": ["修復", "オート"],
+    "description": "ターン/パート終了時、このパーツを修復", 
+    "description_raw": "バトルパートにてターン終了時、パート終了時、このパーツが損傷していたなら、修復してよい。",
+    "source": { "book": "基本ルールブック", "page": 86 }, 
+    "effects": [{ "ref": "SELF_REPAIR", "params": { "trigger": ["turn_end", "part_end"] } }]
+  },
+  "M1-02": {
+    "name": "つぎはぎ", "category": "修復", "allowedLocations": "胴",
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "tags": ["修復", "オート"],
+    "description": "バトルパート終了時、このパーツと損傷した基本パーツ1つを修復", 
+    "description_raw": "バトルパート終了時、このパーツと損傷した基本パーツ1つを修復してよい。",
+    "source": { "book": "基本ルールブック", "page": 86 }, 
+    "effects": [
+      { "ref": "REPAIR_PART", "params": { "target": "self", "part_type": "this_part", "count": 1, "trigger": "battle_end" } },
+      { "ref": "REPAIR_PART", "params": { "target": "self", "part_type": "基本", "count": 1, "trigger": "battle_end" } }
+    ]
+  },
+  "M1-03": {
+    "name": "しんぞう", "category": "行動値", "allowedLocations": "胴",
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "tags": ["行動値", "オート"],
+    "description": "最大行動値+1", 
+    "description_raw": "最大行動値+1。",
+    "source": { "book": "基本ルールブック", "page": 86 }, 
+    "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "maxActionValue", "value": 1, "duration": "permanent_while_undamaged" } }]
+  },
+  "M1-04": {
+    "name": "しっぽ", "category": "行動値", "allowedLocations": "脚",
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "tags": ["行動値", "オート"],
+    "description": "最大行動値+1", 
+    "description_raw": "最大行動値+1。",
+    "source": { "book": "基本ルールブック", "page": 86 }, 
+    "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "maxActionValue", "value": 1, "duration": "permanent_while_undamaged" } }]
+  },
+  "M1-05": {
+    "name": "はりつき", "category": "移動", "allowedLocations": "脚",
+    "timing": "アクション", "cost": 3, "range": "自身",
+    "tags": ["移動", "アクション", "移動妨害"],
+    "description": "移動1。「移動妨害」無効", 
+    "description_raw": "移動1、この移動に対して「移動妨害」は全て無効。",
+    "source": { "book": "基本ルールブック", "page": 86 }, 
+    "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": 1, "direction": "performer_choice", "ignore_move_debuff": true } }]
+  },
+  "M1-06": {
+    "name": "どろどろ", "category": "攻撃", "allowedLocations": "胴",
+    "timing": "ダメージ", "cost": 1, "range": "0～1",
+    "tags": ["攻撃", "ダメージ"],
+    "description": "肉弾攻撃2。自身がダメージを受けた際、攻撃者に反撃", 
+    "description_raw": "自身がダメージを受けた際、そのダメージを与えた対象にのみ使用可。肉弾攻撃2。",
+    "source": { "book": "基本ルールブック", "page": 86 }, 
+    "effects": [{ "ref": "COUNTER_ATTACK", "params": { "attack_type": "肉弾", "damage": 2 } }]
+  },
+  "M1-07": {
+    "name": "かぎづめ", "category": "攻撃", "allowedLocations": "腕",
+    "timing": "アクション", "cost": 2, "range": "0",
+    "tags": ["攻撃", "アクション"],
+    "description": "肉弾攻撃2", 
+    "description_raw": "肉弾攻撃2。",
+    "source": { "book": "基本ルールブック", "page": 86 }, 
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 2 } }]
+  },
+  "M1-08": {
+    "name": "あるびの", "category": "支援", "allowedLocations": "胴",
+    "timing": "ジャッジ", "cost": 1, "range": "0～1",
+    "tags": ["支援", "ジャッジ"],
+    "description": "支援1", 
+    "description_raw": "支援1。",
+    "source": { "book": "基本ルールブック", "page": 86 }, 
+    "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "target": "any_roll", "value": 1 } }]
+  },
+  "M1-09": {
+    "name": "ちみどろ", "category": "妨害", "allowedLocations": "胴",
+    "timing": "ジャッジ", "cost": 1, "range": "0～1",
+    "tags": ["妨害", "ジャッジ"],
+    "description": "妨害1", 
+    "description_raw": "妨害1。",
+    "source": { "book": "基本ルールブック", "page": 86 }, 
+    "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "target": "any_roll", "value": -1 } }]
+  },
+  "M1-10": {
+    "name": "おおあな", "category": "妨害", "allowedLocations": "任意",
+    "timing": "ジャッジ", "cost": 0, "range": "0～3",
+    "tags": ["妨害", "ジャッジ"],
+    "description": "妨害1。自身への攻撃判定のみ", 
+    "description_raw": "あなたに対する攻撃判定にのみ使用可。妨害1。",
+    "source": { "book": "基本ルールブック", "page": 86 }, 
+    "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "target": "incoming_attack_roll", "value": -1 } }]
+  },
+
+  "//": "--- レベル2 変異 (M2) ---",
+  "M2-01": {
+    "name": "けもみみ", "category": "行動値", "allowedLocations": "頭",
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "tags": ["行動値", "オート", "損傷無効"],
+    "description": "最大行動値+1。行動判定で大失敗してもこのパーツは損傷しない。", 
+    "description_raw": "最大行動値+1。このパーツを行動判定で使用した際、大失敗してもこのパーツは損傷しない。",
+    "source": { "book": "基本ルールブック", "page": 87 }, 
+    "effects": [
+        { "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "maxActionValue", "value": 1, "duration": "permanent_while_undamaged" } },
+        { "ref": "NEGATE_SELF_DAMAGE", "params": { "trigger": "on_skill_check_fumble", "part": "this_part" } }
+    ]
+  },
+  "M2-02": {
+    "name": "おとこのこ", "category": "補助", "allowedLocations": "任意",
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "tags": ["対話判定", "オート"],
+    "description": "対話判定+1", 
+    "description_raw": "対話判定において、判定出目+1してもよい。",
+    "source": { "book": "基本ルールブック", "page": 87 }, 
+    "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "dialogueCheckBonus", "value": 1, "duration": "permanent_while_undamaged" } }]
+  },
+  "M2-03": {
+    "name": "よぶんなうで", "category": "補助", "allowedLocations": "腕",
+    "timing": "ラピッド", "cost": 0, "range": "自身",
+    "tags": ["ラピッド使用", "ラピッド"],
+    "description": "アクションマニューバ1つを「ラピッド」として使用可", 
+    "description_raw": "望む「アクション」マニューバ1つを「ラピッド」として使用する。",
+    "source": { "book": "基本ルールブック", "page": 87, "errata": "1.6.1" }, 
+    "effects": [{ "ref": "ALLOW_MANEUVER_AS_TIMING", "params": { "target": "self", "maneuver_timing": "アクション", "as_timing": "ラピッド" } }]
+  },
+  "M2-04": {
+    "name": "ほねやり", "category": "攻撃", "allowedLocations": "任意",
+    "timing": "アクション", "cost": 2, "range": "0",
+    "tags": ["攻撃", "アクション", "連撃"],
+    "description": "肉弾攻撃1+連撃1", 
+    "description_raw": "肉弾攻撃1+連撃1。",
+    "source": { "book": "基本ルールブック", "page": 87 }, 
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 1, "on_hit": ["CHAIN_ATTACK_1"] } }]
+  },
+  "M2-05": {
+    "name": "どくばり", "category": "攻撃", "allowedLocations": "任意",
+    "timing": "アクション", "cost": 3, "range": "0",
+    "tags": ["攻撃", "アクション"],
+    "description": "肉弾攻撃3", 
+    "description_raw": "肉弾攻撃3。",
+    "source": { "book": "基本ルールブック", "page": 87 }, 
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 3 } }]
+  },
+  "M2-06": {
+    "name": "よだれじた", "category": "妨害", "allowedLocations": "頭",
+    "timing": "ジャッジ", "cost": 2, "range": "0～1",
+    "tags": ["妨害", "ジャッジ", "転倒"],
+    "description": "妨害1+転倒", 
+    "description_raw": "妨害1+転倒。",
+    "source": { "book": "基本ルールブック", "page": 87 }, 
+    "effects": [
+        { "ref": "GENERIC_JUDGE_MOD", "params": { "target": "any_roll", "value": -1 } },
+        { "ref": "DEAL_STATUS_EFFECT", "params": { "target": "original_target", "effect": "転倒", "delay": "after_judge" } }
+    ]
+  },
+  "M2-07": {
+    "name": "よぶんなめ", "category": "支援", "allowedLocations": "任意",
+    "timing": "ジャッジ", "cost": 1, "range": "0～1",
+    "tags": ["支援", "ジャッジ"],
+    "description": "支援2", 
+    "description_raw": "支援2。",
+    "source": { "book": "基本ルールブック", "page": 87 }, 
+    "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "target": "any_roll", "value": 2 } }]
+  },
+  "M2-08": {
+    "name": "しょくしゅ", "category": "妨害", "allowedLocations": "任意",
+    "timing": "ラピッド", "cost": 1, "range": "0～1",
+    "tags": ["移動妨害", "ラピッド"],
+    "description": "移動妨害1", 
+    "description_raw": "移動妨害1。",
+    "source": { "book": "基本ルールブック", "page": 87 }, 
+    "effects": [{ "ref": "GENERIC_MOVE_DEBUFF", "params": { "value": -1 } }]
+  },
+  "M2-09": {
+    "name": "ほとけかずら", "category": "補助", "allowedLocations": "任意",
+    "timing": "ジャッジ", "cost": 0, "range": "0",
+    "tags": ["支援", "妨害", "ジャッジ"],
+    "description": "支援1か妨害1", 
+    "description_raw": "支援1か妨害1。",
+    "source": { "book": "基本ルールブック", "page": 87 }, 
+    "effects": [{ "ref": "CHOICE_JUDGE_MOD", "params": { "options": [{ "type": "支援", "value": 1 }, { "type": "妨害", "value": -1 }] } }]
+  },
+  "M2-10": {
+    "name": "うろこ", "category": "防御", "allowedLocations": "胴",
+    "timing": "ダメージ", "cost": 1, "range": "自身",
+    "tags": ["防御", "ダメージ"],
+    "description": "防御2", 
+    "description_raw": "防御2。",
+    "source": { "book": "基本ルールブック", "page": 87 }, 
+    "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 2 } }]
+  },
+
+  "//": "--- レベル3 変異 (M3) ---",
+  "M3-01": {
+    "name": "よぶんなあし", "category": "防御", "allowedLocations": "脚",
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "tags": ["損傷無効", "オート"],
+    "description": "これ以外の脚部パーツが破損しても、マニューバをそのまま使用可", 
+    "description_raw": "これ以外の脚部パーツが破損しても、マニューバをそのまま使用してよい。",
+    "source": { "book": "基本ルールブック", "page": 88 }, 
+    "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "ignore_part_damage_location", "value": "脚", "duration": "permanent_while_undamaged" } }]
+  },
+  "M3-02": {
+    "name": "よぶんなあたま", "category": "行動値", "allowedLocations": "頭",
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "tags": ["行動値", "オート"],
+    "description": "最大行動値+2", 
+    "description_raw": "最大行動値+2。",
+    "source": { "book": "基本ルールブック", "page": 88 }, 
+    "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "maxActionValue", "value": 2, "duration": "permanent_while_undamaged" } }]
+  },
+  "M3-03": {
+    "name": "やせぎす", "category": "防御", "allowedLocations": "胴",
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "tags": ["防御", "オート", "妨害"],
+    "description": "1つの判定につき1回、「妨害」を無効化", 
+    "description_raw": "バトルパートで1つの判定につき1回、「妨害」を無効化してよい。",
+    "source": { "book": "基本ルールブック", "page": 88 }, 
+    "effects": [{ "ref": "NEGATE_DEBUFF_ONCE_PER_ROLL", "params": {} }]
+  },
+  "M3-04": {
+    "name": "くされじる", "category": "攻撃", "allowedLocations": "任意",
+    "timing": "アクション", "cost": 3, "range": "0～1",
+    "tags": ["攻撃", "アクション", "爆発", "転倒"],
+    "description": "肉弾攻撃1+爆発+転倒", 
+    "description_raw": "肉弾攻撃1+爆発+転倒。",
+    "source": { "book": "基本ルールブック", "page": 88 }, 
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 1, "on_hit": ["EXPLOSION", "TUMBLE"] } }]
+  },
+  "M3-05": {
+    "name": "にくむち", "category": "攻撃", "allowedLocations": "任意",
+    "timing": "アクション", "cost": 3, "range": "0～1",
+    "tags": ["攻撃", "アクション", "連撃"],
+    "description": "肉弾攻撃2+連撃1", 
+    "description_raw": "肉弾攻撃2+連撃1。",
+    "source": { "book": "基本ルールブック", "page": 88 }, 
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 2, "on_hit": ["CHAIN_ATTACK_1"] } }]
+  },
+  "M3-06": {
+    "name": "やぶれひまく", "category": "防御", "allowedLocations": "任意",
+    "timing": "ダメージ", "cost": 0, "range": "自身",
+    "tags": ["防御", "ダメージ"],
+    "description": "防御2", 
+    "description_raw": "防御2。",
+    "source": { "book": "基本ルールブック", "page": 88 }, 
+    "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 2 } }]
+  },
+  "M3-07": {
+    "name": "けもあし", "category": "移動", "allowedLocations": "脚",
+    "timing": "アクション", "cost": 2, "range": "自身",
+    "tags": ["移動", "アクション"],
+    "description": "移動1～2", 
+    "description_raw": "移動1～2。",
+    "source": { "book": "基本ルールブック", "page": 88 }, 
+    "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": "1-2", "direction": "performer_choice" } }]
+  },
+  "M3-08": {
+    "name": "しびとだけ", "category": "妨害", "allowedLocations": "任意",
+    "timing": "ジャッジ", "cost": 0, "range": "0",
+    "tags": ["妨害", "ジャッジ"],
+    "description": "妨害2", 
+    "description_raw": "妨害2。",
+    "source": { "book": "基本ルールブック", "page": 88 }, 
+    "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "target": "any_roll", "value": -2 } }]
+  },
+  "M3-09": {
+    "name": "だるま", "category": "防御", "allowedLocations": "胴",
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "tags": ["防御", "オート"],
+    "description": "ダメージを任意の箇所に振り分けてよい。切断判定は、ダメージを受けた箇所１つを選ぶ", 
+    "description_raw": "任意の箇所を望む数選び、ダメージを振り分けてよい。切断判定は、ダメージを受けた箇所の１つを選んで行う。",
+    "source": { "book": "基本ルールブック", "page": 88, "errata": "1.6.1" }, 
+    "effects": [{ "ref": "DISTRIBUTE_DAMAGE", "params": {} }]
+  },
+  "M3-10": {
+    "name": "きもちいいくすり", "category": "修復", "allowedLocations": "頭",
+    "timing": "ダメージ", "cost": "1", "range": "自身",
+    "tags": ["修復", "ダメージ", "狂気点操作"],
+    "description": "自身がダメージを受けた際、任意の未練の狂気点を1点減らす", 
+    "description_raw": "自身がダメージを受けた際のみ使用可。任意の未練から、狂気点を1減少させてよい。",
+    "source": { "book": "基本ルールブック", "page": 88 }, 
+    "effects": [{ "ref": "REDUCE_MADNESS_POINTS", "params": { "value": 1, "trigger": "on_taking_damage" } }]
+  }
+}

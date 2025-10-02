@@ -1,0 +1,281 @@
+{
+  "//": "========================================",
+  "//": "==    強化パーツ：武装 の定義        ==",
+  "//": "========================================",
+
+  "//": "--- レベル1 武装 (A1) ---",
+  "A1-01": {
+    "name": "カンフー", "category": "行動値", "allowedLocations": "頭",
+    "tags": ["行動値", "オート"],
+    "description": "最大行動値+1", 
+    "description_raw": "最大行動値+1。",
+    "source": { "book": "基本ルールブック", "page": 83 }, 
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "maxActionValue", "value": 1, "duration": "permanent_while_undamaged" } }]
+  },
+  "A1-02": {
+    "name": "釘バット", "category": "攻撃", "allowedLocations": "腕",
+    "tags": ["攻撃", "アクション", "爆発"],
+    "description": "白兵攻撃1+爆発", 
+    "description_raw": "白兵攻撃1+爆発。",
+    "source": { "book": "基本ルールブック", "page": 83 }, 
+    "timing": "アクション", "cost": 2, "range": "0",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 1, "on_hit": ["EXPLOSION"] } }]
+  },
+  "A1-03": {
+    "name": "バール", "category": "攻撃", "allowedLocations": "腕",
+    "tags": ["攻撃", "アクション", "支援"],
+    "description": "白兵攻撃2、支援1", 
+    "description_raw": "白兵攻撃2、攻撃判定の出目+1。",
+    "source": { "book": "基本ルールブック", "page": 83 }, 
+    "timing": "アクション", "cost": 3, "range": "0",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 2, "attack_bonus": 1 } }]
+  },
+  "A1-04": {
+    "name": "斧", "category": "攻撃", "allowedLocations": "腕",
+    "tags": ["攻撃", "アクション"],
+    "description": "白兵攻撃3", 
+    "description_raw": "白兵攻撃3。",
+    "source": { "book": "基本ルールブック", "page": 83 }, 
+    "timing": "アクション", "cost": 3, "range": "0",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 3 } }]
+  },
+  "A1-05": {
+    "name": "肉切り包丁", "category": "攻撃", "allowedLocations": "腕",
+    "tags": ["攻撃", "アクション"],
+    "description": "白兵攻撃2", 
+    "description_raw": "白兵攻撃2。",
+    "source": { "book": "基本ルールブック", "page": 83 }, 
+    "timing": "アクション", "cost": 2, "range": "0",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 2 } }]
+  },
+  "A1-06": {
+    "name": "日本刀", "category": "攻撃", "allowedLocations": "腕",
+    "tags": ["攻撃", "アクション", "切断"],
+    "description": "白兵攻撃1+切断", 
+    "description_raw": "白兵攻撃1+切断。",
+    "source": { "book": "基本ルールブック", "page": 83 }, 
+    "timing": "アクション", "cost": 2, "range": "0",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 1, "on_hit": ["SEVERANCE"] } }]
+  },
+  "A1-07": {
+    "name": "チェーンソー", "category": "攻撃", "allowedLocations": "腕",
+    "tags": ["攻撃", "アクション", "切断"],
+    "description": "白兵攻撃2+切断", 
+    "description_raw": "白兵攻撃2+切断。",
+    "source": { "book": "基本ルールブック", "page": 83 }, 
+    "timing": "アクション", "cost": 3, "range": "0",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 2, "on_hit": ["SEVERANCE"] } }]
+  },
+  "A1-08": {
+    "name": "大型拳銃", "category": "攻撃", "allowedLocations": "腕",
+    "tags": ["攻撃", "アクション"],
+    "description": "射撃攻撃1", 
+    "description_raw": "射撃攻撃1。",
+    "source": { "book": "基本ルールブック", "page": 83 }, 
+    "timing": "アクション", "cost": 2, "range": "0～1",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "射撃", "damage": 1 } }]
+  },
+  "A1-09": {
+    "name": "狙撃ライフル", "category": "攻撃", "allowedLocations": "腕",
+    "tags": ["攻撃", "アクション", "支援"],
+    "description": "射撃攻撃1、支援1", 
+    "description_raw": "射撃攻撃1、攻撃判定の出目+1。",
+    "source": { "book": "基本ルールブック", "page": 83 }, 
+    "timing": "アクション", "cost": 2, "range": "2～3",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "射撃", "damage": 1, "attack_bonus": 1 } }]
+  },
+  "A1-10": {
+    "name": "火炎ビン", "category": "攻撃", "allowedLocations": "任意",
+    "tags": ["攻撃", "アクション", "爆発", "連撃", "妨害"],
+    "description": "砲撃攻撃1+爆発+連撃1、妨害1", 
+    "description_raw": "砲撃攻撃1+爆発+連撃1、攻撃判定の出目-1。",
+    "source": { "book": "基本ルールブック", "page": 83 }, 
+    "timing": "アクション", "cost": 2, "range": "0～1",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "砲撃", "damage": 1, "attack_bonus": -1, "on_hit": ["EXPLOSION", "CHAIN_ATTACK_1"] } }]
+  },
+
+  "//": "--- レベル2 武装 (A2) ---",
+  "A2-01": {
+    "name": "有刺鉄線", "category": "強化", "allowedLocations": "任意",
+    "tags": ["強化", "ダメージ"],
+    "description": "肉弾攻撃・白兵攻撃の与ダメージ+1", 
+    "description_raw": "自身がダメージを与えた際のみ使用可。白兵・肉弾ダメージ+1。",
+    "source": { "book": "基本ルールブック", "page": 84 }, 
+    "timing": "ダメージ", "cost": 0, "range": "自身",
+    "effects": [{ "ref": "INCREASE_DEALT_DAMAGE", "params": { "value": 1, "condition": ["肉弾攻撃", "白兵攻撃"] } }]
+  },
+  "A2-02": {
+    "name": "仕込みブーツ", "category": "攻撃", "allowedLocations": "脚",
+    "tags": ["攻撃", "アクション", "支援"],
+    "description": "白兵攻撃2、支援1", 
+    "description_raw": "白兵攻撃2、攻撃判定の出目+1。",
+    "source": { "book": "基本ルールブック", "page": 84 }, 
+    "timing": "アクション", "cost": 2, "range": "0",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 2, "attack_bonus": 1 } }]
+  },
+  "A2-03": {
+    "name": "発勁", "category": "移動", "allowedLocations": "頭",
+    "tags": ["移動", "ラピッド"],
+    "description": "他者に対して移動1", 
+    "description_raw": "自身に対しては使用不可。移動1。",
+    "source": { "book": "基本ルールブック", "page": 84 }, 
+    "timing": "ラピッド", "cost": 0, "range": "0",
+    "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "other_character", "distance": 1, "direction": "performer_choice" } }]
+  },
+  "A2-04": {
+    "name": "合金トランク", "category": "防御", "allowedLocations": "腕",
+    "tags": ["防御", "ダメージ", "爆発"],
+    "description": "防御1+「爆発」無効化", 
+    "description_raw": "防御1、「爆発」無効化。",
+    "source": { "book": "基本ルールブック", "page": 84 }, 
+    "timing": "ダメージ", "cost": 0, "range": "自身",
+    "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 1 } }, { "ref": "NEGATE_DAMAGE_EFFECT", "params": { "effect_to_negate": "爆発" } }]
+  },
+  "A2-05": {
+    "name": "鉄球鎖", "category": "攻撃", "allowedLocations": "腕",
+    "tags": ["攻撃", "アクション", "転倒"],
+    "description": "白兵攻撃1+転倒", 
+    "description_raw": "白兵攻撃1+転倒。",
+    "source": { "book": "基本ルールブック", "page": 84 }, 
+    "timing": "アクション", "cost": 2, "range": "0～1",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 1, "on_hit": ["TUMBLE"] } }]
+  },
+  "A2-06": {
+    "name": "ショットガン", "category": "攻撃", "allowedLocations": "腕",
+    "tags": ["攻撃", "アクション", "爆発", "支援"],
+    "description": "射撃攻撃1+爆発、支援1", 
+    "description_raw": "射撃攻撃1+爆発、攻撃判定の出目+1。",
+    "source": { "book": "基本ルールブック", "page": 84 }, 
+    "timing": "アクション", "cost": 2, "range": "0～1",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "射撃", "damage": 1, "attack_bonus": 1, "on_hit": ["EXPLOSION"] } }]
+  },
+  "A2-07": {
+    "name": "マシンガン", "category": "攻撃", "allowedLocations": "腕",
+    "tags": ["攻撃", "アクション", "全体攻撃"],
+    "description": "射撃攻撃1+全体攻撃", 
+    "description_raw": "射撃攻撃1+全体攻撃。",
+    "source": { "book": "基本ルールブック", "page": 84 }, 
+    "timing": "アクション", "cost": 3, "range": "1",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "射撃", "damage": 1, "on_hit": ["AREA_ATTACK"] } }]
+  },
+  "A2-08": {
+    "name": "熊撃ち銃", "category": "攻撃", "allowedLocations": "腕",
+    "tags": ["攻撃", "アクション"],
+    "description": "射撃攻撃3", 
+    "description_raw": "射撃攻撃3。",
+    "source": { "book": "基本ルールブック", "page": 84 }, 
+    "timing": "アクション", "cost": 3, "range": "0～2",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "射撃", "damage": 3 } }]
+  },
+  "A2-09": {
+    "name": "二丁拳銃", "category": "攻撃", "allowedLocations": "腕",
+    "tags": ["攻撃", "アクション", "連撃"],
+    "description": "射撃攻撃2+連撃1", 
+    "description_raw": "射撃攻撃2+連撃1。",
+    "source": { "book": "基本ルールブック", "page": 84 }, 
+    "timing": "アクション", "cost": 3, "range": "0～1",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "射撃", "damage": 2, "on_hit": ["CHAIN_ATTACK_1"] } }]
+  },
+  "A2-10": {
+    "name": "手榴弾", "category": "攻撃", "allowedLocations": "任意",
+    "tags": ["攻撃", "ラピッド", "爆発", "妨害"],
+    "description": "砲撃攻撃2+爆発、妨害1。", 
+    "description_raw": "砲撃攻撃2+爆発、攻撃判定の出目-1。",
+    "source": { "book": "基本ルールブック", "page": 84 }, 
+    "timing": "ラピッド", "cost": 2, "range": "0～1",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "砲撃", "damage": 2, "attack_bonus": -1, "on_hit": ["EXPLOSION"] } }]
+  },
+
+  "//": "--- レベル3 武装 (A3) ---",
+  "A3-01": {
+    "name": "ジョギリ", "category": "攻撃", "allowedLocations": "腕",
+    "tags": ["攻撃", "アクション", "支援"],
+    "description": "白兵攻撃4、支援1", 
+    "description_raw": "白兵攻撃4、攻撃判定の出目+1",
+    "source": { "book": "基本ルールブック", "page": 85 }, 
+    "timing": "アクション", "cost": 3, "range": "0",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 4, "attack_bonus": 1 } }]
+  },
+  "A3-02": {
+    "name": "芝刈り機", "category": "攻撃", "allowedLocations": "腕",
+    "tags": ["攻撃", "アクション", "連撃"],
+    "description": "白兵攻撃3+連撃2", 
+    "description_raw": "白兵攻撃3+連撃2。",
+    "source": { "book": "基本ルールブック", "page": 85 }, 
+    "timing": "アクション", "cost": 3, "range": "0",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 3, "on_hit": ["CHAIN_ATTACK_2"] } }]
+  },
+  "A3-03": {
+    "name": "名刀", "category": "攻撃", "allowedLocations": "腕",
+    "tags": ["攻撃", "アクション", "切断", "支援"],
+    "description": "白兵攻撃2+切断、支援1", 
+    "description_raw": "白兵攻撃2+切断、攻撃判定の出目+1",
+    "source": { "book": "基本ルールブック", "page": 85 }, 
+    "timing": "アクション", "cost": 2, "range": "0",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 2, "attack_bonus": 1, "on_hit": ["SEVERANCE"] } }]
+  },
+  "A3-04": {
+    "name": "単分子繊維", "category": "攻撃", "allowedLocations": "任意",
+    "tags": ["攻撃", "アクション", "切断", "連撃"],
+    "description": "白兵攻撃1+切断+連撃1", 
+    "description_raw": "白兵攻撃1+切断+連撃1。",
+    "source": { "book": "基本ルールブック", "page": 85 }, 
+    "timing": "アクション", "cost": 2, "range": "0～1",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 1, "on_hit": ["SEVERANCE", "CHAIN_ATTACK_1"] } }]
+  },
+  "A3-05": {
+    "name": "空飛ぶギロチン", "category": "攻撃", "allowedLocations": "腕",
+    "tags": ["攻撃", "アクション", "切断", "転倒"],
+    "description": "白兵攻撃1+切断+転倒", 
+    "description_raw": "白兵攻撃1+切断+転倒。",
+    "source": { "book": "基本ルールブック", "page": 85 }, 
+    "timing": "アクション", "cost": 3, "range": "0～1",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 1, "on_hit": ["SEVERANCE", "TUMBLE"] } }]
+  },
+  "A3-06": {
+    "name": "対戦車ライフル", "category": "攻撃", "allowedLocations": "腕",
+    "tags": ["攻撃", "アクション"],
+    "description": "射撃攻撃5", 
+    "description_raw": "射撃攻撃5。",
+    "source": { "book": "基本ルールブック", "page": 85 }, 
+    "timing": "アクション", "cost": 4, "range": "1～3",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "射撃", "damage": 5 } }]
+  },
+  "A3-07": {
+    "name": "アンデッドガン", "category": "攻撃", "allowedLocations": "腕",
+    "tags": ["攻撃", "アクション", "爆発", "全体攻撃"],
+    "description": "射撃攻撃1+爆発+全体攻撃", 
+    "description_raw": "射撃攻撃1+爆発+全体攻撃。",
+    "source": { "book": "基本ルールブック", "page": 85 }, 
+    "timing": "アクション", "cost": 3, "range": "1～2",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "射撃", "damage": 1, "on_hit": ["EXPLOSION", "AREA_ATTACK"] } }]
+  },
+  "A3-08": {
+    "name": "火炎放射器", "category": "攻撃", "allowedLocations": "腕",
+    "tags": ["攻撃", "アクション", "爆発", "連撃"],
+    "description": "砲撃攻撃1+爆発+連撃1", 
+    "description_raw": "砲撃攻撃1+爆発+連撃1。",
+    "source": { "book": "基本ルールブック", "page": 85 }, 
+    "timing": "アクション", "cost": 2, "range": "0～1",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "砲撃", "damage": 1, "on_hit": ["EXPLOSION", "CHAIN_ATTACK_1"] } }]
+  },
+  "A3-09": {
+    "name": "ダイナマイト", "category": "攻撃", "allowedLocations": "任意",
+    "tags": ["攻撃", "アクション", "爆発", "全体攻撃", "妨害"],
+    "description": "砲撃攻撃2+爆発+全体攻撃、妨害1", 
+    "description_raw": "砲撃攻撃2+爆発+全体攻撃、攻撃判定の出目-1",
+    "source": { "book": "基本ルールブック", "page": 85 }, 
+    "timing": "アクション", "cost": 3, "range": "0～1",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "砲撃", "damage": 2, "attack_bonus": -1, "on_hit": ["EXPLOSION", "AREA_ATTACK"] } }]
+  },
+  "A3-10": {
+    "name": "ランチャー", "category": "攻撃", "allowedLocations": "腕",
+    "tags": ["攻撃", "アクション", "爆発"],
+    "description": "砲撃攻撃4+爆発", 
+    "description_raw": "砲撃攻撃4+爆発。",
+    "source": { "book": "基本ルールブック", "page": 85 }, 
+    "timing": "アクション", "cost": 4, "range": "1～2",
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "砲撃", "damage": 4, "on_hit": ["EXPLOSION"] } }]
+  }
+}
