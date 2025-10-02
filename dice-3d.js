@@ -3,10 +3,9 @@
  */
 export const version = "1.0.10"; // パッチバージョンを更新
 
-import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
-import * as CANNON from 'https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js';
-import { FBXLoader } from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders/FBXLoader.js';
-
+import * as THREE from 'three';
+import * as CANNON from 'cannon-es';
+import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 
 // ===== Settings =====
 // const tableSize = 0.4;         // 仮想的なテーブル幅（m）
