@@ -1,7 +1,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "2.0.0"; // パッチバージョンを更新
+export const version = "2.0.5"; // パッチバージョンを更新
 
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
@@ -11,39 +11,39 @@ import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 
 // ===== Settings =====
 const settings = {
-    gravity: -9.82,             // 重力加速度 (m/s²)
+    gravity:           -1.00,   // 重力加速度 (m/s²) -9.82
     dice: {
-        radius: 0.01,           // ダイスの外接球半径 (m)
-        mass: 0.005,            // 質量 (kg)
+        radius:         0.01,   // ダイスの外接球半径 (m)
+        mass:           0.01,  // 質量 (kg)
         angularDamping: 0.1,    // 回転の減衰 (0-1)
         initialPosition: { xPercent: 90, yPercent: 90 }, // 右下(%)
-        initialHeight: 0.1,    // 投擲する高さ (m)
+        initialHeight:  0.05,   // 投擲する高さ (m)
         throw: {
-            speed:       { min: 2.5, max: 2.8 }, // 初速 [m/s]
-            azimuth:     { min: 320, max: 350 }, // 水平方向 [deg]
-            elevation:   { min: 85,  max: 88 },  // 射出角度 [deg]
-            angularVelocity: { min: 10, max: 15 } // [rad/s]
+            speed:           { min: 0.1, max: 0.2 }, // 初速 [m/s]
+            azimuth:         { min: 320, max: 350 }, // 水平方向 [deg]
+            elevation:       { min: -10, max:  40 }, // 射出角度 [deg]
+            angularVelocity: { min:   5, max:  10 }  // [rad/s]
         }
     },
     physics: {
-        frictionGround:    0.2, // 床の摩擦
+        frictionGround:    0.1, // 床の摩擦
         frictionWall:      0.1, // 壁の摩擦
-        restitutionGround: 0.2, // 床の反発係数
-        restitutionWall:   0.6  // 壁の反発係数
+        restitutionGround: 0.3, // 床の反発係数
+        restitutionWall:   0.9  // 壁の反発係数
     },
     camera: {
-        fov: 10,                // 視野角 (ズーム)
-        height: 1.0             // 高さ
+        fov:   20,              // 視野角 (ズーム)
+        height: 0.6             // 視点高
     },
     tray: {
-        sizeRatio: 0.6,         // 画面サイズに対するトレイの比率
-        wallHeight: 1.0,        // 壁と天井の高さ（共通）
+        sizeRatio:     0.7,     // 画面サイズに対するトレイの比率
+        wallHeight:    0.6,     // 壁と天井の高さ（共通）
         wallThickness: 0.5      // 壁の厚み
     },
     timeouts: {
-        stopCheck: 100,         // 停止チェックの間隔 (ms)
-        forceResult: 2000,      // 強制終了までの時間 (ms)
-        hide: 3000              // 結果表示後に非表示になるまでの時間 (ms)
+        stopCheck:    100,      // 停止チェックの間隔 (ms)
+        forceResult: 3000,      // 強制終了までの時間 (ms)
+        hide:        1000       // 結果表示後に非表示になるまでの時間 (ms)
     }
 };
 
@@ -101,7 +101,6 @@ export async function init(container) {
 
     scene = new THREE.Scene();
 
-    const fov = 20;
     camera = new THREE.PerspectiveCamera(settings.camera.fov, (width / height) || 1, 0.1, 10);
     camera.position.set(0, settings.camera.height, 0);
     camera.lookAt(0, 0, 0);
@@ -113,23 +112,24 @@ export async function init(container) {
     container.appendChild(renderer.domElement);
 
     // 1. 環境光 (AmbientLight)
-    scene.add(new THREE.AmbientLight(0xffeedd, 0.5));
+    scene.add(new THREE.AmbientLight(0xffeedd, 0.9));
 
     // 2. 平行光源 (DirectionalLight)
-    const dirLight = new THREE.DirectionalLight(0xddeeff, 4);
-    dirLight.position.set(1, 5, 2);
+    const dirLight = new THREE.DirectionalLight(0xddeeff, 5);
+    // dirLight.position.set(1, 5, 2);
+    dirLight.position.set(-1, 5, 2);
     scene.add(dirLight);
 
     // 補助ライト（フィルライト）
     const fillLight = new THREE.DirectionalLight(0xeeffee, 0.5);
-    fillLight.position.set(-5, 2, -1); // メインとは逆の左手前から当てる
+    fillLight.position.set(5, 2, -1); // メインとは逆の左手前から当てる
     scene.add(fillLight);
 
     world = new CANNON.World();
     world.gravity.set(0, settings.gravity, 0);
 
     // GSソルバー(GSSolver)を使用し、計算の反復回数を増やす
-    world.solver.iterations = 20; // デフォルトは10。値を大きくすると精度が上がる。反復回数
+    world.solver.iterations = 30; // デフォルトは10。値を大きくすると精度が上がる。反復回数
     world.solver.tolerance = 0.0; // デフォルトは0.1。値を小さくすると精度が上がる。誤りしきい値
 
     diceMaterial = new CANNON.Material('dice');
@@ -142,21 +142,25 @@ export async function init(container) {
     world.addContactMaterial(new CANNON.ContactMaterial(diceMaterial, wallMaterial, {
         restitution: settings.physics.restitutionWall, friction: settings.physics.frictionWall
     }));
-
+    // ★★★ ダイス同士の接触ルールを追加 ★★★
+    world.addContactMaterial(new CANNON.ContactMaterial(diceMaterial, diceMaterial, {
+        restitution: 0.5, // 反発係数 (0-1)。少し弾むように設定
+        friction: 0.1     // 摩擦係数 (0-1)。滑りやすく設定
+    }));
     // 物理床
     const groundBody = new CANNON.Body({ mass: 0, material: groundMaterial });
     groundBody.addShape(new CANNON.Plane());
     groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
     world.addBody(groundBody);
 
-    // 物理蓋
+/*    // 物理蓋
     const ceilingBody = new CANNON.Body({ mass: 0, material: groundMaterial });
     ceilingBody.addShape(new CANNON.Plane());
     // X軸に180度回転させて下を向かせる
     ceilingBody.quaternion.setFromEuler(Math.PI / 2, 0, 0);
     ceilingBody.position.set(0, settings.tray.wallHeight, 0); // 壁と同じ高さを参照
     world.addBody(ceilingBody);
-
+*/
     createWalls();
 
     const loadPromises = [];
@@ -360,17 +364,31 @@ function checkIfStopped() {
     }
 }
 
+/**
+ * 使用済みのダイスを非表示にし、プールに戻すヘルパー関数
+ */
+function cleanupDice() {
+    activeDice.forEach(die => {
+        die.inUse = false;
+        die.model.visible = false;
+        die.id = null;
+    });
+    activeDice = [];
+}
+
 function finishRoll() {
-    if (!isRolling) return;
+    if (!isRolling) {
+        console.log("finishRoll called, but isRolling is already false. Aborting.");
+        return;
+    }
+    console.log("finishRoll triggered. Calculating results and setting up hide timer.");
 
     const results = activeDice.map(die => {
         let currentColor = 0;
-        // モデルの子要素から最初のMeshを探し、そのマテリアルの色を取得する
         const mesh = die.model.getObjectByProperty('isMesh', true);
         if (mesh) {
             currentColor = mesh.material.color.getHex();
         }
-        
         return {
             id: die.id,
             color: currentColor,
@@ -379,19 +397,16 @@ function finishRoll() {
     });
 
     if (rollCallback) {
-        rollCallback(results);
+        rollCallback(results); // ★ 1. 先に結果をコールバックで返す
     }
     
-    // ★★★ 使用したダイスをプールに戻す ★★★
-    activeDice.forEach(die => {
-        die.inUse = false;
-        die.model.visible = false;
-    });
-    activeDice = [];
-    isRolling = false; // isRollingフラグをリセット
+    isRolling = false; // ★ 2. isRollingフラグをここでfalseにする
 
+    // ★ 3. hideタイマーの中で、ダイスのクリーンアップとコンテナ非表示の両方を行う
     setTimeout(() => {
-        containerElement.classList.remove('is-visible');
+        console.log(`Hiding container and cleaning up dice. (After ${settings.timeouts.hide}ms)`);
+        cleanupDice(); // ダイスを非表示にし、プールに戻す
+        containerElement.classList.remove('is-visible'); // 背景（床）を非表示にする
     }, settings.timeouts.hide);
 }
 
@@ -506,16 +521,33 @@ function onWindowResize() {
 
     if (width === 0 || height === 0) return;
 
-    // FOVが狭くなれば、計算されるviewportSizeも自動的に小さくなる
-    const vFOV = THREE.MathUtils.degToRad(camera.fov);
-    const vpHeight = 2 * Math.tan(vFOV / 2) * camera.position.y;
-    const vpWidth = vpHeight * (width / height);
+    // ★★★ 対角線FOVを基準にビューポートサイズとカメラFOVを再計算 ★★★
+
+    // 1. settingsから基準となる「対角線FOV」を取得 (ラジアンに変換)
+    //    現在のcamera.fov = 10 を、対角線FOVの基準値として流用します。
+    const diagonalFovRad = THREE.MathUtils.degToRad(settings.camera.fov);
+
+    // 2. 画面の対角線の長さとアスペクト比を計算
+    const aspectRatio = width / height;
+    const diagonalLength = Math.sqrt(aspectRatio * aspectRatio + 1);
+
+    // 3. カメラから床面までの距離を取得
+    const distance = camera.position.y;
+
+    // 4. 対角線FOVと対角線の長さから、ビューポートの高さを計算
+    //    (三角関数の関係から導出)
+    const vpHeight = 2 * distance * Math.tan(diagonalFovRad / 2) / diagonalLength;
+    const vpWidth = vpHeight * aspectRatio;
     viewportSize = { width: vpWidth, height: vpHeight };
 
-    // ★★★ 壁を再生成する ★★★
-    createWalls();
+    // 5. 新しく計算したビューポートの高さから、three.jsに必要な「垂直FOV」を逆算
+    const newVerticalFovRad = 2 * Math.atan(vpHeight / (2 * distance));
+    const newVerticalFovDeg = THREE.MathUtils.radToDeg(newVerticalFovRad);
 
-    camera.aspect = width / height;
+    // 6. 壁を再生成し、カメラのパラメータを更新
+    createWalls();
+    camera.aspect = aspectRatio;
+    camera.fov = newVerticalFovDeg; // ← 計算した新しい垂直FOVを設定
     camera.updateProjectionMatrix();
     renderer.setSize(width, height);
 }

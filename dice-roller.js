@@ -6,7 +6,7 @@
 /**
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.3.14";
+export const version = "1.3.20";
 
 // import { showModal } from './ui-manager.js';
 import { showModal, showToastNotification } from './ui-manager.js';
@@ -125,8 +125,9 @@ function performD100Roll(rollData, processResultCallback) {
 
     const rollConfig = {
         dices: [
-            { id: 'tens', color: 0xff0000 },
-            { id: 'ones', color: 0x0066cc }
+            // { id: 'tens', color: 0xffbb00 },
+            { id: 'tens', color: 0xff4444 },
+            { id: 'ones', color: 0x0088ff }
         ]
     };
 
@@ -186,54 +187,81 @@ export function performDiceRoll(rollData) {
         // --- システムコマンド (NA, NC) の場合 ---
         const [, numDiceStr, command, modifierStr] = systemMatch;
         const modifier = modifierStr ? parseInt(modifierStr, 10) : 0;
+        const numDice = parseInt(numDiceStr, 10) || 1;
+
+        // 振るダイスの設定を作成
+        const rollConfig = {
+            dices: Array.from({ length: numDice }, (_, i) => ({
+                id: `system_d${i}`,
+                color: 0xffffff
+            }))
+        };
         
-        // ★★★ 3. 新しいAPIに合わせて呼び出し方を変更 ★★★
-        const rollConfig = { dices: [{ color: 0xffffff }] }; // 1個の白いダイス
         roll3DDice(rollConfig, (results) => {
-            if (!results || results.length === 0) {
-                console.error("3Dダイスロールの結果がありません。");
+            if (!results || results.length < numDice) {
+                console.error("3Dダイスロールの結果が不足しています。");
                 return;
             }
-            const diceValue = results[0].value;
-            const resultValue = diceValue === 0 ? 10 : diceValue;
 
-            const finalValue = resultValue + modifier;
-            let modifierText = modifier > 0 ? `+${modifier}` : (modifier < 0 ? `${modifier}` : "");
+            // ★★★ お客様ご提示の正しい判定ロジック ★★★
+
+            // 1. 各ダイスの出目(1-10)と、それに修正値を加えた「判定値」の配列を計算
+            const rawValues = results.map(r => r.value === 0 ? 10 : r.value);
+            const finalValues = rawValues.map(v => v + modifier);
             
-            let result = '', details = '', color = '#dc3545';
-            let finalResultForCallback = null;
-            let hitLocation = null;
+            // 2. 判定値の最大値(max)と最小値(min)を取得
+            const maxFinalValue = Math.max(...finalValues);
+            const minFinalValue = Math.min(...finalValues);
 
-            if (command === 'nc') {
-                if (finalValue >= 11) { result = '大成功'; color = '#007bff'; }
-                else if (finalValue <= 1) { result = '大失敗'; details = '＞ 使用パーツ全損'; }
-                else if (finalValue >= 6) { result = '成功'; color = '#007bff'; }
-                else { result = '失敗'; }
-                finalResultForCallback = result;
-            } else if (command === 'na') {
-                if (finalValue >= 11) { result = '大成功'; details = `＞ 攻撃側任意（追加ダメージ${finalValue - 10}）`; color = '#007bff'; hitLocation = '任意'; }
-                else if (finalValue >= 10) { result = '成功'; details = '＞ 頭（なければ攻撃側任意）'; color = '#007bff'; hitLocation = '頭'; }
-                else if (finalValue >= 9) { result = '成功'; details = '＞ 腕（なければ攻撃側任意）'; color = '#007bff'; hitLocation = '腕'; }
-                else if (finalValue >= 8) { result = '成功'; details = '＞ 胴（なければ攻撃側任意）'; color = '#007bff'; hitLocation = '胴'; }
-                else if (finalValue >= 7) { result = '成功'; details = '＞ 脚（なければ攻撃側任意）'; color = '#007bff'; hitLocation = '脚'; }
-                else if (finalValue >= 6) { result = '成功'; details = '＞ 防御側任意'; color = '#007bff'; hitLocation = '任意'; }
-                else if (finalValue >= 2) { result = '失敗'; }
-                else { result = '大失敗'; details = '＞ 味方か自身に命中'; }
-                finalResultForCallback = result;
+            // 3. 最終的な結果を、ご指示の優先順位で決定する
+            let bestResult = '';
+            let bestResultDetails = '';
+            let bestHitLocation = null;
+
+            if (maxFinalValue >= 11) {
+                bestResult = '大成功';
+                // 詳細テキストはコマンドに応じて設定
+                if (command === 'na') { bestResultDetails = `＞ 攻撃側任意（追加ダメージ${maxFinalValue - 10}）`; bestHitLocation = '任意'; }
+
+            } else if (maxFinalValue >= 6) {
+                bestResult = '成功';
+                // 詳細テキストはコマンドに応じて設定 (NAのみ)
+                if (command === 'na') {
+                    if (maxFinalValue >= 10) { bestResultDetails = '＞ 頭（なければ攻撃側任意）'; bestHitLocation = '頭'; }
+                    else if (maxFinalValue >= 9) { bestResultDetails = '＞ 腕（なければ攻撃側任意）'; bestHitLocation = '腕'; }
+                    else if (maxFinalValue >= 8) { bestResultDetails = '＞ 胴（なければ攻撃側任意）'; bestHitLocation = '胴'; }
+                    else if (maxFinalValue >= 7) { bestResultDetails = '＞ 脚（なければ攻撃側任意）'; bestHitLocation = '脚'; }
+                    else { bestResultDetails = '＞ 防御側任意'; bestHitLocation = '任意'; }
+                }
+
+            } else if (minFinalValue <= 1) {
+                bestResult = '大失敗';
+                // 詳細テキストはコマンドに応じて設定
+                if (command === 'na') { bestResultDetails = '＞ 味方か自身に命中'; }
+                else if (command === 'nc') { bestResultDetails = '＞ 使用パーツ全損'; }
+
+            } else {
+                bestResult = '失敗';
             }
             
-            const resultText = `<span style="color: ${color};">🎲 ${input.toUpperCase()} ＞ ${resultValue}${modifierText} ＞ ${finalValue} ＞ ${result} ${details}</span>`;
+            // 4. ログ用のテキストをお客様の仕様に合わせて組み立て
+            const modifierText = modifier > 0 ? `+${modifier}` : (modifier < 0 ? `${modifier}` : "");
+            const color = (bestResult === '大成功' || bestResult === '成功') ? '#007bff' : '#dc3545';
             
+            // 例: 2NC ＞ [1,6] ＞ 6[1,6] ＞ 成功
+            const resultText = `<span style="color: ${color};">🎲 ${input.toUpperCase()} ＞ [${rawValues.join(',')}]${modifierText} ＞ ${maxFinalValue}[${finalValues.join(',')}] ＞ ${bestResult} ${bestResultDetails}</span>`;
+
+            // 5. ログとトーストに表示
             addLog(resultText);
-            if ((typeof rollData === 'object' && rollData.showToast)) {
-                showToastNotification(resultText, 3000);
+            if (rollData.showToast) {
+                showToastNotification(resultText, 4000);
             }
 
+            // 6. battle-logicに最終結果を渡す
             if (callback) {
-                callback(finalResultForCallback, hitLocation, resultText);
+                callback(bestResult, bestHitLocation, resultText);
             }
         });
-
     } else if (d10Match) {
         const command = d10Match[1];
         

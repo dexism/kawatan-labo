@@ -6,7 +6,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.12.68";
+export const version = "1.12.71";
 
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
@@ -84,15 +84,29 @@ export function showToastNotification(message, duration = 2000) {
     const toast = document.getElementById('toast-notification');
     if (!toast) return;
 
+    // 以前のタイマーが残っていればクリア
     if (toastTimer) {
         clearTimeout(toastTimer);
     }
 
+    // onclickを使うことで、古いリスナーを自動的に上書きする
+    // これにより、リスナーが重複する問題をシンプルに解決できる
+    toast.onclick = () => {
+        toast.classList.remove('is-visible');
+        if (toastTimer) {
+            clearTimeout(toastTimer);
+            toastTimer = null;
+        }
+        toast.onclick = null; // 一度クリックされたら、クリックイベントを自身で解除
+    };
+
     toast.innerHTML = message;
     toast.classList.add('is-visible');
 
+    // 時間経過で閉じるタイマーを設定
     toastTimer = setTimeout(() => {
         toast.classList.remove('is-visible');
+        toast.onclick = null; // タイマーで閉じた場合も、クリックイベントを解除
         toastTimer = null;
     }, duration);
 }

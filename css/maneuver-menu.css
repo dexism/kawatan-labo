@@ -25,14 +25,14 @@
     left: 0;
     /* display: none; */
     transform: translateX(-100%);
-    opacity: 0.2;
+    /* opacity: 0.2; */
     transition: all 0.2s ease-out;
     margin: 0;
     z-index:   1000;
 }
 #maneuverMenu.is-visible {
     visibility: visible; 
-    opacity: 1;
+    /* opacity: 1; */
     transform: translate(0, 0);
     transition: all 0.2s ease-out;
 }
