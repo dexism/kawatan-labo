@@ -1,11 +1,13 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.0.11"; // パッチバージョンを更新
+export const version = "2.0.0"; // パッチバージョンを更新
 
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
+// import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+// import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
 
 // ===== Settings =====
 const settings = {
@@ -26,7 +28,7 @@ const settings = {
     physics: {
         frictionGround:    0.2, // 床の摩擦
         frictionWall:      0.1, // 壁の摩擦
-        restitutionGround: 0.3, // 床の反発係数
+        restitutionGround: 0.2, // 床の反発係数
         restitutionWall:   0.6  // 壁の反発係数
     },
     camera: {
@@ -48,7 +50,7 @@ const settings = {
 // ===== モジュール内変数 =====
 // let THREE, CANNON, FBXLoader;
 let scene, camera, renderer, world;
-let diceObject, diceBody;
+// let diceObject, diceBody;
 let diceMaterial, groundMaterial, wallMaterial;
 let rollCallback = null;
 let isRolling = false;
@@ -56,6 +58,12 @@ let stopCheckTimeout;
 let forceResultTimeout;
 let containerElement;
 let viewportSize;
+let isDiceReady = false;
+
+// ★★★ 複数ダイス管理用の変数 ★★★
+const MAX_DICE_COUNT = 5; // 同時に振れるダイスの最大数
+let dicePool = []; // 生成したダイスインスタンスを保持するプール
+let activeDice = []; // 現在ロール中のダイスを保持する配列
 
 // 面の法線ベクトルと対応する出目（モデルの向きに合わせて調整が必要）
 // これはD10モデルの各面がどの方向を向いているかを定義します。
@@ -84,7 +92,7 @@ const faceNormals = [
  * 3Dダイスの初期化
  * @param {HTMLElement} container - 3Dキャンバスを追加するコンテナ要素
  */
-export function init(container) {
+export async function init(container) {
     containerElement = container;
 
     // --- 初期サイズは0x0のままでOK ---
@@ -105,16 +113,16 @@ export function init(container) {
     container.appendChild(renderer.domElement);
 
     // 1. 環境光 (AmbientLight)
-    scene.add(new THREE.AmbientLight(0xffeedd, 0.4));
+    scene.add(new THREE.AmbientLight(0xffeedd, 0.5));
 
     // 2. 平行光源 (DirectionalLight)
     const dirLight = new THREE.DirectionalLight(0xddeeff, 4);
-    dirLight.position.set(1.5, 3, 1);
+    dirLight.position.set(1, 5, 2);
     scene.add(dirLight);
 
     // 補助ライト（フィルライト）
-    const fillLight = new THREE.DirectionalLight(0xeeffee, 0.3);
-    fillLight.position.set(-1, 1, -1); // メインとは逆の左手前から当てる
+    const fillLight = new THREE.DirectionalLight(0xeeffee, 0.5);
+    fillLight.position.set(-5, 2, -1); // メインとは逆の左手前から当てる
     scene.add(fillLight);
 
     world = new CANNON.World();
@@ -150,7 +158,15 @@ export function init(container) {
     world.addBody(ceilingBody);
 
     createWalls();
-    loadDiceModel();
+
+    const loadPromises = [];
+    for (let i = 0; i < MAX_DICE_COUNT; i++) {
+        loadPromises.push(loadDiceModel()); // loadDiceModelがPromiseを返すように変更
+    }
+    await Promise.all(loadPromises);
+
+    isDiceReady = true; // ★★★ 準備完了フラグを立てる ★★★
+    console.log("3D Dice pool ready.");
 
     animate();
     window.addEventListener('resize', onWindowResize);
@@ -160,10 +176,21 @@ export function init(container) {
 
 /**
  * ダイスを投げる
- * @param {function(number)} callback - 結果を返すコールバック関数
+ * @param {object} rollConfig - ロールの設定 { dices: [{ color: 0xffffff }, ...] }
+ * @param {function(Array)} callback - 結果を返すコールバック関数
  */
-export function rollDice(callback) {
-    if (!diceBody || isRolling) return;
+export function rollDice(rollConfig, callback) {
+    if (isRolling || !isDiceReady) return;
+
+    const requiredDiceCount = rollConfig.dices.length;
+    const availableDice = dicePool.filter(d => !d.inUse);
+
+    if (availableDice.length < requiredDiceCount) {
+        console.error("リクエストされた数のダイスが不足しています。");
+        return;
+    }
+    
+    activeDice = [];
     rollCallback = callback;
     isRolling = true;
     
@@ -171,55 +198,55 @@ export function rollDice(callback) {
     containerElement.classList.add('is-visible');
     onWindowResize();
 
-    // 1. トレイのサイズを取得
     const trayWidth = viewportSize.width * settings.tray.sizeRatio;
     const trayHeight = viewportSize.height * settings.tray.sizeRatio;
 
-    // 2. 設定されたパーセント値を 10% ～ 90% の範囲に制限(クランプ)
-    const xPercent = Math.max(10, Math.min(90, settings.dice.initialPosition.xPercent));
-    const yPercent = Math.max(10, Math.min(90, settings.dice.initialPosition.yPercent));
+    for (let i = 0; i < requiredDiceCount; i++) {
+        const die = availableDice[i];
+        const config = rollConfig.dices[i];
+        
+        die.inUse = true;
+        die.model.visible = true;
+        die.id = config.id;
+        
+        // ★★★ マテリアルの色を設定 ★★★
+        die.model.traverse((child) => {
+            if (child.isMesh) {
+                child.material.color.set(config.color);
+            }
+        });
 
-    // 3. パーセントから物理座標を計算
-    // (0,0)がトレイ中央なので、-0.5してから掛ける
-    const initialX = (xPercent / 100 - 0.5) * trayWidth;
-    const initialZ = (yPercent / 100 - 0.5) * trayHeight;
+        // 複数のダイスが重ならないように初期位置を少しずらす
+        const xPercent = settings.dice.initialPosition.xPercent - (i * 5);
+        const yPercent = settings.dice.initialPosition.yPercent - (i * 5);
+        const initialX = (Math.max(10, Math.min(90, xPercent)) / 100 - 0.5) * trayWidth;
+        const initialZ = (Math.max(10, Math.min(90, yPercent)) / 100 - 0.5) * trayHeight;
 
-    // 4. ダイスの初期位置を設定
-    diceBody.position.set(
-        initialX,
-        settings.dice.initialHeight,
-        initialZ
-    );
+        die.body.position.set(initialX, settings.dice.initialHeight, initialZ);
 
-    // 1. 各パラメータの範囲内でランダムな値を生成するヘルパー関数
-    const randomInRange = (range) => Math.random() * (range.max - range.min) + range.min;
+        // ... 速度や角速度の設定 (ほぼ変更なし) ...
+        const randomInRange = (range) => Math.random() * (range.max - range.min) + range.min;
+        // ...
+        const speed = randomInRange(settings.dice.throw.speed);
+        const azimuth = randomInRange(settings.dice.throw.azimuth);
+        const elevation = randomInRange(settings.dice.throw.elevation);
+        const azimuthRad = THREE.MathUtils.degToRad(azimuth);
+        const elevationRad = THREE.MathUtils.degToRad(elevation);
+        const horizontalSpeed = speed * Math.cos(elevationRad);
+        const verticalSpeed = speed * Math.sin(elevationRad);
+        const speedX = horizontalSpeed * Math.sin(azimuthRad);
+        const speedZ = -horizontalSpeed * Math.cos(azimuthRad);
+        die.body.velocity.set(speedX, verticalSpeed, speedZ);
+        const angVelRange = settings.dice.throw.angularVelocity;
+        die.body.angularVelocity.set(
+            randomInRange(angVelRange) * (Math.random() < 0.5 ? 1 : -1),
+            randomInRange(angVelRange) * (Math.random() < 0.5 ? 1 : -1),
+            randomInRange(angVelRange) * (Math.random() < 0.5 ? 1 : -1)
+        );
 
-    // 2. 投擲パラメータをランダムに決定
-    const speed = randomInRange(settings.dice.throw.speed);
-    const azimuth = randomInRange(settings.dice.throw.azimuth);
-    const elevation = randomInRange(settings.dice.throw.elevation);
-    
-    // 3. 角度をラジアンに変換
-    const azimuthRad = THREE.MathUtils.degToRad(azimuth);
-    const elevationRad = THREE.MathUtils.degToRad(elevation);
-
-    // 4. 速度ベクトルを三角関数で計算 (計算式自体は変更なし)
-    const horizontalSpeed = speed * Math.cos(elevationRad);
-    const verticalSpeed = speed * Math.sin(elevationRad);
-    const speedX = horizontalSpeed * Math.sin(azimuthRad);
-    const speedZ = -horizontalSpeed * Math.cos(azimuthRad);
-
-    diceBody.velocity.set(speedX, verticalSpeed, speedZ);
-
-    // 5. 回転（角速度）もランダムに与える (ヘルパー関数を利用するように変更)
-    const angVelRange = settings.dice.throw.angularVelocity;
-    diceBody.angularVelocity.set(
-        randomInRange(angVelRange) * (Math.random() < 0.5 ? 1 : -1),
-        randomInRange(angVelRange) * (Math.random() < 0.5 ? 1 : -1),
-        randomInRange(angVelRange) * (Math.random() < 0.5 ? 1 : -1)
-    );
-    
-    diceBody.wakeUp();
+        die.body.wakeUp();
+        activeDice.push(die);
+    }
     checkIfStopped();
     
     forceResultTimeout = setTimeout(() => {
@@ -232,131 +259,149 @@ export function rollDice(callback) {
 
 // ===== 内部ヘルパー関数 (省略なし) =====
 
+// dice-3d.js L:203
 function loadDiceModel() {
-    const fbxLoader = new FBXLoader();
-    const texLoader = new THREE.TextureLoader();
-    const basePath = '/models/';
-    const modelFile = 'Dice_10.fbx';
-    const textureFiles = {
-        map: 'Dice_10_Albedo.png',
-        normalMap: 'Dice_10_Normal.png',
-        metalnessMap: 'Dice_10_Metallic.png',
-        roughnessMap: 'Dice_10_Roughness.png',
-        aoMap: 'Dice_10_AO.png'
-    };
+    // ★★★ Promiseで全体をラップする ★★★
+    return new Promise((resolve, reject) => {
+        const fbxLoader = new FBXLoader();
+        const texLoader = new THREE.TextureLoader();
+        const basePath = '/models/';
+        const modelFile = 'Dice_10.fbx';
+        const textureFiles = {
+            map: 'Dice_10_Albedo.png',
+            normalMap: 'Dice_10_Normal.png',
+            metalnessMap: 'Dice_10_Metallic.png',
+            roughnessMap: 'Dice_10_Roughness.png',
+            aoMap: 'Dice_10_AO.png',
+            displacementMap: 'Dice_10_Height.png'
+        };
 
-    // ★★★ 複数のテクスチャを読み込む ★★★
-    const textures = {};
-    let texturesLoaded = 0;
-    const numTextures = Object.keys(textureFiles).length;
+        const textures = {};
+        let texturesLoaded = 0;
+        const numTextures = Object.keys(textureFiles).length;
 
-    Object.entries(textureFiles).forEach(([key, file]) => {
-        texLoader.load(basePath + file, (texture) => {
-            texture.colorSpace = THREE.SRGBColorSpace;
-            textures[key] = texture;
-            texturesLoaded++;
-            // すべてのテクスチャが読み込み終わったらモデルを処理
-            if (texturesLoaded === numTextures) {
-                loadModelWithTextures();
-            }
+        Object.entries(textureFiles).forEach(([key, file]) => {
+            texLoader.load(basePath + file, 
+                (texture) => { // onSuccess
+                    texture.colorSpace = THREE.SRGBColorSpace;
+                    textures[key] = texture;
+                    texturesLoaded++;
+                    if (texturesLoaded === numTextures) {
+                        loadModelWithTextures();
+                    }
+                },
+                undefined, // onProgress (使用しない)
+                (err) => reject(err) // onError
+            );
         });
-    });
-    function loadModelWithTextures() {
-        fbxLoader.load(basePath + modelFile, (object) => {
-            object.traverse((child) => {
-                if (child.isMesh) {
-                    // ★★★ 読み込んだテクスチャをマテリアルに設定 ★★★
-                    child.material = new THREE.MeshStandardMaterial({
-                        map: textures.map,
-                        normalMap: textures.normalMap,
-                        metalnessMap: textures.metalnessMap,
-                        roughnessMap: textures.roughnessMap,
-                        aoMap: textures.aoMap,
-                        metalness: 1.0, // metalnessMapを使うときは1.0にするのが一般的
-                        roughness: 1.0, // roughnessMapを使うときは1.0にするのが一般的
-                        // 法線マップ（凹凸）の強さ
-                        // new THREE.Vector2(x, y) で、X方向とY方向の強度を個別に設定
-                        // (1, 1) がデフォルト。値を大きくすると凹凸が深くなる。
-                        normalScale: new THREE.Vector2(2, 2),
 
-                        // AOマップ（影）の強さ
-                        // 0.0（効果なし）から 1.0（最大）の範囲。
-                        aoMapIntensity: 0.5 // AOマップの強度
-
-                        // 発光マップの強さ（今回は使っていませんが参考）
-                        // emissiveMap: textures.emissiveMap,
-                        // emissiveIntensity: 1.0,
-                        // emissive: new THREE.Color(0xffffff), // 発光色
+        function loadModelWithTextures() {
+            fbxLoader.load(basePath + modelFile, 
+                (object) => { // onSuccess
+                    object.traverse((child) => {
+                        if (child.isMesh) {
+                            child.material = new THREE.MeshStandardMaterial({
+                                map: textures.map,
+                                normalMap: textures.normalMap,
+                                displacementMap: textures.displacementMap,
+                                aoMap: textures.aoMap,
+                                metalnessMap: textures.metalnessMap,
+                                roughnessMap: textures.roughnessMap,
+                                metalness: 1.0,
+                                roughness: 1.0,
+                                normalScale: new THREE.Vector2(2, 2),
+                                displacementScale: 0.00,
+                                aoMapIntensity: 0.5
+                            });
+                        }
                     });
-                }
-            });
 
-            recenterGeometryToOrigin(object);
-            const currentR = computeBoundingRadiusFromObject(object);
-            
-            const scaleFactor = settings.dice.radius / currentR;
-            bakeUniformScale(object, scaleFactor);
+                    recenterGeometryToOrigin(object);
+                    const currentR = computeBoundingRadiusFromObject(object);
+                    const scaleFactor = settings.dice.radius / currentR;
+                    bakeUniformScale(object, scaleFactor);
 
-            scene.add(object);
-            diceObject = object;
+                    const { vertices, indices } = collectLocalTrimeshData(object);
+                    const shape = new CANNON.Trimesh(vertices, indices);
 
-            // ★★★ 物理ボディをTrimeshに戻します ★★★
-            const { vertices, indices } = collectLocalTrimeshData(object);
-            const shape = new CANNON.Trimesh(vertices, indices);
-
-            diceBody = new CANNON.Body({
-                mass: settings.dice.mass,
-                material: diceMaterial,
-                shape: shape,
-                angularDamping: settings.dice.angularDamping,
-                allowSleep: true,
-            });
-            world.addBody(diceBody);
-        });
-    }
+                    const body = new CANNON.Body({
+                        mass: settings.dice.mass,
+                        material: diceMaterial,
+                        shape: shape,
+                        angularDamping: settings.dice.angularDamping,
+                        allowSleep: true,
+                    });
+                    object.visible = false;
+                    dicePool.push({ 
+                        model: object, body: body, inUse: false, color: null, id: null 
+                    });
+                    scene.add(object);
+                    world.addBody(body);
+                    
+                    resolve(); // ★★★ モデルとボディの準備が完了したらPromiseを解決 ★★★
+                },
+                undefined, // onProgress
+                (err) => reject(err) // onError
+            );
+        }
+    });
 }
 
 function checkIfStopped() {
     clearTimeout(stopCheckTimeout);
     
-    // cannon-esのsleep状態をチェックするのが最も確実
-    if (diceBody.sleepState === CANNON.Body.SLEEPING) {
-        // ★★★ タイムアウトをクリア ★★★
+    const allDiceSleeping = activeDice.length > 0 && activeDice.every(die => die.body.sleepState === CANNON.Body.SLEEPING);
+
+    if (allDiceSleeping) {
         clearTimeout(forceResultTimeout);
         setTimeout(finishRoll, 200);
-    } else {
-        stopCheckTimeout = setTimeout(checkIfStopped, 100);
+    } else if (isRolling) { // isRolling中のみ次のチェックを予約
+        stopCheckTimeout = setTimeout(checkIfStopped, settings.timeouts.stopCheck);
     }
 }
 
 function finishRoll() {
     if (!isRolling) return;
-    isRolling = false;
-    clearTimeout(forceResultTimeout);
-    clearTimeout(stopCheckTimeout);
-    
-    // ★★★ 修正箇所：デバッグ情報を出力してから、出目を判定する ★★★
-    // debug_checkNormals(); // デバッグ関数を呼び出す
-    const resultValue = getDiceValue();
+
+    const results = activeDice.map(die => {
+        let currentColor = 0;
+        // モデルの子要素から最初のMeshを探し、そのマテリアルの色を取得する
+        const mesh = die.model.getObjectByProperty('isMesh', true);
+        if (mesh) {
+            currentColor = mesh.material.color.getHex();
+        }
+        
+        return {
+            id: die.id,
+            color: currentColor,
+            value: getDiceValue(die.model)
+        };
+    });
 
     if (rollCallback) {
-        rollCallback(resultValue);
+        rollCallback(results);
     }
+    
+    // ★★★ 使用したダイスをプールに戻す ★★★
+    activeDice.forEach(die => {
+        die.inUse = false;
+        die.model.visible = false;
+    });
+    activeDice = [];
+    isRolling = false; // isRollingフラグをリセット
 
     setTimeout(() => {
         containerElement.classList.remove('is-visible');
     }, settings.timeouts.hide);
 }
 
-function getDiceValue() {
-    let highestDot = -2; // 比較のために-2から始める
+function getDiceValue(diceObject) {
+    let highestDot = -2;
     let result = -1;
-    const upVector = new THREE.Vector3(0, 1, 0); // 世界座標の「真上」
+    const upVector = new THREE.Vector3(0, 1, 0);
 
     faceNormals.forEach(face => {
-        // ダイスの現在の回転を考慮した、世界座標での面の向きを計算
         const worldNormal = face.normal.clone().applyQuaternion(diceObject.quaternion);
-        // 「真上」との角度（内積）を計算。1に近いほど真上を向いている。
         const dot = worldNormal.dot(upVector);
 
         if (dot > highestDot) {
@@ -479,23 +524,18 @@ let lastTime = performance.now();
 
 function animate() {
     requestAnimationFrame(animate);
-
     const time = performance.now();
     const dt = (time - lastTime) / 1000;
-
     if (world) {
         world.step(1 / 60, dt, 3);
     }
-
     lastTime = time;
 
-    if (diceObject && diceBody) {
-        // ★★★ 修正点3: デバッグ用のNaNチェックを削除 ★★★
-        // if (isRolling && (isNaN(diceBody.position.x))) { ... }
-
-        diceObject.position.copy(diceBody.position);
-        diceObject.quaternion.copy(diceBody.quaternion);
-    }
+    // ★★★ アクティブなダイスすべてを更新 ★★★
+    activeDice.forEach(die => {
+        die.model.position.copy(die.body.position);
+        die.model.quaternion.copy(die.body.quaternion);
+    });
     
     if (renderer && scene && camera) {
         renderer.render(scene, camera);

@@ -6,7 +6,7 @@
 /**
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.2.13";
+export const version = "1.3.14";
 
 // import { showModal } from './ui-manager.js';
 import { showModal, showToastNotification } from './ui-manager.js';
@@ -115,58 +115,100 @@ function onDocumentClickForDice(e) {
     }
 }
 
+/**
+ * D100の3Dダイスロールを実行し、結果を処理する共通ヘルパー関数
+ * @param {object} rollData - performDiceRollから渡される元のデータ
+ * @param {function(number, string)} processResultCallback - 結果の数値を元に、ログ用テキストを生成するコールバック
+ */
+function performD100Roll(rollData, processResultCallback) {
+    const { command, showToast, callback } = rollData;
+
+    const rollConfig = {
+        dices: [
+            { id: 'tens', color: 0xff0000 },
+            { id: 'ones', color: 0x0066cc }
+        ]
+    };
+
+    roll3DDice(rollConfig, (results) => {
+        if (!results || results.length < 2) {
+            console.error("D100ロールの結果取得に失敗しました。");
+            return;
+        }
+        
+        const tensDieResult = results.find(r => r.id === 'tens');
+        const onesDieResult = results.find(r => r.id === 'ones');
+        
+        if (!tensDieResult || !onesDieResult) {
+            console.error("D100ロールの結果取得に失敗しました（ダイスの役割を特定できません）。");
+            return;
+        }
+
+        const tensValue = tensDieResult.value === 10 ? 0 : tensDieResult.value;
+        const onesValue = onesDieResult.value === 10 ? 0 : onesDieResult.value;
+
+        let finalResult = (tensValue * 10) + onesValue;
+        if (finalResult === 0) {
+            finalResult = 100;
+        }
+        
+        const resultText = processResultCallback(finalResult, tensValue, onesValue);
+
+        addLog(resultText);
+        if (showToast) {
+            showToastNotification(resultText, 3000);
+        }
+        
+        if (callback) {
+            callback(finalResult, null, resultText);
+        }
+    });
+}
+
 export function performDiceRoll(rollData) {
     const input = (typeof rollData === 'string') ? rollData : rollData.command;
     const callback = (typeof rollData === 'object' && rollData.callback) ? rollData.callback : null;
 
     if (!input) return;
     const cleanedInput = input.toLowerCase().replace(/\s/g, '');
-    let resultText = `「${input}」は無効な入力です。`;
-    let finalResultForCallback = null;
-    let hitLocation = null;
 
-    if (cleanedInput === 'nm') {
-        resultText = rollOnRegretTable('SI-', '姉妹への未練表');
-    } else if (cleanedInput === 'nme') {
-        resultText = rollOnRegretTable('EN-', '敵への未練表');
-    } else if (cleanedInput === 'nmn') {
-        resultText = rollOnRegretTable('NP-', '中立者への未練表');
+    const d10Pattern = /^(nm|nme|nmn|nt|nh|1?d10)$/;
+    const systemCommandPattern = /^(\d*)?(nc|na)([+-]\d+)?$/;
+    // ★★★ 1. D100用の正規表現を追加 ★★★
+    const d100Match = /^(1?d100)$/;
 
-    } else if (cleanedInput === 'nt') {
-        const roll = Math.floor(Math.random() * 10) + 1;
-        const takaramono = takaramonoMasterData[roll];
-        resultText = takaramono ? `🎲 たからもの表(${roll}) ＞ 【${takaramono.name}】 ${takaramono.description}` : `たからものデータ[${roll}]が見つかりませんでした。`;
-    } else if (cleanedInput === 'nk') {
-        const roll = Math.floor(Math.random() * 100) + 1;
-        const fragment = memoryFragmentsData[roll];
-        resultText = fragment ? `🎲 記憶のカケラ表(${roll}) ＞ 【${fragment.name}】 ${fragment.description}` : `記憶のカケラデータ[${roll}]が見つかりませんでした。`;
-    } else if (cleanedInput === 'nh') { // ★ このelse ifブロックを追加
-        const roll = Math.floor(Math.random() * 10) + 1;
-        const hint = hintMasterData[roll];
-        resultText = hint ? `🎲 暗示表(${roll}) ＞ 【${hint.name}】 ${hint.description}` : `暗示データ[${roll}]が見つかりませんでした。`;
-    } else {
-        const systemCommandPattern = /^(\d*)?(nc|na)([+-]\d+)?$/;
-        const systemMatch = cleanedInput.match(systemCommandPattern);
+    const systemMatch = cleanedInput.match(systemCommandPattern);
+    const d10Match = cleanedInput.match(d10Pattern);
+    // ★★★ 2. D100のmatch結果を格納する変数を追加 ★★★
+    const d100MatchResult = cleanedInput.match(d100Match);
+
+    if (systemMatch) {
+        // --- システムコマンド (NA, NC) の場合 ---
+        const [, numDiceStr, command, modifierStr] = systemMatch;
+        const modifier = modifierStr ? parseInt(modifierStr, 10) : 0;
         
-        if (systemMatch) {
-            const [, numDiceStr, command, modifierStr] = systemMatch;
-            const numDice = numDiceStr ? parseInt(numDiceStr, 10) : 1;
-            const modifier = modifierStr ? parseInt(modifierStr, 10) : 0;
-            const rawRolls = Array.from({ length: numDice }, () => Math.floor(Math.random() * 10) + 1);
-            
-            const highestRawRoll = Math.max(...rawRolls);
-            const lowestRawRoll = Math.min(...rawRolls);
-            const finalValue = highestRawRoll + modifier;
-            
+        // ★★★ 3. 新しいAPIに合わせて呼び出し方を変更 ★★★
+        const rollConfig = { dices: [{ color: 0xffffff }] }; // 1個の白いダイス
+        roll3DDice(rollConfig, (results) => {
+            if (!results || results.length === 0) {
+                console.error("3Dダイスロールの結果がありません。");
+                return;
+            }
+            const diceValue = results[0].value;
+            const resultValue = diceValue === 0 ? 10 : diceValue;
+
+            const finalValue = resultValue + modifier;
             let modifierText = modifier > 0 ? `+${modifier}` : (modifier < 0 ? `${modifier}` : "");
             
             let result = '', details = '', color = '#dc3545';
-            
+            let finalResultForCallback = null;
+            let hitLocation = null;
+
             if (command === 'nc') {
                 if (finalValue >= 11) { result = '大成功'; color = '#007bff'; }
-                else if (lowestRawRoll + modifier <= 1) { result = '大失敗'; details = '＞ 使用パーツ全損'; }
+                else if (finalValue <= 1) { result = '大失敗'; details = '＞ 使用パーツ全損'; }
                 else if (finalValue >= 6) { result = '成功'; color = '#007bff'; }
-                else result = '失敗';
+                else { result = '失敗'; }
                 finalResultForCallback = result;
             } else if (command === 'na') {
                 if (finalValue >= 11) { result = '大成功'; details = `＞ 攻撃側任意（追加ダメージ${finalValue - 10}）`; color = '#007bff'; hitLocation = '任意'; }
@@ -175,85 +217,130 @@ export function performDiceRoll(rollData) {
                 else if (finalValue >= 8) { result = '成功'; details = '＞ 胴（なければ攻撃側任意）'; color = '#007bff'; hitLocation = '胴'; }
                 else if (finalValue >= 7) { result = '成功'; details = '＞ 脚（なければ攻撃側任意）'; color = '#007bff'; hitLocation = '脚'; }
                 else if (finalValue >= 6) { result = '成功'; details = '＞ 防御側任意'; color = '#007bff'; hitLocation = '任意'; }
-                else if (finalValue >= 2) result = '失敗';
+                else if (finalValue >= 2) { result = '失敗'; }
                 else { result = '大失敗'; details = '＞ 味方か自身に命中'; }
                 finalResultForCallback = result;
             }
             
-            const rollsStr = `[${rawRolls.join(',')}]`;
-            resultText = `<span style="color: ${color};">🎲 ${input.toUpperCase()} ＞ ${highestRawRoll}${rollsStr}${modifierText} ＞ ${finalValue} ＞ ${result} ${details}</span>`;
-
-            // 2Dの結果をログに出力
-            addLog(resultText);
-
-            // 3Dダイスを振る
-            roll3DDice((resultValue) => {
-                const finalResultText = `🎲 1D10 ＞ ${resultValue}`;
-                showToastNotification(finalResultText, 2000);
-                
-                if (callback) {
-                    callback(finalResultForCallback, hitLocation, resultText);
-                }
-            });
+            const resultText = `<span style="color: ${color};">🎲 ${input.toUpperCase()} ＞ ${resultValue}${modifierText} ＞ ${finalValue} ＞ ${result} ${details}</span>`;
             
-            return; 
-        } else {
-            const dicePattern = /^(\d*)d(\d+)([+-]\d+)?$/;
-            const match = cleanedInput.match(dicePattern);
-            if (match) {
-                const numDice = match[1] ? parseInt(match[1], 10) : 1;
-                const sides = parseInt(match[2], 10);
-                const modifier = match[3] ? parseInt(match[3], 10) : 0;
+            addLog(resultText);
+            if ((typeof rollData === 'object' && rollData.showToast)) {
+                showToastNotification(resultText, 3000);
+            }
 
-                if (numDice > 0 && sides > 0 && numDice <= 100) {
-                    const rolls = Array.from({ length: numDice }, () => Math.floor(Math.random() * sides) + 1);
-                    const sum = rolls.reduce((a, b) => a + b, 0);
-                    const total = sum + modifier;
-                    let modifierText = modifier > 0 ? `+${modifier}` : (modifier < 0 ? `${modifier}` : "");
-                    resultText = `🎲 ${input.toUpperCase()} ＞ ${sum}[${rolls.join(',')}]${modifierText} ＞ ${total}`;
-                } else {
-                    resultText = `「${input}」のダイスの数や種類が正しくありません。`;
-                }
+            if (callback) {
+                callback(finalResultForCallback, hitLocation, resultText);
+            }
+        });
+
+    } else if (d10Match) {
+        const command = d10Match[1];
+        
+        // ★★★ 4. 新しいAPIに合わせて呼び出し方を変更 ★★★
+        const rollConfig = { dices: [{ color: 0xffffff }] }; // 1個の白いダイス
+        roll3DDice(rollConfig, (results) => {
+            if (!results || results.length === 0) {
+                console.error("3Dダイスロールの結果がありません。");
+                return;
+            }
+            const diceValue = results[0].value;
+            const resultValue = diceValue === 0 ? 10 : diceValue;
+            let resultText = "";
+
+            switch (command) {
+                case 'nm':
+                    resultText = formatRegretResult('SI-', '姉妹への未練表', resultValue);
+                    break;
+                case 'nme':
+                    resultText = formatRegretResult('EN-', '敵への未練表', resultValue);
+                    break;
+                case 'nmn':
+                    resultText = formatRegretResult('NP-', '中立者への未練表', resultValue);
+                    break;
+                case 'nt':
+                    const takaramono = takaramonoMasterData[resultValue];
+                    resultText = takaramono ? `🎲 たからもの表(${resultValue}) ＞ 【${takaramono.name}】 ${takaramono.description}` : `たからものデータ[${resultValue}]が見つかりませんでした。`;
+                    break;
+                case 'nh':
+                    const hint = hintMasterData[resultValue];
+                    resultText = hint ? `🎲 暗示表(${resultValue}) ＞ 【${hint.name}】 ${hint.description}` : `暗示データ[${resultValue}]が見つかりませんでした。`;
+                    break;
+                case '1d10':
+                case 'd10':
+                    resultText = `🎲 D10 ＞ ${resultValue}`;
+                    break;
+            }
+
+            addLog(resultText);
+            if ((typeof rollData === 'object' && rollData.showToast)) {
+                showToastNotification(resultText, 3000);
+            }
+        });
+
+    } else if (d100MatchResult) {
+        performD100Roll(rollData, (finalResult, tensValue, onesValue) => {
+            return `🎲 1D100 ＞ ${finalResult} [${tensValue*10} + ${onesValue}]`;
+        });
+
+    // ★★★ NKロールも共通関数を呼び出す ★★★
+    } else if (cleanedInput === 'nk') {
+        performD100Roll(rollData, (finalResult) => {
+            const fragment = memoryFragmentsData[finalResult];
+            return fragment 
+                ? `🎲 記憶のカケラ表(${finalResult}) ＞ 【${fragment.name}】 ${fragment.description}` 
+                : `記憶のカケラデータ[${finalResult}]が見つかりませんでした。`;
+        });
+    } else {
+        // --- システムコマンドとD10系以外 (NK, 1d100 など) の場合 ---
+        // これらは3D演出の対象外
+        let resultText = `「${input}」は無効な入力です。`;
+        
+        
+        // 1d6, 2d6+1 などの汎用ダイスロール (変更なし)
+        const dicePattern = /^(\d*)d(\d+)([+-]\d+)?$/;
+        const match = cleanedInput.match(dicePattern);
+        if (match) {
+            const numDice = match[1] ? parseInt(match[1], 10) : 1;
+            const sides = parseInt(match[2], 10);
+            const modifier = match[3] ? parseInt(match[3], 10) : 0;
+
+            if (numDice > 0 && sides > 0 && numDice <= 100) {
+                const rolls = Array.from({ length: numDice }, () => Math.floor(Math.random() * sides) + 1);
+                const sum = rolls.reduce((a, b) => a + b, 0);
+                const total = sum + modifier;
+                let modifierText = modifier > 0 ? `+${modifier}` : (modifier < 0 ? `${modifier}` : "");
+                resultText = `🎲 ${input.toUpperCase()} ＞ ${sum}[${rolls.join(',')}]${modifierText} ＞ ${total}`;
+            } else {
+                resultText = `「${input}」のダイスの数や種類が正しくありません。`;
             }
         }
-    }
 
-    addLog(resultText);
-
-    if ((typeof rollData === 'object' && rollData.showToast) || (typeof rollData === 'string')) { 
-        showToastNotification(resultText, 2000);
-    }
-
-    if (callback) {
-        callback(finalResultForCallback, hitLocation, resultText);
+        addLog(resultText);
+        if ((typeof rollData === 'object' && rollData.showToast) || (typeof rollData === 'string')) {
+            showToastNotification(resultText, 3000);
+        }
     }
 }
 
 /**
- * ★★★ 新しく追加するヘルパー関数 ★★★
- * regret.json から指定されたプレフィックスを持つ未練をランダムに抽選する
+ * 3Dダイスの出目に基づいて、regret.jsonから対応する未練の結果をフォーマットする
  * @param {string} prefix - 抽選対象のIDプレフィックス (例: 'SI-')
  * @param {string} tableName - ログに表示する表の名前 (例: '姉妹への未練表')
+ * @param {number} diceResult - 3Dダイスの出目 (1-10)
  * @returns {string} - フォーマットされた結果の文字列
  */
-function rollOnRegretTable(prefix, tableName) {
+function formatRegretResult(prefix, tableName, diceResult) {
     const allRegrets = regretMasterData;
     if (!allRegrets || Object.keys(allRegrets).length === 0) {
         return `未練データが見つかりませんでした。`;
     }
 
-    // 指定されたプレフィックスで未練IDをフィルタリング
-    const filteredIds = Object.keys(allRegrets).filter(id => id.startsWith(prefix));
-
-    if (filteredIds.length === 0) {
-        return `${tableName} に該当する未練データが見つかりませんでした。`;
-    }
-
-    // フィルタリングされたIDの中からランダムに1つ選ぶ
-    const randomId = filteredIds[Math.floor(Math.random() * filteredIds.length)];
-    const regret = allRegrets[randomId];
+    // プレフィックスと出目を組み合わせてIDを生成 (例: "SI-01", "SI-10")
+    const regretId = `${prefix}${String(diceResult).padStart(2, '0')}`;
+    const regret = allRegrets[regretId];
     
     return regret 
-        ? `🎲 ${tableName}(${randomId}) ＞ 【${regret.name}】[発狂:${regret.madnessName}] ${regret.madnessEffect}` 
-        : `未練データ[${randomId}]が見つかりませんでした。`;
+        ? `🎲 ${tableName}(${regretId}) ＞ 【${regret.name}】[発狂:${regret.madnessName}] ${regret.madnessEffect}` 
+        : `未練データ[${regretId}]が見つかりませんでした。`;
 }

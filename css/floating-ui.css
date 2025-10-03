@@ -134,137 +134,6 @@
 /* ================================
   マニューバメニュー
 ================================ */
-/*
-#maneuverMenu {
-  background-color: var(--color-background);
-  color:            var(--color-text-muted);
-  padding:     10px;
-  margin:      10px;
-  font-size:   14px;
-  font-weight: bold;
-  z-index:   1000;
-  max-height:  90%;
-  max-width:  100%;
-  min-width:  300px;
-  overflow-y: auto;
-  box-sizing: border-box;
-  box-shadow: 0 0 8px black;
-  border-radius: 5px;
-
-  position: fixed;
-  bottom: 0;
-  left:   0;
-  opacity: 0.5;
-  transform:
-    translate(0, 80%)
-    scale(1);
-  visibility: hidden;
-  transition:
-    opacity    0.2s ease-out,
-    transform  0.2s ease-out,
-    visibility 0.2s;
-}
-
-#maneuverMenu.is-visible {
-  visibility: visible; 
-  opacity: 1;
-  transform:
-    translate(0, 0)
-    scale(1);
-  transition:
-    opacity    0.2s ease-out,
-    transform  0.2s ease-out,
-    visibility 0.2s;
-}
-.maneuver-menu-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 5px 10px;
-    background-color: var(--color-surface-1);
-    border-bottom: 0px solid var(--color-border);
-    border-radius: 5px;
-outline: 1px dashed red;
-}
-.maneuver-menu-title-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-.maneuver-menu-sheet-btn {
-    background: none;
-    border: none;
-    font-size: 1.4rem;
-    line-height: 1;
-    padding: 2px;
-    color: var(--color-text-muted);
-    cursor: pointer;
-    border-radius: 5px;
-    transition: all 0.2s;
-}
-.maneuver-menu-sheet-btn:hover {
-    background-color: rgba(0, 0, 0, 0.2);
-    color: var(--color-text);
-    transform: scale(1.1);
-}
-.maneuver-menu-title {
-    font-weight: bold;
-    font-size: 14px;
-}
-.maneuver-menu-close-btn {
-    background: none;
-    border: none;
-    font-size: 1.4rem;
-    line-height: 1;
-    padding: 0 5px;
-    color: var(--color-text-muted);
-    cursor: pointer;
-    border-radius: 50%;
-    transition: all 0.2s;
-}
-.maneuver-menu-close-btn:hover {
-    color: var(--color-text);
-    background-color: rgba(0, 0, 0, 0.2);
-}
-#maneuverMenu .accordion-container {
-  background-color: var(--color-background);
-  margin: 5px;
-}
-.maneuver-category-title {
-  font-weight: bold;
-  width: calc(100% - 10PX);
-  padding: 5px 0 5px 10px;
-  margin: 0;
-  color: var(--color-text-3);
-  border-radius: 5px 5px 0 0;
-}
-.maneuver-item {
-  padding: 5px;
-  margin:  5px;
-  cursor: pointer;
-  border-radius: 5px;
-  background-color: var(--color-text-light);
-  background-color: transparent;
-  outline: 2px solid gold;
-}
-.maneuver-item:not(.is-masked):hover {
-  background-color:  gold;
-  color:             black;
-}
-.maneuver-item.is-masked {
-  background-color: var(--color-panel);
-  outline: none;
-  cursor: not-allowed;
-  pointer-events: auto;
-}
-.maneuver-item.is-masked:hover {
-    background-color: var(--color-surface-1);
-}
-.maneuver-item.is-damaged {
-  color: var(--color-accent-red);
-  text-decoration: line-through;
-}
-*/
 .simple-menu-modal-backdrop {
     justify-content: center;
     align-items: center;
@@ -279,18 +148,38 @@ outline: 1px dashed red;
     flex-direction: column;
     align-items: stretch;
     gap: 5px;
-    padding: 10px;
+    align-content: start;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    overflow-y: auto;
+    justify-content: center;
+    height: auto;
 }
+
 /* メニュー項目のスタイルは既存のものを流用 */
 .simple-menu-modal-body .maneuver-item {
-    min-width: 60%;
+    min-width: 50%;
     text-align: center;
+    font-size: 16px;
+    font-weight: bold;
     margin: 5px;
     padding: 5px 20px;
     border-radius: 10px;
-    background-color: #444;
-    color:            #eee;
-    border: 2px solid #888;
+    background-color: var(--color-level-1);
+    color:            var(--color-text);
+    border: 2px solid gold;
+}
+/* ホバー時の色を少し明るくする */
+.simple-menu-modal-body .maneuver-item:not(.is-masked):hover {
+    background-color:  gold;
+    color:             black;
+}
+/* 無効化されたボタンのスタイル */
+.simple-menu-modal-body .maneuver-item.is-masked {
+    border: none;
+    color: var(--color-text-muted);
+    /* filter: grayscale(80%);*/
 }
 .simple-menu-modal-body .maneuver-item.area-color-naraku {   background-color: var(--color-naraku); }
 .simple-menu-modal-body .maneuver-item.area-color-jigoku {   background-color: var(--color-jigoku); }
@@ -298,19 +187,6 @@ outline: 1px dashed red;
 .simple-menu-modal-body .maneuver-item.area-color-hanazono { background-color: var(--color-hanazono); }
 .simple-menu-modal-body .maneuver-item.area-color-rakuen {   background-color: var(--color-rakuen); }
 
-/* ホバー時の色を少し明るくする */
-.simple-menu-modal-body .maneuver-item:not(.is-masked):hover {
-    background-color:  gold;
-    color:             black;
-}
-
-/* 無効化されたボタンのスタイル */
-.simple-menu-modal-body .maneuver-item.is-masked {
-    outline: none;
-    background-color: transparent;
-    color: var(--color-text-muted);
-    /* filter: grayscale(80%);*/
-}
 /* --- カテゴリ色分け --- */
 .category-color-move {         background-color: var(--color-move); }
 .category-color-attack {       background-color: var(--color-attack); }

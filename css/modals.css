@@ -595,11 +595,15 @@
     /* display: grid; を上書き */
     display: flex;
     flex-direction: column; /* 縦方向に並べる */
-    align-content: center;
+    align-content: start;
     align-items: center;   /* 幅を親に合わせる */
-    gap: 0;
+    gap: 5px;
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
+    overflow-y: auto;
+    justify-content: center;
+    height: auto;
 }
 
 #simpleMenuModalBody .maneuver-item {

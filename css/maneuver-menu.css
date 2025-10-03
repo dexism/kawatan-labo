@@ -168,9 +168,9 @@
 
 .maneuver-item-new:not(.is-masked):hover {
     background-color: var(--color-surface-hover);
-    outline-color: gold;
+    outline-color:    gold;
     background-color: gold;
-    color: black;
+    color:            black;
 }
 /*
 .item-left-col {
