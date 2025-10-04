@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', async () => {
  */
 function initializeApp() {
   const LATEST_UPDATE_NOTES = `
-    <div class="modal-header modal-header-sub">📢主な更新内容:7.10.3.22</div>
+    <div class="modal-header modal-header-sub">📢主な更新内容:7.10.5.2</div>
     <div class="modal-body welcome-modal-body">
       <p>◆ 3Dダイス<strong>複数ダイス、D100に対応</strong>しました。
       <p>◆ 試しに<strong>ダイスが転がる</strong>ようにしてみましたが、動作が怪しいです。
