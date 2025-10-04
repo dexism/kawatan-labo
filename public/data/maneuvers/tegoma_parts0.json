@@ -105,56 +105,277 @@
   "P0-20": { 
     "name": "スクレーパー", "category": "支援", "tags": ["支援", "ジャッジ"], "description": "支援2。", "description_raw": "支援2", "source": { "book": "基本ルールブック" }, "timing": "ジャッジ", "cost": "1", "range": "自身", "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "target": "self_roll", "value": 2 } }] 
   },
-  "P0-21": { "name": "正面装甲", "category": "防御", "tags": ["防御", "ダメージ"], "description": "防御1。", "description_raw": "防御1", "source": { "book": "基本ルールブック" }, "timing": "ダメージ", "cost": "0", "range": "自身", "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 1 } }] },
-  "P0-22": { "name": "オートバランサー", "category": "防御", "tags": ["防御", "オート", "転倒", "移動"], "description": "「転倒」「移動」を無効化可。", "description_raw": "「転倒」「移動」を無効化可", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "NEGATE_STATUS_EFFECT", "params": { "effects_to_negate": ["転倒", "移動"], "optional": true } }] },
-  "P0-23": { "name": "メインエンジン", "category": "行動値", "tags": ["行動値", "オート"], "description": "最大行動値+2。", "description_raw": "最大行動値+2", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 2 } }] },
-  "P0-24": { "name": "サブエンジン", "category": "行動値", "tags": ["行動値", "オート"], "description": "最大行動値+1。", "description_raw": "最大行動値+1", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 1 } }] },
-  "P0-25": { "name": "装甲板", "category": "その他", "tags": ["オート"], "description": "効果なし。", "description_raw": "効果なし", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "なし", "effects": [] },
-  "P0-26": { "name": "殺戮本能", "category": "行動値", "tags": ["行動値", "オート"], "description": "最大行動値+2。", "description_raw": "最大行動値+2", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 2 } }] },
-  "P0-27": { "name": "鎧具足", "category": "防御", "tags": ["防御", "ダメージ"], "description": "防御1。", "description_raw": "防御1", "source": { "book": "基本ルールブック" }, "timing": "ダメージ", "cost": "0", "range": "自身", "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 1 } }] },
-  "P0-28": { "name": "戦闘感覚", "category": "支援", "tags": ["支援", "オート"], "description": "白兵攻撃の判定+1。", "description_raw": "白兵攻撃マニューバの攻撃判定+1", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "attackCheckBonus", "value": 1, "condition": "白兵攻撃" } }] },
-  "P0-29": { "name": "怪物の顎", "category": "攻撃", "tags": ["攻撃", "アクション"], "description": "肉弾攻撃3。", "description_raw": "肉弾攻撃3", "source": { "book": "基本ルールブック", "errata": "1.6.1" }, "timing": "アクション", "cost": "3", "range": "0", "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 3 } }] },
-  "P0-30": { "name": "節足", "category": "移動", "tags": ["移動", "アクション"], "description": "移動1。", "description_raw": "移動1", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "3", "range": "自身", "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": 1 } }] },
-  "P0-31": { "name": "粘液塊", "category": "妨害", "tags": ["妨害", "ジャッジ"], "description": "妨害1。", "description_raw": "妨害1", "source": { "book": "基本ルールブック" }, "timing": "ジャッジ", "cost": "1", "range": "0～1", "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "value": -1 } }] },
-  "P0-32": { "name": "強化外骨格", "category": "防御", "tags": ["防御", "ダメージ"], "description": "防御2。", "description_raw": "防御2", "source": { "book": "基本ルールブック" }, "timing": "ダメージ", "cost": "1", "range": "自身", "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 2 } }] },
-  "P0-33": { "name": "巨体", "category": "防御", "tags": ["防御", "オート", "転倒", "移動"], "description": "「転倒」「移動」を無効化可。", "description_raw": "「転倒」「移動」を無効化してよい", "source": { "book": "基本ルールブック", "errata": "1.6.1" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "NEGATE_STATUS_EFFECT", "params": { "effects_to_negate": ["転倒", "移動"], "optional": true } }] },
-  "P0-34": { "name": "中枢神経", "category": "行動値", "tags": ["行動値", "オート"], "description": "最大行動値+2。", "description_raw": "最大行動値+2", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 2 } }] },
-  "P0-35": { "name": "常時飢餓", "category": "行動値", "tags": ["行動値", "オート"], "description": "最大行動値+1。", "description_raw": "最大行動値+1", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 1 } }] },
-  "P0-36": { "name": "怪物の腕", "category": "攻撃", "tags": ["攻撃", "アクション"], "description": "肉弾攻撃3。", "description_raw": "肉弾攻撃3", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "3", "range": "0", "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 3 } }] },
-  "P0-37": { "name": "強化筋肉", "category": "防御", "tags": ["防御", "ダメージ", "爆発"], "description": "防御1+「爆発」無効。", "description_raw": "防御1+「爆発」無効", "source": { "book": "基本ルールブック" }, "timing": "ダメージ", "cost": "0", "range": "自身", "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 1 } }, { "ref": "NEGATE_DAMAGE_EFFECT", "params": { "effect_to_negate": "爆発" } }] },
-  "P0-38": { "name": "人工知能", "category": "行動値", "tags": ["行動値", "オート"], "description": "最大行動値+2。", "description_raw": "最大行動値+2", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 2 } }] },
-  "P0-39": { "name": "エンジン", "category": "行動値", "tags": ["行動値", "オート"], "description": "最大行動値+2。", "description_raw": "最大行動値+2", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 2 } }] },
-  "P0-40": { "name": "ブースター", "category": "行動値", "tags": ["行動値", "オート"], "description": "最大行動値+1。", "description_raw": "最大行動値+1", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 1 } }] },
-  "P0-41": { "name": "ヒートブロウ", "category": "妨害", "tags": ["妨害", "ジャッジ"], "description": "妨害1。", "description_raw": "妨害1", "source": { "book": "基本ルールブック" }, "timing": "ジャッジ", "cost": "1", "range": "0", "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "value": -1 } }] },
-  "P0-42": { "name": "ホバー", "category": "移動", "tags": ["移動", "アクション"], "description": "移動1～2。", "description_raw": "移動1～2", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "2", "range": "自身", "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": "1-2" } }] },
-  "P0-43": { "name": "選ばれし美貌", "category": "妨害", "tags": ["妨害", "ジャッジ"], "description": "妨害2。1ターンに何度でも使用可(1判定1回)。", "description_raw": "妨害2、1ターンに何度使ってもよい、1回の判定に重複不可", "source": { "book": "基本ルールブック" }, "timing": "ジャッジ", "cost": "2", "range": "0", "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "value": -2, "limit_per_turn": "none", "limit_per_roll": 1 } }] },
-  "P0-44": { "name": "選ばれし唇", "category": "支援", "tags": ["支援", "ジャッジ"], "description": "支援2。自身には使用不可。", "description_raw": "支援2、自身に対しては使用不可", "source": { "book": "基本ルールブック" }, "timing": "ジャッジ", "cost": "0", "range": "0～1", "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "target": "other_roll", "value": 2 } }] },
-  "P0-45": { "name": "選ばれし脳", "category": "行動値", "tags": ["行動値", "オート"], "description": "最大行動値+2。", "description_raw": "最大行動値+2", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 2 } }] },
-  "P0-46": { "name": "選ばれし瞳", "category": "行動値", "tags": ["行動値", "オート"], "description": "最大行動値+1。", "description_raw": "最大行動値+1", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 1 } }] },
-  "P0-47": { "name": "奴隷の献身", "category": "防御", "tags": ["防御", "ダメージ"], "description": "同エリアのレギオンを任意数減らし、ダメージ減少。1ターンに何度でも可。", "description_raw": "同エリアのレギオンを任意の数減らし、その数だけダメージ減少。1ターンに何度でも使用可", "source": { "book": "基本ルールブック" }, "timing": "ダメージ", "cost": "1", "range": "自身", "effects": [{ "ref": "DEFEND_BY_SACRIFICE", "params": { "unit_type": "legion", "ratio": 1 } }] },
-  "P0-48": { "name": "選ばれし手", "category": "行動値", "tags": ["行動値", "オート"], "description": "最大行動値+1。", "description_raw": "最大行動値+1", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 1 } }] },
-  "P0-49": { "name": "選ばれし指先", "category": "行動値", "tags": ["行動値", "オート"], "description": "最大行動値+1。", "description_raw": "最大行動値+1", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 1 } }] },
-  "P0-50": { "name": "選ばれし肌", "category": "防御", "tags": ["防御", "ダメージ"], "description": "防御2。", "description_raw": "防御2", "source": { "book": "基本ルールブック" }, "timing": "ダメージ", "cost": "1", "range": "自身", "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 2 } }] },
-  "P0-51": { "name": "選ばれし心臓", "category": "行動値", "tags": ["行動値", "オート"], "description": "最大行動値+1。", "description_raw": "最大行動値+1", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 1 } }] },
-  "P0-52": { "name": "選ばれし骨格", "category": "行動値", "tags": ["行動値", "オート"], "description": "最大行動値+1。", "description_raw": "最大行動値+1", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 1 } }] },
-  "P0-53": { "name": "選ばれし臓腑", "category": "その他", "tags": ["オート"], "description": "効果なし。", "description_raw": "効果なし", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "なし", "effects": [] },
-  "P0-54": { "name": "麗しきドレス", "category": "その他", "tags": ["オート"], "description": "効果なし。", "description_raw": "効果なし", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "なし", "effects": [] },
-  "P0-55": { "name": "女王の歩み", "category": "移動", "tags": ["移動", "アクション", "移動妨害"], "description": "移動1、「移動妨害」無効。", "description_raw": "移動1、「移動妨害」無効", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "3", "range": "自身", "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": 1, "ignore_move_debuff": true } }] },
-  "P0-56": { "name": "選ばれし脚", "category": "妨害", "tags": ["妨害", "ジャッジ"], "description": "妨害1。", "description_raw": "妨害1", "source": { "book": "基本ルールブック" }, "timing": "ジャッジ", "cost": "1", "range": "0", "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "value": -1 } }] },
-  "P0-57": { "name": "クラッシュバイス", "category": "攻撃", "tags": ["攻撃", "アクション"], "description": "肉弾攻撃3。", "description_raw": "肉弾攻撃3", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "3", "range": "0", "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 3 } }] },
-  "P0-58": { "name": "キャタピラ", "category": "移動", "tags": ["移動", "アクション"], "description": "移動1。", "description_raw": "移動1", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "3", "range": "自身", "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": 1 } }] },
-  "P0-59": { "name": "モーターギア", "category": "強化", "tags": ["強化", "ダメージ"], "description": "自身の肉弾・白兵攻撃の与ダメージ+2。", "description_raw": "自身が与える白兵攻撃・肉弾攻撃の与ダメージ+2", "source": { "book": "基本ルールブック" }, "timing": "ダメージ", "cost": "1", "range": "自身", "effects": [{ "ref": "INCREASE_DEALT_DAMAGE", "params": { "value": 2, "condition": ["肉弾攻撃", "白兵攻撃"] } }] },
-  "P0-60": { "name": "強化装甲", "category": "防御", "tags": ["防御", "ダメージ"], "description": "防御2。", "description_raw": "防御2", "source": { "book": "基本ルールブック" }, "timing": "ダメージ", "cost": "1", "range": "自身", "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 2 } }] },
-  "P0-61": { "name": "おおあご", "category": "攻撃", "tags": ["攻撃", "アクション"], "description": "肉弾攻撃2。", "description_raw": "肉弾攻撃2", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "2", "range": "0", "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 2 } }] },
-  "P0-62": { "name": "はね", "category": "移動", "tags": ["移動", "アクション"], "description": "移動1～2。", "description_raw": "移動1～2", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "2", "range": "自身", "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": "1-2" } }] },
-  "P0-63": { "name": "よぶんなはね", "category": "補助", "tags": ["ラピッド使用", "ラピッド"], "description": "望むアクションマニューバをラピッドとして使用可。", "description_raw": "望むアクションマニューバをラピッドとして使用可", "source": { "book": "基本ルールブック" }, "timing": "ラピッド", "cost": "0", "range": "0", "effects": [{ "ref": "ALLOW_MANEUVER_AS_TIMING", "params": { "target": "self", "maneuver_timing": "アクション", "as_timing": "ラピッド" } }] },
-  "P0-64": { "name": "外骨格", "category": "防御", "tags": ["防御", "ダメージ"], "description": "防御1。", "description_raw": "防御1", "source": { "book": "基本ルールブック" }, "timing": "ダメージ", "cost": "0", "range": "自身", "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 1 } }] },
-  "P0-65": { "name": "脚", "category": "その他", "tags": ["オート"], "description": "効果なし。", "description_raw": "効果なし", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "なし", "effects": [] },
-  "P0-66": { "name": "大鉈", "category": "攻撃", "tags": ["攻撃", "アクション"], "description": "白兵攻撃2。", "description_raw": "白兵攻撃2", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "2", "range": "0", "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 2 } }] },
-  "P0-67": { "name": "寄生胞子", "category": "攻撃", "tags": ["攻撃", "アクション", "爆発", "支援"], "description": "射撃攻撃1+爆発、判定+1。", "description_raw": "射撃攻撃1+爆発、攻撃判定+1", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "2", "range": "0～1", "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "射撃", "damage": 1, "attack_bonus": 1, "on_hit": ["EXPLOSION"] } }] },
-  "P0-68": { "name": "よろめくあし", "category": "移動", "tags": ["移動", "アクション"], "description": "移動1。", "description_raw": "移動1", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "3", "range": "自身", "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": 1 } }] },
-  "P0-69": { "name": "きのこ", "category": "その他", "tags": ["オート"], "description": "効果なし。", "description_raw": "効果なし", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "なし", "effects": [] },
-  "P0-70": { "name": "分解ガス", "category": "攻撃", "tags": ["攻撃", "アクション", "全体攻撃"], "description": "射撃攻撃1+全体攻撃。", "description_raw": "射撃攻撃1+全体攻撃", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "3", "range": "1", "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "射撃", "damage": 1, "on_hit": ["AREA_ATTACK"] } }] },
-  "P0-71": { "name": "自動制御装置", "category": "補助", "tags": ["損傷無効", "オート"], "description": "パーツが損傷してもターン終了まで使用可。", "description_raw": "パーツを損傷しても、ターン終了までマニューバ使用可", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "ignore_part_damage", "value": true, "duration": "end_of_turn" } }] },
-  "P0-72": { "name": "スコープS", "category": "支援", "tags": ["支援", "オート"], "description": "射撃・砲撃攻撃の判定に+2の支援。", "description_raw": "射撃攻撃・砲撃攻撃のみ支援2", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "attackCheckBonus", "value": 2, "condition": ["射撃攻撃", "砲撃攻撃"] } }] }
+  "P0-21": { 
+    "name": "正面装甲", "category": "防御", "tags": ["防御", "ダメージ"], "description": "防御1。", "description_raw": "防御1", "source": { "book": "基本ルールブック" }, "timing": "ダメージ", "cost": "0", "range": "自身", "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 1 } }] 
+  },
+  "P0-22": { 
+    "name": "オートバランサー", "category": "防御", "tags": ["防御", "オート", "転倒", "移動"], "description": "「転倒」「移動」を無効化可。", "description_raw": "「転倒」「移動」を無効化可", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "NEGATE_STATUS_EFFECT", "params": { "effects_to_negate": ["転倒", "移動"], "optional": true } }] },
+  "P0-23": { 
+    "name": "メインエンジン", "category": "行動値", "tags": ["行動値", "オート"], "description": "最大行動値+2。", "description_raw": "最大行動値+2", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 2 } }] },
+  "P0-24": { 
+    "name": "サブエンジン", "category": "行動値", "tags": ["行動値", "オート"], "description": "最大行動値+1。", "description_raw": "最大行動値+1", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 1 } }] },
+  "P0-25": { 
+    "name": "装甲板", "category": "その他", "tags": ["オート"], "description": "効果なし。", "description_raw": "効果なし", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "なし", "effects": [] },
+  "P0-26": { 
+    "name": "殺戮本能", "category": "行動値", "tags": ["行動値", "オート"], "description": "最大行動値+2。", "description_raw": "最大行動値+2", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 2 } }] },
+  "P0-27": { 
+    "name": "鎧具足", "category": "防御", "tags": ["防御", "ダメージ"], "description": "防御1。", "description_raw": "防御1", "source": { "book": "基本ルールブック" }, "timing": "ダメージ", "cost": "0", "range": "自身", "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 1 } }] },
+  "P0-28": { 
+    "name": "戦闘感覚", "category": "支援", "tags": ["支援", "オート"], "description": "白兵攻撃の判定+1。", "description_raw": "白兵攻撃マニューバの攻撃判定+1", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "attackCheckBonus", "value": 1, "condition": "白兵攻撃" } }] },
+  "P0-29": { 
+    "name": "怪物の顎", "category": "攻撃", "tags": ["攻撃", "アクション"], "description": "肉弾攻撃3。", "description_raw": "肉弾攻撃3", "source": { "book": "基本ルールブック", "errata": "1.6.1" }, "timing": "アクション", "cost": "3", "range": "0", "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 3 } }] },
+  "P0-30": { 
+    "name": "節足", "category": "移動", "tags": ["移動", "アクション"], "description": "移動1。", "description_raw": "移動1", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "3", "range": "自身", "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": 1 } }] },
+  "P0-31": { 
+    "name": "粘液塊", "category": "妨害", "tags": ["妨害", "ジャッジ"], "description": "妨害1。", "description_raw": "妨害1", "source": { "book": "基本ルールブック" }, "timing": "ジャッジ", "cost": "1", "range": "0～1", "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "value": -1 } }] },
+  "P0-32": { 
+    "name": "強化外骨格", "category": "防御", "tags": ["防御", "ダメージ"], "description": "防御2。", "description_raw": "防御2", "source": { "book": "基本ルールブック" }, "timing": "ダメージ", "cost": "1", "range": "自身", "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 2 } }] },
+  "P0-33": { 
+    "name": "巨体", "category": "防御", "tags": ["防御", "オート", "転倒", "移動"], "description": "「転倒」「移動」を無効化可。", "description_raw": "「転倒」「移動」を無効化してよい", "source": { "book": "基本ルールブック", "errata": "1.6.1" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "NEGATE_STATUS_EFFECT", "params": { "effects_to_negate": ["転倒", "移動"], "optional": true } }] },
+  "P0-34": { 
+    "name": "中枢神経", "category": "行動値", "tags": ["行動値", "オート"], "description": "最大行動値+2。", "description_raw": "最大行動値+2", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 2 } }] },
+  "P0-35": { 
+    "name": "常時飢餓", "category": "行動値", "tags": ["行動値", "オート"], "description": "最大行動値+1。", "description_raw": "最大行動値+1", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 1 } }] },
+  "P0-36": { 
+    "name": "怪物の腕", "category": "攻撃", "tags": ["攻撃", "アクション"], "description": "肉弾攻撃3。", "description_raw": "肉弾攻撃3", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "3", "range": "0", "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 3 } }] },
+  "P0-37": { 
+    "name": "強化筋肉", "category": "防御", "tags": ["防御", "ダメージ", "爆発"], "description": "防御1+「爆発」無効。", "description_raw": "防御1+「爆発」無効", "source": { "book": "基本ルールブック" }, "timing": "ダメージ", "cost": "0", "range": "自身", "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 1 } }, { "ref": "NEGATE_DAMAGE_EFFECT", "params": { "effect_to_negate": "爆発" } }] },
+  "P0-38": { 
+    "name": "人工知能", "category": "行動値", "tags": ["行動値", "オート"], "description": "最大行動値+2。", "description_raw": "最大行動値+2", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 2 } }] },
+  "P0-39": { 
+    "name": "エンジン", "category": "行動値", "tags": ["行動値", "オート"], "description": "最大行動値+2。", "description_raw": "最大行動値+2", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 2 } }] },
+  "P0-40": { 
+    "name": "ブースター", "category": "行動値", "tags": ["行動値", "オート"], "description": "最大行動値+1。", "description_raw": "最大行動値+1", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 1 } }] },
+  "P0-41": { 
+    "name": "ヒートブロウ", "category": "妨害", "tags": ["妨害", "ジャッジ"], "description": "妨害1。", "description_raw": "妨害1", "source": { "book": "基本ルールブック" }, "timing": "ジャッジ", "cost": "1", "range": "0", "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "value": -1 } }] },
+  "P0-42": { 
+    "name": "ホバー", "category": "移動", "tags": ["移動", "アクション"], "description": "移動1～2。", "description_raw": "移動1～2", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "2", "range": "自身", "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": "1-2" } }] },
+  "P0-43": { 
+    "name": "選ばれし美貌", "category": "妨害", "tags": ["妨害", "ジャッジ"], "description": "妨害2。1ターンに何度でも使用可(1判定1回)。", "description_raw": "妨害2、1ターンに何度使ってもよい、1回の判定に重複不可", "source": { "book": "基本ルールブック" }, "timing": "ジャッジ", "cost": "2", "range": "0", "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "value": -2, "limit_per_turn": "none", "limit_per_roll": 1 } }] },
+  "P0-44": { 
+    "name": "選ばれし唇", "category": "支援", "tags": ["支援", "ジャッジ"], "description": "支援2。自身には使用不可。", "description_raw": "支援2、自身に対しては使用不可", "source": { "book": "基本ルールブック" }, "timing": "ジャッジ", "cost": "0", "range": "0～1", "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "target": "other_roll", "value": 2 } }] },
+  "P0-45": { 
+    "name": "選ばれし脳", "category": "行動値", "tags": ["行動値", "オート"], "description": "最大行動値+2。", "description_raw": "最大行動値+2", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 2 } }] },
+  "P0-46": { 
+    "name": "選ばれし瞳", "category": "行動値", "tags": ["行動値", "オート"], "description": "最大行動値+1。", "description_raw": "最大行動値+1", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 1 } }] },
+  "P0-47": { 
+    "name": "奴隷の献身", "category": "防御", "tags": ["防御", "ダメージ"], "description": "同エリアのレギオンを任意数減らし、ダメージ減少。1ターンに何度でも可。", "description_raw": "同エリアのレギオンを任意の数減らし、その数だけダメージ減少。1ターンに何度でも使用可", "source": { "book": "基本ルールブック" }, "timing": "ダメージ", "cost": "1", "range": "自身", "effects": [{ "ref": "DEFEND_BY_SACRIFICE", "params": { "unit_type": "legion", "ratio": 1 } }] },
+  "P0-48": { 
+    "name": "選ばれし手", "category": "行動値", "tags": ["行動値", "オート"], "description": "最大行動値+1。", "description_raw": "最大行動値+1", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 1 } }] },
+  "P0-49": { 
+    "name": "選ばれし指先", "category": "行動値", "tags": ["行動値", "オート"], "description": "最大行動値+1。", "description_raw": "最大行動値+1", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 1 } }] },
+  "P0-50": { 
+    "name": "選ばれし肌", "category": "防御", "tags": ["防御", "ダメージ"], "description": "防御2。", "description_raw": "防御2", "source": { "book": "基本ルールブック" }, "timing": "ダメージ", "cost": "1", "range": "自身", "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 2 } }] },
+  "P0-51": { 
+    "name": "選ばれし心臓", "category": "行動値", "tags": ["行動値", "オート"], "description": "最大行動値+1。", "description_raw": "最大行動値+1", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 1 } }] },
+  "P0-52": { 
+    "name": "選ばれし骨格", "category": "行動値", "tags": ["行動値", "オート"], "description": "最大行動値+1。", "description_raw": "最大行動値+1", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 1 } }] },
+  "P0-53": { 
+    "name": "選ばれし臓腑", "category": "その他", "tags": ["オート"], "description": "効果なし。", "description_raw": "効果なし", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "なし", "effects": [] },
+  "P0-54": { 
+    "name": "麗しきドレス", "category": "その他", "tags": ["オート"], "description": "効果なし。", "description_raw": "効果なし", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "なし", "effects": [] },
+  "P0-55": { 
+    "name": "女王の歩み", "category": "移動", "tags": ["移動", "アクション", "移動妨害"], "description": "移動1、「移動妨害」無効。", "description_raw": "移動1、「移動妨害」無効", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "3", "range": "自身", "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": 1, "ignore_move_debuff": true } }] },
+  "P0-56": { 
+    "name": "選ばれし脚", "category": "妨害", "tags": ["妨害", "ジャッジ"], "description": "妨害1。", "description_raw": "妨害1", "source": { "book": "基本ルールブック" }, "timing": "ジャッジ", "cost": "1", "range": "0", "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "value": -1 } }] },
+  "P0-57": { 
+    "name": "クラッシュバイス", "category": "攻撃", "tags": ["攻撃", "アクション"], "description": "肉弾攻撃3。", "description_raw": "肉弾攻撃3", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "3", "range": "0", "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 3 } }] },
+  "P0-58": { 
+    "name": "キャタピラ", "category": "移動", "tags": ["移動", "アクション"], "description": "移動1。", "description_raw": "移動1", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "3", "range": "自身", "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": 1 } }] },
+  "P0-59": { 
+    "name": "モーターギア", "category": "強化", "tags": ["強化", "ダメージ"], "description": "自身の肉弾・白兵攻撃の与ダメージ+2。", "description_raw": "自身が与える白兵攻撃・肉弾攻撃の与ダメージ+2", "source": { "book": "基本ルールブック" }, "timing": "ダメージ", "cost": "1", "range": "自身", "effects": [{ "ref": "INCREASE_DEALT_DAMAGE", "params": { "value": 2, "condition": ["肉弾攻撃", "白兵攻撃"] } }] },
+  "P0-60": { 
+    "name": "強化装甲", "category": "防御", "tags": ["防御", "ダメージ"], "description": "防御2。", "description_raw": "防御2", "source": { "book": "基本ルールブック" }, "timing": "ダメージ", "cost": "1", "range": "自身", "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 2 } }] },
+  "P0-61": { 
+    "name": "おおあご", "category": "攻撃", "tags": ["攻撃", "アクション"], "description": "肉弾攻撃2。", "description_raw": "肉弾攻撃2", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "2", "range": "0", "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 2 } }] },
+  "P0-62": { 
+    "name": "はね", "category": "移動", "tags": ["移動", "アクション"], "description": "移動1～2。", "description_raw": "移動1～2", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "2", "range": "自身", "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": "1-2" } }] 
+  },
+  "P0-63": { 
+    "name": "よぶんなはね", "category": "補助", "tags": ["ラピッド使用", "ラピッド"], "description": "望むアクションマニューバをラピッドとして使用可。", "description_raw": "望むアクションマニューバをラピッドとして使用可", "source": { "book": "基本ルールブック" }, "timing": "ラピッド", "cost": "0", "range": "0", "effects": [{ "ref": "ALLOW_MANEUVER_AS_TIMING", "params": { "target": "self", "maneuver_timing": "アクション", "as_timing": "ラピッド" } }] 
+  },
+  "P0-64": { 
+    "name": "外骨格", "category": "防御", "tags": ["防御", "ダメージ"], "description": "防御1。", "description_raw": "防御1", "source": { "book": "基本ルールブック" }, "timing": "ダメージ", "cost": "0", "range": "自身", "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 1 } }] 
+  },
+  "P0-65": { 
+    "name": "脚", "category": "その他", "tags": ["オート"], "description": "効果なし。", "description_raw": "効果なし", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "なし", "effects": [] 
+  },
+  "P0-66": { 
+    "name": "大鉈", "category": "攻撃", "tags": ["攻撃", "アクション"], "description": "白兵攻撃2。", "description_raw": "白兵攻撃2", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "2", "range": "0", "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 2 } }] 
+  },
+  "P0-67": { 
+    "name": "寄生胞子", "category": "攻撃", "tags": ["攻撃", "アクション", "爆発", "支援"], "description": "射撃攻撃1+爆発、判定+1。", "description_raw": "射撃攻撃1+爆発、攻撃判定+1", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "2", "range": "0～1", "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "射撃", "damage": 1, "attack_bonus": 1, "on_hit": ["EXPLOSION"] } }] 
+  },
+  "P0-68": { 
+    "name": "よろめくあし", "category": "移動", "tags": ["移動", "アクション"], "description": "移動1。", "description_raw": "移動1", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "3", "range": "自身", "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": 1 } }] 
+  },
+  "P0-69": { 
+    "name": "きのこ", "category": "その他", "tags": ["オート"], "description": "効果なし。", "description_raw": "効果なし", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "なし", "effects": [] 
+  },
+  "P0-70": { 
+    "name": "分解ガス", "category": "攻撃", "tags": ["攻撃", "アクション", "全体攻撃"], "description": "射撃攻撃1+全体攻撃。", "description_raw": "射撃攻撃1+全体攻撃", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "3", "range": "1", "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "射撃", "damage": 1, "on_hit": ["AREA_ATTACK"] } }] 
+  },
+  "P0-71": { 
+    "name": "自動制御装置", "category": "補助", "tags": ["損傷無効", "オート"], "description": "パーツが損傷してもターン終了まで使用可。", "description_raw": "パーツを損傷しても、ターン終了までマニューバ使用可", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "ignore_part_damage", "value": true, "duration": "end_of_turn" } }] 
+  },
+  "P0-72": { 
+    "name": "スコープS", "category": "支援", "tags": ["支援", "オート"], "description": "射撃・砲撃攻撃の判定に+2の支援。", "description_raw": "射撃攻撃・砲撃攻撃のみ支援2", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "attackCheckBonus", "value": 2, "condition": ["射撃攻撃", "砲撃攻撃"] } }] 
+  },
+  "P0-73": {
+    "name": "ただよう", "category": "移動",
+    "tags": ["アクション", "移動"],
+    "timing": "アクション", "cost": 3, "range": "自身",
+    "description": "移動1（【ほね】相当）。",
+    "description_raw": "移動1（【ほね】相当）",
+    "flavor_text": "死者たちは地を歩む。それは二本の足であるが、足先が多少どうこうなっていても骨さえあればなんとかなる。",
+    "source": { "book": "ESP", "page": 50 },
+    "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": 1, "direction": "performer_choice" } }]
+  },
+  "P0-74": {
+    "name": "少女の体", "category": "補助",
+    "tags": ["オート", "狂気点操作"],
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "description": "このパーツが損傷した際、損傷させた者は狂気点1点を得る（【トラウマスイッチ】相当）",
+    "description_raw": "このパーツが損傷した際、損傷させた者は狂気点1点を得る（【トラウマスイッチ】相当）",
+    "source": { "book": "ESP", "page": 50 },
+    "effects": [{ "ref": "INFLICT_MADNESS_ON_DAMAGE_TAKEN", "params": { "value": 1 } }]
+  },
+  "P0-75": {
+    "name": "巨大な脚", "category": "移動",
+    "tags": ["アクション", "移動"],
+    "timing": "アクション", "cost": 2, "range": "自身",
+    "description": "移動1～2（【けもあし】相当）",
+    "description_raw": "移動1～2（【けもあし】相当）",
+    "flavor_text": "あなたの足は切り落とされ、獣のものがつながれている。ひどく歪んだ造形だが、早く走れることは間違いない。",
+    "source": { "book": "ESP", "page": 50 },
+    "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": "1-2", "direction": "performer_choice" } }]
+  },
+  "P0-76": {
+    "name": "踏みつけ", "category": "攻撃",
+    "tags": ["アクション", "攻撃"],
+    "timing": "アクション", "cost": 2, "range": "0",
+    "description": "肉弾攻撃2（【かぎづめ】相当）",
+    "description_raw": "肉弾攻撃2（【かぎづめ】相当）",
+    "flavor_text": "敵を引き裂くために発達した鉤爪。日常生活に不便こそあれ、アンデッドに日常はない。よって問題なし。",
+    "source": { "book": "ESP", "page": 50 },
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 2 } }]
+  },
+  "P0-77": {
+    "name": "反射跳躍", "category": "移動",
+    "tags": ["移動", "ラピッド", "移動妨害"],
+    "timing": "ラピッド", "cost": 2, "range": "自身",
+    "description": "移動1、移動妨害無効（【ホッパー】相当）",
+    "description_raw": "移動1、移動妨害無効（【ホッパー】相当）",
+    "flavor_text": "脚に仕込まれた強力なバネによって、瞬間的にジャンプできる。ダイナミックな回避や移動を行うことが可能だ。",
+    "source": { "book": "ESP", "page": 50 },
+    "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": 1, "direction": "performer_choice", "ignore_move_debuff": true } }]
+  },
+  "P0-78": {
+    "name": "過剰筋肉", "category": "その他",
+    "tags": ["オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "description": "なし（【はらわた】相当）",
+    "description_raw": "なし（【はらわた】相当）",
+    "flavor_text": "体の中がスカスカでは格好がつかない。死者であろうと、体内には用途不明の器官が多数押し込められているのだ。",
+    "source": { "book": "ESP", "page": 50 },
+    "effects": []
+  },
+  "P0-79": {
+    "name": "肥大脳", "category": "行動値",
+    "tags": ["オート", "行動値"],
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "description": "最大行動値+2（【よぶんなあたま】相当）",
+    "description_raw": "最大行動値+2（【よぶんなあたま】相当）",
+    "flavor_text": "あなたの肩の上には、もう一つの頭がある。もう一人いるほど何かとすごくやってくる。二つの知見は早い反応をさせてくれる。",
+    "source": { "book": "ESP", "page": 51 },
+    "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "maxActionValue", "value": 2, "duration": "permanent_while_undamaged" } }]
+  },
+  "P0-80": {
+    "name": "のうしょう", "category": "その他",
+    "tags": ["オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "description": "なし（【はらわた】相当）",
+    "description_raw": "なし（【はらわた】相当）",
+    "flavor_text": "体の中がスカスカでは格好がつかない。死者であろうと、体内には用途不明の器官が多数押し込められているのだ。",
+    "source": { "book": "ESP", "page": 51 },
+    "effects": []
+  },
+  "P0-81": {
+    "name": "自動再接続", "category": "防御",
+    "tags": ["オート", "防御", "切断"],
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "description": "「切断」を無効化（【オートセパレート】相当）",
+    "description_raw": "「切断」を無効化（【オートセパレート】相当）",
+    "flavor_text": "自らを切り離す分離システム。たやすく解体されるが、それぞれが独自に動き、再びつながるのだ。",
+    "source": { "book": "ESP", "page": 51 },
+    "effects": [{ "ref": "NEGATE_DAMAGE_EFFECT", "params": { "effect_to_negate": "切断", "optional": true } }]
+  },
+  "P0-82": {
+    "name": "有機触肢", "category": "移動",
+    "tags": ["アクション", "移動"],
+    "timing": "アクション", "cost": 3, "range": "自身",
+    "description": "移動1、「移動妨害」無効（【はりつき】相当）。",
+    "description_raw": "移動1、「移動妨害」無効（【はりつき】相当）",
+    "flavor_text": "あなたの足には鉤爪や吸盤があり、壁や天井を駆け上ることでトリッキーな移動が可能となる。",
+    "source": { "book": "ESP", "page": 51 },
+    "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": 1, "direction": "performer_choice", "ignore_move_debuff": true } }]
+  },
+  "P0-83": {
+    "name": "強化反応器", "category": "行動値",
+    "tags": ["オート", "行動値"],
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "description": "最大行動値+1（【めだま】相当）",
+    "description_raw": "最大行動値+1（【めだま】相当）",
+    "flavor_text": "人間にとって最も重大な感覚器官。感覚の鋭さはそのまま、手数の多さに直結するのが死者の戦いだ。",
+    "source": { "book": "ESP", "page": 51 },
+    "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "maxActionValue", "value": 1, "duration": "permanent_while_undamaged" } }]
+  },
+  "P0-84": {
+    "name": "構築関節", "category": "その他",
+    "tags": ["オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "description": "なし（【はらわた】相当）",
+    "description_raw": "なし（【はらわた】相当）",
+    "source": { "book": "ESP", "page": 51 },
+    "effects": []
+  },
+  "P0-85": {
+    "name": "覚醒領域", "category": "行動値",
+    "tags": ["オート", "行動値"],
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "description": "最大行動値+2（【よぶんなあたま】相当）",
+    "description_raw": "最大行動値+2（【よぶんなあたま】相当）",
+    "source": { "book": "ESP", "page": 50 },
+    "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "maxActionValue", "value": 2, "duration": "permanent_while_undamaged" } }]
+  },
+  "P0-86": {
+    "name": "脳幹刺激端末", "category": "行動値",
+    "tags": ["オート", "行動値"],
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "description": "最大行動値+1（【アドレナリン】相当）。",
+    "description_raw": "最大行動値+1（【アドレナリン】相当）",
+    "flavor_text": "脳の働きを活性化させ、反応速度を無理矢理に活性化させる改造。アンデッドならではの薬物強化である。",
+    "source": { "book": "ESP", "page": 50 },
+    "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "maxActionValue", "value": 1, "duration": "permanent_while_undamaged" } }]
+  },
+  "P0-87": {
+    "name": "痩せた腕", "category": "その他",
+    "tags": ["オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "description": "なし（【よぶんなにく】相当）",
+    "description_raw": "なし（【よぶんなにく】相当）",
+    "flavor_text": "これといった機能のないパーツ。しかし、機能などなくとも最低限の盾としては活用できるものだ。",
+    "source": { "book": "ESP", "page": 50 },
+    "effects": []
+  },
+  "P0-88": {
+    "name": "痩せた脚", "category": "その他",
+    "tags": ["オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "description": "なし（【よぶんなにく】相当）",
+    "description_raw": "なし（【よぶんなにく】相当）",
+    "flavor_text": "これといった機能のないパーツ。しかし、機能などなくとも最低限の盾としては活用できるものだ。",
+    "source": { "book": "ESP", "page": 50 },
+    "effects": []
+  }
 }

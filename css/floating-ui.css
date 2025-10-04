@@ -35,7 +35,7 @@
 .maneuver-card {
   position: fixed;
   width: 300px;
-  background: var(--color-background);
+  background: var(--color-background-2);
   background-color: transparent;
   border-radius: 5px;
   pointer-events: none;
@@ -107,7 +107,7 @@
 }
 .card-row {
   padding: 6px;
-  background-color: var(--color-background);
+  background-color: var(--color-background-2);
   border-radius: 0 0 5px 5px;
 
   padding: 4px 8px; /* パディングを調整 */
@@ -166,10 +166,11 @@
     margin: 5px;
     padding: 5px 20px;
     border-radius: 10px;
-    background-color: var(--color-level-1);
-    color:            var(--color-text);
-    border: 2px solid gold;
-}
+    background-color: var(--color-6);
+    color:            var(--color-f);
+    outline: 2px solid gold;
+    transition: all 0.2s;
+  }
 /* ホバー時の色を少し明るくする */
 .simple-menu-modal-body .maneuver-item:not(.is-masked):hover {
     background-color:  gold;
@@ -177,8 +178,9 @@
 }
 /* 無効化されたボタンのスタイル */
 .simple-menu-modal-body .maneuver-item.is-masked {
-    border: none;
-    color: var(--color-text-muted);
+    outline: none;
+    opacity: 0.5;
+    color: var(--color-c);
     /* filter: grayscale(80%);*/
 }
 .simple-menu-modal-body .maneuver-item.area-color-naraku {   background-color: var(--color-naraku); }

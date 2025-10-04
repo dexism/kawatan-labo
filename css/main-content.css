@@ -333,6 +333,10 @@ body.is-dragging .char.hover-highlight {
 .add-char-text {
   font-weight: bold;
 }
+.add-char-text-2 {
+  font-size: 26px;
+  font-weight: bold;
+}
 /* カードホバー時のアクションボタン */
 .card-actions-overlay {
   position: absolute;
@@ -455,7 +459,7 @@ body.is-dragging .char.hover-highlight {
   font-weight: bold;
   position: relative;
   transition: all 0.2s ease-out;
-  background-color: var(--color-background);
+  background-color: var(--color-background-2);
   gap: 3px;
 }
 /* グリッドのヘッダーとセル */

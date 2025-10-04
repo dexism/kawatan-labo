@@ -364,6 +364,58 @@
     "baseActionValue": 6,
     "malice": 10.0
   },
+  "piece_217": {
+    "name": "マリオネット",
+    "description": "ESPに操られるドールやサヴァント。バラバラになろうとも浮遊させられ戦う。",
+    "img": "images/pieces/pieces_217.png",
+    "category": "ホラー",
+    "position": "マリオネット",
+    "skills": ["ホラー"],
+    "parts": {
+      "body": ["心崩し", "ベクトル偏向膜", "フローター", "止まらぬ痙攣", "おぞましきもの", "ただよう", "少女の体"]
+    },
+    "baseActionValue": 6,
+    "malice": 3
+  },
+  "piece_218": {
+    "name": "マウント",
+    "description": "特定サヴァントの乗騎として調整されたアンデッド。移動能力に特化している。",
+    "img": "images/pieces/pieces_218.png",
+    "category": "ホラー",
+    "position": "マウント",
+    "skills": ["ホラー"],
+    "parts": {
+      "body": ["騎乗調整", "巨大な脚", "踏みつけ", "突進", "反射跳躍", "不動", "強化脊髄", "はらわた", "過剰筋肉", "過剰筋肉"]
+    },
+    "baseActionValue": 7,
+    "malice": 8
+  },
+  "piece_219": {
+    "name": "フォビア",
+    "description": "重度の精神攻撃を可能としたESP兵器。多くはアンデッドだが、生体も存在するらしい。",
+    "img": "images/pieces/pieces_219.png",
+    "category": "ホラー",
+    "position": "フォビア",
+    "skills": ["ホラー"],
+    "parts": {
+      "body": ["狂気の波調", "不安の種", "知覚混乱", "フローター", "のうみそ", "肥大脳", "めだま", "のうしょう", "のうしょう"]
+    },
+    "baseActionValue": 6,
+    "malice": 8
+  },
+  "piece_220": {
+    "name": "リアニメイター",
+    "description": "破壊されたアンデッドの再生を行う半機械アンデッド。ネクロマンサーの助手的存在。",
+    "img": "images/pieces/pieces_220.png",
+    "category": "ホラー",
+    "position": "リアニメイター",
+    "skills": ["ホラー"],
+    "parts": {
+      "body": ["大鋏", "縫合用アーム", "合成再活性化", "自動再接続", "再生", "不動", "アームバイス", "有機触肢", "のうみそ", "強化反応器", "リフレックス", "アドレナリン", "構築関節", "構築関節", "構築関節"]
+    },
+    "baseActionValue": 6,
+    "malice": 16
+  },
   "savant_301": {
     "name": "ネメシス",
     "description": "クセのない外見と能力を誇る汎用兵士型サヴァント。",
@@ -427,5 +479,21 @@
     },
     "baseActionValue": 6,
     "malice": 14.0
+  },
+   "savant_305": {
+    "name": "オラクル",
+    "description": "ESP研究の成功作サヴァント。しかし、その自我は半ば暴走している。",
+    "img": "images/pieces/pieces_305.png",
+    "category": "サヴァント",
+    "position": "オラクル",
+    "skills": [],
+    "parts": {
+      "head": ["緊急転移", "絶対歪曲", "のうみそ", "覚醒領域", "めだま", "脳幹刺激端末"],
+      "arms": ["空間抉り", "痩せた腕", "痩せた腕"],
+      "torso": ["知覚混乱", "ベクトル偏向膜", "しんぞう", "リフレックス", "はらわた", "はらわた"],
+      "legs": ["フローター", "痩せた脚", "痩せた脚"]
+    },
+    "baseActionValue": 6,
+    "malice": 10
   }
 }

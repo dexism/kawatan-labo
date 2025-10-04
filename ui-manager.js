@@ -134,7 +134,7 @@ function renderCharacterGroup(container, characters, type) {
     const addCard = document.createElement('div');
     addCard.className = 'add-char-card';
     const typeText = (type === 'pc') ? '姉妹ドール' : 'NCの手駒';
-    addCard.innerHTML = `<div class="add-char-text">${typeText}</div><div class="add-char-plus">+</div><div class="add-char-text">アンデッドを追加</div>`;
+    addCard.innerHTML = `<div class="add-char-text-2">UNDEAD</div><div class="add-char-plus">+</div><div class="add-char-text">${typeText}を追加</div>`;
     container.appendChild(addCard);
   }
 }
@@ -731,9 +731,7 @@ export function showManeuverCard(baseElementRect, itemRect, character, maneuverO
     cardEl.innerHTML = `
         <div class="card-category-bar ${categoryClass}">${categoryName}</div>
         <div class="card-content">
-            <div class="card-source-header">
-                ${sourceText}
-            </div>
+            <div class="card-source-header">${sourceText}</div>
             <div class="card-header">
                 <span class="card-location-text">${locationText}</span>
                 <span class="card-maneuver-name">【${maneuver.name}】</span>
@@ -743,12 +741,12 @@ export function showManeuverCard(baseElementRect, itemRect, character, maneuverO
                 <div><span>C</span>${maneuver.cost}</div>
                 <div><span>R</span>${maneuver.range}</div>
             </div>
-            <div class="card-row"><strong>効果</strong> ${maneuver.description || '---'}</div>
-            <div class="card-row"><strong>説明</strong> ${maneuver.description_raw || '---'}</div>
+            <div class="card-row"><strong>効果</strong> ${maneuver.description_raw || '---'}</div>
+            ${maneuver.flavor_text ? `<div class="card-row" style="font-style: italic;">${maneuver.flavor_text}</div>` : ''}
             <div class="card-row"><strong>出典</strong> ${rulebookInfo || '---'}</div>
         </div>
     `;
-
+            // <div class="card-row"><strong>効果</strong> ${maneuver.description || '---'}</div>
     cardEl.style.display = 'flex';
     const cardRect = cardEl.getBoundingClientRect();
     let left = 20;

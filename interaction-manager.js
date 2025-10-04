@@ -264,11 +264,16 @@ export function handleDamageItemClick(index) {
 
         if (character.category === 'レギオン' || Object.values(character.partsStatus).flat().filter(p => !p.damaged).length <= damageInfo.amount) {
             if (character.category === 'レギオン') {
-                ui.addLog(`レギオンへの攻撃！ ${damageInfo.amount}体の兵員が失われます。`);
-                charManager.damagePart(character.id, null, damageInfo.amount);
+                ui.addLog(`レギオンへの攻撃！ ${damageInfo.amount}体が失われます。`);
+                // charManager.damagePart(character.id, null, damageInfo.amount);
+                const wasDestroyed = charManager.damagePart(character.id, null, damageInfo.amount);
+                if (wasDestroyed) {
+                    ui.showToastNotification(`${character.name}は完全破壊されました`);
+                }
             } else {
                 ui.addLog(`＞ ${character.name}は残りパーツ数以上のダメージを受け、完全に破壊されました！`);
                 charManager.updateCharacter(character.id, { isDestroyed: true });
+                ui.showToastNotification(`${character.name}は完全破壊されました`);
             }
             ui.removeDamagePrompt(character.id);
             onConfirmCallback();

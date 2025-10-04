@@ -3,216 +3,581 @@
   "//": "==    手駒専用パーツの定義           ==",
   "//": "========================================",
 
+  "//": "---------- 悪意点 0.5 (P1) ----------",
+  "P1-01": {
+    "name": "よぶんなにく", "category": "補助",
+    "tags": ["オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "description": "1体の手駒に複数を所有させてよい。",
+    "description_raw": "1体の手駒に複数を所有させてよい。",
+    "flavor_text": "これといった機能のないパーツ。しかし、機能などなくとも最低限の盾としては活用できるものだ。",
+    "source": { "book": "ESP", "page": 52 },
+    "effects": [{ "ref": "ALLOW_MULTIPLE", "params": {} }]
+  },
+  "P1-02": {
+    "name": "止まらぬ痙攣", "category": "支援",
+    "tags": ["ジャッジ", "支援"],
+    "timing": "ジャッジ", "cost": 2, "range": "0",
+    "description": "支援1。",
+    "description_raw": "支援1。",
+    "flavor_text": "常にガクガクと不安定に震え痙攣する体は、著しく運動性を損なう。しかし、時として思わぬ決定打を生み出すこともあるのだ。",
+    "source": { "book": "ESP", "page": 52 },
+    "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "target": "any_roll", "value": 1 } }]
+  },
+  "P1-03": {
+    "name": "おぞましきもの", "category": "妨害",
+    "tags": ["ジャッジ", "妨害"],
+    "timing": "ジャッジ", "cost": 2, "range": "0",
+    "description": "妨害1。",
+    "description_raw": "妨害1。",
+    "flavor_text": "醜悪さ、悲痛さ、哀れさ。相対する者に心があるならば……目を背けてしまっても仕方あるまい。たとえ戦いの中であろうと。",
+    "source": { "book": "ESP", "page": 52 },
+    "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "target": "any_roll", "value": -1 } }]
+  },
+
   "//": "---------- 悪意点 1 (P2) ----------",
   "P2-01": {
-    "name": "ひきさく", "category": "攻撃", 
+    "name": "ひきさく", "category": "攻撃",
     "tags": ["攻撃", "アクション", "連撃"],
+    "timing": "アクション", "cost": 2, "range": "0",
     "description": "肉弾攻撃1。同エリアのゾンビ10体につき連撃+1。", 
     "description_raw": "肉弾攻撃1+連撃[同エリアのゾンビの数÷10](切捨て)",
+    "flavor_text": "死者の爪と歯は、生前とは比べ物にならない。原始的な肉食獣の如く飛びかかり獲物を引き裂くのだ。",
     "source": { "book": "基本ルールブック", "page": 141 }, 
-    "timing": "アクション", "cost": 2, "range": "0",
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 1, "on_hit_dynamic": { "type": "CHAIN_ATTACK_BY_ALLY_COUNT", "ally_name": "ゾンビ" } } }]
   },
   "P2-02": {
     "name": "むらがる", "category": "妨害", 
     "tags": ["移動妨害", "ラピッド"],
+    "timing": "ラピッド", "cost": 0, "range": "0",
     "description": "射程0の対象に移動妨害1。", 
     "description_raw": "移動妨害1",
+    "flavor_text": "動きの遅いザコも、数さえいれば邪魔くさいはできる。じぶとさと力を持っていればなおさらだ。",
     "source": { "book": "基本ルールブック", "page": 141 }, 
-    "timing": "ラピッド", "cost": 0, "range": "0",
     "effects": [{ "ref": "GENERIC_MOVE_DEBUFF", "params": { "value": -1 } }]
   },
   "P2-03": {
     "name": "第二形態", "category": "補助", 
     "tags": ["変身", "オート", "損傷"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "損傷時、自身を消し、別の手駒を配置する。追加手駒の悪意は半分。", 
     "description_raw": "このパーツの損傷時、自身を舞台から取り除き、予め用意した別の手駒（行動値は現カウント－１）を同エリアか隣接エリアに配置。合計悪意に手駒本来の半分（切り上げ）を加える。",
+    "flavor_text": "“それ”は本当の姿ではない。真の絶望はこれから現れる……！",
     "source": { "book": "基本ルールブック", "page": 141, "errata": "1.6.1" }, 
-    "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [{ "ref": "TRANSFORM", "params": { "trigger": "on_this_part_damaged" } }]
   },
   "P2-04": {
     "name": "肉漁り虫", "category": "補助", 
     "tags": ["増援", "アクション"],
+    "timing": "アクション", "cost": 2, "range": "0～1",
     "description": "コストとしてレギオン5体を消費し、ヘビトンボ1体を増援する。", 
     "description_raw": "増援1(ヘビトンボ)。対象エリアの任意のレギオンを5体減らす。",
+    "flavor_text": "死者の軍勢が蠢く時、忌まわしい屍肉漁りどもも集まってくる。あるいは、予め巨大昆虫の幼虫を体内に仕込まれたゾンビもいるという。",
     "source": { "book": "基本ルールブック", "page": 141 }, 
-    "timing": "アクション", "cost": 2, "range": "0～1",
     "effects": [{ "ref": "SUMMON_UNIT", "params": { "unit_name": "ヘビトンボ", "count": 1, "cost_type": "sacrifice_legion", "cost_value": 5 } }]
+  },
+  "P2-05": {
+    "name": "心崩し", "category": "攻撃",
+    "tags": ["アクション", "攻撃", "精神攻撃"],
+    "timing": "アクション", "cost": 2, "range": "0～1",
+    "description": "「発狂中の未練」を持たないドールのみ対象。精神攻撃1。",
+    "description_raw": "「発狂中の未練」を持たないドールのみ対象に選べる。精神攻撃1。",
+    "flavor_text": "気丈にふるまってきた心は、それゆえにこそ脆い。傷一つないというのなら、それこそが傷となるのだ。",
+    "source": { "book": "ESP", "page": 52 },
+    "effects": [{ "ref": "MENTAL_ATTACK", "params": { "damage": 1, "condition": "target_not_mad" } }]
+  },
+  "P2-06": {
+    "name": "空間抉り", "category": "攻撃",
+    "tags": ["アクション", "攻撃", "損傷"],
+    "timing": "アクション", "cost": 2, "range": "0～2",
+    "description": "対象はパーツを1つ選び、損傷させる。",
+    "description_raw": "対象はパーツを1つ選ぶ。そのパーツは損傷する。",
+    "flavor_text": "見えざる手が、長く長く伸びて。肉も、肉も、鋼鉄も。とてつもない怪力で、ぐしゃりと握りつぶしてくる。それを防ぐ手段はない。",
+    "source": { "book": "ESP", "page": 52 },
+    "effects": [{ "ref": "FORCE_PART_DAMAGE", "params": { "count": 1 } }]
+  },
+  "P2-07": {
+    "name": "ベクトル偏向膜", "category": "防御",
+    "tags": ["オート", "防御", "爆発"],
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "description": "「爆発」無効化。攻撃判定で大失敗時、手駒に与えるダメージ2倍。",
+    "description_raw": "自身が受けた「爆発」を無効化してもよい。あなたが攻撃判定で大失敗した際、手駒に与えるダメージは2倍になる。",
+    "flavor_text": "一定以上の衝撃に対し、ESPによってその志向性を軽減する。もっとも、この力は緊急時以外にも誤作動し、思わぬ事態を招く不安定なものだ。",
+    "source": { "book": "ESP", "page": 52 },
+    "effects": [
+      { "ref": "NEGATE_DAMAGE_EFFECT", "params": { "effect_to_negate": "爆発", "optional": true } },
+      { "ref": "INCREASE_SELF_FUMBLE_DAMAGE", "params": { "multiplier": 2 } }
+    ]
   },
 
   "//": "---------- 悪意点 1.5 (P3) ----------",
   "P3-01": {
     "name": "一斉射撃", "category": "攻撃", 
     "tags": ["攻撃", "アクション", "連撃"],
+    "timing": "アクション", "cost": 3, "range": "0～1",
     "description": "射撃攻撃2。同エリアのソルジャー10体につき連撃+1。", 
     "description_raw": "射撃攻撃2+連撃[同エリアのソルジャーの数÷10](切捨て)",
+    "flavor_text": "機転と容赦を持ち合わせない死者の兵団は、肉片と化した敵にも銃弾を浴びせ続けることで有名だ。",
     "source": { "book": "基本ルールブック", "page": 141 }, 
-    "timing": "アクション", "cost": 3, "range": "0～1",
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "射撃", "damage": 2, "on_hit_dynamic": { "type": "CHAIN_ATTACK_BY_ALLY_COUNT", "ally_name": "ソルジャー" } } }]
   },
   "P3-02": {
     "name": "うわごと", "category": "攻撃", 
     "tags": ["攻撃", "アクション", "連撃", "狂気点操作"],
+    "timing": "アクション", "cost": 3, "range": "0",
     "description": "精神攻撃1。同エリアのナイトメア10体につき連撃+1。", 
     "description_raw": "精神攻撃1+連撃[同エリアのナイトメアの数÷10](切捨て)",
+    "flavor_text": "できそこないの自我がつぶやく言葉は、ドールたちの心を引き裂く鉤爪となるだろう。",
     "source": { "book": "基本ルールブック", "page": 141 }, 
-    "timing": "アクション", "cost": 3, "range": "0",
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "精神", "damage": 1, "on_hit_dynamic": { "type": "CHAIN_ATTACK_BY_ALLY_COUNT", "ally_name": "ナイトメア" } } }]
   },
   "P3-03": {
     "name": "フローター", "category": "妨害", 
     "tags": ["妨害", "オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "自身が受ける肉弾・白兵攻撃の判定を-1する。", 
     "description_raw": "自身を対象とする肉弾攻撃・白兵攻撃の判定値-1、全体攻撃では、自身に対する判定値のみ-1",
+    "flavor_text": "宙に浮かぶ存在に、力任せの一撃は受け流される。",
     "source": { "book": "基本ルールブック", "page": 141 }, 
-    "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "defenseCheckBonus", "value": -1, "duration": "permanent_while_undamaged", "condition": ["肉弾攻撃", "白兵攻撃"] } }]
   },
   "P3-04": {
     "name": "突進", "category": "攻撃", 
     "tags": ["攻撃", "ラピッド", "移動"],
+    "timing": "ラピッド", "cost": 1, "range": "効果参照",
     "description": "自身の移動時に使用可。移動前後のエリアの対象1体に肉弾攻撃3。", 
     "description_raw": "自身の移動時に使用可。移動前か移動後のエリアの対象1体に、肉弾攻撃3",
+    "flavor_text": "巨体、スピード、凶器のいずれか、あるいは全てを持ち合わせ、ただ進むだけで、強力な攻撃となる。",
     "source": { "book": "基本ルールブック", "page": 141 }, 
-    "timing": "ラピッド", "cost": 1, "range": "効果参照",
     "effects": [{ "ref": "ATTACK_ON_MOVE", "params": { "attack_type": "肉弾", "damage": 3 } }]
   },
   "P3-05": {
     "name": "楽園の蹂躙", "category": "移動", 
     "tags": ["コスト補正", "オート", "移動"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "「楽園」方向への自身の移動マニューバのコストを-1。", 
     "description_raw": "バトルパートにおいて、現在位置から「楽園」方向への移動マニューバを自身を対象として宣言する際、そのマニューバのコストが－１（最低０）される。",
+    "flavor_text": "ネクロマンサーの手に囚われた連中は、ドールたちの自由と笑顔を心底憎んでいるに違いない。",
     "source": { "book": "基本ルールブック", "page": 142, "errata": "1.6.1" }, 
-    "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [{ "ref": "REDUCE_MOVE_COST", "params": { "direction": "楽園", "value": 1 } }]
   },
   "P3-06": {
     "name": "死人指揮", "category": "支援", 
     "tags": ["支援", "ジャッジ"],
+    "timing": "ジャッジ", "cost": 0, "range": "0～1",
     "description": "射程内の他者の判定に+2の支援を行う。", 
     "description_raw": "支援2、自身には使用不可",
+    "flavor_text": "ネクロマンサーとその代理人が持つ軍団指揮能力。率いられるアンデッドは、目覚しい戦果をあげるという。",
     "source": { "book": "基本ルールブック", "page": 142 }, 
-    "timing": "ジャッジ", "cost": 0, "range": "0～1",
     "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "target": "other_roll", "value": 2 } }]
   },
   "P3-07": {
     "name": "死者融合", "category": "補助", 
     "tags": ["増援", "アクション"],
+    "timing": "アクション", "cost": 2, "range": "0～1",
     "description": "コストとしてレギオンを1d10体消費し、ブッチャー1体を増援する。", 
     "description_raw": "増援1(ブッチャー)。対象エリアの任意のレギオンをサイコロの出目分だけ減らす",
+    "flavor_text": "弱兵の群れをつなぎあわせ、巨大な1体の怪物にする。継ぎの時間は今や、ネクロマンサーはかくして強大な兵力を得るのだ。",
     "source": { "book": "基本ルールブック", "page": 142 }, 
-    "timing": "アクション", "cost": 2, "range": "0～1",
     "effects": [{ "ref": "SUMMON_UNIT", "params": { "unit_name": "ブッチャー", "count": 1, "cost_type": "sacrifice_legion", "cost_value_dice": "1d10" } }]
   },
   "P3-08": {
     "name": "操り人形糸", "category": "攻撃", 
     "tags": ["攻撃", "アクション", "切断", "連撃"],
+    "timing": "アクション", "cost": 3, "range": "0～1",
     "description": "白兵攻撃1+切断。ゾンビ10体につき連撃+1。", 
     "description_raw": "白兵攻撃1+切断+連撃[対象エリアのゾンビの数÷10]（切捨て）",
+    "flavor_text": "ゾンビの体内に信号を送り、己の攻撃に連動させる技がある。信号を送る糸自体が肉を切り裂く繊維であり、ドールを締め刻むのだという。",
     "source": { "book": "基本ルールブック", "page": 142 }, 
-    "timing": "アクション", "cost": 3, "range": "0～1",
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 1, "on_hit": ["SEVERANCE"], "on_hit_dynamic": { "type": "CHAIN_ATTACK_BY_ALLY_COUNT", "ally_name": "ゾンビ" } } }]
   },
   "P3-09": {
     "name": "長い腕", "category": "補助", 
     "tags": ["射程補正", "オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "肉弾・白兵攻撃マニューバの射程を+1。", 
     "description_raw": "肉弾・白兵攻撃マニューバの射程を+1してもよい",
+    "flavor_text": "自我の薄いアンデッドに腕を扱わせることは難しい。遠くに攻撃させたいなら、腕自体を伸ばす方がずっとたやすい。",
     "source": { "book": "基本ルールブック", "page": 142 }, 
-    "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "rangeBonus", "value": 1, "duration": "permanent_while_undamaged", "condition": ["肉弾攻撃", "白兵攻撃"] } }]
   },
   "P3-10": {
     "name": "長い脚", "category": "補助", 
     "tags": ["移動距離補正", "オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "移動マニューバの移動距離を+1。", 
     "description_raw": "移動マニューバの移動距離を+1してもよい",
+    "flavor_text": "往々にして自我の薄いアンデッドは鈍重だ。しかし脚自体が長ければ進む距離は増えるだろう。わかりきった道理ではないか。",
     "source": { "book": "基本ルールブック", "page": 142 }, 
-    "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "moveDistanceBonus", "value": 1, "duration": "permanent_while_undamaged", "condition": "移動" } }]
   },
   "P3-11": {
     "name": "精神汚染", "category": "攻撃", 
     "tags": ["攻撃", "アクション", "狂気点操作"],
+    "timing": "アクション", "cost": 3, "range": "0～1",
     "description": "射程0～1の対象に「精神攻撃1」。", 
     "description_raw": "精神攻撃1",
+    "flavor_text": "真なる狂気と悪意は、意志を蝕む疫病だ。その上、死んでも逃れられない。",
     "source": { "book": "基本ルールブック", "page": 142 }, 
-    "timing": "アクション", "cost": 3, "range": "0～1",
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "精神", "damage": 1 } }]
   },
   "P3-12": {
     "name": "不動", "category": "防御", 
     "tags": ["防御", "オート", "転倒", "移動"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "「転倒」「移動」の効果を無効化できる。", 
     "description_raw": "「転倒」「移動」を無効化できる",
+    "flavor_text": "いかに人を超えた力を与えられようと、所詮ドールはか弱い少女に過ぎない。いつかそれを思い知らされる時が来る。",
     "source": { "book": "基本ルールブック", "page": 142, "errata": "1.6.1" }, 
-    "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [{ "ref": "NEGATE_STATUS_EFFECT", "params": { "effects_to_negate": ["転倒", "移動"], "optional": true } }]
+  },
+  "P3-13": {
+    "name": "不安の種", "category": "補助",
+    "tags": ["アクション", "狂気点操作"],
+    "timing": "アクション", "cost": 2, "range": "0～1",
+    "description": "ドールの未練1つを「依存」に変更する。戦闘終了時に元に戻る。",
+    "description_raw": "対象ドール1体の任意の未練内容1つを「依存」に変更する。この内容変更は戦闘終了時、元に戻る。",
+    "flavor_text": "自我拡大によるESP効果の基本はテレパシーだ。孤独、怯え、絶望、嗚咽……これらを過度に投射されれば、一時的にせよ精神的影響を受けずにはいられない。",
+    "source": { "book": "ESP", "page": 52 },
+    "effects": [{ "ref": "CHANGE_REGRET_TYPE_TEMPORARY", "params": { "to": "依存" } }]
+  },
+  "P3-14": {
+    "name": "悪意の芽", "category": "補助",
+    "tags": ["アクション", "狂気点操作"],
+    "timing": "アクション", "cost": 2, "range": "0～1",
+    "description": "ドールの未練1つを「嫌悪」に変更する。戦闘終了時に元に戻る。",
+    "description_raw": "対象ドール1体の任意の未練内容1つを「嫌悪」に変更する。この内容変更は戦闘終了時、元に戻る。",
+    "flavor_text": "ESP開発の献体は死者であっても繰り返し過度のストレスを受けた。その怨念めいた憎悪のテレパシーは、繊細なドールの精神を一時的にせよ汚染する。",
+    "source": { "book": "ESP", "page": 52 },
+    "effects": [{ "ref": "CHANGE_REGRET_TYPE_TEMPORARY", "params": { "to": "嫌悪" } }]
+  },
+  "P3-15": {
+    "name": "妄想の華", "category": "補助",
+    "tags": ["アクション", "狂気点操作"],
+    "timing": "アクション", "cost": 2, "range": "0～1",
+    "description": "ドールの未練1つを「信頼」に変更する。戦闘終了時に元に戻る。",
+    "description_raw": "対象ドール1体の任意の未練内容1つを「信頼」に変更する。この内容変更は戦闘終了時、元に戻る。",
+    "flavor_text": "妄信が幼さか、哀れにも開発者たちを信頼しきって苦しみ抜いた献体は少なくない。狂信めいた愛情は、深い絆で結ばれたドールの心を捉え呪縛してしまう。",
+    "source": { "book": "ESP", "page": 52 },
+    "effects": [{ "ref": "CHANGE_REGRET_TYPE_TEMPORARY", "params": { "to": "信頼" } }]
+  },
+  "P3-16": {
+    "name": "絶対歪曲", "category": "攻撃",
+    "tags": ["アクション", "攻撃", "破壊"],
+    "timing": "アクション", "cost": 6, "range": "0～2",
+    "description": "5カウント後に発動。対象のパーツを6つ損傷する。その間に自身がパーツを損傷すると無効。残りカウント5以上ないと宣言不可。",
+    "description_raw": "射程内の対象1体を選ぶ。このマニューバが宣言されたカウントを1として数え始めて5カウント目の終了時、このパーツが損傷していなければ効果が発動する。対象はパーツを6つ選び、損傷させる。このマニューバは残りカウントが5以上なければ宣言できない。",
+    "flavor_text": "それは過度の敵意、敵の全てを抹消せんとする意志。完成されたESPは、ただただ使い手の気に入らないもの全てを粉砕するために発動する。",
+    "source": { "book": "ESP", "page": 52 },
+    "effects": [{ "ref": "DELAYED_DAMAGE", "params": { "damage": 6, "delay": 5, "cancel_on_damage": true } }]
+  },
+  "P3-17": {
+    "name": "ESP障壁", "category": "防御",
+    "tags": ["ダメージ", "防御"],
+    "timing": "ダメージ", "cost": 2, "range": "0～1",
+    "description": "防御1。1ターンに何度でも使用可（1回の攻撃には1回のみ）。",
+    "description_raw": "防御1。1ターンに何度でも使用可。ただし一回の攻撃に対しては一度しか使用できない。",
+    "flavor_text": "視界の中で起きる事象に干渉しうる、拡大された自我。その最もわかりやすい加護が、この見える盾である。",
+    "source": { "book": "ESP", "page": 52 },
+    "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 1, "limit_per_damage": 1 } }]
+  },
+  "P3-18": {
+    "name": "騎乗調整", "category": "移動",
+    "tags": ["オート", "移動", "配置変更"],
+    "timing": "オート", "cost": "なし", "range": "効果参照",
+    "description": "戦闘開始時、特定のサヴァント1体を「乗り手」とする。自身が移動・配置変更した際、「乗り手」も同じエリアに移動する。",
+    "description_raw": "戦闘開始時、自身を除く特定のサヴァント1体を“乗り手”として選ぶ（戦闘中の変更はできない）。戦闘中、あなたと“乗り手”が同じエリアにいるなら、“乗り手”は「移動」「転倒」「爆発」の効果を無効化してよい。また、あなたが「移動」「配置を変更」した際は、“乗り手”も同じエリアに配置変更する。",
+    "flavor_text": "アンデッド兵器の全てが、単体での活動を想定されていたわけではない。他の補助のためだけに特化されたアンデッドもまた、散見されている。",
+    "source": { "book": "ESP", "page": 53 },
+    "effects": [{ "ref": "RIDER_MECHANIC", "params": {} }]
+  },
+  "P3-19": {
+    "name": "穢れ送り", "category": "移動",
+    "tags": ["アクション", "移動", "配置変更", "損傷"],
+    "timing": "アクション", "cost": 3, "range": "0",
+    "description": "自身を除く手駒1体（レギオン不可）を選び、パーツ2つを損傷させ、「楽園」に配置変更する。",
+    "description_raw": "自身を除く手駒1体（レギオンは不可）を対象に選ぶ。対象のパーツ2個を損傷し、対象を「楽園」に配置変更する。",
+    "flavor_text": "ドールが安心できる所にこそ手駒を送ろうと、ネクロマンサーやサヴァントは考えるだろう。たとえいくらかの損害を負ったとしても……。",
+    "source": { "book": "ESP", "page": 53 },
+    "effects": [{ "ref": "TELEPORT_ALLY_WITH_COST", "params": { "target": "piece", "area": "楽園", "damage_cost": 2 } }]
+  },
+  "P3-20": {
+    "name": "緊急転移", "category": "移動",
+    "tags": ["ラピッド", "配置変更"],
+    "timing": "ラピッド", "cost": 3, "range": "自身",
+    "description": "1d10を振り、出目に応じたエリアへ自身を配置変更する。同カウントに何度でも使用可（同カウント1回のみ）。",
+    "description_raw": "サイコロを振る。出目が1～2なら「奈落」、3～4なら「地獄」、5～6なら「煉獄」、7～8なら「花園」、9～10なら「楽園」へあなたの配置が変更される。この効果は1ターンに何度使用してもよいが、同カウント中には1回しか使用できない。",
+    "flavor_text": "確認例すら少ないESPによるテレポートを、瞬時に使える形へと無理やり調整した幻の能力。不安定極まりない。",
+    "source": { "book": "ESP", "page": 53 },
+    "effects": [{ "ref": "RANDOM_TELEPORT", "params": { "limit_per_count": 1 } }]
+  },
+  "P3-21": {
+    "name": "亡者の狂乱", "category": "補助",
+    "tags": ["オート", "行動値", "攻撃判定"],
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "description": "サヴァントのみ所有可。あらゆ部位の全パーツが損傷した箇所1つにつき、最大行動値+1、攻撃判定+1。",
+    "description_raw": "サヴァントのみ所有可。あなたはあらゆる判定において、パーツが全て損傷した箇所1つにつき修正+1を得る（元からパーツのない箇所は含まない）。",
+    "flavor_text": "存在への執着を抱えた者は、まるでドールのように意外な奮闘を見せてくれることがある。失うことで得るのは、絶望だけではないらしい。",
+    "source": { "book": "ESP", "page": 53 },
+    "effects": [{ "ref": "BONUS_PER_DESTROYED_LOCATION_SAVANT", "params": { "stat_bonus": ["maxActionValue", "attackCheckBonus"], "value": 1 } }]
+  },
+  "P3-22": {
+    "name": "狂気の舞踏", "category": "行動値",
+    "tags": ["オート", "行動値"],
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "description": "サヴァントのみ所有可。戦闘開始時、ドール側の発狂状態の未練の数だけ、最大行動値と現在行動値が増加。",
+    "description_raw": "サヴァントのみ所有可。戦闘におけるターン開始前に効果が発動する。最大行動値+（ドール全員の発狂状態にある未練の数）。この効果は重複しない。",
+    "flavor_text": "ドールどもの狂気は蜜の味。彼女たちが哀れにも心砕ければ砕けるほどに、陶酔の中で手足は軽く、動きは滑らかになってゆくのだ。",
+    "source": { "book": "ESP", "page": 53 },
+    "effects": [{ "ref": "GAIN_AP_PER_DOLL_MADNESS", "params": {} }]
+  },
+  "P3-23": {
+    "name": "悪夢の化身", "category": "支援",
+    "tags": ["オート", "支援", "攻撃判定"],
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "description": "精神攻撃の攻撃判定の出目に+1。",
+    "description_raw": "精神攻撃において攻撃判定出目を+1してもよい。",
+    "flavor_text": "恐怖でもいい。絶望でもいい。嫌悪感でもいい。念入りに準備しよう。少女たちの心がより傷つくよう、念入りに念入りに。",
+    "source": { "book": "ESP", "page": 53 },
+    "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "attackCheckBonus", "value": 1, "condition": "精神攻撃" } }]
+  },
+  "P3-24": {
+    "name": "知覚混乱", "category": "妨害",
+    "tags": ["ジャッジ", "妨害"],
+    "timing": "ジャッジ", "cost": 2, "range": "0～2",
+    "description": "妨害2。1ターンに何度でも使用可（1回の判定には1回のみ）。",
+    "description_raw": "妨害2。1ターンに何度でも使用可。ただし一回の判定に対しては一度しか使用できない。",
+    "flavor_text": "ESPによる雑多なイメージ投射は、波のように離れた者にこそ強く作用し、感覚を狂わせる。",
+    "source": { "book": "ESP", "page": 53 },
+    "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "target": "any_roll", "value": -2, "limit_per_turn": "none", "limit_per_roll": 1 } }]
   },
 
   "//": "---------- 悪意点 2 (P4) ----------",
   "P4-01": {
     "name": "屍肉の盾", "category": "防御", 
     "tags": ["防御", "ダメージ"],
+    "timing": "ダメージ", "cost": 1, "range": "自身",
     "description": "同エリアのレギオンを任意数減らし、その数だけダメージを減少させる。", 
     "description_raw": "同エリアのレギオンを任意の数だけ減らし、減らした数だけダメージを減少させる。この効果は1ターンに何度でも使用できる",
+    "flavor_text": "手駒は仲間でも味方でもない。ただの道具である。",
     "source": { "book": "基本ルールブック", "page": 143 }, 
-    "timing": "ダメージ", "cost": 1, "range": "自身",
     "effects": [{ "ref": "DEFEND_BY_SACRIFICE", "params": { "unit_type": "legion", "ratio": 1 } }]
   },
   "P4-02": {
     "name": "対策装備", "category": "防御", 
     "tags": ["防御", "オート", "全体攻撃"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "自身と味方の「全体攻撃」によるダメージを無効化する。", 
     "description_raw": "自身と味方の「全体攻撃」によるダメージ無効",
+    "flavor_text": "設備と資材、そして時間にも恵まれたネクロマンサーは、己の戦術をいくらでも分析し研磨することができる。",
     "source": { "book": "基本ルールブック", "page": 143 }, 
-    "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [{ "ref": "IMMUNITY", "params": { "damage_type": "全体攻撃", "source": "ally" } }]
   },
   "P4-03": {
     "name": "狂気の歌", "category": "攻撃", 
     "tags": ["攻撃", "アクション", "全体攻撃", "狂気点操作"],
+    "timing": "アクション", "cost": 3, "range": "0",
     "description": "射程0のエリアにいる敵全体に「精神攻撃1」。", 
     "description_raw": "精神攻撃1+全体攻撃",
+    "flavor_text": "歌はあらゆる相手に己を顕示する有効な手段だ。歌い手が狂っていようとも、それは変わらない。",
     "source": { "book": "基本ルールブック", "page": 143 }, 
-    "timing": "アクション", "cost": 3, "range": "0",
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "精神", "damage": 1, "on_hit": ["AREA_ATTACK"] } }]
   },
   "P4-04": {
     "name": "亡者の目覚め", "category": "補助", 
     "tags": ["増援", "アクション"],
+    "timing": "アクション", "cost": 3, "range": "0～1",
     "description": "射程0～1のエリアにゾンビを1d10体増援する。", 
     "description_raw": "増援d10(ゾンビ)",
+    "flavor_text": "どんな肉片になろうとも、ネクロマンサーはつなぎあわせまた動かすことができる。破損が少なければ、いくらでも動かしてやれるだろう。",
     "source": { "book": "基本ルールブック", "page": 143 }, 
-    "timing": "アクション", "cost": 3, "range": "0～1",
     "effects": [{ "ref": "SUMMON_UNIT", "params": { "unit_name": "ゾンビ", "count_dice": "1d10" } }]
   },
   "P4-05": {
     "name": "つながれた体", "category": "移動", 
     "tags": ["移動", "オート"],
+    "timing": "オート", "cost": "なし", "range": "0",
     "description": "同エリアの他の手駒全てが、自身の移動に追従する。", 
     "description_raw": "バトルパートで対象の手駒が移動した際、自動的に同じエリアにいる他の手駒も全て同じ移動先へ移動する(コスト不要)",
+    "flavor_text": "ひとつにつながれた体。屍肉の拘束具。孤独ならざることが幸福とは限らない……わけで……。",
     "source": { "book": "基本ルールブック", "page": 143 }, 
-    "timing": "オート", "cost": "なし", "range": "0",
     "effects": [{ "ref": "ALLY_FOLLOW_MOVE", "params": { "target": "other_pieces_in_area" } }]
   },
   "P4-06": {
     "name": "肉の拘束", "category": "防御", 
     "tags": ["防御", "オート", "転倒", "移動"],
+    "timing": "オート", "cost": "なし", "range": "0",
     "description": "同エリアの手駒全てが「転倒」「移動」を無効化できる。", 
     "description_raw": "バトルパートで同エリアにいる手駒は全て「転倒」「移動」を無効化してもよい",
+    "flavor_text": "その存在を監獄に変えたものがいる。そいつは常に新しい入所者を求める。",
     "source": { "book": "基本ルールブック", "page": 143 }, 
-    "timing": "オート", "cost": "なし", "range": "0",
     "effects": [{ "ref": "GRANT_IMMUNITY_TO_AREA", "params": { "effects_to_grant": ["転倒", "移動"], "target_type": "piece" } }]
   },
   "P4-07": {
     "name": "死者暴走", "category": "補助", 
     "tags": ["増援", "アクション"],
+    "timing": "アクション", "cost": 2, "range": "0～1",
     "description": "コストとしてレギオン1体を消費し、グール1体を増援する。", 
     "description_raw": "増援1(グール)。対象エリアの任意のレギオンを1体減らす",
+    "flavor_text": "即席の自我を与えられたゾンビは凶暴化し、獣性は肉体さえも歪ませるという。",
     "source": { "book": "基本ルールブック", "page": 143 }, 
-    "timing": "アクション", "cost": 2, "range": "0～1",
     "effects": [{ "ref": "SUMMON_UNIT", "params": { "unit_name": "グール", "count": 1, "cost_type": "sacrifice_legion", "cost_value": 1 } }]
+  },
+  "P4-08": {
+    "name": "縫合用アーム", "category": "修復",
+    "tags": ["オート", "修復"],
+    "timing": "オート", "cost": "なし", "range": "0～1",
+    "description": "このパーツが使用した攻撃マニューバで敵が破壊された場合、射程内のホラーかサヴァント1体を2つ修復する。",
+    "description_raw": "あなたか使用した攻撃マニューバにより、攻撃対象が最低一ヶ所以上を全損させた時のみ、この効果を使用してよい。射程内のホラーかサヴァント1体を対象に選ぶ。対象は損傷したパーツを2個修復する。",
+    "flavor_text": "切り落とした敵の腕や脚を、ただ打ち捨てるなど無駄なことだ。うまく損傷面に縫い合わせれば、アンデッドならすぐに動かせる。",
+    "source": { "book": "ESP", "page": 54 },
+    "effects": [{ "ref": "REPAIR_ALLY_ON_KILL", "params": { "target_type": ["ホラー", "サヴァント"], "count": 2 } }]
+  },
+  "P4-09": {
+    "name": "修復デバイス", "category": "修復",
+    "tags": ["アクション", "修復"],
+    "timing": "アクション", "cost": 2, "range": "0～1",
+    "description": "対象1体の損傷中のパーツを1つ選び、修復する。",
+    "description_raw": "あなたは対象1体の損傷中のパーツを1つ選び、それを修復する。",
+    "flavor_text": "周囲に飛び散った肉片や金属片を利用し、特定機能を取り戻させる技術や器材。",
+    "source": { "book": "ESP", "page": 54 },
+    "effects": [{ "ref": "REPAIR_PART", "params": { "target": "character", "count": 1 } }]
+  },
+  "P4-10": {
+    "name": "見えざる触手", "category": "妨害",
+    "tags": ["ジャッジ", "妨害", "損傷"],
+    "timing": "ジャッジ", "cost": "効果参照", "range": "0～1",
+    "description": "任意のパーツ2つを損傷し、判定結果を判定値に関わらず「失敗」とする。",
+    "description_raw": "コストの代わりに、あなたは任意のパーツ2つを損傷する。判定の結果は判定値に関係なく「判定値6(いかなる修正も受けない)」として処理する。",
+    "flavor_text": "拡大された自我は、ESPによる無数の“手”で、周囲の事象を操り、望んだ結末をもたらしてくれるだろう。",
+    "source": { "book": "ESP", "page": 54 },
+    "effects": [{ "ref": "FORCE_FAILURE_WITH_COST", "params": { "cost_type": "damage_any_part", "cost_value": 2 } }]
+  },
+  "P4-11": {
+    "name": "念動接続", "category": "修復",
+    "tags": ["オート", "修復"],
+    "timing": "オート", "cost": "なし", "range": "0～2",
+    "description": "各ターンにおいて2回まで、自身を含む射程内の手駒全体の損傷パーツ4つを修復。",
+    "description_raw": "各ターンにおいてカウント0となった際、自身を含む射程内の手駒全体の中で合計4つの損傷中のパーツを修復してもよい。",
+    "flavor_text": "周囲一帯を包み込むESPは、壊れた部分すら操り、元のよう動かして見せる。馴染むには少し時間がかかるのだが……。",
+    "source": { "book": "ESP", "page": 54 },
+    "effects": [{ "ref": "AREA_REPAIR", "params": { "target": "piece", "count": 4, "limit_per_turn": 2 } }]
+  },
+  "P4-12": {
+    "name": "守護本能", "category": "防御",
+    "tags": ["オート", "防御"],
+    "timing": "オート", "cost": "なし", "range": "効果参照",
+    "description": "戦闘開始時、特定のサヴァント1体を「主」とする。「主」を対象とするマニューバを自身が代わりに受ける（「主」が無効化されるマニューバも有効）。",
+    "description_raw": "戦闘開始時、自身を除く特定のサヴァントかホラー1体を“主”として選ぶ（戦闘中の変更はできない）。戦闘中、あなたと“主”が同じエリアにいるなら、”主”を対象としたマニューバが宣言された際に対象を、あなたに変更してもよい（あなたが対象として不適切な場合、そのマニューバは無効化される）。",
+    "flavor_text": "優秀な手駒は、主を守る盾でなくてはならぬ。光栄に震えるがいい、これは優秀と信頼の証だ。",
+    "source": { "book": "ESP", "page": 54 },
+    "effects": [{ "ref": "GUARDIAN_MECHANIC", "params": {} }]
+  },
+  "P4-13": {
+    "name": "狂気の波調", "category": "補助",
+    "tags": ["アクション", "補助", "狂気点操作"],
+    "timing": "アクション", "cost": 4, "range": "効果参照",
+    "description": "5カウント後、舞台上のドール全員の未練に狂気点1点追加。自身がパーツ損傷で無効。残りカウント5以上ないと宣言不可。",
+    "description_raw": "このマニューバが宣言されたカウントを1として数え始めて5カウント目の終了時、このパーツが損傷していなければ効果が発動する。舞台上の全てのドールは発狂していない未練1つを選び、狂気点1点を加える。このマニューバは残りカウントが5以上なければ宣言できない。",
+    "flavor_text": "これが孕む苦しみ、哀しみ。憎しみはあまりに暗く深い。ESPによる無差別投射は、ドールの自我に消えざる傷痕を刻むだろう。",
+    "source": { "book": "ESP", "page": 54 },
+    "effects": [{ "ref": "DELAYED_MADNESS_GAIN", "params": { "delay": 5, "target": "all_dolls", "cancel_on_damage": true } }]
+  },
+  "P4-14": {
+    "name": "空間圧縮", "category": "支援",
+    "tags": ["オート", "支援", "爆発", "攻撃判定"],
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "description": "このパーツを損傷することで「爆発」を無効化し、攻撃判定+1。",
+    "description_raw": "1シナリオでこのパーツを所有する手駒は1体以下でなくてはいけない。あなたは「爆発」を無効化してよい。砲撃攻撃マニューバの攻撃判定で出目+1してよい。",
+    "flavor_text": "衝撃のベクトルを操作する、精密なESP技術。処理手間はかかるが、安定した能力だ。",
+    "source": { "book": "ESP", "page": 54 },
+    "effects": [{ "ref": "SACRIFICE_FOR_BUFF", "params": { "negate": "爆発", "buff_stat": "attackCheckBonus", "buff_value": 1 } }]
+  },
+  "P4-15": {
+    "name": "ESP共鳴振動", "category": "攻撃",
+    "tags": ["アクション", "攻撃", "破壊"],
+    "timing": "アクション", "cost": 4, "range": "効果参照",
+    "description": "舞台上のドール全てを対象とし、各自「サイケデリック」のスキル数と同数のパーツを損傷させる。",
+    "description_raw": "舞台上にいるドール全てを対象とする。各ドールは自身が所有するクラス「サイケデリック」のスキル数に等しい数のパーツを選び、損傷させる。",
+    "flavor_text": "ESP開発の完成は、対抗手段もまた完成させる。拡大された自我は互いに干渉し合い、使用者にとって諸刃の剣ともなるだろう。",
+    "source": { "book": "ESP", "page": 54 },
+    "effects": [{ "ref": "DAMAGE_BY_SKILL_COUNT", "params": { "skill_class": "サイケデリック" } }]
+  },
+  "P4-16": {
+    "name": "痕抉り", "category": "攻撃",
+    "tags": ["アクション", "攻撃", "精神攻撃"],
+    "timing": "アクション", "cost": 3, "range": "0～1",
+    "description": "精神攻撃として、攻撃判定を行う。成功した場合、対象の記憶のカケラと同じ数だけ、自身のパーツを選び損傷する。",
+    "description_raw": "精神攻撃として、攻撃判定を行う。成功したなら、対象が獲得している「記憶のカケラ」と同じ数だけ、対象は自身のパーツを選び、損傷する。",
+    "flavor_text": "世界を彷徨って得た記憶は、それ自体が狂気への扉ともなる。爆発的な狂気は、記憶の持ち主に自傷行為を強いるだろう。",
+    "source": { "book": "ESP", "page": 54 },
+    "effects": [{ "ref": "MENTAL_ATTACK_AND_SELF_HARM", "params": {} }]
+  },
+
+  "//": "---------- 悪意点 3 (P6) ----------",
+  "P6-01": {
+    "name": "合成再活性化", "category": "修復",
+    "tags": ["アクション", "修復"],
+    "timing": "アクション", "cost": "効果参照", "range": "0～1",
+    "description": "射程内で全損したホラー1体を選び、その悪意分、あなたは行動値を減らす。対象は損傷パーツ内のパーツ全てが修復される。",
+    "description_raw": "射程内で、あなたより「悪意」の低いホラー1体を選び、その悪意分だけ、あなたは行動値を減らす(軽減不可)。対象は損傷しているパーツ全てが修復される(ただしターン内の使用回数は回復しない)。",
+    "flavor_text": "かつて戦争の前線で活動したネクロマンサー達は、ありあわせの肉片や部品を活用し、瞬時にアンデッドを復元したという。",
+    "source": { "book": "ESP", "page": 55 },
+    "effects": [{ "ref": "REVIVE_ALLY", "params": { "target_type": "ホラー" } }]
+  },
+  "P6-02": {
+    "name": "強制再起動", "category": "補助",
+    "tags": ["アクション", "補助", "配置変更", "増援"],
+    "timing": "アクション", "cost": "効果参照", "range": "効果参照",
+    "description": "配置時にデータ開示されている、完全解体状態のホラー1体を舞台から消去し、選んだホラーの悪意分の行動値を減らす。消したホラーと同名のホラー1体を「増援」し、あなたと同じエリアに配置。",
+    "description_raw": "配置時にデータ開示されていた、完全解体状態のホラー1体を選び、舞台から消去する。あなたは、選んだホラーの悪意分、行動値を減らす(軽減不可)。消去したものと同じホラー1体を「増援」として、あなたと同じか隣接するエリアに配置する。",
+    "flavor_text": "自我レベルの低いホラーなら、特に簡単に修復できる。量産された個体なら、簡単な処置でも一時的に戦わせることは十分に可能だ。",
+    "source": { "book": "ESP", "page": 55 },
+    "effects": [{ "ref": "REINFORCE_FROM_DESTROYED", "params": { "target_type": "ホラー" } }]
+  },
+  "P6-03": {
+    "name": "具現する悪意", "category": "攻撃",
+    "tags": ["アクション", "攻撃", "破壊"],
+    "timing": "アクション", "cost": 4, "range": "効果参照",
+    "description": "5カウント後、舞台上のドールはパーツを2つ選び損傷。自身がパーツ損傷で無効。残りカウント5以上ないと宣言不可。",
+    "description_raw": "このマニューバが宣言されたカウントを1として数え始めて5カウント目の終了時、このパーツが損傷していなければ効果が発動する。舞台上の全てのドールはパーツを2つ選び、損傷させる。このマニューバは残りカウントが5以上なければ宣言できない。",
+    "flavor_text": "仕掛けられた罠か、体に仕組まれた自壊作用か、周囲一帯を壊滅させるESPか……。ネクロマンサーの悪意は、戦いの水面下で着々と進む。",
+    "source": { "book": "ESP", "page": 55 },
+    "effects": [{ "ref": "DELAYED_DAMAGE", "params": { "damage": 2, "delay": 5, "target": "all_dolls", "cancel_on_damage": true } }]
+  },
+  "P6-04": {
+    "name": "死者の王", "category": "支援",
+    "tags": ["オート", "支援", "行動値", "攻撃判定"],
+    "timing": "オート", "cost": "なし", "range": "効果参照",
+    "description": "レギオンは最大行動値+1、攻撃判定+1。",
+    "description_raw": "1シナリオでこのパーツを所有する手駒は1体以下でなくてはいけない。舞台上の全てのレギオンは最大行動値が+1され、攻撃判定に+1の修正を受ける。",
+    "flavor_text": "レギオン全体に群体意識を埋め込み、特定の指揮個体下での効率的活動を可能たらしめる。最終戦争前後に広く用いられた技術だ。",
+    "source": { "book": "ESP", "page": 55 },
+    "effects": [{ "ref": "AURA_BUFF", "params": { "target": "レギオン", "buffs": [{ "stat": "maxActionValue", "value": 1 }, { "stat": "attackCheckBonus", "value": 1 }] } }]
+  },
+
+  "//": "---------- 悪意点 4 (P8) ----------",
+  "P8-01": {
+    "name": "超知覚領域", "category": "支援",
+    "tags": ["オート", "支援", "妨害", "転倒", "移動"],
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "description": "全ての判定に+1。「妨害」「転倒」「移動」を無効化。",
+    "description_raw": "1シナリオでこのパーツを所有する手駒は1体以下でなくてはいけない。あなたは全ての攻撃判定に+1の修正を得る。また、「妨害」「転倒」「移動」を無効にしてよい。",
+    "flavor_text": "完成されたESPは、自身の周囲に起きる事象全てを知覚し、コントロールする。まさに神の視点を得るのだ。",
+    "source": { "book": "ESP", "page": 55 },
+    "effects": [
+    { "ref": "UNIVERSAL_CHECK_BONUS", "params": { "value": 1 } },
+    { "ref": "NEGATE_STATUS_EFFECT", "params": { "effects_to_negate": ["妨害", "転倒", "移動"], "optional": true } }
+    ]
+  },
+  "P8-02": {
+    "name": "遠隔自壊操作", "category": "攻撃",
+    "tags": ["アクション", "攻撃", "破壊"],
+    "timing": "アクション", "cost": 4, "range": "効果参照",
+    "description": "舞台上の全ドールが対象。各自、自身の「改造」強化パーツ数と同数のパーツを選び、損傷させる。",
+    "description_raw": "1シナリオでこのパーツを所有する手駒は1体以下でなくてはいけない。舞台上にいるドール全てを対象とする。各ドールは自身が所有する損傷していない「改造」の強化パーツ数に等しい数のパーツを選び、損傷させる。",
+    "flavor_text": "選ばれし手駒のみがそれを得る。ネクロマンサーが埋め込んだ機械部分を暴走させ、肉体を崩壊させる機能を。",
+    "source": { "book": "ESP", "page": 55 },
+    "effects": [{ "ref": "DAMAGE_BY_PART_TYPE_COUNT", "params": { "part_type": "改造" } }]
   }
 }

@@ -27,91 +27,101 @@
   "BP-01": {
     "name": "のうみそ", "category": "行動値", "allowedLocations": "頭",
     "tags": ["行動値", "オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "最大行動値+2", 
     "description_raw": "最大行動値+2。",
+    "flavor_text": "ドールの意識を補助し、情報をより素早く処理するための器官。戦闘でうまく立ち回るには必須とも言える。",
     "source": { "book": "基本ルールブック", "page": 81 }, 
-    "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "maxActionValue", "value": 2, "duration": "permanent_while_undamaged" } }]
   },
   "BP-02": {
     "name": "めだま", "category": "行動値", "allowedLocations": "頭",
     "tags": ["行動値", "オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "最大行動値+1", 
     "description_raw": "最大行動値+1。",
+    "flavor_text": "人間にとって最も重大な感覚器官。感覚の鋭さはそのまま、手数の多さに直結するのが死者の戦いだ。",
     "source": { "book": "基本ルールブック", "page": 81 }, 
-    "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "maxActionValue", "value": 1, "duration": "permanent_while_undamaged" } }]
   },
   "BP-03": {
     "name": "あご", "category": "攻撃", "allowedLocations": "頭",
     "tags": ["攻撃", "アクション"],
+    "timing": "アクション", "cost": 2, "range": "0",
     "description": "肉弾攻撃1", 
     "description_raw": "肉弾攻撃1。",
+    "flavor_text": "噛み付き、引きちぎる。死者たちの戦いでは至極基本的な戦い方と言えるだろう。",
     "source": { "book": "基本ルールブック", "page": 81 }, 
-    "timing": "アクション", "cost": 2, "range": "0",
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 1 } }]
   },
   "BP-04": {
     "name": "こぶし", "category": "攻撃", "allowedLocations": "腕",
     "tags": ["攻撃", "アクション"],
+    "timing": "アクション", "cost": 2, "range": "0",
     "description": "肉弾攻撃1", 
     "description_raw": "肉弾攻撃1。",
+    "flavor_text": "死者の体は、生者と違い全ての潜在力を発揮できる。自身の体を壊すようなパワーで敵を殴ることができるのだ。",
     "source": { "book": "基本ルールブック", "page": 80 }, 
-    "timing": "アクション", "cost": 2, "range": "0",
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 1 } }]
   },
   "BP-05": {
     "name": "うで", "category": "支援", "allowedLocations": "腕",
     "tags": ["支援", "ジャッジ"],
+    "timing": "ジャッジ", "cost": 1, "range": "0",
     "description": "支援1", 
     "description_raw": "支援1。",
+    "flavor_text": "手先の器用さ、身についた数多の癖は、効率的に体を使い、正確な動きを可能とする。",
     "source": { "book": "基本ルールブック", "page": 80 }, 
-    "timing": "ジャッジ", "cost": 1, "range": "0",
     "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "target": "any_roll", "value": 1 } }]
   },
   "BP-06": {
     "name": "かた", "category": "移動", "allowedLocations": "腕",
     "tags": ["移動", "アクション"],
+    "timing": "アクション", "cost": 4, "range": "自身",
     "description": "移動1", 
     "description_raw": "移動1。",
+    "flavor_text": "死者に下半身は不要。足がなくとも、這って進むことによる負担はさほどでもない。",
     "source": { "book": "基本ルールブック", "page": 80 }, 
-    "timing": "アクション", "cost": 4, "range": "自身",
     "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": 1, "direction": "performer_choice" } }]
   },
   "BP-07": {
     "name": "せぼね", "category": "補助", "allowedLocations": "胴",
     "tags": ["補助", "アクション", "コスト補正"],
+    "timing": "アクション", "cost": 1, "range": "自身",
     "description": "同ターン内の次のカウントで使うマニューバ1つのコスト-1(最低0)", 
     "description_raw": "同ターン内の次のカウントで使うマニューバ1つのコスト-1(最低0)する。",
+    "flavor_text": "体に力を溜め、じっと機会を伺うことができる。込められた力は次の瞬間に弾け、放たれるのだ。",
     "source": { "book": "基本ルールブック", "page": 81 }, 
-    "timing": "アクション", "cost": 1, "range": "自身",
     "effects": [{ "ref": "REDUCE_NEXT_MANEUVER_COST", "params": { "value": 1, "minimum": 0, "count": 1 } }]
   },
   "BP-08": {
     "name": "はらわた", "category": "その他", "allowedLocations": "胴",
     "tags": ["オート"],
+    "timing": "オート", "cost": "なし", "range": "なし",
     "description": "効果なし", 
     "description_raw": "なし",
+    "flavor_text": "体の中がスカスカでは格好がつかない。死者であろうと、体内には用途不明の器官が多数押し込められているのだ。",
     "source": { "book": "基本ルールブック", "page": 81 }, 
-    "timing": "オート", "cost": "なし", "range": "なし",
     "effects": []
   },
   "BP-09": {
     "name": "ほね", "category": "移動", "allowedLocations": "脚",
     "tags": ["移動", "アクション"],
+    "timing": "アクション", "cost": 3, "range": "自身",
     "description": "移動1", 
     "description_raw": "移動1。",
+    "flavor_text": "死者たちは地を歩む。それは二本の足であるが、足先が多少どうこうなっていても骨さえあればなんとかなる。",
     "source": { "book": "基本ルールブック", "page": 80 }, 
-    "timing": "アクション", "cost": 3, "range": "自身",
     "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": 1, "direction": "performer_choice" } }]
   },
   "BP-10": {
     "name": "あし", "category": "妨害", "allowedLocations": "脚",
     "tags": ["妨害", "ジャッジ"],
+    "timing": "ジャッジ", "cost": 1, "range": "0",
     "description": "妨害1", 
     "description_raw": "妨害1。",
+    "flavor_text": "足首をうまく使うことで体の位置を変え、タイミングを見て敵の攻撃をそらしたり、味方を弾道からそらしたりできる。",
     "source": { "book": "基本ルールブック", "page": 80 }, 
-    "timing": "ジャッジ", "cost": 1, "range": "0",
     "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "target": "any_roll", "value": -1 } }]
   },
 
@@ -119,10 +129,11 @@
   "TR-00": {
     "name": "たからもの", "category": "たからもの", "allowedLocations": "任意",
     "tags": ["修復", "オート", "狂気点操作", "破壊"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "バトルパート終了時、任意の未練の狂気点を1点減らす。損傷すると失われる。",
     "description_raw": "たからもの。バトルパート終了時、任意の未練１つを選んで狂気点を１点減らす。このパーツは損傷時に所持パーツから取り除く。",
+    "flavor_text": "大切な過去の断片。精一杯の可愛らしさ。肌身離さず持っていれば、あなたの心を慰めてくれる。けれど、もし壊れれば、それは心の疵となるだろう。",
     "source": { "book": "基本ルールブック", "page": 56, "errata": "1.6.1" }, 
-    "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [
       { "ref": "REDUCE_MADNESS_POINTS", "params": { "value": 1, "trigger": "battle_end", "target_regret": "any" } },
       { "ref": "REMOVE_PART_ON_DAMAGE", "params": { "target": "this_part" } }

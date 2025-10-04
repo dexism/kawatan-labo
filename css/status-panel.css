@@ -3,7 +3,7 @@
 ================================ */
 /* --- セクション共通 --- */
 .section {
-    background-color: var(--color-background);
+    background-color: var(--color-background-2);
     color:            var(--color-text-2);
     padding: 0 5px 5px 5px;
 }
@@ -67,7 +67,7 @@ h2.section-title {
     font-weight: bold;
     border-radius: 5px;
     border: 0;
-    background: var(--color-background);
+    background: var(--color-background-2);
     color:      var(--color-text-muted);
     text-align: center;
     pointer-events: none;

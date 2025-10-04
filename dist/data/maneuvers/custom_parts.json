@@ -9,6 +9,7 @@
     "tags": ["行動値", "オート", "損傷"],
     "description": "バトル中に損傷した際、最大行動値+2。効果中はこのパーツを修復不可。", 
     "description_raw": "このパーツがバトルパート中に損傷した時、宣言することで最大行動値に+2してもよい。バトルパート終了までこの効果は続き、効果中はこのパーツを修復できない。",
+    "flavor_text": "あふれ出したら止まらない脳内麻薬を抑えておくための抑制装置。失った途端、過ぎる感覚に世界は追いつけなくなる。",
     "source": { "book": "基本ルールブック", "page": 89, "errata": "1.6.1" }, 
     "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [{ "ref": "MODIFY_MAX_ACTION_VALUE_ON_DAMAGE", "params": { "value": 2, "repair_negation": true } }]
@@ -18,6 +19,7 @@
     "tags": ["行動値", "オート"],
     "description": "最大行動値+1", 
     "description_raw": "最大行動値+1。",
+    "flavor_text": "脳の働きを活性化させ、反応速度を無理矢理に活性化させる改造。アンデッドならではの薬物強化である。",
     "source": { "book": "基本ルールブック", "page": 89 }, 
     "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "maxActionValue", "value": 1, "duration": "permanent_while_undamaged" } }]
@@ -27,6 +29,7 @@
     "tags": ["攻撃", "アクション"],
     "description": "肉弾攻撃2", 
     "description_raw": "肉弾攻撃2。",
+    "flavor_text": "鋼鉄の顎と歯。噛み付き引き裂くことに強力な効果を発揮する。可愛いとは外から見えない、牙皮膚でカモフラージュできる。",
     "source": { "book": "基本ルールブック", "page": 89 }, 
     "timing": "アクション", "cost": 2, "range": "0",
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 2 } }]
@@ -36,6 +39,7 @@
     "tags": ["移動", "ダメージ", "損傷"],
     "description": "白兵・肉弾ダメージ+1(重複不可)。自身が与えたダメージのみ。任意の基本パーツ1つを損傷。使用制限なし。", 
     "description_raw": "自身がダメージを与えた際のみ使用可。コストとして、あなたは任意の基本パーツを1つ損傷する。白兵・肉弾ダメージ+1(重複不可)。1ターンに何度でも使用してよい。",
+    "flavor_text": "体の後部に突き出たジェット噴射口。格闘戦の威力を格段に高め、自らの肉体を崩壊させつつ高い威力を発揮する。",
     "source": { "book": "基本ルールブック", "page": 89 }, 
     "timing": "ダメージ", "cost": "基本パーツ1", "range": "自身",
     "effects": [{ "ref": "MOVE_ON_DEALING_DAMAGE", "params": { "cost": "damage_this_part", "target": "all_characters", "distance": 1 } }]
@@ -45,6 +49,7 @@
     "tags": ["攻撃", "アクション", "切断"],
     "description": "肉弾攻撃1+切断", 
     "description_raw": "肉弾攻撃1+切断。",
+    "flavor_text": "ハサミ状の義手、あるいは鋭利な爪。通常の道具を使うには不便だが、相手の体を切り刻みバラバラにできる。",
     "source": { "book": "基本ルールブック", "page": 89 }, 
     "timing": "アクション", "cost": 2, "range": "0",
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 1, "on_hit": ["SEVERANCE"] } }]
@@ -54,6 +59,7 @@
     "tags": ["防御", "ダメージ"],
     "description": "防御1", 
     "description_raw": "防御1。",
+    "flavor_text": "強靭な人工皮膚。全身を覆うそれは、あなたが受けるダメージを確実に軽減してくれることだろう。",
     "source": { "book": "基本ルールブック", "page": 89 }, 
     "timing": "ダメージ", "cost": 0, "range": "自身",
     "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 1 } }]
@@ -63,6 +69,7 @@
     "tags": ["防御", "ダメージ", "切断"],
     "description": "防御1、「切断」無効化", 
     "description_raw": "防御1+「切断」無効化。",
+    "flavor_text": "超硬化金属の骨。体内に埋め込まれた鋼は、斬撃に対して強い防御性を誇る。日本刀や単分子繊維への強さは折り紙付きだ。",
     "source": { "book": "基本ルールブック", "page": 89 }, 
     "timing": "ダメージ", "cost": 1, "range": "自身",
     "effects": [
@@ -75,6 +82,7 @@
     "tags": ["支援", "ジャッジ"],
     "description": "支援2", 
     "description_raw": "支援2。",
+    "flavor_text": "頭部から調整ツマミが突き出しており、調整することで反応や脳内麻薬をコントロールすることができる。",
     "source": { "book": "基本ルールブック", "page": 89 }, 
     "timing": "ジャッジ", "cost": 1, "range": "自身",
     "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "target": "self_roll", "value": 2 } }]
@@ -84,6 +92,7 @@
     "tags": ["攻撃", "アクション", "転倒"],
     "description": "肉弾攻撃1+転倒", 
     "description_raw": "肉弾攻撃1+転倒。",
+    "flavor_text": "腕や脚、時には首さえも切り離して相手に向けて発射する。攻撃後は即座に戻ってくるため、発射数に制限はない。",
     "source": { "book": "基本ルールブック", "page": 89 }, 
     "timing": "アクション", "cost": 3, "range": "0～1",
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 1, "on_hit": ["TUMBLE"] } }]
@@ -93,9 +102,30 @@
     "tags": ["対話判定", "ラピッド"],
     "description": "姉妹1体と互いに対話判定可", 
     "description_raw": "対象の姉妹1体と互いに対話判定を行ってよい。",
+    "flavor_text": "指向性の音声を発する喉。戦闘の間でもコミュニケーションをとることができる。",
     "source": { "book": "基本ルールブック", "page": 89 }, 
     "timing": "ラピッド", "cost": 2, "range": "0～2",
     "effects": [{ "ref": "PERFORM_DIALOGUE_CHECK_MUTUAL", "params": {} }]
+  },
+  "R1-11": {
+    "name": "ジャンクパーツ", "category": "修復", "allowedLocations": "任意",
+    "tags": ["オート", "修復", "破壊"],
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "description": "このパーツが戦闘終了時に破壊されていなければ、このパーツが装備された箇所の基本パーツは全て修復される。",
+    "description_raw": "このパーツが破壊されず戦闘終了したなら、このパーツが装備された箇所の基本パーツは全て損傷前の状態に戻る。",
+    "flavor_text": "鉄パイプや簡単なボルトといった、ガラクタで作られた体。活動に特に支障がないことと、壊れても簡単に修復できることが強み。",
+    "source": { "book": "ESP", "page": 43 },
+    "effects": [{ "ref": "REPAIR_LOCATION_ON_BATTLE_END", "params": { "part_type": "基本" } }]
+  },
+  "R1-12": {
+    "name": "カルマプロセッサ", "category": "補助", "allowedLocations": "頭",
+    "tags": ["オート", "狂気点操作"],
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "description": "狂気点を1点無効化する代わりに、このパーツを損傷させてもよい。",
+    "description_raw": "あなたは受けた狂気点1点を無効化する代わり、このパーツを損傷させてもよい。",
+    "flavor_text": "緊急時に自我をある程度マヒさせる、メンタル面のプロテクトシステム。過剰なストレスをわずかながら、やわらげてくれる。",
+    "source": { "book": "ESP", "page": 43 },
+    "effects": [{ "ref": "NEGATE_MADNESS_WITH_SELF_DAMAGE", "params": { "part_name": "カルマプロセッサ" } }]
   },
 
   "//": "--- レベル2 改造 (R2) ---",
@@ -105,6 +135,7 @@
     "tags": ["攻撃", "ダメージ", "爆発", "全体攻撃", "損傷"],
     "description": "このパーツが損傷した際、砲撃攻撃2+爆発+全体攻撃", 
     "description_raw": "このパーツが損傷した際のみ使用可。判定値8(ジャッジタイミング発生)の「砲撃攻撃2+爆発+全体攻撃」を与える。",
+    "flavor_text": "体内に爆薬を仕込まれた爆弾。当然、当人もただではすまない。しかし、多数の敵に囲まれた際は思わぬ助け舟にも……。",
     "source": { "book": "基本ルールブック", "page": 90 }, 
     "effects": [{ "ref": "ATTACK_ON_DAMAGE", "params": { "attack_type": "砲撃", "damage": 2, "roll_value": 8, "on_hit": ["EXPLOSION", "AREA_ATTACK"] } }]
   },
@@ -114,6 +145,7 @@
     "tags": ["行動値", "オート"],
     "description": "最大行動値+1", 
     "description_raw": "最大行動値+1。",
+    "flavor_text": "強化された反射神経。より素早い肉体反応を可能とし、わずかなりとも素早く動くことが出来る。",
     "source": { "book": "基本ルールブック", "page": 90 }, 
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "maxActionValue", "value": 1, "duration": "permanent_while_undamaged" } }]
   },
@@ -123,6 +155,7 @@
     "tags": ["攻撃", "アクション", "転倒"],
     "description": "肉弾攻撃1+転倒", 
     "description_raw": "肉弾攻撃1+転倒。",
+    "flavor_text": "体内に日常的に蓄えた電気を放出する。死体とはいえ、反射的な痙攣によって、体は一瞬動けなくなる。",
     "source": { "book": "基本ルールブック", "page": 90 }, 
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 1, "on_hit": ["TUMBLE"] } }]
   },
@@ -132,6 +165,7 @@
     "tags": ["攻撃", "アクション", "防御"],
     "description": "白兵攻撃2、「防御」無効", 
     "description_raw": "白兵攻撃2、この攻撃に対して「防御」は全て無効。",
+    "flavor_text": "凄まじい勢いで回転し、相手の防御を無視して貫く強靭なドリル。防御力の高い者には、天敵とも言える武器だ。",
     "source": { "book": "基本ルールブック", "page": 90 }, 
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 2, "defense_piercing": true } }]
   },
@@ -141,6 +175,7 @@
     "tags": ["攻撃", "ラピッド", "連撃"],
     "description": "白兵攻撃2+連撃1", 
     "description_raw": "白兵攻撃2+連撃1。",
+    "flavor_text": "体内に仕込まれた刃。瞬時に飛び出し、相手を切り裂く。予期できないその斬撃は、敵を黙らせるに十分だ。",
     "source": { "book": "基本ルールブック", "page": 90 }, 
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 2, "on_hit": ["CHAIN_ATTACK_1"] } }]
   },
@@ -150,6 +185,7 @@
     "tags": ["攻撃", "アクション", "切断"],
     "description": "射撃攻撃1+切断", 
     "description_raw": "射撃攻撃1+切断。",
+    "flavor_text": "体の一部から迸る熱光線。威力は小さいが、遠距離まで届くため、役立つことは多いだろう。",
     "source": { "book": "基本ルールブック", "page": 90 }, 
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "射撃", "damage": 1, "on_hit": ["SEVERANCE"] } }]
   },
@@ -159,6 +195,7 @@
     "tags": ["支援", "ジャッジ"],
     "description": "支援2。射撃・砲撃攻撃のみ", 
     "description_raw": "支援2。射撃・砲撃攻撃にのみ可。",
+    "flavor_text": "顔に直接取り付けられたスコープやミラーシェード。暗所や遠くを見通すのに適しており、精密な射撃を可能とされる。",
     "source": { "book": "基本ルールブック", "page": 90 }, 
     "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "target": "self_roll", "value": 2, "condition": ["射撃攻撃", "砲撃攻撃"] } }]
   },
@@ -168,6 +205,7 @@
     "tags": ["強化", "ダメージ"],
     "description": "白兵・肉弾攻撃の与ダメージ+2", 
     "description_raw": "自身がダメージを与えた際のみ使用可。白兵・肉弾ダメージ+2。",
+    "flavor_text": "体内から突き破るようにして生える棘や角。組み合った戦いにおいて、追い打ちの効果を発揮することができる。",
     "source": { "book": "基本ルールブック", "page": 90 }, 
     "effects": [{ "ref": "INCREASE_DEALT_DAMAGE", "params": { "value": 2, "condition": ["肉弾攻撃", "白兵攻撃"] } }]
   },
@@ -177,6 +215,7 @@
     "tags": ["移動妨害", "ラピッド"],
     "description": "移動妨害1", 
     "description_raw": "移動妨害1。",
+    "flavor_text": "金属の触手。生体触手と同様、敵に絡み付いて行動を阻害する。無機的な外観ゆえか、生体触手よりドールたちに好評。",
     "source": { "book": "基本ルールブック", "page": 90 }, 
     "effects": [{ "ref": "GENERIC_MOVE_DEBUFF", "params": { "value": -1 } }]
   },
@@ -186,8 +225,32 @@
     "tags": ["移動", "ラピッド"],
     "description": "移動1", 
     "description_raw": "移動1。",
+    "flavor_text": "発射したフック付ワイヤーで引っ掛け、強引に引っ張り上げる。対象を無理矢理引き寄せたり、吊り上げたりすることができる。",
     "source": { "book": "基本ルールブック", "page": 90 }, 
     "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "any_character", "distance": 1, "direction": "performer_choice" } }]
+  },
+  "R2-11": {
+    "name": "アンテナ", "category": "補助", "allowedLocations": "頭",
+    "tags": ["オート", "狂気点操作"],
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "description": "戦闘中1ターン1回、コストの狂気点1点を無効化。",
+    "description_raw": "あなたは戦闘中の1ターンにつき1回だけ、コストの代わりに加えられる狂気点1点を無効化できる。",
+    "flavor_text": "あなたは頭に取り付けられた目立つアンテナで、何処かから発信される精神安定化電波を受信している。あなたを狂わせまいという気づかいだろうか。",
+    "source": { "book": "ESP", "page": 43 },
+    "effects": [{ "ref": "NEGATE_MADNESS_COST_ONCE_PER_TURN", "params": {} }]
+  },
+  "R2-12": {
+    "name": "エナジーチューブ", "category": "行動値", "allowedLocations": "任意",
+    "tags": ["オート", "行動値", "損傷"],
+    "timing": "オート", "cost": "なし", "range": "自身",
+    "description": "最大行動値+2。装備箇所にダメージを受けたらパーツ1つ追加で損傷。",
+    "description_raw": "最大行動値+2。装備箇所にダメージを受けた際、あなたは任意の基本パーツ1つを追加で損傷しなくてはならない。",
+    "flavor_text": "体に取り付けられたむきだしの太いチューブ。常に多量のエネルギ－を循環させており、ドールの肉体を異常活性化させる。",
+    "source": { "book": "ESP", "page": 43 },
+    "effects": [
+      { "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 2 } },
+      { "ref": "TAKE_EXTRA_DAMAGE_ON_HIT", "params": { "part_type": "基本", "count": 1 } }
+    ]
   },
 
   "//": "--- レベル3 改造 (R3) ---",
@@ -197,6 +260,7 @@
     "tags": ["強化", "防御", "オート"],
     "description": "腕へのダメージに防御1。腕パーツの白兵・肉弾攻撃の与ダメージ+1。", 
     "description_raw": "腕のみ、ダメージに対して常に「防御1」。腕部にある白兵・肉弾攻撃マニューバのダメージ+1。",
+    "flavor_text": "巨大にして強力な鋼鉄の腕を与えられている。その一撃はほとんどの敵を粉砕し、吹き飛ばす。",
     "source": { "book": "基本ルールブック", "page": 91 }, 
     "effects": [
         { "ref": "APPLY_PASSIVE_DEFENSE", "params": { "value": 1, "condition": "hit_location_is_arm" } },
@@ -209,6 +273,7 @@
     "tags": ["防御", "ラピッド使用", "オート"],
     "description": "脚へのダメージに防御1。移動時、白兵・肉弾マニューバ1つをラピッドで使用可。", 
     "description_raw": "脚のみ、ダメージに対して常に「防御1」。バトルパートで移動時、白兵・肉弾攻撃マニューバを1つ、「ラピッド」で使用可。",
+    "flavor_text": "下半身をそのままで多脚戦車に置き換えている。装甲に加えて、砲塔ゆえの移動攻撃も可能。ただし人間離れは否めない。",
     "source": { "book": "基本ルールブック", "page": 91 }, 
     "effects": [
         { "ref": "APPLY_PASSIVE_DEFENSE", "params": { "value": 1, "condition": "hit_location_is_leg" } },
@@ -221,6 +286,7 @@
     "tags": ["移動妨害", "転倒", "ラピッド"],
     "description": "移動妨害1+転倒", 
     "description_raw": "移動妨害1+転倒。",
+    "flavor_text": "ワイヤーなどで操る程度伸ばすことのできる関節。伸びた関節は、思わぬ間合いの敵を掴み動きを止める。",
     "source": { "book": "基本ルールブック", "page": 91 }, 
     "effects": [
         { "ref": "GENERIC_MOVE_DEBUFF", "params": { "value": -1 } },
@@ -233,6 +299,7 @@
     "tags": ["防御", "ダメージ"],
     "description": "防御2", 
     "description_raw": "防御2。",
+    "flavor_text": "肉体の大部分を機械に置き換えた半機械人間。その体は見れば有機体だが、ほとんどの攻撃は鋼鉄の装甲で跳ね返す。",
     "source": { "book": "基本ルールブック", "page": 91 }, 
     "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 2 } }]
   },
@@ -242,6 +309,7 @@
     "tags": ["支援", "妨害", "ジャッジ"],
     "description": "支援2か妨害2", 
     "description_raw": "支援2か妨害2。",
+    "flavor_text": "まれの外の力を実現する義手システム。強力な指先で掴まれれば、次の攻撃から逃れることはできない。",
     "source": { "book": "基本ルールブック", "page": 91 }, 
     "effects": [{ "ref": "CHOICE_JUDGE_MOD", "params": { "options": [{ "type": "支援", "value": 2 }, { "type": "妨害", "value": -2 }] } }]
   },
@@ -251,6 +319,7 @@
     "tags": ["防御", "オート", "切断"],
     "description": "「切断」無効化", 
     "description_raw": "「切断」を常に無効化してよい。",
+    "flavor_text": "自らを切り離す分離システム。たやすく解体されるが、それぞれが独自に動き、再びつながるのだ。",
     "source": { "book": "基本ルールブック", "page": 91 }, 
     "effects": [{ "ref": "NEGATE_DAMAGE_EFFECT", "params": { "effect_to_negate": "切断", "optional": true } }]
   },
@@ -260,6 +329,7 @@
     "tags": ["妨害", "ジャッジ"],
     "description": "妨害2。使用制限なし（1判定1回）。", 
     "description_raw": "妨害2。1ターン何度使ってもよい。ただし、1回の判定への重複は不可。",
+    "flavor_text": "美しく人形のように化粧された容姿。ドールたちの憧れであり、ネクロマンサーの寵愛。死者にも汚せぬ聖域。",
     "source": { "book": "基本ルールブック", "page": 91 }, 
     "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "target": "any_roll", "value": -2, "limit_per_turn": "none", "limit_per_roll": 1 } }]
   },
@@ -269,6 +339,7 @@
     "tags": ["攻撃", "アクション", "防御", "移動"],
     "description": "白兵攻撃2、「防御」無効、命中時対象に移動1", 
     "description_raw": "白兵攻撃２、この攻撃に対して「防御」は全て無効。なお、攻撃が命中したなら対象を「移動1」してもよい。",
+    "flavor_text": "金属杭を高熱油圧と共に高速射出し、敵の防御を打ち抜きつつ吹き飛ばす。",
     "source": { "book": "基本ルールブック", "page": 91, "errata": "1.6.1" }, 
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 2, "defense_piercing": true, "on_hit": ["MOVE_TARGET_1_OPTIONAL"] } }]
   },
@@ -278,6 +349,7 @@
     "tags": ["攻撃", "アクション", "切断", "連撃"],
     "description": "白兵攻撃1+切断+連撃1", 
     "description_raw": "白兵攻撃1+切断+連撃1。",
+    "flavor_text": "必要時、任意に発生させることのできる光の刃。焼けつく光が、電子音と共に敵の体を切り刻むのだ。",
     "source": { "book": "基本ルールブック", "page": 91 }, 
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 1, "on_hit": ["SEVERANCE", "CHAIN_ATTACK_1"] } }]
   },
@@ -287,7 +359,28 @@
     "tags": ["移動", "ラピッド", "移動妨害"],
     "description": "移動1、「移動妨害」無効", 
     "description_raw": "移動1、この移動に対して「移動妨害」は全て無効。",
+    "flavor_text": "脚に仕込まれた強力なバネによって、瞬間的にジャンプできる。ダイナミックな回避や移動を行うことが可能だ。",
     "source": { "book": "基本ルールブック", "page": 91 }, 
     "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": 1, "direction": "performer_choice", "ignore_move_debuff": true } }]
+  },
+  "R3-11": {
+    "name": "サイコブラスター", "category": "攻撃", "allowedLocations": "任意",
+    "tags": ["ラピッド", "攻撃", "射撃攻撃", "狂気点操作"],
+    "timing": "ラピッド", "cost": "効果参照", "range": "0～2",
+    "description": "行動値1減らす代わりに、未練の狂気点を1点加えて射撃攻撃4。",
+    "description_raw": "コストの代わりにあなたは現在行動値を1減らした上で、任意の未練に狂気点1点を加える。射撃攻撃4。",
+    "flavor_text": "超能力開発の副産物。使用者の自我に強制干渉し、ある種の超能力を無理やり発動させてエネルギーとして発射。敵を破壊する。",
+    "source": { "book": "ESP", "page": 43 },
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "射撃", "damage": 4, "cost_type": "ap_and_madness", "cost_value": 1 } }]
+  },
+  "R3-12": {
+    "name": "ロケットパック", "category": "移動", "allowedLocations": "胴",
+    "tags": ["アクション", "移動"],
+    "timing": "アクション", "cost": 0, "range": "自身",
+    "description": "移動1～2。1つのパートにつき1回のみ。",
+    "description_raw": "移動1～2。1つのパートにつき、1回のみ使用可。",
+    "flavor_text": "体内の粘菌コミュニティと連動、貯蓄したエネルギーを燃焼し、ごく短時間の飛行を可能とする兵装。",
+    "source": { "book": "ESP", "page": 43 },
+    "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": "1-2", "limit_per_part": 1 } }]
   }
 }

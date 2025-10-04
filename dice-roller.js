@@ -221,24 +221,24 @@ export function performDiceRoll(rollData) {
             if (maxFinalValue >= 11) {
                 bestResult = '大成功';
                 // 詳細テキストはコマンドに応じて設定
-                if (command === 'na') { bestResultDetails = `＞ 攻撃側任意（追加ダメージ${maxFinalValue - 10}）`; bestHitLocation = '任意'; }
+                if (command === 'na') { bestResultDetails = `攻撃側任意（追加ダメージ${maxFinalValue - 10}）`; bestHitLocation = '任意'; }
 
             } else if (maxFinalValue >= 6) {
                 bestResult = '成功';
                 // 詳細テキストはコマンドに応じて設定 (NAのみ)
                 if (command === 'na') {
-                    if (maxFinalValue >= 10) { bestResultDetails = '＞ 頭（なければ攻撃側任意）'; bestHitLocation = '頭'; }
-                    else if (maxFinalValue >= 9) { bestResultDetails = '＞ 腕（なければ攻撃側任意）'; bestHitLocation = '腕'; }
-                    else if (maxFinalValue >= 8) { bestResultDetails = '＞ 胴（なければ攻撃側任意）'; bestHitLocation = '胴'; }
-                    else if (maxFinalValue >= 7) { bestResultDetails = '＞ 脚（なければ攻撃側任意）'; bestHitLocation = '脚'; }
-                    else { bestResultDetails = '＞ 防御側任意'; bestHitLocation = '任意'; }
+                    if (maxFinalValue >= 10) { bestResultDetails = '頭（なければ攻撃側任意）'; bestHitLocation = '頭'; }
+                    else if (maxFinalValue >= 9) { bestResultDetails = '腕（なければ攻撃側任意）'; bestHitLocation = '腕'; }
+                    else if (maxFinalValue >= 8) { bestResultDetails = '胴（なければ攻撃側任意）'; bestHitLocation = '胴'; }
+                    else if (maxFinalValue >= 7) { bestResultDetails = '脚（なければ攻撃側任意）'; bestHitLocation = '脚'; }
+                    else { bestResultDetails = '防御側任意'; bestHitLocation = '任意'; }
                 }
 
             } else if (minFinalValue <= 1) {
                 bestResult = '大失敗';
                 // 詳細テキストはコマンドに応じて設定
-                if (command === 'na') { bestResultDetails = '＞ 味方か自身に命中'; }
-                else if (command === 'nc') { bestResultDetails = '＞ 使用パーツ全損'; }
+                if (command === 'na') { bestResultDetails = '味方か自身に命中'; }
+                else if (command === 'nc') { bestResultDetails = '使用パーツ全損'; }
 
             } else {
                 bestResult = '失敗';
@@ -249,12 +249,12 @@ export function performDiceRoll(rollData) {
             const color = (bestResult === '大成功' || bestResult === '成功') ? '#007bff' : '#dc3545';
             
             // 例: 2NC ＞ [1,6] ＞ 6[1,6] ＞ 成功
-            const resultText = `<span style="color: ${color};">🎲 ${input.toUpperCase()} ＞ [${rawValues.join(',')}]${modifierText} ＞ ${maxFinalValue}[${finalValues.join(',')}] ＞ ${bestResult} ${bestResultDetails}</span>`;
+            const resultText = `<span style="color: ${color};">🎲 ${input.toUpperCase()} ＞ [${rawValues.join(',')}]${modifierText} ＞ ${maxFinalValue}[${finalValues.join(',')}]<br>${bestResult}<br>${bestResultDetails}</span>`;
 
             // 5. ログとトーストに表示
             addLog(resultText);
             if (rollData.showToast) {
-                showToastNotification(resultText, 4000);
+                showToastNotification(resultText, 2000);
             }
 
             // 6. battle-logicに最終結果を渡す
@@ -288,11 +288,11 @@ export function performDiceRoll(rollData) {
                     break;
                 case 'nt':
                     const takaramono = takaramonoMasterData[resultValue];
-                    resultText = takaramono ? `🎲 たからもの表(${resultValue}) ＞ 【${takaramono.name}】 ${takaramono.description}` : `たからものデータ[${resultValue}]が見つかりませんでした。`;
+                    resultText = takaramono ? `🎲 たからもの表(${resultValue})<br>【${takaramono.name}】 ${takaramono.description}` : `たからものデータ[${resultValue}]が見つかりませんでした。`;
                     break;
                 case 'nh':
                     const hint = hintMasterData[resultValue];
-                    resultText = hint ? `🎲 暗示表(${resultValue}) ＞ 【${hint.name}】 ${hint.description}` : `暗示データ[${resultValue}]が見つかりませんでした。`;
+                    resultText = hint ? `🎲 暗示表(${resultValue})<br>【${hint.name}】 ${hint.description}` : `暗示データ[${resultValue}]が見つかりませんでした。`;
                     break;
                 case '1d10':
                 case 'd10':
@@ -316,11 +316,11 @@ export function performDiceRoll(rollData) {
         performD100Roll(rollData, (finalResult) => {
             const fragment = memoryFragmentsData[finalResult];
             return fragment 
-                ? `🎲 記憶のカケラ表(${finalResult}) ＞ 【${fragment.name}】 ${fragment.description}` 
+                ? `🎲 記憶のカケラ表(${finalResult})<br>【${fragment.name}】 ${fragment.description}` 
                 : `記憶のカケラデータ[${finalResult}]が見つかりませんでした。`;
         });
     } else {
-        // --- システムコマンドとD10系以外 (NK, 1d100 など) の場合 ---
+        // --- システムコマンドとD10系以外 (1d8 など) の場合 ---
         // これらは3D演出の対象外
         let resultText = `「${input}」は無効な入力です。`;
         
@@ -369,6 +369,6 @@ function formatRegretResult(prefix, tableName, diceResult) {
     const regret = allRegrets[regretId];
     
     return regret 
-        ? `🎲 ${tableName}(${regretId}) ＞ 【${regret.name}】[発狂:${regret.madnessName}] ${regret.madnessEffect}` 
+        ? `🎲 ${tableName}(${regretId})<br>【${regret.name}】[発狂:${regret.madnessName}] ${regret.madnessEffect}` 
         : `未練データ[${regretId}]が見つかりませんでした。`;
 }

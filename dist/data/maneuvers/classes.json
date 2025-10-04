@@ -7,55 +7,61 @@
   "ST-SP": {
     "name": "蠢く肉片", "category": "妨害", 
     "tags": ["妨害", "ジャッジ"],
-    "description": "ダメージを受けている際、射程内の判定に-3の妨害を行う。", 
-    "description_raw": "ダメージを受けている際のみ使用可。妨害3。",
-    "source": { "book": "基本ルールブック", "page": 72 }, 
     "timing": "ジャッジ", "cost": 0, "range": "0～2",
+    "description": "妨害3。ダメージを受けているときのみ", 
+    "description_raw": "ダメージを受けている際のみ使用可。妨害3。",
+    "flavor_text": "切り落とされ、吹き飛ばされ、ちぎれ落ちた肉片さえも。あなたの意のままに蠢き、敵を阻むのだ。",
+    "source": { "book": "基本ルールブック", "page": 72 }, 
     "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "target": "any_roll", "value": -3, "condition": "is_damaged" } }]
   },
   "ST-01": {
     "name": "平気", "category": "補助", 
     "tags": ["損傷無効", "オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "パーツが損傷しても、そのパーツのマニューバをターン終了まで使用できる。", 
     "description_raw": "パーツを損傷しても、ターン終了までマニューバ使用可。",
+    "flavor_text": "あなたの体は、たとえズタズタバラバラになろうとも機能し続ける。ちぎれた首も考え続ける。戦闘に支障はない。",
     "source": { "book": "基本ルールブック", "page": 72 }, 
-    "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "ignore_part_damage", "value": true, "duration": "end_of_turn" } }]
   },
   "ST-02": {
     "name": "死に続け", "category": "修復", 
     "tags": ["修復", "ラピッド"],
+    "timing": "ラピッド", "cost": 0, "range": "自身",
     "description": "損傷している基本パーツ1つを修復する。", 
     "description_raw": "損傷している基本パーツ1つを修復する。",
+    "flavor_text": "失われた箇所があろうとも、うなずけば元通り。あなたの体はあなたであることをやめない。こさつど、いいえまでも。",
     "source": { "book": "基本ルールブック", "page": 72 }, 
-    "timing": "ラピッド", "cost": 0, "range": "自身",
     "effects": [{ "ref": "REPAIR_PART", "params": { "target": "self", "part_type": "基本", "count": 1 } }]
   },
   "ST-03": {
     "name": "庇う", "category": "防御", 
     "tags": ["防御", "ダメージ"],
+    "timing": "ダメージ", "cost": 0, "range": "0～1",
     "description": "射程内の味方が受けたダメージを代わりに受ける。1ターンに何度でも使用可。", 
     "description_raw": "対象が受けたダメージを自身が受ける。1ターンに何度でも使用可。",
+    "flavor_text": "あなたはいつでも躊躇なく、姉妹を庇ってやれる。あなたこそが皆の盾だ。",
     "source": { "book": "基本ルールブック", "page": 72 }, 
-    "timing": "ダメージ", "cost": 0, "range": "0～1",
     "effects": [{ "ref": "TAKE_DAMAGE_FOR_ALLY", "params": { "limit_per_turn": "none" } }]
   },
   "ST-04": {
     "name": "肉の盾", "category": "防御", 
     "tags": ["防御", "ダメージ"],
+    "timing": "ダメージ", "cost": 0, "range": "0～1",
     "description": "ダメージに付随する効果（切断、爆発など）を全て打ち消す。", 
     "description_raw": "ダメージに付随する効果全てを打ち消す(切断、連撃、全体攻撃など)",
+    "flavor_text": "咄嗟に己の身を盾にし、その余波を打ち消す。それは覚悟ゆえか。鈍感になった危機感なのか。",
     "source": { "book": "基本ルールブック", "page": 72 }, 
-    "timing": "ダメージ", "cost": 0, "range": "0～1",
     "effects": [{ "ref": "CANCEL_DAMAGE_EFFECTS", "params": {} }]
   },
   "ST-05": {
     "name": "失敗作", "category": "補助", 
     "tags": ["支援", "損傷", "オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "常時、攻撃判定と切断判定に+1。ただしターン終了毎にパーツ1つを損傷。", 
     "description_raw": "攻撃判定+1、切断判定+1。ただし、バトルパートの毎ターン終了時および戦闘終了時、あなたは任意のパーツを1つ損傷する。この損傷はコストとしては扱わない。",
+    "flavor_text": "あなたは優秀ではあるが、明確な失敗作。その体は戦いとなれば崩れていってしまうのだ。",
     "source": { "book": "基本ルールブック", "page": 72 }, 
-    "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [
         { "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "attackCheckBonus", "value": 1, "duration": "permanent" } },
         { "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "severanceCheckBonus", "value": 1, "duration": "permanent" } },
@@ -65,19 +71,21 @@
   "ST-06": {
     "name": "臓物豚", "category": "修復",
     "tags": ["修復", "オート"],
+    "timing": "オート", "cost": "なし", "range": "姉妹全員",
     "description": "戦闘終了時、自身を含む姉妹全員の、損傷している【はらわた】を修復してよい。", 
     "description_raw": "戦闘終了時、あなたを含む姉妹全員、損傷している【はらわた】を修復してよい。",
+    "flavor_text": "どんな理由でこんな体なのか、想像したくもないけれど。あなたの体は、臓物だけは短時間で再生する。抉られても焼かれても喰われても。",
     "source": { "book": "ESP", "page": 40 },
-    "timing": "オート", "cost": "なし", "range": "姉妹全員",
     "effects": [{ "ref": "REPAIR_ALLY_PART", "params": { "trigger": "battle_end", "part_name": "はらわた" } }]
   },
   "ST-07": {
     "name": "死人の流儀", "category": "補助",
     "tags": ["支援", "妨害", "ジャッジ", "損傷"],
+    "timing": "ジャッジ", "cost": "基本パーツ1", "range": "0～1",
     "description": "支援2か妨害2", 
     "description_raw": "コストの代わりに、あなたは任意の基本パーツを1つ損傷する。支援2か妨害2。",
+    "flavor_text": "自らもぎとった腕で相手を掴む。己の顎を投げつけて噛み付かせる。真に覚悟を決めた死人なら、できて当たり前の戦術だ。",
     "source": { "book": "ESP", "page": 40 },
-    "timing": "ジャッジ", "cost": "基本パーツ1", "range": "0～1",
     "effects": [{ "ref": "CHOICE_JUDGE_MOD", "params": { "cost_type": "damage_basic_part", "options": [{ "value": 2 }, { "value": -2 }] } }]
   },
 
@@ -85,73 +93,81 @@
   "TN-SP": {
     "name": "無限解体", "category": "攻撃", 
     "tags": ["攻撃", "ダメージ", "ラピッド使用"],
+    "timing": "ダメージ", "cost": 0, "range": "自身",
     "description": "自身がダメージを与えた際、次カウントまで、所有する攻撃マニューバは全て同対象に「ダメージ」タイミングで使用可能になる。", 
     "description_raw": "自身がダメージを与えた際のみ使用可。次カウントまで、所有する攻撃マニューバは全て、同対象に使う限りタイミングが「ダメージ」となる。",
+    "flavor_text": "一撃を与えた次の瞬間。持てる攻撃手段全てを敵に叩き込み、完全解体する対アンデッド用戦闘術。",
     "source": { "book": "基本ルールブック", "page": 73 }, 
-    "timing": "ダメージ", "cost": 0, "range": "自身",
     "effects": [{ "ref": "CHANGE_MANEUVER_TIMING", "params": { "category": "攻撃", "new_timing": "ダメージ", "duration": "next_count", "condition": "same_target" } }]
   },
   "TN-01": {
     "name": "死神", "category": "支援", 
     "tags": ["支援", "オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "白兵攻撃の攻撃判定に+1。", 
     "description_raw": "白兵攻撃マニューバの攻撃判定において、出目+1してもよい。",
+    "flavor_text": "振りかざし、当てる。あなたの腕と目と脳はそのために調整され、磨かれた。死と破壊をもたらすために。",
     "source": { "book": "基本ルールブック", "page": 73 }, 
-    "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "attackCheckBonus", "value": 1, "duration": "permanent", "condition": "白兵攻撃" } }]
   },
   "TN-02": {
     "name": "災禍", "category": "攻撃", 
     "tags": ["攻撃", "ダメージ", "全体攻撃"],
+    "timing": "ダメージ", "cost": 2, "range": "自身",
     "description": "自身が与えた白兵攻撃に「全体攻撃」の効果を付与する。", 
     "description_raw": "自身が与えた白兵攻撃にのみ使用可。「全体攻撃」の効果を得る。これによって自身がダメージを受けることはない。",
+    "flavor_text": "あなたの存在は死の竜巻だ。切り込んだ場所で凶器と狂気が荒れ狂い、敵味方関係なく全てを破壊の渦に巻き込むだろう。",
     "source": { "book": "基本ルールブック", "page": 73 }, 
-    "timing": "ダメージ", "cost": 2, "range": "自身",
     "effects": [{ "ref": "ADD_EFFECT_TO_ATTACK", "params": { "effect_to_add": "全体攻撃", "self_immune": true } }]
   },
   "TN-03": {
     "name": "奈落送り", "category": "支援", 
     "tags": ["支援", "強化", "オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "同カウント内に他の姉妹が攻撃した敵に攻撃する際、自身の攻撃判定+1、与ダメージ+1。", 
     "description_raw": "同カウント内に他の姉妹が攻撃対象とした敵に攻撃判定する際、自身の攻撃判定+1、与ダメージ+1",
+    "flavor_text": "タイミングを見定め、同時攻撃で最大の効果を上げる。呼吸の止まった体でも、息を合わせることに意味があるのだ。",
     "source": { "book": "基本ルールブック", "page": 73 }, 
-    "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [{ "ref": "APPLY_CONDITIONAL_BUFF", "params": { "trigger": "attacking_same_target_as_ally_this_count", "buffs": [{ "stat": "attackCheckBonus", "value": 1 }, { "stat": "damageBonus", "value": 1 }] } }]
   },
   "TN-04": {
     "name": "刈り取る", "category": "防御", 
     "tags": ["防御", "オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "自身が使用するマニューバに対し、他者は「ラピッド」「ジャッジ」で割り込めない。", 
     "description_raw": "バトルパートで使用するマニューバを、自身以外は「ラピッド」「ジャッジ」でマニューバを使用できない。",
+    "flavor_text": "超高速の一撃。それを阻むことなど誰にもできはしないのだ。",
     "source": { "book": "基本ルールブック", "page": 73 }, 
-    "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [{ "ref": "PREVENT_INTERRUPTION", "params": { "target": "self_maneuvers" } }]
   },
   "TN-05": {
     "name": "心中", "category": "攻撃", 
     "tags": ["攻撃", "オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "攻撃判定の出目が「6」の際、命中箇所を任意に決めてよい。", 
     "description_raw": "バトルパートで攻撃判定が「6」の際、任意の箇所にダメージを与えてよい。",
+    "flavor_text": "その一撃は必ず敵に致命傷を与える。偶然ではなく必然が敵を薙ぎ払うだろう。",
     "source": { "book": "基本ルールブック", "page": 73 }, 
-    "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [{ "ref": "MODIFY_ATTACK_RESULT", "params": { "condition_roll_equals": 6, "effect": "choose_hit_location" } }]
   },
   "TN-06": {
     "name": "断罪", "category": "支援",
     "tags": ["支援", "ジャッジ"],
+    "timing": "ジャッジ", "cost": 0, "range": "自身",
     "description": "自身の白兵攻撃$6、サイコロの出目「6」固定。", 
     "description_raw": "自身の白兵攻撃判定においてのみ使用可能。攻撃判定のサイコロ出目は「６」となり、いかなる効果でも振り直しはできなくなる。",
+    "flavor_text": "外せない一撃がある。いいだろう、絶対に、当ててやる。あやふやな運から解放された、絶対の結末を見せてやる。",
     "source": { "book": "ESP", "page": 40 },
-    "timing": "ジャッジ", "cost": 0, "range": "自身",
     "effects": [{ "ref": "SET_DICE_ROLL", "params": { "target_roll": "self_melee_attack", "value": 6, "prevent_reroll": true } }]
   },
   "TN-07": {
     "name": "冥王", "category": "妨害",
     "tags": ["妨害", "オート", "移動妨害"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "レギオンの「移動妨害」無効化。レギオンからの攻撃は判定値7以上でなければダメージを受けない。", 
     "description_raw": "レギオンの「移動妨害」を常に無効化してよい。さらに、レギオンがあなたに対して行った攻撃判定は判定値7以上でなければダメージを与えない。",
+    "flavor_text": "いかに数をそろえようと、ものを考えることすらできぬ死者の中など、無人の野をゆくが如し。奴らの指はあなたに触れることすらできない。",
     "source": { "book": "ESP", "page": 40 },
-    "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [
       { "ref": "NEGATE_EFFECT_FROM", "params": { "effect_tag": "移動妨害", "source_category": "レギオン" } },
       { "ref": "MINIMUM_HIT_ROLL", "params": { "value": 7, "source_category": "レギオン" } }
@@ -162,73 +178,81 @@
   "GT-SP": {
     "name": "暴食", "category": "修復", 
     "tags": ["修復", "ラピッド"],
+    "timing": "ラピッド", "cost": 0, "range": "自身",
     "description": "損傷した強化パーツ1つを修復する。", 
     "description_raw": "損傷した強化パーツ1つを修復する。",
+    "flavor_text": "屍肉を喰らうあなたは、本来の肉体にはありえざる特性すら回復させる。",
     "source": { "book": "基本ルールブック", "page": 74 }, 
-    "timing": "ラピッド", "cost": 0, "range": "自身",
     "effects": [{ "ref": "REPAIR_PART", "params": { "target": "self", "part_type": "強化", "count": 1 } }]
   },
   "GT-01": {
     "name": "肉の宴", "category": "修復", 
     "tags": ["修復", "アクション"],
+    "timing": "アクション", "cost": 1, "range": "自身",
     "description": "損傷した基本パーツ1つを修復する。", 
     "description_raw": "損傷した基本パーツ1つを修復する。",
+    "flavor_text": "あなたは屍肉を食らう。食らった肉は取り込み自らのものとなる。それは、多くの死者がおぞましさを感じる光景だ。",
     "source": { "book": "基本ルールブック", "page": 74 }, 
-    "timing": "アクション", "cost": 1, "range": "自身",
     "effects": [{ "ref": "REPAIR_PART", "params": { "target": "self", "part_type": "基本", "count": 1 } }]
   },
   "GT-02": {
     "name": "捕食者", "category": "妨害", 
     "tags": ["妨害", "ダメージ", "転倒"],
+    "timing": "ダメージ", "cost": 2, "range": "0",
     "description": "自身のいるエリア内の敵全てに「転倒」を与える。", 
     "description_raw": "自身のいるエリア内の敵全てに「転倒」を与える。",
+    "flavor_text": "死者を食らう異端を、敵は本能的に恐怖する。自我を持たぬ屍兵どもでさえも、あなたを恐怖せずにはいられない。",
     "source": { "book": "基本ルールブック", "page": 74 }, 
-    "timing": "ダメージ", "cost": 2, "range": "0",
     "effects": [{ "ref": "DEAL_STATUS_EFFECT_TO_AREA", "params": { "effect": "転倒", "target_type": "enemy" } }]
   },
   "GT-03": {
     "name": "舌なめずり", "category": "妨害", 
     "tags": ["移動妨害", "ラピッド"],
+    "timing": "ラピッド", "cost": 0, "range": "0～1",
     "description": "射程内の対象の移動距離を-1する。", 
     "description_raw": "移動妨害1。",
+    "flavor_text": "おぞましい食欲の目、唇を這う舌、したたる唾液。その様相には、いかなる死者も足を止めざるをえない。",
     "source": { "book": "基本ルールブック", "page": 74 }, 
-    "timing": "ラピッド", "cost": 0, "range": "0～1",
     "effects": [{ "ref": "GENERIC_MOVE_DEBUFF", "params": { "value": -1 } }]
   },
   "GT-04": {
     "name": "冥食", "category": "妨害", 
     "tags": ["妨害", "オート"],
+    "timing": "オート", "cost": "なし", "range": "効果参照",
     "description": "自身の攻撃によって発生した切断判定の出目を-2する。", 
     "description_raw": "自身の攻撃によって対象に発生させた切断判定は、出目が-2される。",
+    "flavor_text": "刃は食事を切り分けるナイフ。ちぎれかけたそれを、あなたの爪が、歯が、逃さず喰らうのだ。",
     "source": { "book": "基本ルールブック", "page": 74 }, 
-    "timing": "オート", "cost": "なし", "range": "効果参照",
     "effects": [{ "ref": "APPLY_DEBUFF_TO_ENEMY_ROLL", "params": { "trigger": "severance_check_by_self", "roll_type": "切断判定", "value": -2 } }]
   },
   "GT-05": {
     "name": "背徳の悦び", "category": "補助", 
     "tags": ["再使用", "ダメージ"],
+    "timing": "ダメージ", "cost": 0, "range": "自身",
     "description": "使用済みの「ラピッド」「ジャッジ」「ダメージ」マニューバ1つを再使用可能にする。", 
     "description_raw": "使用済みの「ラピッド」「ジャッジ」「ダメージ」のマニューバを1つ、再使用可能にする。",
+    "flavor_text": "己自身さえも含め、誰かが傷つく時。あなたは思わず、背徳的な高揚感を得てしまう。",
     "source": { "book": "基本ルールブック", "page": 74 }, 
-    "timing": "ダメージ", "cost": 0, "range": "自身",
     "effects": [{ "ref": "RESET_MANEUVER_COOLDOWN", "params": { "timings": ["ラピッド", "ジャッジ", "ダメージ"] } }]
   },
   "GT-06": {
     "name": "引き裂き", "category": "補助",
     "tags": ["強化", "オート", "切断"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "肉弾攻撃1+切断。【あご】【こぶし】のみ。", 
     "description_raw": "あなたの【あご】【こぶし】の効果は「肉弾攻撃1+切断」となる。",
+    "flavor_text": "あなたは屍肉を喰らう。ただ喰らうだけではない。引き裂き、貪り、喰らい尽くす。あなたの牙は、あらゆるものを引き裂く。",
     "source": { "book": "ESP", "page": 40 },
-    "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [{ "ref": "MODIFY_MANEUVER_EFFECT", "params": { "target_maneuvers": ["あご", "こぶし"], "new_effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 1, "on_hit": ["SEVERANCE"] } }] } }]
   },
   "GT-07": {
     "name": "完全捕食", "category": "攻撃",
     "tags": ["攻撃", "破壊", "オート"],
+    "timing": "オート", "cost": "なし", "range": "0",
     "description": "完全破壊。肉弾攻撃成功時。対象の残りパーツ総数が[攻撃判定値-5]以下。", 
     "description_raw": "あなたが射程０の対象に肉弾攻撃を成功させた際、対象の残りパーツ総数が［攻撃判定値-5］以下だったなら、対象は全てのパーツが損傷する（ただしレギオンには無効）。",
+    "flavor_text": "あなたは屍肉を喰らう。ただ喰らうだけではない。喰らい尽くし、完全に自らの肉体へと変えてしまうのだ。",
     "source": { "book": "ESP", "page": 40 },
-    "timing": "オート", "cost": "なし", "range": "0",
     "effects": [{ "ref": "DESTROY_TARGET_ON_HIT", "params": { "condition": "remaining_parts <= roll_value - 5", "exclude": "レギオン" } }]
   },
 
@@ -236,49 +260,54 @@
   "RQ-SP": {
     "name": "魔弾", "category": "補助", 
     "tags": ["射程補正", "オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "射撃攻撃マニューバの最大射程を+1。", 
     "description_raw": "バトルパートで射撃攻撃マニューバの最大射程を+1してもよい。",
+    "flavor_text": "死者は銃を撃つに適さない。だが、あなたは特別製だ。通常より遥か遠くの敵にまで、その弾丸は届き、打ち抜く。",
     "source": { "book": "基本ルールブック", "page": 75 }, 
-    "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "rangeBonus", "value": 1, "duration": "permanent", "condition": "射撃攻撃" } }]
   },
   "RQ-01": {
-    "name": "鎮魂", "category": "支援", 
+    "name": "銃神", "category": "支援", 
     "tags": ["支援", "オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "射撃攻撃の攻撃判定に+1。", 
     "description_raw": "射撃攻撃マニューバの攻撃判定において、出目+1してもよい。",
+    "flavor_text": "あなたの目と銃はつながっている。乱射魔のゾンビ兵どもとは違う。狙ったものを確実に貫くのだ。",
     "source": { "book": "基本ルールブック", "page": 75 }, 
-    "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "attackCheckBonus", "value": 1, "duration": "permanent", "condition": "射撃攻撃" } }]
   },
   "RQ-02": {
     "name": "死の手", "category": "補助", 
     "tags": ["ラピッド使用", "ラピッド", "攻撃"],
+    "timing": "ラピッド", "cost": 0, "range": "自身",
     "description": "任意の攻撃マニューバ1つを「ラピッド」として使用できる。", 
     "description_raw": "任意の攻撃マニューバ1つを「ラピッド」として使用可",
+    "flavor_text": "あなたの三撃はいつだって白馬の王子。絶妙のタイミングで撃ち込んで見せる。敵はいつだって、あなたの後だ。",
     "source": { "book": "基本ルールブック", "page": 75 }, 
-    "timing": "ラピッド", "cost": 0, "range": "自身",
     "effects": [{ "ref": "ALLOW_MANEUVER_AS_TIMING", "params": { "target": "self", "maneuver_category": "攻撃", "as_timing": "ラピッド" } }]
   },
   "RQ-03": {
     "name": "子守唄", "category": "補助", 
     "tags": ["弱体化", "コスト補正", "オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "射撃攻撃の攻撃判定-1、コスト-1(最低1)。", 
     "description_raw": "バトルパートで射撃攻撃マニューバの攻撃判定出目-1、コスト-1(最低1)。",
+    "flavor_text": "銃声は止まらない。戦場では特に。声が途切れれば歌ではない。連ねて、重く、銃を歌わせる。",
     "source": { "book": "基本ルールブック", "page": 75 }, 
-    "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [
         { "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "attackCheckBonus", "value": -1, "duration": "permanent", "condition": "射撃攻撃" } },
         { "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "costBonus", "value": -1, "minimum": 1, "duration": "permanent", "condition": "射撃攻撃" } }
     ]
   },
   "RQ-04": {
-    "name": "銃咒", "category": "攻撃", 
+    "name": "銃型", "category": "攻撃", 
     "tags": ["攻撃", "妨害", "ジャッジ"],
+    "timing": "ジャッジ", "cost": 2, "range": "0～1",
     "description": "射程内の判定に-2の妨害を行い、その後、同対象に「射撃攻撃1」を行ってよい。", 
     "description_raw": "妨害2。その後、同対象に射撃攻撃1を行ってよい。",
+    "flavor_text": "銃を用いた攻防一体の格闘術。基本は三丁拳銃だが、死者たちはあらゆる銃撃戦にこの格闘術を用いることができる。",
     "source": { "book": "基本ルールブック", "page": 75 }, 
-    "timing": "ジャッジ", "cost": 2, "range": "0～1",
     "effects": [
         { "ref": "GENERIC_JUDGE_MOD", "params": { "target": "any_roll", "value": -2 } },
         { "ref": "GENERIC_ATTACK", "params": { "attack_type": "射撃", "damage": 1, "target": "original_target", "delay": "after_judge" } }
@@ -287,28 +316,31 @@
   "RQ-05": {
     "name": "集中", "category": "支援", 
     "tags": ["支援", "ラピッド"],
+    "timing": "ラピッド", "cost": 2, "range": "自身",
     "description": "ターン終了まで自身の攻撃判定に+1。", 
     "description_raw": "以後、ターン終了まであなたの攻撃判定+1。",
+    "flavor_text": "感覚を研ぎ澄まし、相手の隙を狙う。狙いすました一撃は、必ず敵を打ち据えることだろう。",
     "source": { "book": "基本ルールブック", "page": 75 }, 
-    "timing": "ラピッド", "cost": 2, "range": "自身",
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "attackCheckBonus", "value": 1, "duration": "end_of_turn" } }]
   },
   "RQ-06": {
     "name": "後衛の誇り", "category": "その他",
     "tags": ["支援", "オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "大失敗の無効化。射撃攻撃・砲撃攻撃", 
     "description_raw": "あなたは射撃攻撃・砲撃攻撃において、攻撃判定値が1以下でも大失敗ではなく通常の失敗となる。",
+    "flavor_text": "味方の背後から敵を撃つ。あなたを信じているから、後衛の戦いに専念できるのだ。そんな信頼を、わずかなミスで裏切っていいはずがない。",
     "source": { "book": "ESP", "page": 41 },
-    "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [{ "ref": "PREVENT_FUMBLE", "params": { "condition": ["射撃攻撃", "砲撃攻撃"] } }]
   },
   "RQ-07": {
     "name": "最高の戦友", "category": "修復",
     "tags": ["修復", "ラピッド"],
+    "timing": "ラピッド", "cost": 1, "range": "自身",
     "description": "修復1。白兵攻撃・射撃攻撃のパーツ1つ", 
     "description_raw": "あなたは損傷中の「白兵攻撃」か「射撃攻撃」の効果を持つパーツ１つを、損傷前の状態に戻してよい。",
+    "flavor_text": "あなたの手にあるは、自身の腕より信じる武器。常に触れ続けた武器。折れようと曲がろうと、裏切るはずがない。それは、必ず、あなたに応える。",
     "source": { "book": "ESP", "page": 41 },
-    "timing": "ラピッド", "cost": 1, "range": "自身",
     "effects": [{ "ref": "REPAIR_PART_BY_TYPE", "params": { "count": 1, "attack_types": ["白兵攻撃", "射撃攻撃"] } }]
   },
 
@@ -316,73 +348,81 @@
   "BR-SP": {
     "name": "異形存在", "category": "防御", 
     "tags": ["防御", "オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "攻撃を受けた際、大成功でなければ命中箇所を任意に決めてよい。", 
     "description_raw": "バトルパートにおいて攻撃を受けた際、敵が大成功でなければ、命中箇所を任意に決めてよい（ただし全てのパーツが損傷した箇所は不可）。",
+    "flavor_text": "その体はもはや、人の形をしていない。ゆえに、人を相手するつもりでの攻撃は受け付けないのだ。",
     "source": { "book": "基本ルールブック", "page": 76 }, 
-    "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [{ "ref": "CHANGE_HIT_LOCATION", "params": { "trigger": "on_being_hit", "condition": "not_critical_hit" } }]
   },
   "BR-01": {
     "name": "狂鬼", "category": "支援", 
     "tags": ["支援", "オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "肉弾攻撃の攻撃判定に+1。", 
     "description_raw": "肉弾攻撃マニューバの攻撃判定+1",
+    "flavor_text": "あなたは真紅の戦闘本能に支配されて戦う。視界は真紅に染まり、立ち向かってくるものを爪で、牙で、引き裂くのだ。",
     "source": { "book": "基本ルールブック", "page": 76 }, 
-    "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "attackCheckBonus", "value": 1, "duration": "permanent", "condition": "肉弾攻撃" } }]
   },
   "BR-02": {
     "name": "怪力", "category": "強化", 
     "tags": ["強化", "オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "肉弾攻撃・白兵攻撃の与ダメージ+1。", 
     "description_raw": "肉弾攻撃・白兵攻撃における与ダメージ+1。",
+    "flavor_text": "人間にありえざる死者の筋力。さらにそれを高め、高め、高められた。細胞に込められた怪物は、解放の時を常に待っている。",
     "source": { "book": "基本ルールブック", "page": 76 }, 
-    "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "damageBonus", "value": 1, "duration": "permanent", "condition": ["肉弾攻撃", "白兵攻撃"] } }]
   },
   "BR-03": {
     "name": "変異", "category": "補助", 
     "tags": ["パーツ追加", "オート"],
+    "timing": "オート", "cost": "なし", "range": "効果参照",
     "description": "習得時、レベル3変異パーツを追加で1つ獲得する。このパーツは強化値に縛られない。", 
     "description_raw": "このスキルを習得した際、レベル3変異パーツを追加で1つ獲得する。このパーツは強化値に縛られず、修復することも可能である。",
+    "flavor_text": "あなたに込められた異形の呪いは肉体の限界を超えるほどで。あなたが心を保っていることは奇跡という他ない。",
     "source": { "book": "基本ルールブック", "page": 76 }, 
-    "timing": "オート", "cost": "なし", "range": "効果参照",
     "effects": [{ "ref": "GAIN_EXTRA_PART", "params": { "type": "変異", "level": 3 } }]
   },
   "BR-04": {
     "name": "修復身", "category": "修復", 
     "tags": ["修復", "オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "バトルパート終了時、望むパーツ2つを修復する。", 
     "description_raw": "バトルパート終了時、望むパーツ2つを修復してよい。",
+    "flavor_text": "何度も切り刻まれ、撃ち抜かれ、破壊されて破壊され。今更、少し壊れたからとどうしたというのだろう。",
     "source": { "book": "基本ルールブック", "page": 76 }, 
-    "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [{ "ref": "REPAIR_PART", "params": { "target": "self", "part_type": "任意", "count": 2, "trigger": "battle_end" } }]
   },
   "BR-05": {
     "name": "再生", "category": "防御", 
     "tags": ["防御", "ダメージ"],
+    "timing": "ダメージ", "cost": 1, "range": "自身",
     "description": "受けるダメージを-1する。1ターンに何度でも使用可（同一ダメージには1回のみ）。", 
     "description_raw": "防御1。1ターンに何度使ってもよい。",
+    "flavor_text": "あなたの体はひとりでに元に戻っていく。どんな攻撃も少し動きを鈍らせるだけだ。",
     "source": { "book": "基本ルールブック", "page": 76, "errata": "1.6.1" }, 
-    "timing": "ダメージ", "cost": 1, "range": "自身",
     "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 1, "limit_per_damage": 1 } }]
   },
   "BR-06": {
     "name": "凶化器官", "category": "強化",
     "tags": ["強化", "オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "与ダメージ+1。「切断」「爆発」「転倒」「連撃」「全体攻撃」の効果は失われる。", 
     "description_raw": "あなたが持つ、あらゆる攻撃マニューバが与えるダメージを、使用宣言時に1上昇させてもよい。ただし、その際に「切断」「爆発」「転倒」「連撃」「全体攻撃」の効果は失われる。",
+    "flavor_text": "本来の武器や攻撃器官を、あなたの肉体は模倣し強化し、より禍々しい凶器として発現させる。破壊の力はいや増したろうが、そのおぞましさは本来の比ではない。",
     "source": { "book": "ESP", "page": 41 },
-    "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [{ "ref": "TRADE_DAMAGE_FOR_EFFECTS", "params": { "damage_bonus": 1, "removed_tags": ["切断", "爆発", "転倒", "全体攻撃"] } }]
   },
   "BR-07": {
     "name": "結晶化", "category": "防御",
     "tags": ["防御", "ダメージ", "切断", "爆発", "移動"],
+    "timing": "ダメージ", "cost": 1, "range": "自身",
     "description": "「切断」「爆発」「移動」無効化。使用制限なし", 
     "description_raw": "受けたダメージに付属した「切断」「爆発」「移動」は全てを無効化される。このマニューバは1ターンに何度でも使用してよい。",
+    "flavor_text": "異形の体に流れるは異様な体液。外気に触れれば結晶となり硬化する。切断されようともつながり、爆発も吸収。なるほど怪物の体……しかし便利な体だ！",
     "source": { "book": "ESP", "page": 41 },
-    "timing": "ダメージ", "cost": 1, "range": "自身",
     "effects": [{ "ref": "NEGATE_DAMAGE_EFFECTS", "params": { "effects_to_negate": ["切断", "爆発", "移動"] } }]
   },
 
@@ -390,73 +430,81 @@
   "RM-SP": {
     "name": "戦乙女", "category": "行動値", 
     "tags": ["行動値", "オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "最大行動値+2。", 
     "description_raw": "最大行動値+2。",
+    "flavor_text": "あなたの舞は死者として破格の速さ。周りが全て遅く見えるほどに。",
     "source": { "book": "基本ルールブック", "page": 77 }, 
-    "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "maxActionValue", "value": 2, "duration": "permanent" } }]
   },
   "RM-01": {
     "name": "円舞曲", "category": "妨害", 
     "tags": ["妨害", "ラピッド"],
+    "timing": "ラピッド", "cost": 1, "range": "自身",
     "description": "ターン終了まで、自身を対象とする全ての攻撃判定-1。重複不可。", 
     "description_raw": "ターン終了まで、自身を対象とするすべての攻撃判定-1。（全体攻撃は、自身への判定値のみ-1）",
+    "flavor_text": "戦場の舞姫。舞い踊るあなたへ打ち込まれる攻撃は、いなされ、かわされる。踊る人形を止めることは至難。",
     "source": { "book": "基本ルールブック", "page": 77, "errata": "1.6.1" }, 
-    "timing": "ラピッド", "cost": 1, "range": "自身",
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "defenseCheckBonus", "value": -1, "duration": "end_of_turn", "stackable": false } }]
   },
   "RM-02": {
     "name": "死の舞踏", "category": "補助", 
     "tags": ["振り直し", "ジャッジ"],
+    "timing": "ジャッジ", "cost": 0, "range": "自身",
     "description": "自身の攻撃判定のサイコロを振りなおす。", 
     "description_raw": "攻撃判定のサイコロを振りなおす。",
+    "flavor_text": "精密な動きを可能とする体だからこそ、できること。相手の場所を抉り撃つ。細かな応用も交え、敵の弱点を確実に。",
     "source": { "book": "基本ルールブック", "page": 77 }, 
-    "timing": "ジャッジ", "cost": 0, "range": "自身",
     "effects": [{ "ref": "REROLL_DICE", "params": { "target_roll": ["自身の攻撃判定"] } }]
   },
   "RM-03": {
     "name": "言霊", "category": "補助", 
     "tags": ["損傷無効", "ラピッド"],
+    "timing": "ラピッド", "cost": 1, "range": "0",
     "description": "対象の損傷したパーツ1つを選び、ターン終了までそのパーツのマニューバを使用可能にする。", 
     "description_raw": "対象の損傷したパーツ１つを選ぶ。対象はターン終了までそのパーツのマニューバを使用してよい（ただし使用済み・重複不可などは戻らない）。",
+    "flavor_text": "壊れなくても踊らされるのが慰み者。壊れた体を無理に動かす術を、あなたは知っている。",
     "source": { "book": "基本ルールブック", "page": 77, "errata": "1.6.1" }, 
-    "timing": "ラピッド", "cost": 1, "range": "0",
     "effects": [{ "ref": "ALLOW_DAMAGED_PART_USE", "params": { "target": "character", "count": 1, "duration": "end_of_turn" } }]
   },
   "RM-04": {
     "name": "空蝉", "category": "妨害", 
     "tags": ["妨害", "ラピッド", "転倒"],
+    "timing": "ラピッド", "cost": 1, "range": "0",
     "description": "射程内の対象に「転倒」を与える。", 
     "description_raw": "転倒。",
+    "flavor_text": "官能のくすぐり。舞姫の指が違えば、死者の肉もわななき痙攣し、ひと時の快楽に震えるだろう。",
     "source": { "book": "基本ルールブック", "page": 77 }, 
-    "timing": "ラピッド", "cost": 1, "range": "0",
     "effects": [{ "ref": "DEAL_STATUS_EFFECT", "params": { "target": "character", "effect": "転倒" } }]
   },
   "RM-05": {
     "name": "時計仕掛け", "category": "補助", 
     "tags": ["パーツ追加", "オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "習得時、レベル3改造パーツを追加で1つ獲得する。このパーツは強化値に縛られない。", 
     "description_raw": "このスキルを習得した際、レベル3改造パーツを追加で1つ獲得する。このパーツは強化値に縛られず、修復することも可能である。",
+    "flavor_text": "その体は歯車と螺子でできている。あなたを動かす血や肉はもはやほとんどない。",
     "source": { "book": "基本ルールブック", "page": 77 }, 
-    "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [{ "ref": "GAIN_EXTRA_PART", "params": { "type": "改造", "level": 3 } }]
   },
   "RM-06": {
     "name": "数多の手管", "category": "補助",
     "tags": ["コスト補正", "オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "コスト-1（最低0）。【うで】【あし】使用時。", 
     "description_raw": "あなたが【うで】【あし】を使用する際、コストは1減少する（最低0）。",
+    "flavor_text": "めまぐるしく踊り交わされる、あなたの手足。よらば共に踊りましょうと身を絡め、戦いの中でもあなたは多情な舞踏会を催すだろう。",
     "source": { "book": "ESP", "page": 41 },
-    "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [{ "ref": "REDUCE_COST_OF_MANEUVER", "params": { "value": 1, "target_maneuvers": ["うで", "あし"] } }]
   },
   "RM-07": {
     "name": "狂った歯車", "category": "強化",
     "tags": ["強化", "オート"],
+    "timing": "オート", "cost": "なし", "range": "0",
     "description": "与ダメージ+1。敵の大失敗時", 
     "description_raw": "あなたがいるエリアで、いずれかの敵が大失敗した際、その結果によって発生するダメージを1点上昇させてよい。",
+    "flavor_text": "無様な踊りは、しかるべき喜劇に。中途半端な醜態など許されない。せめて笑える道化の芸に変えてさしあげなくては。",
     "source": { "book": "ESP", "page": 41 },
-    "timing": "オート", "cost": "なし", "range": "0",
     "effects": [{ "ref": "INCREASE_FUMBLE_DAMAGE", "params": { "value": 1, "target": "enemy_in_area" } }]
   },
 
@@ -464,73 +512,81 @@
   "SY-SP": {
     "name": "破壊の渦", "category": "攻撃",
     "tags": ["攻撃", "破壊", "ラピッド", "狂気点操作"],
+    "timing": "ラピッド", "cost": "狂気点", "range": "すべて",
     "description": "第1ターン終了まで使用不可。コストの代わりに、あなたは発狂していない未練全てに、狂気点1点を加える。舞台上の全存在はパーツ4つを各自選び、損傷させる（レギオンは全滅）。", 
     "description_raw": "第1ターン終了まで使用不可。コストの代わりに、あなたは発狂していない未練全てに、狂気点1点を加える。舞台上の全存在はパーツ4つを各自選び、損傷させる（レギオンは全滅）。",
+    "flavor_text": "あなたの中で抑えられていた“もっとも恐ろしいもの”が溢れ出し、目に映る全てを破壊していく。そう、あなた自身さえも含めて。",
     "source": { "book": "ESP", "page": 36 },
-    "timing": "ラピッド", "cost": "狂気点", "range": "すべて",
     "effects": [{ "ref": "UNIVERSAL_DESTRUCTION", "params": { "cost_type": "madness_all_sane", "damage": 4, "legion_destruction": true } }]
   },
   "SY-01": {
     "name": "歪める力", "category": "攻撃",
     "tags": ["ラピッド", "攻撃"],
+    "timing": "ラピッド", "cost": 3, "range": "0～2",
     "description": "『完全解体』状態でも使用可。対象がパーツを2つ任意に選び損傷させる。", 
     "description_raw": "『完全解体』状態でも使用可。対象はパーツを2つ選ぶ。そのパーツは損傷する（レギオンは2体減少）。",
+    "flavor_text": "もっともわかりやすい破壊の超能力。目にしたものを意の力で歪め、捩り、裂く。見えない暴力が敵を蹂躙し、肉塊や鉄屑に変えるのだ。",
     "source": { "book": "ESP", "page": 36 },
-    "timing": "ラピッド", "cost": 3, "range": "0～2",
     "effects": [{ "ref": "INFLICT_DAMAGE", "params": { "damage": 2, "legion_damage": 2 } }]
   },
   "SY-02": {
     "name": "拒む意志", "category": "防御",
     "tags": ["防御", "ダメージ"],
+    "timing": "ダメージ", "cost": 2, "range": "0～1",
     "description": "『完全解体』状態でも使用可。防御1。1ターンに何度でも使用可（一回の攻撃に対しては一度のみ）。", 
     "description_raw": "『完全解体』状態でも使用可。防御1。1ターンに何度でも使用可。ただし一回の攻撃に対しては一度しか使用できない。",
+    "flavor_text": "あなたは思うだけで結果を弾き出す。望まぬ未来を跳ね除けることができる力。常に、弾丸に、あなたの矢になるものをやすやすと食らわしはしない。",
     "source": { "book": "ESP", "page": 36 },
-    "timing": "ダメージ", "cost": 2, "range": "0～1",
     "effects": []
   },
   "SY-03": {
     "name": "運命歪曲", "category": "妨害",
     "tags": ["ジャッジ", "狂気点操作", "妨害"],
+    "timing": "ジャッジ", "cost": "狂気点1", "range": "0～3",
     "description": "あなたを対象とした攻撃判定でのみ使用可。妨害0", 
     "description_raw": "あなたを対象とした攻撃判定でのみ使用可。コストの代わりに、あなたは任意の未練に狂気点1点を加える。判定の結果は判定値に関係なく「失敗」となる。",
+    "flavor_text": "未来を見る目。天の心には重すぎる力。魂の軋みを代償に、最悪の危機だけは避ける。",
     "source": { "book": "ESP", "page": 36 },
-    "timing": "ジャッジ", "cost": "狂気点1", "range": "0～3",
     "effects": [{ "ref": "FORCE_FAILURE", "params": { "cost_type": "madness_1", "target_roll": "incoming_attack" } }]
   },
   "SY-04": {
     "name": "魂の抱擁", "category": "その他",
     "tags": ["アクション", "狂気点操作"],
+    "timing": "アクション", "cost": 2, "range": "0～2",
     "description": "『完全解体』状態でも使用可。対象の未練1つから狂気点1点を減らし、自身の未練1つに狂気点1点を加える。", 
     "description_raw": "『完全解体』状態でも使用可。対象が持つ未練1つを任意に選んで狂気点1点を減らす。その後、自身の発狂していない未練1つを任意に選び、狂気点1点を加える。",
+    "flavor_text": "あなたの魂は肉の檻に囚われない。そっと抜け出し、大切な人の魂に直接触れることができる。そして抱きしめ、その苦しみを分かち合うことも。",
     "source": { "book": "ESP", "page": 36 },
-    "timing": "アクション", "cost": 2, "range": "0～2",
     "effects": [{ "ref": "MANIPULATE_MADNESS_POINTS", "params": {} }]
   },
   "SY-05": {
     "name": "虚空の玉座", "category": "防御",
     "tags": ["防御", "オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "あなたが同エリアから受ける「妨害」「移動妨害」は無効になる。", 
     "description_raw": "あなたが同エリアから受けた「妨害」「移動妨害」は無効にしてもよい。",
+    "flavor_text": "わずかだが、あなたの体は常に浮遊している。重力に囚われぬ身さばきは、無粋な差し出しなど気にも留めさせない。",
     "source": { "book": "ESP", "page": 1 },
-    "timing": "オート", "cost": "なし", "range": "自身",
     "effects": [{ "ref": "NEGATE_EFFECT_IN_AREA", "params": { "effect_tags": ["妨害", "移動妨害"] } }]
   },
   "SY-06": {
     "name": "喪失の共有", "category": "攻撃",
     "tags": ["攻撃", "ラピッド"],
+    "timing": "ラピッド", "cost": 3, "range": "0～1",
     "description": "ホラーに対してのみ有効。自身の箇所1つを選び、「その箇所にある損傷しているパーツ」と同数を対象自身のパーツから損傷させる。", 
     "description_raw": "ホラーに対してのみ有効。自身の箇所1つを任意で選ぶ。対象は「選んだ箇所にある損傷しているパーツ」と同数を対象自身のパーツから選び、損傷させる。",
+    "flavor_text": "己の受けた破壊を、敵の自我に投影して誤認させる。……ごくごく軽度の低い自我しか持たない相手にだけ有効な攻撃。破壊せず、使えなくするのだ。",
     "source": { "book": "ESP", "page": 36 },
-    "timing": "ラピッド", "cost": 3, "range": "0～1",
     "effects": [{ "ref": "SHARED_DAMAGE", "params": { "target_category": "ホラー", "self_damage": 1 } }]
   },
   "SY-07": {
     "name": "盤上の駒", "category": "移動",
     "tags": ["移動", "アクション"],
+    "timing": "アクション", "cost": 2, "range": "0～1",
     "description": "移動1。対象の現在行動値-2。『完全解体』状態でも使用可。", 
     "description_raw": "『完全解体』状態でも使用可。移動1。さらに移動させた対象の現在行動値を2点減らす（移動が妨害されても行動値は減少する）。",
+    "flavor_text": "強力な意志の力は、重力にさえささやかな影響を与える。狙った相手を“力”の突風で吹き飛ばし、叩きつけるのだ。上下感覚さえ狂った相手は、大きな隙を見せるだろう。",
     "source": { "book": "ESP", "page": 36 },
-    "timing": "アクション", "cost": 2, "range": "0～1",
     "effects": [
       { "ref": "MOVE_CHARACTER", "params": { "target": "character", "distance": 1 } },
       { "ref": "REDUCE_ACTION_VALUE", "params": { "target": "moved_character", "value": 2 } }

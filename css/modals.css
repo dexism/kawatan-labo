@@ -59,7 +59,7 @@
     pointer-events: auto;
 }
 .modal-content {
-    background-color: var(--color-surface-dark);
+    background-color: var(--color-background-2);
     color:            var(--color-text);
     border-radius: 10px;
     overflow: hidden; /* 角丸を有効にするために必要 */
@@ -390,7 +390,7 @@
         "skills"
         "parts"
         "personal";
-    gap: 5px;
+    gap: 10px;
     font-size: 14px;
     box-sizing: border-box;
 }
@@ -531,8 +531,9 @@
     grid-area: personal;
 }
 .sheet-section {
-    background:       var(--color-surface-1);
-    border: 1px solid var(--color-border);
+    background:       var(--color-background-4);
+    /* border: 1px solid var(--color-border); */
+    border-left: 4px solid gold;
     border-radius: 10px;
     padding: 10px;
     font-size: 14px;
@@ -557,7 +558,7 @@
 .sheet-input-group input,
 .sheet-textarea {
 /*    width: 100%;*/
-    background: var(--color-background);
+    background: var(--color-background-2);
     color: var(--color-text);
     border: 1px solid var(--color-border);
     border-radius: 5px;
@@ -573,7 +574,7 @@
     margin: 5px;
     padding: 5px;
     border-radius: 5px;
-    background-color: var(--color-surface-2);
+    background-color: var(--color-background-2);
 }
 .part-list-item .type { 
     font-weight: bold; 
@@ -696,7 +697,7 @@
     font-size: 1.2rem;
     box-sizing: border-box;
     text-align: center;
-    background-color: var(--color-background);
+    background-color: var(--color-background-2);
     color: var(--color-text);
     border: 1px solid var(--color-border);
     border-radius: 5px;
@@ -769,13 +770,14 @@
     margin: 10px;
     padding: 0;
     box-sizing: border-box;
-
+    height: auto;
     display: grid; /* flexからgridに変更 */
     grid-template-columns: 1fr 1fr 1fr; /* 3つの均等な列を作成 */
     margin-bottom: 10px;
     border: 1px solid var(--color-border);
     border-radius: 20px;
     overflow: hidden;
+    font-weight: bold;
 }
 .import-method-selector input[type="radio"] {
     display: none;
@@ -793,13 +795,15 @@
     color: black;
 }
 .sheet-list-container {
-    max-height: 60vh;
+    max-height: 70vh;
     overflow-y: auto;
+    font-size: 16px;
+border: 1px dashed cyan;
 }
 
 
 .pc-name-in-list {
-    font-size: 0.9em; /* 少し小さく */
+    font-size: 14px; /* 少し小さく */
     color: var(--color-text-muted); /* 少し薄い色に */
 }
 

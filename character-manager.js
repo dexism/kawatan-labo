@@ -6,7 +6,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.5.17";
+export const version = "1.5.18";
 
 // --- モジュールのインポート ---
 import * as data from './data-handler.js';
@@ -363,8 +363,9 @@ export function damagePart(characterId, partId, damageAmount = 1) {
           character.isDestroyed = true;
           character.actionValue = 0;
           console.log(`${character.name}は完全に破壊されました。`);
+          return true;
       }
-      return;
+      return false;
   }
 
   for (const location in character.partsStatus) {
@@ -376,7 +377,7 @@ export function damagePart(characterId, partId, damageAmount = 1) {
           
           // パーツが損傷したら必ず最大行動値を再計算する
           recalculateMaxActionValue(character);
-          return;
+          return false;
       }
   }
   console.error("損傷対象のパーツIDが見つかりません。", { characterId, partId });

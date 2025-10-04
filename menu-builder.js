@@ -244,7 +244,7 @@ function createManeuverItem(maneuverObj, char) {
             <span class="item-name">【${maneuver.name}】</span>
             <span class="item-stats">《${maneuver.timing}/${maneuver.cost}/${maneuver.range}》</span>
         </div>
-        <div class="item-row-2">${maneuver.description || ''}</div>
+        <div class="item-row-2">${maneuver.description_raw || ''}</div>
     `;
 
     // 各列をitemに追加 (変更なし)
@@ -579,7 +579,7 @@ export function showCharacterSheetModal(char) {
                         if (!maneuver) {
                              return `<div class="part-list-item"><span class="type">[${type}]</span> <b>${part.name}</b></div>`;
                         }
-                        const description = isTreasure ? maneuver.effect : (maneuver.description || maneuver.effect);
+                        const description = isTreasure ? maneuver.description_raw : (maneuver.description_raw || maneuver.effect);
                         return `<div class="part-list-item"><span class="type">[${type}]</span> <b>【${part.name}】</b>《${maneuver.timing}／${maneuver.cost}／${maneuver.range}》：${description}</div>`;
                     }).join('');
                     return `<div><h4>〈${locName}〉</h4>${partsHtml}</div>`;

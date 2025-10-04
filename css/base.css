@@ -11,7 +11,7 @@ html, body {
 body {
   font-family: sans-serif;
   font-size: 1.0rem;
-  background-color: var(--color-background);
+  background-color: var(--color-background-2);
   color:            var(--color-text);
 }
 body.is-dragging {
@@ -76,7 +76,16 @@ h2 {
   --color-text-3:       var(--color-1);
   --color-text-light:   var(--color-e);
   --color-text-muted:   var(--color-7);
-  --color-background:   var(--color-e);
+  --color-fore-1:       var(--color-0);
+  --color-fore-2:       var(--color-1);
+  --color-fore-3:       var(--color-2);
+  --color-fore-4:       var(--color-3);
+  --color-fore-5:       var(--color-4);
+  --color-background-1: var(--color-f);
+  --color-background-2: var(--color-e);
+  --color-background-3: var(--color-d);
+  --color-background-4: var(--color-c);
+  --color-background-5: var(--color-b);
   --color-panel:        var(--color-c); /* パネルの背景 */
   --color-surface-1:    var(--color-d); /* パネルやカードの背景 */
   --color-surface-2:    var(--color-e); /* メニューやモーダルの背景 */
@@ -121,7 +130,16 @@ html[data-theme="dark"] {
     --color-text-3:       var(--color-e);
     --color-text-light:   var(--color-1);
     --color-text-muted:   var(--color-8);
-    --color-background:   var(--color-1);
+    --color-fore-1:       var(--color-f);
+    --color-fore-2:       var(--color-e);
+    --color-fore-3:       var(--color-d);
+    --color-fore-4:       var(--color-c);
+    --color-fore-5:       var(--color-b);
+    --color-background-1: var(--color-0);
+    --color-background-2: var(--color-1);
+    --color-background-3: var(--color-2);
+    --color-background-4: var(--color-3);
+    --color-background-5: var(--color-4);
     --color-panel:        var(--color-3);
     --color-surface-1:    var(--color-5);
     --color-surface-2:    var(--color-4);
@@ -168,7 +186,11 @@ html[data-theme="dark"] {
     --color-text-3:       var(--color-e);
     --color-text-light:   var(--color-1);
     --color-text-muted:   var(--color-8);
-    --color-background:   var(--color-1);
+    --color-background-1: var(--color-0);
+    --color-background-2: var(--color-1);
+    --color-background-3: var(--color-2);
+    --color-background-4: var(--color-3);
+    --color-background-5: var(--color-4);
     --color-panel:        var(--color-3);
     --color-surface-1:    var(--color-5);
     --color-surface-2:    var(--color-4);
@@ -186,6 +208,10 @@ html[data-theme="dark"] {
     --color-sub-bg:       #200;
     --color-btn-text:     var(--color-c);
     --color-btn-bg:       var(--color-0);
+    --color-level-1:      rgba(255, 255, 255, 0.1); 
+    --color-level-3:      rgba(255, 255, 255, 0.3); 
+    --color-level-f:      rgba(0, 0, 0, 0.8); 
+
     /* カテゴリ色分け */
     --color-move:         #3a6b8c;
     --color-attack:       #a65c58;

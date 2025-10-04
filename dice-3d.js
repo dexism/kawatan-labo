@@ -16,7 +16,7 @@ const settings = {
         radius:         0.01,   // ダイスの外接球半径 (m)
         mass:           0.01,  // 質量 (kg)
         angularDamping: 0.1,    // 回転の減衰 (0-1)
-        initialPosition: { xPercent: 90, yPercent: 90 }, // 右下(%)
+        initialPosition: { xPercent: 75, yPercent: 75 }, // 右下(%)
         initialHeight:  0.05,   // 投擲する高さ (m)
         throw: {
             speed:           { min: 0.1, max: 0.2 }, // 初速 [m/s]
@@ -33,10 +33,10 @@ const settings = {
     },
     camera: {
         fov:   20,              // 視野角 (ズーム)
-        height: 0.6             // 視点高
+        height: 0.5             // 視点高
     },
     tray: {
-        sizeRatio:     0.7,     // 画面サイズに対するトレイの比率
+        sizeRatio:     1.0,     // 画面サイズに対するトレイの比率
         wallHeight:    0.6,     // 壁と天井の高さ（共通）
         wallThickness: 0.5      // 壁の厚み
     },
@@ -145,7 +145,7 @@ export async function init(container) {
     // ★★★ ダイス同士の接触ルールを追加 ★★★
     world.addContactMaterial(new CANNON.ContactMaterial(diceMaterial, diceMaterial, {
         restitution: 0.5, // 反発係数 (0-1)。少し弾むように設定
-        friction: 0.1     // 摩擦係数 (0-1)。滑りやすく設定
+        friction:    0.1  // 摩擦係数 (0-1)。滑りやすく設定
     }));
     // 物理床
     const groundBody = new CANNON.Body({ mass: 0, material: groundMaterial });
@@ -204,6 +204,36 @@ export function rollDice(rollConfig, callback) {
 
     const trayWidth = viewportSize.width * settings.tray.sizeRatio;
     const trayHeight = viewportSize.height * settings.tray.sizeRatio;
+    
+    // 1. ダイスの数に応じた配置パターンを定義
+    const diceArrangements = {
+        1: [{ x: 0,    z: 0,    y: 0.00 }], // 中央
+        2: [{ x: -1,   z: 0,    y: 0.01 }, { x: 1,    z: 0,    y: 0.00 }], // 左右
+        3: [{ x: -1,   z: 1,    y: 0.02 }, { x: 1,    z: 1,    y: 0.01 }, { x: 0,    z: -1,   y: 0.00 }], // 三角形
+        // ★★★ 4個の場合：三角錐の頂点 ★★★
+        4: [
+            { x: 0,    z: 1.5,  y: 0.00 }, // 手前の底面頂点
+            { x: -1.2, z: -0.5, y: 0.01 }, // 奥左の底面頂点
+            { x: 1.2,  z: -0.5, y: 0.02 }, // 奥右の底面頂点
+            { x: 0,    z: 0,    y: 0.05 }  // 上部の頂点
+        ],
+        // ★★★ 5個の場合：三角錐を2つ合わせた形 ★★★
+        5: [
+            { x: 0,    z: 1.5,  y: 0.00 }, // 手前の頂点
+            { x: -1.2, z: -0.5, y: 0.01 }, // 中央左の頂点
+            { x: 1.2,  z: -0.5, y: 0.02 }, // 中央右の頂点
+            { x: 0,    z: -1.5, y: 0.04 }, // 奥の頂点
+            { x: 0,    z: 0,    y: 0.07 }  // 最上部の頂点
+        ]
+    };
+
+    // 2. 基準点と間隔を定義
+    const centerX = (settings.dice.initialPosition.xPercent / 100 - 0.5) * trayWidth;
+    const centerZ = (settings.dice.initialPosition.yPercent / 100 - 0.5) * trayHeight;
+    const spacing = settings.dice.radius * 2.5; // 直径の1.25倍の間隔
+
+    // 3. 適用する配置パターンを取得
+    const arrangement = diceArrangements[requiredDiceCount] || diceArrangements[5];
 
     for (let i = 0; i < requiredDiceCount; i++) {
         const die = availableDice[i];
@@ -213,20 +243,19 @@ export function rollDice(rollConfig, callback) {
         die.model.visible = true;
         die.id = config.id;
         
-        // ★★★ マテリアルの色を設定 ★★★
         die.model.traverse((child) => {
             if (child.isMesh) {
                 child.material.color.set(config.color);
             }
         });
 
-        // 複数のダイスが重ならないように初期位置を少しずらす
-        const xPercent = settings.dice.initialPosition.xPercent - (i * 5);
-        const yPercent = settings.dice.initialPosition.yPercent - (i * 5);
-        const initialX = (Math.max(10, Math.min(90, xPercent)) / 100 - 0.5) * trayWidth;
-        const initialZ = (Math.max(10, Math.min(90, yPercent)) / 100 - 0.5) * trayHeight;
+        // 4. パターンに基づいて各ダイスの3次元位置を計算
+        const offset = arrangement[i];
+        const dieX = centerX + offset.x * spacing;
+        const dieZ = centerZ + offset.z * spacing;
+        const dieY = settings.dice.initialHeight + offset.y; // 高さにもバリエーションを追加
 
-        die.body.position.set(initialX, settings.dice.initialHeight, initialZ);
+        die.body.position.set(dieX, dieY, dieZ);
 
         // ... 速度や角速度の設定 (ほぼ変更なし) ...
         const randomInRange = (range) => Math.random() * (range.max - range.min) + range.min;
@@ -248,6 +277,7 @@ export function rollDice(rollConfig, callback) {
             randomInRange(angVelRange) * (Math.random() < 0.5 ? 1 : -1)
         );
 
+        world.addBody(die.body);
         die.body.wakeUp();
         activeDice.push(die);
     }
@@ -340,7 +370,7 @@ function loadDiceModel() {
                         model: object, body: body, inUse: false, color: null, id: null 
                     });
                     scene.add(object);
-                    world.addBody(body);
+                    // world.addBody(body);
                     
                     resolve(); // ★★★ モデルとボディの準備が完了したらPromiseを解決 ★★★
                 },
@@ -372,6 +402,7 @@ function cleanupDice() {
         die.inUse = false;
         die.model.visible = false;
         die.id = null;
+        world.removeBody(die.body);
     });
     activeDice = [];
 }
@@ -494,10 +525,10 @@ function createWalls() {
     
     // 5. 物理的な壁を4つ作成 (変数名を統一)
     const wallPositions = [
-        new CANNON.Vec3(0, wallHeight / 2, trayHeight / 2),  // 奥
-        new CANNON.Vec3(0, wallHeight / 2, -trayHeight / 2), // 手前
-        new CANNON.Vec3(trayWidth / 2, wallHeight / 2, 0),  // 右
-        new CANNON.Vec3(-trayWidth / 2, wallHeight / 2, 0)  // 左
+        new CANNON.Vec3(0, 0, trayHeight / 2),  // ★ Y座標を0に変更
+        new CANNON.Vec3(0, 0, -trayHeight / 2), // ★ Y座標を0に変更
+        new CANNON.Vec3(trayWidth / 2, 0, 0),  // ★ Y座標を0に変更
+        new CANNON.Vec3(-trayWidth / 2, 0, 0)   // ★ Y座標を0に変更
     ];
     
     const wallBodies = [
