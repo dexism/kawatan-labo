@@ -98,15 +98,17 @@
 .maneuver-menu-list-container {
     overflow-y: auto; /* スクロール可能にする */
     padding: 5px;
+    gap: 10ps;
     cursor: default;
 }
 .maneuver-item-new {
-    margin-top: 5px;
+    margin-top: 10px;
     /* border: 1px solid var(--color-border); */
     background-color: var(--color-background-2); 
     border-radius: 10px;
     transition: all 0.2s;
     color: var(--color-fore-2);
+    box-shadow: 0 0 10px var(--color-shadow);
 
     display: flex;
     padding: 0; 
@@ -136,7 +138,7 @@
     padding: 4px 2px;
     font-size: 14px;
     font-weight: bold;
-    color: var(--color-text-3);
+    color: var(--color-text-2);
     flex-shrink: 0;
 }
 /* アイコン列 (旧 item-left-col) */
@@ -166,7 +168,6 @@
 .maneuver-item-new.is-damaged .item-row-2 {
     text-decoration: line-through;
     color: var(--color-accent-red);
-    color: var(--color-fore-2);
 }
 
 .maneuver-item-new:not(.is-masked):hover {

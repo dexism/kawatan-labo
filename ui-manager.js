@@ -749,9 +749,9 @@ export function showManeuverCard(baseElementRect, itemRect, character, maneuverO
             // <div class="card-row"><strong>効果</strong> ${maneuver.description || '---'}</div>
     cardEl.style.display = 'flex';
     const cardRect = cardEl.getBoundingClientRect();
-    let left = 20;
-    let top = itemRect.top + 60;
-    if (top + cardRect.height > window.innerHeight) { top = 20; }
+    let left = 40;
+    let top = itemRect.top + 100;
+    if (top + cardRect.height > window.innerHeight) { top = itemRect.top - cardRect.height - 40; }
     if (top < 10) top = 20;
     cardEl.style.left = `${left}px`;
     cardEl.style.top = `${top}px`;

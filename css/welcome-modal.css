@@ -70,7 +70,7 @@
     gap: 0;
     border-radius: 10px;
     background-color: var(--color-level-f);
-    box-shadow: 0 0 7px inset black;
+    box-shadow: 0 0 7px inset var(--color-shadow);
 }
 .welcome-modal-body p {
     margin: 0;
