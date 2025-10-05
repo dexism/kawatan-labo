@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>『永い後日談のネクロニカ』バトルパート支援ツール 7.10.5.21</title>
+<title>『永い後日談のネクロニカ』バトルパート支援ツール 7.10.6.2</title>
 
 <!-- Favicon設定 -->
 <link rel="icon" href="favicon.ico" type="image/x-icon">
@@ -172,8 +172,29 @@
     <aside class="grid-area-settings-panel">
       <div class="section accordion-container is-closed" id="settingsArea">
         <h2 class="section-title accordion-header">設定</h2>
-
         <div class="section settings accordion-content" id="settingsArea">
+          
+          <h2 class="section-title">セッションデータ管理</h2>
+          <div class="settings-content" id="session-controls">
+              <button id="saveStateToFileBtn" class="session-btn">ファイルに保存</button>
+              <button id="saveStateBtn" class="session-btn">ブラウザに保存</button>
+              <button id="clearStateBtn" class="session-btn session-btn-danger">保存データ削除</button>
+          </div>
+          
+          <h2 class="section-title">自動保存</h2>
+          <div class="settings-content">
+            <div class="theme-switcher-container" id="autosave-switcher-container">
+              <label>
+                <input type="radio" name="autosave-switcher" value="true" checked>
+                <span>ON</span>
+              </label>
+              <label>
+                <input type="radio" name="autosave-switcher" value="false">
+                <span>OFF</span>
+              </label>
+            </div>
+          </div>
+          
           <h2 class="section-title">セッション接続</h2>
           <div class="settings-content">
             <div class="theme-switcher-container">

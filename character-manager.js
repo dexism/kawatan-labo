@@ -6,10 +6,11 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.5.20";
+export const version = "1.6.24";
 
 // --- モジュールのインポート ---
 import * as data from './data-handler.js';
+import * as stateManager from './state-manager.js';
 
 // ===================================================================================
 //  モジュール内 プライベート変数
@@ -79,6 +80,7 @@ function createCharacterInstance(templateId, type, initialArea) {
 
     const newChar = JSON.parse(JSON.stringify(template));
 
+    newChar.templateId = templateId;
     newChar.id = `char_${nextUniqueId++}`;
     newChar.type = type;
     newChar.area = initialArea || template.initialArea || ((type === 'pc') ? '煉獄' : '奈落');
@@ -279,6 +281,7 @@ export function addCharacterFromTemplate(templateId, type, initialArea) {
   characters.push(newCharacter); 
   console.log(`${newCharacter.name} (${type}) を戦場に追加しました。`);
   mergeCharactersOnBoard();
+  stateManager.autoSave();
   return newCharacter;
 }
 
@@ -296,6 +299,7 @@ export function removeCharacter(id) {
     characters.splice(index, 1);
 
     console.log(`${removedName} を戦場から削除しました。`);
+    stateManager.autoSave();
     return true;
   }
   return false;
@@ -493,6 +497,7 @@ export function addCharacterFromObject(characterObject, type) {
     characters.push(newChar);
     console.log(`${newChar.name} (imported ${type}) を戦場に追加しました。`);
     mergeCharactersOnBoard();
+    stateManager.autoSave();
     return newChar;
 }
 
@@ -570,4 +575,73 @@ export function updateCharacterFromReload(characterId, newData) {
     
     console.log(`キャラクター「${char.name}」が保管所のデータで更新されました。`);
     return char;
+}
+
+/**
+ * 【復元処理専用】
+ * 状態を適用せず、キャラクターの基本的なインスタンスのみを生成して盤面に追加する。
+ * (initializeRegretsForPC や mergeCharactersOnBoard などの副作用をスキップする)
+ * @param {object} charData - テンプレートまたは変換済みキャラクターのオブジェクト
+ * @param {string} type - 'pc' または 'enemy'
+ * @returns {object} 生成されたキャラクターオブジェクト
+ */
+export function createCharacterForLoad(charData, type) {
+    const newChar = JSON.parse(JSON.stringify(charData));
+
+    // 必須プロパティを初期化
+    newChar.id = `char_${nextUniqueId++}`;
+    newChar.type = type;
+    newChar.area = newChar.initialArea || ((type === 'pc') ? '煉獄' : '奈落');
+    
+    // partsStatus を再構築
+    newChar.partsStatus = {};
+    let partIdCounter = 0;
+    if (newChar.parts && typeof newChar.parts === 'object') {
+        Object.keys(newChar.parts).forEach(location => {
+            if (Array.isArray(newChar.parts[location])) {
+                newChar.partsStatus[location] = newChar.parts[location].map(partName => ({
+                    id: `${newChar.id}_part_${partIdCounter++}`, name: partName, damaged: false,
+                }));
+            }
+        });
+    }
+
+    // たからものIDを再設定
+    if (type === 'pc' && newChar.treasure) {
+        for (const location in newChar.partsStatus) {
+            const part = newChar.partsStatus[location].find(p => p.name === newChar.treasure);
+            if (part) {
+                part.id = `${newChar.id}_part_treasure`;
+                break;
+            }
+        }
+    }
+
+    // 状態を初期値で設定
+    newChar.regrets = []; // ★復元時に上書きするため、ここでは空にする
+    newChar.madnessPoints = {};
+    newChar.statusEffects = [];
+    newChar.activeBuffs = [];
+    newChar.isMentallyBroken = false;
+    newChar.isDestroyed = false;
+    newChar.hasWithdrawn = false;
+    newChar.stackCount = 1;
+    newChar.hasActedThisCount = false;
+
+    recalculateMaxActionValue(newChar);
+    newChar.actionValue = newChar.maxActionValue;
+    initializeManeuverLimits(newChar);
+
+    characters.push(newChar);
+    return newChar;
+}
+
+/**
+ * 【内部処理用】
+ * 現在盤面にいる全てのキャラクターを、副作用（自動保存など）なしでクリアする。
+ */
+export function clearAllCharacters() {
+    characters = [];
+    nextUniqueId = 1; // ユニークIDもリセット
+    console.log("All characters cleared from the board.");
 }

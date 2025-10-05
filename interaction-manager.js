@@ -5,14 +5,20 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "2.1.6"; // パッチバージョンを更新
+export const version = "2.2.9"; // パッチバージョンを更新
 
 import * as data from './data-handler.js'; 
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
 import * as ui from './ui-manager.js';
 import { buildDiceMenu } from './dice-roller.js';
-import { buildManeuverMenu, showCharacterSheetModal, showUndeadListModal, buildMoveMenu, buildPlacementMenu, closeAllMenus, showAttackConfirmationModal } from './menu-builder.js';
+import { 
+    buildManeuverMenu, showCharacterSheetModal, 
+    showUndeadListModal, buildMoveMenu, 
+    buildPlacementMenu, closeAllMenus, 
+    showAttackConfirmationModal 
+} from './menu-builder.js';
+import * as stateManager from './state-manager.js';
 
 // --- モジュール内変数 ---
 let isCardDragging = false;
@@ -48,6 +54,26 @@ export function setupAllEventListeners() {
 
     document.getElementById('countdownBtn').onclick = () => battleLogic.advanceCount();
     document.getElementById('endTurnBtn').onclick = () => battleLogic.startMadnessPhase();
+
+    // セッション管理ボタンのイベントリスナー
+    const saveToFileBtn = document.getElementById('saveStateToFileBtn');
+    if (saveToFileBtn) {
+        saveToFileBtn.onclick = stateManager.saveStateToFile; // ★この行を追加
+    }
+    
+    const saveBtn = document.getElementById('saveStateBtn');
+    if (saveBtn) {
+        saveBtn.onclick = stateManager.saveState;
+    }
+
+    const clearBtn = document.getElementById('clearStateBtn');
+    if (clearBtn) {
+        clearBtn.onclick = () => {
+            if (confirm('ブラウザに保存されたセッションデータを削除します。この操作は取り消せません。よろしいですか？')) {
+                stateManager.clearSavedState();
+            }
+        };
+    }
 }
 
 export function setupCharacterEventListeners() {

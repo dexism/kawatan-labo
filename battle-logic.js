@@ -8,7 +8,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.14.57"; // パッチバージョンを更新
+export const version = "1.15.60"; // パッチバージョンを更新
 
 import * as charManager from './character-manager.js';
 import * as ui from './ui-manager.js';
@@ -17,6 +17,7 @@ import { performDiceRoll } from './dice-roller.js';
 import * as interactionManager from './interaction-manager.js';
 import { checkTargetAvailability } from './menu-builder.js';
 import * as data from './data-handler.js';
+import * as stateManager from './state-manager.js';
 
 // ===================================================================================
 //  モジュール内 プライベート変数 (戦闘状態)
@@ -278,6 +279,7 @@ function resetAndStartNewCount() {
     battleState.damageQueue = [];
     ui.updateAllQueuesUI();
     ui.updatePhaseUI(battleState);
+    stateManager.autoSave();
 }
 
 export function handleQueueCheck(queueType, index, isChecked) {
@@ -598,4 +600,47 @@ function performEscapeRoll(action, context) {
             determineNextStep();
         }
     });
+}
+
+/**
+ * 保存された状態から戦闘を復元する
+ * @param {number} turn - 復元するターン数
+ * @param {Array<object>} characters - 復元されたキャラクターの配列
+ */
+export function restoreBattleState(turn, characters) {
+    battleState.isStarted = true;
+    battleState.turn = turn;
+    
+    // 復元されたキャラクターの行動値から現在のカウントを決定
+    battleState.count = Math.max(0, ...characters.map(c => c.actionValue));
+    battleState.shouldScrollToCount = true;
+
+    // UIを戦闘モードに移行させる
+    ui.renderCharacterCards(); 
+    
+    // カウントの初期化と次のステップの決定
+    resetAndStartNewCount();
+    determineNextStep(); 
+}
+
+/**
+ * 戦闘状態を初期のセットアップフェーズにリセットする
+ */
+export function resetToSetupPhase() {
+    battleState = {
+        isStarted: false,
+        turn: 1,
+        count: 0,
+        activeActors: [],
+        phase: 'SETUP',
+        actionQueue: [],
+        rapidQueue: [],
+        judgeQueue: [],
+        damageQueue: [],
+        moveQueue: [],
+        currentAction: null,
+        shouldScrollToCount: false,
+    };
+    // UIも準備状態に更新する
+    ui.updateBattleStatusUI();
 }

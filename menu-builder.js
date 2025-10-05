@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.10.38"; // バージョンを更新
+export const version = "1.10.39"; // バージョンを更新
 
 import * as data from './data-handler.js';
 import * as charManager from './character-manager.js';
@@ -14,6 +14,7 @@ import * as ui from './ui-manager.js';
 import { convertVampireBloodSheet } from './character-converter.js';
 import { getCategoryClass } from './ui-helpers.js';
 import { getLocalStorageUsage, clearLocalImageCache } from './settings-manager.js';
+import * as stateManager from './state-manager.js';
 
 // --- モジュール内変数 ---
 let menuOpener = null;
@@ -1257,6 +1258,7 @@ function showImageSelectionModal(characterToUpdate, closeDetailsModalFn) {
                 item.onclick = () => {
                     const newImagePath = item.dataset.path;
                     charManager.updateCharacter(characterToUpdate.id, { img: newImagePath });
+                    stateManager.autoSave();
                     ui.renderCharacterCards();
                     closeImageSelectFn();
                     closeDetailsModalFn();

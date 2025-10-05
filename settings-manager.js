@@ -5,19 +5,24 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.1.3";
+export const version = "1.2.6";
+
+import * as stateManager from './state-manager.js';
 
 export function initialize() {
     const themeRadios = document.querySelectorAll('input[name="theme-switcher"]');
     
-    // 1. ページ読み込み時に保存された設定を適用する
+    // 1. ページ読み込み時に保存されたテーマ設定を適用する
     const savedTheme = localStorage.getItem('theme') || 'system';
     applyTheme(savedTheme);
 
-    // 対応するラジオボタンを選択状態にする
-    document.querySelector(`input[name="theme-switcher"][value="${savedTheme}"]`).checked = true;
+    // 2. 対応するラジオボタンを選択状態にする
+    const themeRadioToCheck = document.querySelector(`input[name="theme-switcher"][value="${savedTheme}"]`);
+    if (themeRadioToCheck) {
+        themeRadioToCheck.checked = true;
+    }
 
-    // 2. ラジオボタンの変更を監視する
+    // 3. ラジオボタンの変更を監視する
     themeRadios.forEach(radio => {
         radio.addEventListener('change', (event) => {
             const newTheme = event.target.value;
@@ -27,15 +32,29 @@ export function initialize() {
         });
     });
 
-    // OSのテーマ変更を監視する
+    // 4. OSのテーマ変更を監視する
     const darkModeMatcher = window.matchMedia('(prefers-color-scheme: dark)');
-    
-    // OSのテーマが変更されたら、'system'設定の場合のみテーマを再適用する
     darkModeMatcher.addEventListener('change', () => {
         const currentThemeSetting = localStorage.getItem('theme') || 'system';
         if (currentThemeSetting === 'system') {
             applyTheme('system');
         }
+    });
+
+    const autosaveRadios = document.querySelectorAll('input[name="autosave-switcher"]');
+
+    // 1. stateManagerを初期化し、保存された設定を取得
+    const isAutoSaveOn = stateManager.initialize();
+
+    // 2. UIのラジオボタンに反映
+    document.querySelector(`input[name="autosave-switcher"][value="${isAutoSaveOn}"]`).checked = true;
+
+    // 3. ラジオボタンの変更を監視
+    autosaveRadios.forEach(radio => {
+        radio.addEventListener('change', (event) => {
+            const shouldEnable = event.target.value === 'true';
+            stateManager.setAutoSave(shouldEnable);
+        });
     });
 
     console.log("Settings Manager initialized.");
@@ -48,7 +67,6 @@ export function initialize() {
 function applyTheme(theme) {
     if (theme === 'system') {
         // 'system' の場合は、手動設定用の属性を削除する
-        // これにより、CSSの @media クエリが有効になる
         document.documentElement.removeAttribute('data-theme');
     } else {
         // 'light' または 'dark' の場合は、属性を設定する

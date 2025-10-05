@@ -6,7 +6,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.12.71";
+export const version = "1.12.73";
 
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
@@ -821,6 +821,7 @@ export function displayVersionInfo(versionInfo) {
             'interaction-manager', 
             'character-manager', 
             'settings-manager', 
+            'state-manager', 
             'menu-builder', 
             'data-handler', 
             'ui-helpers', 
