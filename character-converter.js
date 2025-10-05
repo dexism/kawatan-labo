@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.1.17";
+export const version = "1.1.18";
 
 import * as data from './data-handler.js';
 
@@ -31,8 +31,27 @@ export function convertVampireBloodSheet(sourceData) {
         // converted.description = `${sourceData.Position_Name || ''}（${sourceData.MCLS_Name || ''}・${sourceData.SCLS_Name || ''}）`;
         converted.img = "/images/noimage.png";
         converted.category = "ドール";
-        converted.initialArea = "煉獄";
+        converted.initialArea = sourceData.sex || "煉獄";
         converted.baseActionValue = 6;
+
+        // ★★★ 暗示(hint)のインポート処理 ★★★
+        const hintName = sourceData.pc_carma; // "カルマ"フィールドから暗示名を取得
+        if (hintName) {
+            const allHints = data.getHintData();
+            const hintKey = Object.keys(allHints).find(key => allHints[key].name === hintName);
+            if (hintKey) {
+                converted.hint = {
+                    key: hintKey, // ← ★★★ キー番号を追加 ★★★
+                    name: allHints[hintKey].name,
+                    description: allHints[hintKey].description
+                };
+            } else {
+                // マスタに見つからない場合
+                converted.hint = { name: hintName, description: 'マスタデータに詳細が見つかりませんでした。' };
+            }
+        } else {
+            converted.hint = null;
+        }
 
         // --- ポジションとクラス ---
         converted.position = sourceData.Position_Name || '';

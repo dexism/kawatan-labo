@@ -121,7 +121,7 @@
     "effects": [{ "ref": "ADD_EFFECT_TO_ATTACK", "params": { "effect_to_add": "全体攻撃", "self_immune": true } }]
   },
   "TN-03": {
-    "name": "奈落送り", "category": "支援", 
+    "name": "殺劇", "category": "支援", 
     "tags": ["支援", "強化", "オート"],
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "同カウント内に他の姉妹が攻撃した敵に攻撃する際、自身の攻撃判定+1、与ダメージ+1。", 
@@ -131,7 +131,7 @@
     "effects": [{ "ref": "APPLY_CONDITIONAL_BUFF", "params": { "trigger": "attacking_same_target_as_ally_this_count", "buffs": [{ "stat": "attackCheckBonus", "value": 1 }, { "stat": "damageBonus", "value": 1 }] } }]
   },
   "TN-04": {
-    "name": "刈り取る", "category": "防御", 
+    "name": "刹那", "category": "防御", 
     "tags": ["防御", "オート"],
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "自身が使用するマニューバに対し、他者は「ラピッド」「ジャッジ」で割り込めない。", 
@@ -141,7 +141,7 @@
     "effects": [{ "ref": "PREVENT_INTERRUPTION", "params": { "target": "self_maneuvers" } }]
   },
   "TN-05": {
-    "name": "心中", "category": "攻撃", 
+    "name": "必中", "category": "攻撃", 
     "tags": ["攻撃", "オート"],
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "攻撃判定の出目が「6」の際、命中箇所を任意に決めてよい。", 
@@ -376,7 +376,7 @@
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "damageBonus", "value": 1, "duration": "permanent", "condition": ["肉弾攻撃", "白兵攻撃"] } }]
   },
   "BR-03": {
-    "name": "変異", "category": "補助", 
+    "name": "歪極", "category": "補助", 
     "tags": ["パーツ追加", "オート"],
     "timing": "オート", "cost": "なし", "range": "効果参照",
     "description": "習得時、レベル3変異パーツを追加で1つ獲得する。このパーツは強化値に縛られない。", 
@@ -386,7 +386,7 @@
     "effects": [{ "ref": "GAIN_EXTRA_PART", "params": { "type": "変異", "level": 3 } }]
   },
   "BR-04": {
-    "name": "修復身", "category": "修復", 
+    "name": "業", "category": "修復", 
     "tags": ["修復", "オート"],
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "バトルパート終了時、望むパーツ2つを修復する。", 

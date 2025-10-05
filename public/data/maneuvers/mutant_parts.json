@@ -10,7 +10,7 @@
     "tags": ["修復", "オート"],
     "description": "ターン/パート終了時、このパーツを修復", 
     "description_raw": "バトルパートにてターン終了時、パート終了時、このパーツが損傷していたなら、修復してよい。",
-    "flavor_text": "体から湧き出す無数の蛆。ミュニケーションと化した昆虫の幼虫であり、あなたの体組織をゆるやかに補強している。",
+    "flavor_text": "体から湧き出す無数の蛆。ミュータント化した昆虫の幼虫であり、あなたの体組織をゆるやかに補強している。",
     "source": { "book": "基本ルールブック", "page": 86 }, 
     "effects": [{ "ref": "SELF_REPAIR", "params": { "trigger": ["turn_end", "part_end"] } }]
   },
@@ -20,7 +20,7 @@
     "tags": ["修復", "オート"],
     "description": "バトルパート終了時、このパーツと損傷した基本パーツ1つを修復", 
     "description_raw": "バトルパート終了時、このパーツと損傷した基本パーツ1つを修復してよい。",
-    "flavor_text": "体中を縦横に走る縫い目、色やサイズの違い個々のパーツ。あなたの体はつぎはぎの寄せ集めだ。",
+    "flavor_text": "体中を縦横に走る縫い目、色やサイズの違う個々のパーツ。あなたの体はつぎはぎの寄せ集めだ。",
     "source": { "book": "基本ルールブック", "page": 86 }, 
     "effects": [
       { "ref": "REPAIR_PART", "params": { "target": "self", "part_type": "this_part", "count": 1, "trigger": "battle_end" } },
@@ -33,7 +33,7 @@
     "tags": ["行動値", "オート"],
     "description": "最大行動値+1", 
     "description_raw": "最大行動値+1。",
-    "flavor_text": "アンデッドの体内で動く半腐れの心臓。思い込みか、失われた擬惰かの方か、それは非効率な行動を可能にする。",
+    "flavor_text": "アンデッドの体内で動く半腐れの心臓。思い込みか、失われた屍術の力か、それは一呼吸早い行動を可能にする。",
     "source": { "book": "基本ルールブック", "page": 86 }, 
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "maxActionValue", "value": 1, "duration": "permanent_while_undamaged" } }]
   },
@@ -53,7 +53,7 @@
     "tags": ["移動", "アクション", "移動妨害"],
     "description": "移動1。「移動妨害」無効", 
     "description_raw": "移動1、この移動に対して「移動妨害」は全て無効。",
-    "flavor_text": "あなたの足には鉤爪や吸盤があり、壁や天井を駆け上ることでトリッキーな移動が可能となる。",
+    "flavor_text": "あなたの足には鉤爪や吸盤があり、壁や天井を駆けることでトリッキーな移動が可能となる。",
     "source": { "book": "基本ルールブック", "page": 86 }, 
     "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": 1, "direction": "performer_choice", "ignore_move_debuff": true } }]
   },
@@ -73,7 +73,7 @@
     "tags": ["攻撃", "アクション"],
     "description": "肉弾攻撃2", 
     "description_raw": "肉弾攻撃2。",
-    "flavor_text": "敵を引き裂くために発達した鉤爪。日常生活に不便こそあれ、アンデッドに日常はない。よって問題なし。",
+    "flavor_text": "敵を引き裂くために発達した鉤爪。日常生活に不便そうだが、アンデッドに日常はない。よって問題なし。",
     "source": { "book": "基本ルールブック", "page": 86 }, 
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 2 } }]
   },
@@ -93,7 +93,7 @@
     "tags": ["妨害", "ジャッジ"],
     "description": "妨害1", 
     "description_raw": "妨害1。",
-    "flavor_text": "腐ったどろどろの血が、あなたの体内には未だ意味もなく流れている。血は簡単に溢れほとばしり周囲の視界を妨げる。",
+    "flavor_text": "腐ったどろどろの血が、あなたの体内には未だ意味もなく流れている。血は簡単に溢れほとばしり、周囲の視界を妨げる。",
     "source": { "book": "基本ルールブック", "page": 86 }, 
     "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "target": "any_roll", "value": -1 } }]
   },
@@ -135,7 +135,7 @@
     "tags": ["行動値", "オート", "損傷無効"],
     "description": "最大行動値+1。行動判定で大失敗してもこのパーツは損傷しない。", 
     "description_raw": "最大行動値+1。このパーツを行動判定で使用した際、大失敗してもこのパーツは損傷しない。",
-    "flavor_text": "あなたの耳はそぎ落とされ、獣の耳が頭につけられた。優れた獣の知覚力、素早い反応を可能とする器官だ。かわいい。",
+    "flavor_text": "あなたの耳はそぎ落とされ、獣の耳が頭につけられた。滅びた獣の知覚力、素早い反応を可能とする器官だ。かわいいし。",
     "source": { "book": "基本ルールブック", "page": 87 }, 
     "effects": [
         { "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "maxActionValue", "value": 1, "duration": "permanent_while_undamaged" } },
@@ -148,7 +148,7 @@
     "tags": ["対話判定", "オート"],
     "description": "対話判定+1", 
     "description_raw": "対話判定において、判定出目+1してもよい。",
-    "flavor_text": "あなたは少々もてあましていたけれど、男性の特長を持ち合わせている。それはあれ、希少価値のある男性は、ちやほやされるものだ。",
+    "flavor_text": "あなたの体は少女めいて入るけれど、男性の特長も持っている。ともあれ、希少価値のある男性は、ちやほやされるものだ。",
     "source": { "book": "基本ルールブック", "page": 87 }, 
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "dialogueCheckBonus", "value": 1, "duration": "permanent_while_undamaged" } }]
   },
@@ -158,7 +158,7 @@
     "tags": ["ラピッド使用", "ラピッド"],
     "description": "アクションマニューバ1つを「ラピッド」として使用可", 
     "description_raw": "望む「アクション」マニューバ1つを「ラピッド」として使用する。",
-    "flavor_text": "あなたの腕は三本ではない。肩に追加の腕がつけられている。使いこなすことは困難だが、戦術の幅は大きく広がるだろう。",
+    "flavor_text": "あなたの腕は二本ではない。肩には追加の腕がつけられている。使いこなすことは困難だが、戦術の幅は大いに広がる。",
     "source": { "book": "基本ルールブック", "page": 87, "errata": "1.6.1" }, 
     "effects": [{ "ref": "ALLOW_MANEUVER_AS_TIMING", "params": { "target": "self", "maneuver_timing": "アクション", "as_timing": "ラピッド" } }]
   },
@@ -178,7 +178,7 @@
     "tags": ["攻撃", "アクション"],
     "description": "肉弾攻撃3", 
     "description_raw": "肉弾攻撃3。",
-    "flavor_text": "打ち込むことで相手の体内を内から溶かす強酸を注入する毒針が、体のどこかに備わっている。",
+    "flavor_text": "打ち込むことで相手の体を内から溶かす強酸を注入する毒針が、体のどこかに備わっている。",
     "source": { "book": "基本ルールブック", "page": 87 }, 
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 3 } }]
   },
@@ -188,7 +188,7 @@
     "tags": ["妨害", "ジャッジ", "転倒"],
     "description": "妨害1+転倒", 
     "description_raw": "妨害1+転倒。",
-    "flavor_text": "だらだらと涎を流し続けるグロテスクな長い舌。その一撃は岩をも砕き、相手の動きを鈍らせる。",
+    "flavor_text": "だらだらと涎を流し続けるグロテスクな長い舌。その一撃は奇襲となり、相手の動きを鈍らせる。",
     "source": { "book": "基本ルールブック", "page": 87 }, 
     "effects": [
         { "ref": "GENERIC_JUDGE_MOD", "params": { "target": "any_roll", "value": -1 } },
@@ -201,7 +201,7 @@
     "tags": ["支援", "ジャッジ"],
     "description": "支援2", 
     "description_raw": "支援2。",
-    "flavor_text": "追加の目がいずくかにつけられている。広い視野はいち早い反応を可能にしてくれるが、少し気持ち悪い。",
+    "flavor_text": "追加の目がいくつか付けられている。広い視野はいち早い反応を可能にしてくれるが、少し気持ち悪い。",
     "source": { "book": "基本ルールブック", "page": 87 }, 
     "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "target": "any_roll", "value": 2 } }]
   },
@@ -211,7 +211,7 @@
     "tags": ["移動妨害", "ラピッド"],
     "description": "移動妨害1", 
     "description_raw": "移動妨害1。",
-    "flavor_text": "うねうねと蠢く触手は、敵の行動を阻害するには最適だ。自らの意思で生きているものとしては悪趣味だが、文句は言えない。",
+    "flavor_text": "うねうねと蠢く触手は、敵の行動を阻害するには最適だ。体から生えているものとしては悪趣味だが、文句は言えまい。",
     "source": { "book": "基本ルールブック", "page": 87 }, 
     "effects": [{ "ref": "GENERIC_MOVE_DEBUFF", "params": { "value": -1 } }]
   },
@@ -231,7 +231,7 @@
     "tags": ["防御", "ダメージ"],
     "description": "防御2", 
     "description_raw": "防御2。",
-    "flavor_text": "体を覆うのは分厚い鱗や毛皮、甲羅、有様の甲冑。かたいさも何も信じないのだけれど、強力な防具であることは否定できない。",
+    "flavor_text": "体を覆うのは分厚い鱗や毛皮、甲羅。有様の甲冑。かわいさも何もないのだけれど、強力な防具であることは否定できない。",
     "source": { "book": "基本ルールブック", "page": 87 }, 
     "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 2 } }]
   },
@@ -259,68 +259,68 @@
   "//": "--- レベル3 変異 (M3) ---",
   "M3-01": {
     "name": "よぶんなあし", "category": "防御", "allowedLocations": "脚",
-    "timing": "オート", "cost": "なし", "range": "自身",
     "tags": ["損傷無効", "オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "これ以外の脚部パーツが破損しても、マニューバをそのまま使用可", 
     "description_raw": "これ以外の脚部パーツが破損しても、マニューバをそのまま使用してよい。",
-    "flavor_text": "生えている脚は2本だけではない。ケンタウロスのようにも、あるいはタコのようにも。あなたは複数の脚を与えられている。",
+    "flavor_text": "生えている脚は2本だけではない。ケンタウロスのように、あるいはタコのように。あなたは複数の脚を与えられている。",
     "source": { "book": "基本ルールブック", "page": 88 }, 
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "ignore_part_damage_location", "value": "脚", "duration": "permanent_while_undamaged" } }]
   },
   "M3-02": {
     "name": "よぶんなあたま", "category": "行動値", "allowedLocations": "頭",
-    "timing": "オート", "cost": "なし", "range": "自身",
     "tags": ["行動値", "オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "最大行動値+2", 
     "description_raw": "最大行動値+2。",
-    "flavor_text": "あなたの肩の上には、もう一つの頭がある。もう一人いるほど何かとすごくやってくる。二つの知見は早い反応をさせてくれる。",
+    "flavor_text": "あなたの肩の上には、もう一つの頭がある。もう一人とは何とかうまくやっている。二つの知覚は早い反応をさせてくれる。",
     "source": { "book": "基本ルールブック", "page": 88 }, 
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "maxActionValue", "value": 2, "duration": "permanent_while_undamaged" } }]
   },
   "M3-03": {
     "name": "やせぎす", "category": "防御", "allowedLocations": "胴",
-    "timing": "オート", "cost": "なし", "range": "自身",
     "tags": ["防御", "オート", "妨害"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "1つの判定につき1回、「妨害」を無効化", 
     "description_raw": "バトルパートで1つの判定につき1回、「妨害」を無効化してよい。",
-    "flavor_text": "無駄な肉を落とされ、栄養失調気味とも言える異様子の体。不健康な外見ながらも、敵を欺き続ける能力には長けている。",
+    "flavor_text": "無駄な肉を落とされ、栄養失調気味とも言える様子の体。不健康な外見ながら、敵をかきわける能力には長けている。",
     "source": { "book": "基本ルールブック", "page": 88 }, 
     "effects": [{ "ref": "NEGATE_DEBUFF_ONCE_PER_ROLL", "params": {} }]
   },
   "M3-04": {
     "name": "くされじる", "category": "攻撃", "allowedLocations": "任意",
-    "timing": "アクション", "cost": 3, "range": "0～1",
     "tags": ["攻撃", "アクション", "爆発", "転倒"],
+    "timing": "アクション", "cost": 3, "range": "0～1",
     "description": "肉弾攻撃1+爆発+転倒", 
     "description_raw": "肉弾攻撃1+爆発+転倒。",
-    "flavor_text": "浴びた相手の体を腐らせる毒瘡を、あなたは発射できる。浴びた相手は腐り果てることだろう。",
+    "flavor_text": "浴びた相手の体を腐らせる毒膿を、あなたは発射できる。浴びた相手は腐り果てることだろう。",
     "source": { "book": "基本ルールブック", "page": 88 }, 
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 1, "on_hit": ["EXPLOSION", "TUMBLE"] } }]
   },
   "M3-05": {
     "name": "にくむち", "category": "攻撃", "allowedLocations": "任意",
-    "timing": "アクション", "cost": 3, "range": "0～1",
     "tags": ["攻撃", "アクション", "連撃"],
+    "timing": "アクション", "cost": 3, "range": "0～1",
     "description": "肉弾攻撃2+連撃1", 
     "description_raw": "肉弾攻撃2+連撃1。",
-    "flavor_text": "細く長く強靭な触手は、阻害するよりもむしろ鎌となる。腐った敵の体を打ち崩し、ボロボロと崩壊させていくのだ。",
+    "flavor_text": "細く長く強靭な触手は、阻害するよりもむしろ鞭となる。腐った敵の体を打ち崩し、ボロボロと崩壊させていくのだ。",
     "source": { "book": "基本ルールブック", "page": 88 }, 
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 2, "on_hit": ["CHAIN_ATTACK_1"] } }]
   },
   "M3-06": {
     "name": "やぶれひまく", "category": "防御", "allowedLocations": "任意",
-    "timing": "ダメージ", "cost": 0, "range": "自身",
     "tags": ["防御", "ダメージ"],
+    "timing": "ダメージ", "cost": 0, "range": "自身",
     "description": "防御2", 
     "description_raw": "防御2。",
-    "flavor_text": "屍肉の皮膜。悪魔の翼。空は飛べないが、体を包み込むように守る盾には、あなたのへの攻撃の大部分を受け流す。",
+    "flavor_text": "屍肉の皮膜。屍天使の翼。空は飛べないが、体を包み込むように守る翼は、あなたへの攻撃の大部分を受け流す。",
     "source": { "book": "基本ルールブック", "page": 88 }, 
     "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 2 } }]
   },
   "M3-07": {
     "name": "けもあし", "category": "移動", "allowedLocations": "脚",
-    "timing": "アクション", "cost": 2, "range": "自身",
     "tags": ["移動", "アクション"],
+    "timing": "アクション", "cost": 2, "range": "自身",
     "description": "移動1～2", 
     "description_raw": "移動1～2。",
     "flavor_text": "あなたの足は切り落とされ、獣のものがつながれている。ひどく歪んだ造形だが、早く走れることは間違いない。",
@@ -329,8 +329,8 @@
   },
   "M3-08": {
     "name": "しびとだけ", "category": "妨害", "allowedLocations": "任意",
-    "timing": "ジャッジ", "cost": 0, "range": "0",
     "tags": ["妨害", "ジャッジ"],
+    "timing": "ジャッジ", "cost": 0, "range": "0",
     "description": "妨害2", 
     "description_raw": "妨害2。",
     "flavor_text": "荒廃した世界に適応した菌類が、あなたの体に生えている。それは凄まじい胞子の雲で敵の攻撃を鈍らせる。",
@@ -339,8 +339,8 @@
   },
   "M3-09": {
     "name": "だるま", "category": "防御", "allowedLocations": "胴",
-    "timing": "オート", "cost": "なし", "range": "自身",
     "tags": ["防御", "オート"],
+    "timing": "オート", "cost": "なし", "range": "自身",
     "description": "ダメージを任意の箇所に振り分けてよい。切断判定は、ダメージを受けた箇所１つを選ぶ", 
     "description_raw": "任意の箇所を望む数選び、ダメージを振り分けてよい。切断判定は、ダメージを受けた箇所の１つを選んで行う。",
     "flavor_text": "あなたには手も足もない。それらの箇所にあたる器官は体に押し込まれている。不自由はない。",
@@ -349,8 +349,8 @@
   },
   "M3-10": {
     "name": "きもちいいくすり", "category": "修復", "allowedLocations": "頭",
-    "timing": "ダメージ", "cost": "1", "range": "自身",
     "tags": ["修復", "ダメージ", "狂気点操作"],
+    "timing": "ダメージ", "cost": "1", "range": "自身",
     "description": "自身がダメージを受けた際、任意の未練の狂気点を1点減らす", 
     "description_raw": "自身がダメージを受けた際のみ使用可。任意の未練から、狂気点を1減少させてよい。",
     "flavor_text": "傷ついた時、あなたの頭の中にどろどろと快楽の薬が流れ出す。それはいやな事を忘れさせてくれるのだ。",

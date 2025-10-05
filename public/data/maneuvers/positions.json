@@ -248,7 +248,7 @@
     "tags": ["支援", "オート"],
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "「地獄」にいる際、自身の攻撃判定に+1。", 
-    "description_raw": "バトルパートで「地獄」にいる際、攻撃判定+1",
+    "description_raw": "バトルパートで「地獄」にいる際、攻撃判定の出目が+1される。",
     "flavor_text": "あなたには地獄こそがふさわしい。味方よりも敵が理解できてしまうのだから。",
     "source": { "book": "基本ルールブック", "page": 69 }, 
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "attackCheckBonus", "value": 1, "duration": "while_in_area", "area": "地獄" } }]

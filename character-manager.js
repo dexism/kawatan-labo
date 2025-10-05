@@ -6,7 +6,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.5.18";
+export const version = "1.5.20";
 
 // --- モジュールのインポート ---
 import * as data from './data-handler.js';
@@ -494,4 +494,80 @@ export function addCharacterFromObject(characterObject, type) {
     console.log(`${newChar.name} (imported ${type}) を戦場に追加しました。`);
     mergeCharactersOnBoard();
     return newChar;
+}
+
+/**
+ * 保管所から再読込みしたデータで既存のキャラクターを更新する
+ * テンプレート由来のデータを入れ替え、ランタイムの状態は極力保持する
+ * @param {string} characterId - 更新対象のキャラクターID
+ * @param {object} newData - character-converterで変換済みの新しいキャラクターデータ
+ * @returns {object|null} 更新後のキャラクターオブジェクト
+ */
+export function updateCharacterFromReload(characterId, newData) {
+    const char = getCharacterById(characterId);
+    if (!char) {
+        console.error(`再読込み対象のキャラクターが見つかりません: ${characterId}`);
+        return null;
+    }
+
+    // 保持すべき現在のランタイム状態を退避
+    const preservedState = {
+        id: char.id,
+        sheetId: char.sheetId,
+        img: char.img,
+        type: char.type,
+        actionValue: char.actionValue,
+        regrets: char.regrets, // 未練は他のPCとの関係性を含むため、そのまま保持する
+        madnessPoints: char.madnessPoints,
+        isMentallyBroken: char.isMentallyBroken,
+        isDestroyed: false, // 再読込み時は非破壊状態に戻す
+        hasWithdrawn: false, // 戦場復帰
+        hasActedThisCount: char.hasActedThisCount
+    };
+
+    // 1. まず新しいデータでキャラクターオブジェクトを上書き
+    //    これにより、charへの参照を維持したまま中身を入れ替える
+    //    元のプロパティを一度クリア
+    Object.keys(char).forEach(key => delete char[key]);
+    // 新しいデータをコピー
+    Object.assign(char, newData);
+
+    char.area = char.initialArea || ((char.type === 'pc') ? '煉獄' : '奈落');
+
+    // 2. 保持していたランタイム状態を書き戻す
+    Object.assign(char, preservedState);
+
+    // 3. partsStatusを新しいデータに基づいて完全に再構築する
+    //    これにより、パーツの損傷状態はリセットされる
+    char.partsStatus = {};
+    let partIdCounter = 0;
+    if (char.parts && typeof char.parts === 'object') {
+        Object.keys(char.parts).forEach(location => {
+            if (Array.isArray(char.parts[location])) {
+                char.partsStatus[location] = char.parts[location].map(partName => ({
+                    id: `${char.id}_part_${partIdCounter++}`, name: partName, damaged: false,
+                }));
+            }
+        });
+    }
+    // たからものIDの再設定
+    if (char.type === 'pc' && char.treasure) {
+        for (const location in char.partsStatus) {
+            const part = char.partsStatus[location].find(p => p.name === char.treasure);
+            if (part) {
+                part.id = `${char.id}_part_treasure`;
+                break;
+            }
+        }
+    }
+    
+    // 4. 派生データを再計算
+    recalculateMaxActionValue(char);
+    // 現在行動値が新しい最大行動値を超えないように調整
+    char.actionValue = Math.min(char.actionValue, char.maxActionValue);
+    
+    initializeManeuverLimits(char);
+    
+    console.log(`キャラクター「${char.name}」が保管所のデータで更新されました。`);
+    return char;
 }

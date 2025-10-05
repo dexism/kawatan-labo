@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.10.36"; // バージョンを更新
+export const version = "1.10.38"; // バージョンを更新
 
 import * as data from './data-handler.js';
 import * as charManager from './character-manager.js';
@@ -438,7 +438,8 @@ export function showCharacterSheetModal(char) {
         <div class="sheet-header">
             ${char.sheetId ? `
             <div class="sheet-charasheet-link">
-                <button class="sheet-link-btn" data-sheet-id="${char.sheetId}">保管所で見る ID: ${char.sheetId}</button> 
+                <button class="sheet-link-btn" data-sheet-id="${char.sheetId}">保管所で見る ID: ${char.sheetId}</button>
+                <button class="sheet-reload-btn" data-sheet-id="${char.sheetId}">保管所から再読込み</button>
             </div>
             ` : ''}
             ${char.personalData && char.personalData.title ? `
@@ -457,9 +458,9 @@ export function showCharacterSheetModal(char) {
             </div>
             <div class="sheet-input-group">
                 <label>暗示</label>
-                <input type="text" value="${char.personalData?.karma || '未設定'}" disabled>
+                <input type="text" value="${char.hint?.key ? `${char.hint.key}:${char.hint.name}` : '未設定'}" disabled>
             </div>` : ''}
-             <div class="sheet-input-group">
+            <div class="sheet-input-group">
                 <label>最大行動値</label>
                 <input type="text" value="${char.maxActionValue}" disabled>
             </div>
@@ -513,7 +514,7 @@ export function showCharacterSheetModal(char) {
         ${isDoll ? `
         <div class="sheet-section sheet-hint">
             <h4>暗示</h4>
-            ${char.hint ? `<p><b>【${char.hint.name}】</b><br>${char.hint.description}</p>` : '<p>（暗示は設定されていません）</p>'}
+            ${char.hint && char.hint.name ? `<p><b>【${char.hint.key}:${char.hint.name}】</b><br>${char.hint.description}</p>` : '<p>（暗示は設定されていません）</p>'}
         </div>
         <div class="sheet-section sheet-memory">
             <h4>記憶のカケラ</h4>
@@ -616,6 +617,40 @@ export function showCharacterSheetModal(char) {
                     const id = openSheetBtn.dataset.sheetId;
                     if (id) {
                         window.open(`https://charasheet.vampire-blood.net/${id}`, '_blank');
+                    }
+                };
+            }
+            const reloadBtn = modal.querySelector('.sheet-reload-btn');
+            if (reloadBtn) {
+                reloadBtn.onclick = async () => {
+                    const sheetId = reloadBtn.dataset.sheetId;
+                    if (!sheetId) return;
+
+                    if (!confirm(`キャラクター「${char.name}」のデータを保管所から再読込みします。\nパーツの損傷状態などはリセットされますが、よろしいですか？`)) {
+                        return;
+                    }
+
+                    try {
+                        ui.showToastNotification(`ID: ${sheetId} を再読込み中...`, 2000);
+                        const sourceData = await fetchVampireBloodSheet(sheetId);
+                        const convertedData = convertVampireBloodSheet(sourceData);
+
+                        if (convertedData) {
+                            // character-managerに新しい更新関数を呼び出す
+                            const updatedChar = charManager.updateCharacterFromReload(char.id, convertedData);
+                            
+                            ui.renderCharacterCards();
+                            ui.updateMarkers();
+                            ui.showToastNotification(`「${updatedChar.name}」を更新しました。`, 2000);
+
+                            // モーダルを閉じて、更新された内容で再度開く
+                            closeFn();
+                            showCharacterSheetModal(updatedChar);
+                        } else {
+                            throw new Error('データの変換に失敗しました。');
+                        }
+                    } catch (error) {
+                        alert(`エラー: ${error.message}`);
                     }
                 };
             }

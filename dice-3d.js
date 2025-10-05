@@ -1,7 +1,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "2.0.5"; // パッチバージョンを更新
+export const version = "2.0.7"; // パッチバージョンを更新
 
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
@@ -14,10 +14,10 @@ const settings = {
     gravity:           -1.00,   // 重力加速度 (m/s²) -9.82
     dice: {
         radius:         0.01,   // ダイスの外接球半径 (m)
-        mass:           0.01,  // 質量 (kg)
+        mass:           0.005,  // 質量 (kg)
         angularDamping: 0.1,    // 回転の減衰 (0-1)
-        initialPosition: { xPercent: 75, yPercent: 75 }, // 右下(%)
-        initialHeight:  0.05,   // 投擲する高さ (m)
+        initialPosition: { xPercent: 80, yPercent: 80 }, // 右下(%)
+        initialHeight:  0.1,    // 投擲する高さ (m)
         throw: {
             speed:           { min: 0.1, max: 0.2 }, // 初速 [m/s]
             azimuth:         { min: 320, max: 350 }, // 水平方向 [deg]
@@ -32,13 +32,15 @@ const settings = {
         restitutionWall:   0.9  // 壁の反発係数
     },
     camera: {
-        fov:   20,              // 視野角 (ズーム)
-        height: 0.5             // 視点高
+        height:               0.5,    // 視点高
+        breakpoint_px:      768,      // ★ 追加：PC/スマホを切り替える画面幅
+        scaleMobile_m_per_px: 0.0002, // ★ スマホ時のスケール (2cm / 100px)
+        scalePC_m_per_px:     0.0002  // ★ PC時のスケール (2cm / 100px)
     },
     tray: {
-        sizeRatio:     1.0,     // 画面サイズに対するトレイの比率
-        wallHeight:    0.6,     // 壁と天井の高さ（共通）
-        wallThickness: 0.5      // 壁の厚み
+        sizeRatio:     0.9,     // 画面サイズに対するトレイの比率
+        wallHeight:    0.5,     // 壁と天井の高さ（共通）
+        wallThickness: 0.1      // 壁の厚み
     },
     timeouts: {
         stopCheck:    100,      // 停止チェックの間隔 (ms)
@@ -101,7 +103,8 @@ export async function init(container) {
 
     scene = new THREE.Scene();
 
-    camera = new THREE.PerspectiveCamera(settings.camera.fov, (width / height) || 1, 0.1, 10);
+    // camera = new THREE.PerspectiveCamera(1, (width / height) || 1, 0.1, 10);
+    camera = new THREE.PerspectiveCamera(1, (width / height) || 1, 0.1, 10);
     camera.position.set(0, settings.camera.height, 0);
     camera.lookAt(0, 0, 0);
 
@@ -226,12 +229,12 @@ export function rollDice(rollConfig, callback) {
             { x: 0,    z: 0,    y: 0.07 }  // 最上部の頂点
         ]
     };
-
+ 
     // 2. 基準点と間隔を定義
     const centerX = (settings.dice.initialPosition.xPercent / 100 - 0.5) * trayWidth;
     const centerZ = (settings.dice.initialPosition.yPercent / 100 - 0.5) * trayHeight;
     const spacing = settings.dice.radius * 2.5; // 直径の1.25倍の間隔
-
+    
     // 3. 適用する配置パターンを取得
     const arrangement = diceArrangements[requiredDiceCount] || diceArrangements[5];
 
@@ -524,13 +527,21 @@ function createWalls() {
     const wallShapeZ = new CANNON.Box(new CANNON.Vec3(wallThickness / 2, wallHeight / 2, trayHeight / 2)); // trayDepth を trayHeight に変更
     
     // 5. 物理的な壁を4つ作成 (変数名を統一)
+    /*
     const wallPositions = [
         new CANNON.Vec3(0, 0, trayHeight / 2),  // ★ Y座標を0に変更
         new CANNON.Vec3(0, 0, -trayHeight / 2), // ★ Y座標を0に変更
         new CANNON.Vec3(trayWidth / 2, 0, 0),  // ★ Y座標を0に変更
         new CANNON.Vec3(-trayWidth / 2, 0, 0)   // ★ Y座標を0に変更
     ];
-    
+    */
+    const wallPositions = [
+        new CANNON.Vec3(0, wallHeight / 2, trayHeight / 2),  // ★ Y座標を高さの半分に変更
+        new CANNON.Vec3(0, wallHeight / 2, -trayHeight / 2), // ★ Y座標を高さの半分に変更
+        new CANNON.Vec3(trayWidth / 2, wallHeight / 2, 0),  // ★ Y座標を高さの半分に変更
+        new CANNON.Vec3(-trayWidth / 2, wallHeight / 2, 0)   // ★ Y座標を高さの半分に変更
+    ];
+
     const wallBodies = [
         new CANNON.Body({ mass: 0, shape: wallShapeX, position: wallPositions[0], material: wallMaterial }),
         new CANNON.Body({ mass: 0, shape: wallShapeX, position: wallPositions[1], material: wallMaterial }),
@@ -552,33 +563,34 @@ function onWindowResize() {
 
     if (width === 0 || height === 0) return;
 
-    // ★★★ 対角線FOVを基準にビューポートサイズとカメラFOVを再計算 ★★★
+    // ★★★ 画面の物理スケールに基づいてFOVを動的に計算する ★★★
 
-    // 1. settingsから基準となる「対角線FOV」を取得 (ラジアンに変換)
-    //    現在のcamera.fov = 10 を、対角線FOVの基準値として流用します。
-    const diagonalFovRad = THREE.MathUtils.degToRad(settings.camera.fov);
+    // 1. 画面幅に応じて、適用するスケールを決定
+    const scaleFactor = (width <= settings.camera.breakpoint_px)
+        ? settings.camera.scaleMobile_m_per_px
+        : settings.camera.scalePC_m_per_px;
 
-    // 2. 画面の対角線の長さとアスペクト比を計算
-    const aspectRatio = width / height;
-    const diagonalLength = Math.sqrt(aspectRatio * aspectRatio + 1);
+    // 2. 画面のピクセル高とスケールから、3D空間で見えるべき高さを計算
+    const visibleHeight = height * scaleFactor;
 
     // 3. カメラから床面までの距離を取得
     const distance = camera.position.y;
 
-    // 4. 対角線FOVと対角線の長さから、ビューポートの高さを計算
-    //    (三角関数の関係から導出)
-    const vpHeight = 2 * distance * Math.tan(diagonalFovRad / 2) / diagonalLength;
+    // 4. 見えるべき高さと距離から、three.jsに必要な「垂直FOV」を逆算
+    //    公式: visibleHeight = 2 * tan(fov / 2) * distance
+    const newVerticalFovRad = 2 * Math.atan(visibleHeight / (2 * distance));
+    const newVerticalFovDeg = THREE.MathUtils.radToDeg(newVerticalFovRad);
+
+    // 5. ビューポートサイズを計算 (壁の生成に使う)
+    const aspectRatio = width / height;
+    const vpHeight = visibleHeight;
     const vpWidth = vpHeight * aspectRatio;
     viewportSize = { width: vpWidth, height: vpHeight };
-
-    // 5. 新しく計算したビューポートの高さから、three.jsに必要な「垂直FOV」を逆算
-    const newVerticalFovRad = 2 * Math.atan(vpHeight / (2 * distance));
-    const newVerticalFovDeg = THREE.MathUtils.radToDeg(newVerticalFovRad);
 
     // 6. 壁を再生成し、カメラのパラメータを更新
     createWalls();
     camera.aspect = aspectRatio;
-    camera.fov = newVerticalFovDeg; // ← 計算した新しい垂直FOVを設定
+    camera.fov = newVerticalFovDeg; // 計算した新しい垂直FOVを設定
     camera.updateProjectionMatrix();
     renderer.setSize(width, height);
 }
@@ -597,6 +609,7 @@ function animate() {
     // ★★★ アクティブなダイスすべてを更新 ★★★
     activeDice.forEach(die => {
         die.model.position.copy(die.body.position);
+        // die.model.position.copy(die.body.position).divideScalar(100);
         die.model.quaternion.copy(die.body.quaternion);
     });
     

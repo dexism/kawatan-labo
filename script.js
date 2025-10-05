@@ -69,16 +69,16 @@ document.addEventListener('DOMContentLoaded', async () => {
  */
 function initializeApp() {
   const LATEST_UPDATE_NOTES = `
-    <div class="modal-header modal-header-sub">📢主な更新内容:7.10.5.12</div>
+    <div class="modal-header modal-header-sub">📢主な更新内容:7.10.5.21</div>
     <div class="modal-body welcome-modal-body">
+      <p>◆ <strong>データの誤記を訂正</strong>しました。
+      <p>◆ <strong>【保管所から読込み】【保管所で見る】【保管所から再読込み】</strong>：キャラクターシート保管所との連携を強化しました。
       <p>◆ 3Dダイス<strong>複数ダイス、D100に対応</strong>しました。
       <p>◆ 試しに<strong>ダイスが転がる</strong>ようにしてみましたが、動作が怪しいです。
       <p>◆ ジャッジウィンドウで<strong>適用されている支援、妨害を確認</strong>できるようになりました。
       <p>◆ <strong>支援</strong>がダイスロールに適用できるようになりました。
       <p>◆ ユーザーが<strong>画像を追加</strong>できるようになりました。
-      <p>◆ <strong>【保管所で見る】</strong>：キャラクターシート保管所の<strong>キャラクターへのリンク</strong>を追加しました。
       <p>◆ <strong>【新着/IDリスト】</strong>：キャラクターシート保管所の<strong>キャラクターリスト表示</strong>機能を追加しました。
-      <p>◆ <strong>【保管所から読込み】</strong>：<strong>キャラクターシート保管所</strong>からの<strong>キャラクター読込み</strong>機能を追加しました。
       <p>◆ <strong>【✏️画像の変更】</strong>：「🪪人形設計図」において<strong>画像の変更</strong>機能を追加しました。
       <p>◆ <strong>マニューバリスト</strong>を更新し、<strong>表示機能を拡張</strong>しました。
       <p>◆ その他、軽微なUI調整と不具合の修正を行いました。

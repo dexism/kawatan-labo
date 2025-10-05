@@ -60,7 +60,7 @@
     "timing": "アクション", "cost": 2, "range": "0",
     "description": "白兵攻撃1+切断", 
     "description_raw": "白兵攻撃1+切断。",
-    "flavor_text": "独特の形状から、肉切り包丁とは区別されている。その刃の鋭さ、斬ることをつきつめた威力は異常だ。",
+    "flavor_text": "独特の形状から、肉切り包丁とは区別されている。その刃の鋭さ、斬ることをつきつめた威力は異常でない。",
     "source": { "book": "基本ルールブック", "page": 83 }, 
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 1, "on_hit": ["SEVERANCE"] } }]
   },
@@ -90,7 +90,7 @@
     "timing": "アクション", "cost": 2, "range": "2～3",
     "description": "射撃攻撃1、支援1", 
     "description_raw": "射撃攻撃1、攻撃判定の出目+1。",
-    "flavor_text": "超遠距離への攻撃を可能とする銃の一つ。対人ならば効果は申し分ないのだが、アンデッド相手では威力不足は否めない。",
+    "flavor_text": "超遠距離への攻撃を可能とする銃の一つ。対人ならば効果は申し分ないのだが、アンデッド相手では威力不足はいなめない。",
     "source": { "book": "基本ルールブック", "page": 83 }, 
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "射撃", "damage": 1, "attack_bonus": 1 } }]
   },
@@ -132,7 +132,7 @@
     "timing": "ダメージ", "cost": 0, "range": "自身",
     "description": "肉弾攻撃・白兵攻撃の与ダメージ+1", 
     "description_raw": "自身がダメージを与えた際のみ使用可。白兵・肉弾ダメージ+1。",
-    "flavor_text": "棘だらけの針金。これを体中に巻きつけたアンデッドの攻撃は、相手の体をより深く抉るだろう。",
+    "flavor_text": "棘だらけの針金。これを体中に巻きつけたアンデッドの攻撃は、相手の体をより強く深く抉るだろう。",
     "source": { "book": "基本ルールブック", "page": 84 }, 
     "effects": [{ "ref": "INCREASE_DEALT_DAMAGE", "params": { "value": 1, "condition": ["肉弾攻撃", "白兵攻撃"] } }]
   },
@@ -142,7 +142,7 @@
     "timing": "アクション", "cost": 2, "range": "0",
     "description": "白兵攻撃2、支援1", 
     "description_raw": "白兵攻撃2、攻撃判定の出目+1。",
-    "flavor_text": "つま先や踵から刃が出るよう改造されたブーツ。死者の脚力で駆使すれば、その力は尋常ならざる効果を放つ。",
+    "flavor_text": "つま先や踵から刃が出るよう改造されたブーツ。死者の脚力で駆使すれば、その刃は尋常ならざる効果を放つ。",
     "source": { "book": "基本ルールブック", "page": 84 }, 
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 2, "attack_bonus": 1 } }]
   },
@@ -152,7 +152,7 @@
     "timing": "ラピッド", "cost": 0, "range": "0",
     "description": "他者に対して移動1", 
     "description_raw": "自身に対しては使用不可。移動1。",
-    "flavor_text": "相手に掌を当てただけで巨体をも吹き飛ばしてしまう、脅威の格闘技術。東洋の神秘。",
+    "flavor_text": "相手に掌を当てただけで巨兵をも吹き飛ばしてしまう、脅威の格闘技術。東洋の神秘。",
     "source": { "book": "基本ルールブック", "page": 84 }, 
     "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "other_character", "distance": 1, "direction": "performer_choice" } }]
   },
@@ -161,8 +161,8 @@
     "tags": ["防御", "ダメージ", "爆発"],
     "timing": "ダメージ", "cost": 0, "range": "自身",
     "description": "防御1+「爆発」無効化", 
-    "description_raw": "防御1、「爆発」無効化。",
-    "flavor_text": "とっさの盾として使える強化トランク。使い手の好みでギターケースや傘などもめりかえる。",
+    "description_raw": "防御1+「爆発」無効化。",
+    "flavor_text": "とっさの盾として使える強化トランク。使い手の好みでギターケースや傘などもありえる。",
     "source": { "book": "基本ルールブック", "page": 84 }, 
     "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 1 } }, { "ref": "NEGATE_DAMAGE_EFFECT", "params": { "effect_to_negate": "爆発" } }]
   },
@@ -192,7 +192,7 @@
     "timing": "アクション", "cost": 3, "range": "1",
     "description": "射撃攻撃1+全体攻撃", 
     "description_raw": "射撃攻撃1+全体攻撃。",
-    "flavor_text": "多数の弾丸を瞬く間に撃ち出し、銃弾の雨を降らせる凶銃。敵が一箇所に固まれば多大な効果を注ぐが。",
+    "flavor_text": "多数の弾丸を瞬く間に撃ち出し、銃弾の雨を降り注がせる凶銃。敵が一箇所に集まっている際には効果大。",
     "source": { "book": "基本ルールブック", "page": 84 }, 
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "射撃", "damage": 1, "on_hit": ["AREA_ATTACK"] } }]
   },
@@ -202,7 +202,7 @@
     "timing": "アクション", "cost": 3, "range": "0～2",
     "description": "射撃攻撃3", 
     "description_raw": "射撃攻撃3。",
-    "flavor_text": "強力な威力を誇る超大口径銃。人間にはおよそ非実用的な銃だが、アンデッドなら少し撃ちづらいだけだ。",
+    "flavor_text": "強力な威力を持つ超大口径銃。人間にはおよそ非実用的な銃だが、アンデッドなら少し撃ちづらいだけだ。",
     "source": { "book": "基本ルールブック", "page": 84 }, 
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "射撃", "damage": 3 } }]
   },
@@ -254,7 +254,7 @@
     "timing": "アクション", "cost": 3, "range": "0",
     "description": "白兵攻撃4、支援1", 
     "description_raw": "白兵攻撃4、攻撃判定の出目+1",
-    "flavor_text": "牛刀に蟲やノコギリ貫きノミを一つにまとめた恐怖の殺人凶器。獲物をメッタ斬りにして突き刺し、バラバラに斬り刻む。",
+    "flavor_text": "牛刀に骨ノコやクリ貫きノミを一つにまとめた恐怖の殺人凶器。獲物をメッタ斬りにして突き刺し、バラバラに斬り刻む。",
     "source": { "book": "基本ルールブック", "page": 85 }, 
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 4, "attack_bonus": 1 } }]
   },
@@ -264,7 +264,7 @@
     "timing": "アクション", "cost": 3, "range": "0",
     "description": "白兵攻撃3+連撃2", 
     "description_raw": "白兵攻撃3+連撃2。",
-    "flavor_text": "刃のついた円盤を回転させ、触れたものを粉砕解体する。振り回すことさえできれば、アンデッド最強の破壊武器だ。",
+    "flavor_text": "刃のスクリューを回転させ、触れたものを粉砕解体する。小回りはきかないが、対アンデッド最強の破壊武器だ。",
     "source": { "book": "基本ルールブック", "page": 85 }, 
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 3, "on_hit": ["CHAIN_ATTACK_2"] } }]
   },
@@ -344,7 +344,7 @@
     "timing": "アクション", "cost": 4, "range": "1～2",
     "description": "砲撃攻撃4+爆発", 
     "description_raw": "砲撃攻撃4+爆発。",
-    "flavor_text": "強力なロケット弾で敵を粉砕する個人携帯用の大砲。撃ち込むのに時間を必要とするが、その破壊力は個人用として最大。",
+    "flavor_text": "強力なロケット弾で敵を粉砕する個人携帯用の大砲。弾込めに時間を必要とするが、その破壊力は個人用として最大級。",
     "source": { "book": "基本ルールブック", "page": 85 }, 
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "砲撃", "damage": 4, "on_hit": ["EXPLOSION"] } }]
   },
