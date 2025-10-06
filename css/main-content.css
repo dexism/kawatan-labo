@@ -36,11 +36,11 @@
   width: 160px;
   flex-shrink: 0;
   text-align: center;
-  background-color: var(--color-card);
+  background-color: var(--color-background-1);
   border: none;
   border-radius: 10px;
   padding: 5px;
-  box-shadow: 0 0 10px black;
+  box-shadow: 0 0 10px var(--color-8);
   transition: all 0.2s ease-out;
 }
 

@@ -99,7 +99,7 @@ function initializeAppUI() {
 function showWelcomeAndUpdates() {
     return new Promise(resolve => {
         const LATEST_UPDATE_NOTES = `
-        <div class="modal-header modal-header-sub">📢主な更新内容:7.10.6.2</div>
+        <div class="modal-header modal-header-sub">📢主な更新内容:7.10.6.19</div>
         <div class="modal-body welcome-modal-body">
             <p>◆ <strong>状態の自動保存・復元機能</strong>を実装しました。（自動保存ON/OFF対応）</p>
             <p>◆ <strong>データの誤記を訂正</strong>しました。

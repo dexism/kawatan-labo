@@ -130,7 +130,13 @@
         "name": "切断", "description": "命中部位に切断判定。", "actions": [{ "action_type": "severance_roll", "target": "hit_location" }] 
     },
     "TUMBLE": { 
-        "name": "転倒", "description": "対象の行動値を-2。", "actions": [{ "action_type": "modify_action_value", "target": "current_target", "value": -2 }] 
+        "name": "転倒", 
+        "description": "対象の行動値を-2。", 
+        "actions": [{ 
+            "action_type": "modify_action_value", 
+            "target": "current_target", 
+            "value": -2 
+        }] 
     },
     "AREA_ATTACK": { 
         "name": "全体攻撃", "description": "対象エリア内の全キャラクターに効果を適用。", "actions": [{ "action_type": "apply_to_area" }] 

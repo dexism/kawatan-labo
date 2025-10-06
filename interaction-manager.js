@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "2.2.9"; // パッチバージョンを更新
+export const version = "2.3.12"; // パッチバージョンを更新
 
 import * as data from './data-handler.js'; 
 import * as charManager from './character-manager.js';
@@ -55,6 +55,26 @@ export function setupAllEventListeners() {
     document.getElementById('countdownBtn').onclick = () => battleLogic.advanceCount();
     document.getElementById('endTurnBtn').onclick = () => battleLogic.startMadnessPhase();
 
+    const resetBtn = document.getElementById('resetBattleBtn');
+    if (resetBtn) {
+        resetBtn.onclick = async () => { // ★ async を追加
+            if (confirm('バトルパートを終了して、戦闘開始直前の状態に戻します。よろしいですか？')) {
+                ui.showToastNotification("盤面を初期状態に戻しています...", 2000);
+                
+                // battle-logicのリセットを先に実行
+                battleLogic.resetToSetupPhase();
+
+                // ★★★ stateManagerの非同期処理が完了するのを待つ ★★★
+                await stateManager.restoreInitialState();
+                
+                // 完了後にUIを再描画
+                ui.renderCharacterCards();
+                ui.updateBattleStatusUI();
+
+                ui.showToastNotification("初期状態に戻りました。", 2000);
+            }
+        };
+    }
     // セッション管理ボタンのイベントリスナー
     const saveToFileBtn = document.getElementById('saveStateToFileBtn');
     if (saveToFileBtn) {
@@ -417,4 +437,33 @@ function showDamageModal(target, damageAmount, hitLocation, onConfirmCallback) {
         ui.hideManeuverCard();
     };
     modal.classList.add('is-visible');
+}
+
+/**
+ * アンデッドカード上のダメージマーカーがクリックされたときの処理
+ * @param {string} characterId - ダメージを受けるキャラクターのID
+ */
+export function handleDamageMarkerClick(characterId) {
+    const state = battleLogic.getBattleState();
+
+    // 1. 現在の戦闘フェーズを確認する
+    // ダメージインジケータが点灯する条件と同じロジックで判定
+    const allActionsChecked = state.actionQueue.length > 0 && state.actionQueue.every(a => a.checked);
+    const isDamagePhaseActive = state.phase === 'DAMAGE_RESOLUTION' || (allActionsChecked && state.damageQueue.some(d => !d.applied));
+
+    // 2. ダメージ処理がアクティブでない場合は、何もしない
+    if (!isDamagePhaseActive) {
+        // ui.showToastNotification("今はダメージ処理のタイミングではありません。", 1500);
+        return;
+    }
+    
+    // 3. 対象キャラクターの最も古い未適用ダメージを探す (既存のロジック)
+    const damageInfo = state.damageQueue.find(d => d.target.id === characterId && !d.applied);
+
+    if (damageInfo) {
+        const index = state.damageQueue.indexOf(damageInfo);
+        handleDamageItemClick(index);
+    } else {
+        console.warn(`Damage marker clicked for ${characterId}, but no applicable damage found in the queue.`);
+    }
 }

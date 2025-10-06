@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.10.39"; // バージョンを更新
+export const version = "1.10.40"; // バージョンを更新
 
 import * as data from './data-handler.js';
 import * as charManager from './character-manager.js';
@@ -597,9 +597,28 @@ export function showCharacterSheetModal(char) {
         onRender: (modal, closeFn) => {
             modal.querySelector('.modal-content').classList.add('sheet-modal-content');
             modal.querySelector('.modal-body').classList.add('sheet-modal-body');
+
+            // ★★★ ここからが修正箇所 ★★★
+            const customCloseFn = () => {
+                stateManager.autoSave(); // モーダルを閉じる直前に保存
+                closeFn(); // 元の閉じる関数を実行
+            };
+
+            // 1. 閉じるボタンにカスタム関数を割り当て
+            modal.querySelector('#closeSimpleMenuModalBtn').onclick = customCloseFn;
+
+            // 2. 背景クリック時にもカスタム関数を割り当て
+            modal.onclick = (e) => {
+                if (e.target === modal) {
+                    customCloseFn();
+                }
+            };
+            // ★★★ 修正はここまで ★★★
+
             const editImageBtn = modal.querySelector('.sheet-edit-image-btn');
             if (editImageBtn) {
                 editImageBtn.onclick = () => {
+                    // 画像選択モーダルには、元の閉じる関数を渡す
                     showImageSelectionModal(char, closeFn);
                 };
             }
@@ -610,15 +629,8 @@ export function showCharacterSheetModal(char) {
                     charManager.updateCharacter(char.id, { area: newArea });
                     ui.renderCharacterCards();
                     ui.updateMarkers();
-                };
-            }
-            const openSheetBtn = modal.querySelector('.sheet-link-btn');
-            if (openSheetBtn) {
-                openSheetBtn.onclick = () => {
-                    const id = openSheetBtn.dataset.sheetId;
-                    if (id) {
-                        window.open(`https://charasheet.vampire-blood.net/${id}`, '_blank');
-                    }
+                    // この時点でも保存をトリガーする
+                    stateManager.autoSave(); 
                 };
             }
             const reloadBtn = modal.querySelector('.sheet-reload-btn');
@@ -830,27 +842,47 @@ function getCharacterManeuvers(char) {
     const arbitraryManeuver = data.getManeuverByName('任意');
     if (arbitraryManeuver) allManeuvers.push({ data: arbitraryManeuver, sourceType: 'common' });
     
+    // 1. HTML要素の状態から、現在アクティブなタイミングを判定する
+    const activeIndicators = new Set();
+    const damageIndicator = document.getElementById('damagePhaseIndicator');
+
+    // ダメージインジケータが点灯しているかを直接確認
+    const isDamageTimingActive = damageIndicator && damageIndicator.classList.contains('active');
+
+    if (isDamageTimingActive) {
+        activeIndicators.add('ダメージ');
+    }
+    if (document.getElementById('actionPhaseIndicator')?.classList.contains('active')) activeIndicators.add('アクション');
+    if (document.getElementById('rapidPhaseIndicator')?.classList.contains('active')) activeIndicators.add('ラピッド');
+    if (document.getElementById('judgePhaseIndicator')?.classList.contains('active')) activeIndicators.add('ジャッジ');
+    
+    // ★★★ 修正はここまで ★★★
+    /*
     const activeIndicators = new Set();
     if (document.getElementById('actionPhaseIndicator')?.classList.contains('active')) activeIndicators.add('アクション');
     if (document.getElementById('rapidPhaseIndicator')?.classList.contains('active')) activeIndicators.add('ラピッド');
     if (document.getElementById('judgePhaseIndicator')?.classList.contains('active')) activeIndicators.add('ジャッジ');
     if (document.getElementById('damagePhaseIndicator')?.classList.contains('active')) activeIndicators.add('ダメージ');
+    */
 
     return allManeuvers.map(m => {
         const maneuver = m.data;
         let isUsable = true;
 
+        // 1. パーツ損傷、使用済み、タイミングのチェック (変更なし)
         if (m.isDamaged) isUsable = false;
         if (char.usedManeuvers.has(maneuver.name)) isUsable = false;
-        const cost = isNaN(Number(maneuver.cost)) ? 0 : Number(maneuver.cost);
-        if (cost > char.actionValue) isUsable = false;
+        if (maneuver.timing !== 'オート' && !activeIndicators.has(maneuver.timing)) {
+            isUsable = false;
+        }
 
-        if (maneuver.timing !== 'オート') {
-            if (!activeIndicators.has(maneuver.timing)) isUsable = false;
-        } else {
+        // 2. コスト支払いの可否チェックをルールに合わせて変更
+        // 「すでに行動値が0以下の場合」は、オート以外のマニューバは使用不可
+        if (char.actionValue <= 0 && maneuver.timing !== 'オート') {
             isUsable = false;
         }
         
+        // 3. アクションタイミングとターゲットのチェック (変更なし)
         if (maneuver.timing === 'アクション' && isUsable) {
             const isActiveActor = battleState.activeActors.some(a => a.id === char.id);
             if (!isActiveActor) isUsable = false;
@@ -859,6 +891,11 @@ function getCharacterManeuvers(char) {
         if (isUsable && maneuver.timing !== 'オート') {
             const { hasTarget } = checkTargetAvailability(char, maneuver);
             if (!hasTarget) isUsable = false;
+        }
+
+        // オートタイミングは常に isUsable = false とする (クリック不可のため)
+        if (maneuver.timing === 'オート') {
+            isUsable = false;
         }
 
         return { ...m, isUsable };
@@ -1105,7 +1142,6 @@ function fetchVampireBloodSheet(sheetId) {
 }
 
 function showImageSelectionModal(characterToUpdate, closeDetailsModalFn) {
-    // --- ★★★ ここから追加：ローカル画像を保存・読み込みするヘルパー関数 ★★★ ---
     const getLocalImages = () => {
         const storedImages = localStorage.getItem('userLocalImages');
         return storedImages ? JSON.parse(storedImages) : [];
@@ -1258,7 +1294,7 @@ function showImageSelectionModal(characterToUpdate, closeDetailsModalFn) {
                 item.onclick = () => {
                     const newImagePath = item.dataset.path;
                     charManager.updateCharacter(characterToUpdate.id, { img: newImagePath });
-                    stateManager.autoSave();
+                    // stateManager.autoSave();
                     ui.renderCharacterCards();
                     closeImageSelectFn();
                     closeDetailsModalFn();

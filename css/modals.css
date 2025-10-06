@@ -63,7 +63,7 @@
     color:            var(--color-text);
     border-radius: 10px;
     overflow: hidden; /* 角丸を有効にするために必要 */
-    box-shadow: 0 0 10px var(--color-shadow);
+    box-shadow: 0 0 10px var(--color-8);
 
     /* サイズ定義 */
     width: 90%;
@@ -487,7 +487,7 @@
     grid-area: basic; 
     background:       var(--color-background-1);
     border-left: 4px solid gold;
-    box-shadow: 0 0 10px   var(--color-shadow);
+    box-shadow: 0 0 10px   var(--color-8);
     border-radius: 10px;
     margin: 5px 10px;
     padding: 10px;
@@ -544,7 +544,7 @@
 .sheet-section {
     background:       var(--color-background-1);
     border-left: 4px solid gold;
-    box-shadow: 0 0 10px   var(--color-shadow);
+    box-shadow: 0 0 10px   var(--color-8);
     border-radius: 10px;
     margin: 5px 10px;
     padding: 10px;
@@ -949,4 +949,60 @@
 /* 汎用モーダルのボディの display: grid を上書き */
 #simpleMenuModalBody.attack-confirm-body {
     display: block;
+}
+/* ================================
+   ローディングプログレスバー
+================================ */
+.loading-overlay-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--color-shadow);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    z-index: 10001; /* トースト通知より手前に表示 */
+    
+    display: none; /* 初期状態では非表示 */
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.loading-overlay-backdrop.is-visible {
+    display: flex;
+    opacity: 1;
+}
+
+.loading-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    color: var(--color-text-light);
+    text-shadow: 0 1px 3px black;
+}
+
+#loading-message {
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.progress-bar-track {
+    width: 300px;
+    height: 20px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    width: 0%; /* 初期値は0% */
+    height: 100%;
+    background-color: gold;
+    border-radius: 10px;
+    transition: width 0.4s ease-out; /* 幅の変更をアニメーションさせる */
 }

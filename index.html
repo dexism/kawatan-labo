@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>『永い後日談のネクロニカ』バトルパート支援ツール 7.10.6.2</title>
+<title>『永い後日談のネクロニカ』バトルパート支援ツール 7.10.6.19</title>
 
 <!-- Favicon設定 -->
 <link rel="icon" href="favicon.ico" type="image/x-icon">
@@ -109,6 +109,7 @@
             <div id="inBattleControls" class="in-battle-controls">
               <button id="countdownBtn" class="phase-btn">カウントダウン</button>
               <button id="endTurnBtn" class="phase-btn">ターン終了</button>
+              <button id="resetBattleBtn" class="phase-btn phase-btn-danger">初期画面に戻る</button>
             </div>
           </div>
         </div>
@@ -353,6 +354,14 @@
     <div class="interruption-footer">
         <button id="skipInterruptionBtn" class="card-action-btn">割り込まない</button>
     </div>
+</div>
+<div id="loading-overlay" class="loading-overlay-backdrop">
+  <div class="loading-content">
+    <div id="loading-message">読み込んでいます...</div>
+    <div class="progress-bar-track">
+      <div id="progress-bar-fill" class="progress-bar-fill"></div>
+    </div>
+  </div>
 </div>
 <div id="toast-notification" class="toast-notification"></div>
 

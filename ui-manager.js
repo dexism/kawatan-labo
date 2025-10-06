@@ -6,7 +6,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.12.73";
+export const version = "1.12.74";
 
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
@@ -505,27 +505,53 @@ export function updatePhaseUI(state) {
         judge: document.getElementById('judgePhaseIndicator'),
         damage: document.getElementById('damagePhaseIndicator'),
     };
-    
-    Object.values(indicators).forEach(ind => ind.classList.remove('active'));
 
+    let showAction = false;
+    let showRapid = false;
+    let showJudge = false;
+    let showDamage = false;
+    
+    // 【アクション】行動可能なアクターがいる場合に点灯
     if (activeActors.length > 0) {
-        indicators.action.classList.add('active');
+        showAction = true;
     }
 
+    // 【ラピッド】未チェックのラピッド宣言があるか、またはアクション宣言に対して割り込み可能な場合に点灯
     if (actionQueue.length > 0) {
-        indicators.rapid.classList.add('active');
-        indicators.judge.classList.add('active');
+        showRapid = true;
+        showJudge = true;
     }
-    
+
+    // 【ジャッジ】未チェックのジャッジ宣言があるか、またはアクション宣言に対して割り込み可能な場合に点灯
     if (phase === 'JUDGE_RESOLUTION' || phase === 'ACTION_RESOLUTION') {
-        indicators.judge.classList.add('active');
+        showJudge = true;
     }
+
+    // 【ダメージ】未適用のダメージ処理がある場合に点灯
     if (phase === 'DAMAGE_RESOLUTION') {
-        indicators.damage.classList.add('active');
+        showDamage = true;
     }
-    
+
+    // --- アクションが全てチェック済みの場合の制御 ---
+    const allActionsChecked = actionQueue.length > 0 && actionQueue.every(a => a.checked);
+    if (allActionsChecked) {
+        // アクション、ラピッド、ジャッジを強制的に消灯
+        showAction = false;
+        showRapid = false;
+        showJudge = false;
+        
+    }
+
+    // 判定結果をUIに反映
+    indicators.action.classList.toggle('active', showAction);
+    indicators.rapid.classList.toggle('active', showRapid);
+    indicators.judge.classList.toggle('active', showJudge);
+    indicators.damage.classList.toggle('active', showDamage);
+
     const countdownBtn = document.getElementById('countdownBtn');
     const endTurnBtn = document.getElementById('endTurnBtn');
+
+    if (!countdownBtn || !endTurnBtn) return;
 
     countdownBtn.disabled = true;
     endTurnBtn.disabled = true;
@@ -569,7 +595,7 @@ function updateQueueUI(elementId, queue, headerText) {
     if (!header) return;
     const state = battleLogic.getBattleState();
     const isRapidActive = state.phase === 'RAPID_RESOLUTION';
-    const isJudgeActive = state.phase === 'JUDGE_RESOLUTION';
+    // const isJudgeActive = state.phase === 'JUDGE_RESOLUTION';
     const isActionActive = state.phase === 'ACTION_RESOLUTION';
     const hasUncheckedRapids = state.rapidQueue.some(r => !r.checked);
     const hasUncheckedJudges = state.judgeQueue.some(j => !j.checked);
@@ -591,12 +617,19 @@ function updateQueueUI(elementId, queue, headerText) {
             const labelEl = document.createElement('label');
             labelEl.className = 'action-queue-item';
             let isDisabled = false;
-            if (elementId === 'rapidDeclarationList') isDisabled = !isRapidActive;
-            else if (elementId === 'judgeDeclarationList') isDisabled = !isJudgeActive || hasUncheckedRapids;
-            else if (elementId === 'actionDeclarationList') isDisabled = !isActionActive || hasUncheckedRapids || hasUncheckedJudges;
+            if (elementId === 'rapidDeclarationList') {
+                isDisabled = !isRapidActive;
+            } else if (elementId === 'judgeDeclarationList') {
+                // ★★★ ここを修正 ★★★
+                isDisabled = hasUncheckedRapids;
+            } else if (elementId === 'actionDeclarationList') {
+                isDisabled = !isActionActive || hasUncheckedRapids || hasUncheckedJudges;
+            }
+
             if (declaration.checked) isDisabled = true;
             if (isDisabled) labelEl.classList.add('is-disabled');
             if (declaration.checked) labelEl.classList.add('is-checked');
+            
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.checked = declaration.checked;
@@ -667,23 +700,23 @@ export function createDamagePrompt(targetId, damageAmount) {
     const container = targetCard.querySelector('.damage-prompt-container');
     let button = container.querySelector('.damage-prompt-button');
     
-    if (button) {
-        const currentDamage = parseInt(button.dataset.damage, 10);
-        const newDamage = currentDamage + damageAmount;
-        button.dataset.damage = newDamage;
-        button.textContent = `ダメージ ${newDamage}`;
-    } else {
+    // ボタンがまだ存在しない場合にのみ新しく作成する
+    if (!button) {
         button = document.createElement('button');
         button.className = 'damage-prompt-button';
-        button.dataset.damage = damageAmount;
-        button.textContent = `ダメージ ${damageAmount}`;
-        button.onclick = (e) => {
-            e.stopPropagation();
-            // 何もしない
-        };
-        button.style.pointerEvents = 'none'; // クリックイベント自体を無効化
         container.appendChild(button);
+        
+        button.style.pointerEvents = 'auto'; // クリックイベントを受け付けるように変更
+
+        // クリックされたら、interaction-managerの新しい関数を呼び出す
+        button.onclick = (e) => {
+            e.stopPropagation(); // カード本体へのクリックイベント伝播を停止
+            interactionManager.handleDamageMarkerClick(targetId);
+        };
     }
+    // ボタンのテキスト（ダメージ量）は常に更新する
+    button.dataset.damage = damageAmount;
+    button.textContent = `ダメージ ${damageAmount}`;
 }
 
 export function removeDamagePrompt(characterId) {
@@ -816,18 +849,18 @@ export function displayVersionInfo(versionInfo) {
     if (versionContainer && versionInfo) {
         const displayOrder = [
             'app', 
-            'battle-logic', 
             'ui-manager', 
             'interaction-manager', 
             'character-manager', 
-            'settings-manager', 
-            'state-manager', 
-            'menu-builder', 
+            'battle-logic', 
             'data-handler', 
             'ui-helpers', 
             'dice-roller', 
             'dice-3d', 
-            'character-converter'
+            'state-manager', 
+            'menu-builder', 
+            'settings-manager', 
+            'character-converter',
         ];
         
         const versionHtml = displayOrder
@@ -912,4 +945,53 @@ export function showModal(options) {
 
     // --- 5. モーダルを表示 ---
     modal.classList.add('is-visible');
+}
+// ファイルの末尾に、以下の3つの関数を追加してください。
+
+/**
+ * ローディング進捗バーを表示する
+ * @param {string} initialMessage - 表示する初期メッセージ
+ */
+export function showLoadingProgress(initialMessage) {
+    const overlay = document.getElementById('loading-overlay');
+    const messageEl = document.getElementById('loading-message');
+    const fillEl = document.getElementById('progress-bar-fill');
+
+    if (!overlay || !messageEl || !fillEl) return;
+
+    messageEl.textContent = initialMessage || '処理を開始しています...';
+    fillEl.style.width = '0%';
+    overlay.classList.add('is-visible');
+}
+
+/**
+ * ローディング進捗バーの状態を更新する
+ * @param {number} current - 現在の処理済み件数
+ * @param {number} total - 全体の件数
+ * @param {string} itemName - 現在処理中のアイテム名
+ */
+export function updateLoadingProgress(current, total, itemName) {
+    const messageEl = document.getElementById('loading-message');
+    const fillEl = document.getElementById('progress-bar-fill');
+
+    if (!messageEl || !fillEl) return;
+
+    const percent = total > 0 ? (current / total) * 100 : 0;
+    
+    messageEl.textContent = `キャラクターを読み込み中... (${current} / ${total})`;
+    if (itemName) {
+        messageEl.textContent += `\n「${itemName}」`;
+    }
+    
+    fillEl.style.width = `${percent}%`;
+}
+
+/**
+ * ローディング進捗バーを非表示にする
+ */
+export function hideLoadingProgress() {
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) {
+        overlay.classList.remove('is-visible');
+    }
 }

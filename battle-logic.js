@@ -8,7 +8,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.15.60"; // パッチバージョンを更新
+export const version = "1.16.67"; // パッチバージョンを更新
 
 import * as charManager from './character-manager.js';
 import * as ui from './ui-manager.js';
@@ -27,7 +27,7 @@ let battleState = {
     isStarted: false,
     turn: 1,
     count: 0,
-    activeActors: [], // 現在手番のキャラクターの配列
+    activeActors: [],
     phase: 'SETUP',
     actionQueue: [],
     rapidQueue: [],
@@ -49,12 +49,10 @@ export function startBattle() {
     const allChars = charManager.getCharacters();
     battleState.count = Math.max(0, ...allChars.map(c => c.actionValue));
 
-    // 戦闘開始と同時に、カードを「戦闘モード」で再描画する
     ui.renderCharacterCards();
-
-    battleState.shouldScrollToCount = true; // 戦闘開始時にスクロールフラグを立てる
-    resetAndStartNewCount(); // 初回カウントのフェーズ設定
-    determineNextStep(); 
+    battleState.shouldScrollToCount = true;
+    
+    determineNextStep();
 }
 
 export function getBattleState() {
@@ -93,13 +91,18 @@ export function declareManeuver(char, maneuver, target = null, judgeTargetDeclar
             description: maneuver.description
         }
     };
+    // コストの支払い
     const cost = isNaN(Number(maneuver.cost)) ? 0 : Number(maneuver.cost);
     if (cost > 0) {
         charManager.updateCharacter(char.id, { actionValue: char.actionValue - cost });
     }
-    if (maneuver.name !== '待機') {
-        charManager.updateCharacter(char.id, { hasActedThisCount: true });
+    // ターン制限のあるマニューバを使用済みとしてマーク
+    // (タイミングに関わらず先に処理)
+    if (char.turnLimitedManeuvers.has(maneuver.name)) {
+        char.usedManeuvers.add(maneuver.name);
     }
+
+    // ★★★ 宣言を各種キューに追加し、アクションタイミングの場合のみ追加処理を行う ★★★
     switch (maneuver.timing) {
         case 'ラピッド':
             battleState.rapidQueue.push(declaration);
@@ -112,15 +115,22 @@ export function declareManeuver(char, maneuver, target = null, judgeTargetDeclar
             break;
         case 'ダメージ':
             ui.addLog(`◆[ダメージ] ${char.name}が【${maneuver.name}】を宣言。`);
+            // ダメージタイミングは通常即時解決のため、キューには追加しない
             break;
-        default:
+        case 'アクション':
+        default: // 'アクション' または 不明なタイミングはこちら
+            // 1. hasActedThisCountフラグを立てる
+            charManager.updateCharacter(char.id, { hasActedThisCount: true });
+
+            // 2. activeActorsリストから宣言者を除外する
+            battleState.activeActors = battleState.activeActors.filter(actor => actor.id !== char.id);
+            
+            // 3. アクションキューに追加
             battleState.actionQueue.push(declaration);
             ui.addLog(`◆[アクション] ${char.name}が【${maneuver.name}】を宣言。`);
             break;
     }
-    if (char.turnLimitedManeuvers.has(maneuver.name)) {
-        char.usedManeuvers.add(maneuver.name);
-    }
+
     ui.renderCharacterCards();
     ui.updateMarkers();
     determineNextStep();
@@ -145,74 +155,56 @@ export function toggleActionCheckedState(index) {
 // ===================================================================================
 
 export function determineNextStep() {
-    if (!battleState.isStarted) return;
-    const characters = charManager.getCharacters();
-    if (characters.length === 0) {
-        battleState.count = 0;
+    // isStarted フラグに基づいて処理を分岐
+    if (!battleState.isStarted) {
+        // 【戦闘準備中】
+        battleState.phase = 'SETUP';
         battleState.activeActors = [];
         ui.updateBattleStatusUI();
         return;
     }
-    const allActingCharacters = characters.filter(c => c.actionValue >= battleState.count && !c.hasActedThisCount);
-    const isEnemyActing = allActingCharacters.some(c => c.type === 'enemy');
-    let charactersToHighlight = [];
-    if (isEnemyActing) {
-        charactersToHighlight = allActingCharacters.filter(c => c.type === 'enemy');
-    } else {
-        charactersToHighlight = allActingCharacters;
-    }
-    battleState.activeActors = charactersToHighlight;
-    
-    const prevPhase = battleState.phase;
-    let nextPhase = battleState.phase;
 
-    const allCharacters = charManager.getCharacters().filter(c => !c.isDestroyed && !c.hasWithdrawn);
-    const potentialActors = allCharacters.filter(c => c.actionValue >= battleState.count && !c.hasActedThisCount);
+    // 【戦闘中】
+    // 1. 行動権を持つキャラクターを特定
+    const potentialActors = charManager.getCharacters().filter(c =>
+        c.actionValue >= battleState.count &&
+        !c.hasActedThisCount &&
+        !c.isDestroyed &&
+        !c.hasWithdrawn
+    );
+    const actingEnemies = potentialActors.filter(c => c.type === 'enemy');
+    
+    if (actingEnemies.length > 0) {
+        battleState.activeActors = actingEnemies;
+    } else {
+        battleState.activeActors = potentialActors.filter(c => c.type === 'pc');
+    }
+
+    // 2. フェーズを決定
+    const hasAnyPotentialActors = battleState.activeActors.length > 0;
     const hasUncheckedRapids = battleState.rapidQueue.some(a => !a.checked);
-    const hasUncheckedJudges = battleState.judgeQueue.some(a => !a.checked);
     const hasUncheckedActions = battleState.actionQueue.some(a => !a.checked);
     const hasPendingDamage = battleState.damageQueue.some(d => !d.applied);
-
-    // ターン終了条件：今後、誰か一人でも行動できる可能性が残っているか？
-    // (＝行動値が0より大きいキャラクターが一人でもいるか？)
-    const canAnyoneActInFuture = allCharacters.some(c => c.actionValue > 0);
-
-    if (potentialActors.length > 0) {
-        nextPhase = 'ACTION_DECLARATION';
+    
+    if (hasAnyPotentialActors) {
+        battleState.phase = 'ACTION_DECLARATION';
     } else if (hasUncheckedRapids) {
-        nextPhase = 'RAPID_RESOLUTION';
-    } else if (hasUncheckedJudges) {
-        nextPhase = 'JUDGE_RESOLUTION'; 
-    } else if (hasUncheckedActions) {
-        nextPhase = 'ACTION_RESOLUTION'; 
+        battleState.phase = 'RAPID_RESOLUTION';
+    } else if (hasUncheckedActions) { // judgeキューは考慮しない方がシンプル
+        battleState.phase = 'ACTION_RESOLUTION';
     } else if (hasPendingDamage) {
-        nextPhase = 'DAMAGE_RESOLUTION';
-    } else if (battleState.count > 0 && canAnyoneActInFuture) { // ★ 条件を追加: カウントが0より大きく、かつ誰か行動できる可能性がある
-        // まだ行動可能なキャラクターが残っている場合はカウント終了
-        nextPhase = 'COUNT_END';
+        battleState.phase = 'DAMAGE_RESOLUTION';
     } else {
-        // 誰一人行動可能なキャラクターが残っていない、またはカウントが0になった場合はターン終了へ
-        nextPhase = 'TURN_END_PREPARATION';
-    }
-
-    battleState.phase = nextPhase;
-
-    if (prevPhase !== battleState.phase) {
-        switch(battleState.phase) {
-            case 'RAPID_RESOLUTION': ui.addLog("--- ラピッド解決フェーズ開始 ---"); break;
-            case 'JUDGE_RESOLUTION': ui.addLog("--- ジャッジ解決フェーズ開始 ---"); break;
-            case 'ACTION_RESOLUTION': ui.addLog("--- アクション解決フェーズ開始 ---"); break;
-            case 'DAMAGE_RESOLUTION': ui.addLog("--- ダメージ解決フェーズ開始 ---"); break;
-            case 'COUNT_END': ui.addLog("--- カウント終了 ---"); break;
-            case 'TURN_END_PREPARATION': ui.addLog("--- ターン終了準備 ---"); break;
+        const canAnyoneActInFuture = charManager.getCharacters().some(c => c.actionValue > 0 && !c.isDestroyed && !c.hasWithdrawn);
+        if (battleState.count > 0 && canAnyoneActInFuture) {
+            battleState.phase = 'COUNT_END';
+        } else {
+            battleState.phase = 'TURN_END_PREPARATION';
         }
     }
 
+    // 3. UIを更新
     ui.updateBattleStatusUI();
-    ui.renderCharacterCards();
-    ui.updateMarkers();
-    ui.updateAllQueuesUI();
-    ui.updateCharacterHighlights(battleState.activeActors);
 }
 
 export function advancePhase() {
@@ -277,6 +269,15 @@ function resetAndStartNewCount() {
     battleState.rapidQueue = [];
     battleState.judgeQueue = [];
     battleState.damageQueue = [];
+
+    // 1. カウント開始時点で行動権を持つキャラクターをリストアップして保持する
+    const allCharacters = charManager.getCharacters().filter(c => !c.isDestroyed && !c.hasWithdrawn);
+    battleState.activeActors = allCharacters.filter(c => c.actionValue >= battleState.count);
+    
+    // 2. hasActedThisCountフラグをリセット
+    //    (activeActorsの判定とは独立させる)
+    allCharacters.forEach(c => c.hasActedThisCount = false);
+
     ui.updateAllQueuesUI();
     ui.updatePhaseUI(battleState);
     stateManager.autoSave();
@@ -435,17 +436,21 @@ function expandParams(template, params) {
 }
 
 async function executeEffect(effectRef, context) {
+    let onHitEffects = []; // ★ forループの前に宣言
     const effectDefinition = data.getEffectDefinition(effectRef.ref);
     if (!effectDefinition) {
         console.warn(`[Engine] 汎用効果 '${effectRef.ref}' の定義が見つかりません。`);
-        return;
+        return onHitEffects; // ★ 空の配列を返す
     }
     const params = effectRef.params || {};
     for (const actionTemplate of effectDefinition.actions) {
         const concreteAction = expandParams(actionTemplate, params);
         switch (concreteAction.action_type) {
             case 'attack_roll':
-                await performAttackRoll(concreteAction, context);
+                const { hit, on_hit } = await performAttackRoll(concreteAction, context);
+                if (hit && on_hit) {
+                    onHitEffects.push(...on_hit);
+                }
                 break;
             case 'move_character':
                 performMoveCharacter(concreteAction, context);
@@ -456,11 +461,15 @@ async function executeEffect(effectRef, context) {
             case 'escape_roll':
                 performEscapeRoll(concreteAction, context);
                 break;
+            case 'modify_action_value':
+                performModifyActionValue(concreteAction, context);
+                break;
             default:
                 ui.addLog(`＞ [Engine] 未対応のアクションタイプ: ${concreteAction.action_type}`);
                 console.warn(`[Engine] 未対応のアクションタイプです: ${concreteAction.action_type}`);
         }
     }
+    return onHitEffects;
 }
 
 function performMoveCharacter(action, context) {
@@ -521,7 +530,8 @@ async function performAttackRoll(action, context) {
             command: diceCommand,
             showToast: true,
             callback: (result, hitLocation) => {
-                if (result && !result.includes('失敗')) {
+                const hit = result && !result.includes('失敗');
+                if (hit) {
                     ui.addLog(`＞ ${target.name}に命中！`);
                     let currentDamage = action.damage || 0;
                     battleState.damageQueue.push({
@@ -533,13 +543,11 @@ async function performAttackRoll(action, context) {
                         applied: false
                     });
                     ui.addLog(`＞ 【${currentDamage}】点のダメージ！`);
-                    if (action.on_hit && action.on_hit.length > 0) {
-                        ui.addLog(`＞ 追加効果(${action.on_hit.join(',')})が発動！`);
-                    }
                 } else {
                     ui.addLog(`＞ 攻撃は失敗しました。`);
                 }
-                resolve();
+                // ★ 命中結果とon_hit情報をオブジェクトで解決
+                resolve({ hit, on_hit: action.on_hit || [] });
             }
         });
     });
@@ -571,8 +579,18 @@ async function resolveSingleAction(declaration, totalBonus = 0) { // デフォ�
         totalAttackBonus: totalBonus // ★★★ 計算済みのボーナスを context に追加 ★★★
     };
 
-    for (const effectRef of sourceManeuver.effects) {
-        await executeEffect(effectRef, context);
+    let allOnHitEffects = [];
+    for (const effectRef of declaration.sourceManeuver.effects) {
+        const onHitEffects = await executeEffect(effectRef, context);
+        allOnHitEffects.push(...onHitEffects);
+    }
+
+    if (allOnHitEffects.length > 0) {
+        ui.addLog(`＞ 追加効果(${allOnHitEffects.join(',')})が発動！`);
+        for (const effectName of allOnHitEffects) {
+            // "TUMBLE" などの効果名を effectRef 形式に変換して再度呼び出す
+            await executeEffect({ ref: effectName, params: {} }, context);
+        }
     }
 }
 
@@ -641,6 +659,41 @@ export function resetToSetupPhase() {
         currentAction: null,
         shouldScrollToCount: false,
     };
+    
     // UIも準備状態に更新する
-    ui.updateBattleStatusUI();
+    // これらはUI側の責務なので、呼び出し側で行うのがより適切
+    // ui.updateAllQueuesUI();
+    // ui.updateBattleStatusUI();
+}
+
+/**
+ * 対象の行動値を変更する汎用関数 (「転倒」などで使用)
+ * @param {object} action - パラメータ展開済みの具体的なアクション定義
+ * @param {object} context - 実行コンテキスト
+ */
+function performModifyActionValue(action, context) {
+    const target = context.target;
+    if (!target) {
+        ui.addLog(`＞ 行動値変更の対象がいません。`);
+        return;
+    }
+
+    const value = action.value || 0;
+    if (value === 0) return;
+
+    // 行動値を変更
+    charManager.updateCharacter(target.id, {
+        actionValue: target.actionValue + value
+    });
+
+    // ログ出力 (値がマイナスなら「転倒」と見なす)
+    if (value < 0) {
+        ui.addLog(`＞ ${target.name} は転倒した！ (行動値${value})`);
+    } else {
+        ui.addLog(`＞ ${target.name} の行動値が ${value > 0 ? '+' : ''}${value} された。`);
+    }
+
+    // UIを更新
+    ui.updateMarkers();
+    ui.updateSingleCharacterCard(target.id);
 }

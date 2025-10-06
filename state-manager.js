@@ -2,22 +2,20 @@
  * @file state-manager.js
  * @description アプリケーションのセッション状態の保存と復元を担当するモジュール
  */
-export const version = "1.2.8"; 
+export const version = "2.0.0"; // 大幅なロジック変更のためメジャーバージョンアップ
 
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
 import * as ui from './ui-manager.js';
 import { convertVampireBloodSheet } from './character-converter.js';
-import * as data from './data-handler.js'; // ★ この行を削除
+import * as data from './data-handler.js';
 
-const STORAGE_KEY = 'nechronica-battle-session';
+const STORAGE_KEY = 'nechronica-battle-session-v2'; // ★キーを変更して旧データとの競合を回避
 const AUTOSAVE_KEY = 'nechronica-autosave-enabled';
 
 let isAutoSaveEnabled = false;
 let isLoading = false;
-/**
- * モジュールの初期化。ローカルストレージから自動保存設定を読み込む。
- */
+
 export function initialize() {
     const savedSetting = localStorage.getItem(AUTOSAVE_KEY);
     isAutoSaveEnabled = savedSetting !== 'false';
@@ -25,57 +23,81 @@ export function initialize() {
     return isAutoSaveEnabled;
 }
 
-/**
- * 自動保存の設定を切り替える
- * @param {boolean} isEnabled - 自動保存を有効にするか
- */
 export function setAutoSave(isEnabled) {
     isAutoSaveEnabled = isEnabled;
     localStorage.setItem(AUTOSAVE_KEY, isEnabled);
-    console.log(`Auto-save has been set to ${isEnabled ? 'ON' : 'OFF'}.`);
     if (isEnabled) {
-        saveState(); // 有効にしたタイミングで一度保存する
+        saveState();
     }
 }
 
-/**
- * 自動保存が有効な場合のみ、現在の状態を保存するラッパー関数
- */
 export function autoSave() {
-    // 復元処理中と自動保存OFFの場合は何もしない
     if (isLoading || !isAutoSaveEnabled) return;
     saveState();
 }
 
 /**
- * 現在の戦闘状態をローカルストレージに保存する
+ * 現在の状態をlocalStorageに保存する
  */
+// state-manager.js
+
 export function saveState() {
     try {
         const battleState = battleLogic.getBattleState();
         const characters = charManager.getCharacters();
+        let existingState = {};
+        try {
+            existingState = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+        } catch (e) {
+            existingState = {};
+        }
+
+        const isSetupPhase = !battleState.isStarted;
+        
+        // ★★★ キーを char.id に変更し、キャラクターの配列として保存するように変更 ★★★
+        let initialStates = Array.isArray(existingState.initialStates) ? [...existingState.initialStates] : [];
+
+        characters.forEach(char => {
+            const existingIndex = initialStates.findIndex(is => is.charId === char.id);
+
+            // 戦闘準備中、または新規キャラクターの場合に初期状態を更新/作成
+            if (isSetupPhase || existingIndex === -1) {
+                const initialState = {
+                    charId: char.id, // ★ 内部ユニークIDをキーとして保存
+                    sourceType: char.sheetId ? 'sheet' : 'template',
+                    id: char.sheetId || char.templateId,
+                    type: char.type,
+                    img: char.img,
+                    area: char.area,
+                    stackCount: char.stackCount,
+                    regrets: char.regrets.map(r => ({ name: r.name, points: r.points }))
+                };
+                if (existingIndex === -1) {
+                    initialStates.push(initialState);
+                } else {
+                    initialStates[existingIndex] = initialState;
+                }
+            }
+        });
+        
+        // 削除されたキャラクターを initialStates から除去
+        const currentCharIds = new Set(characters.map(c => c.id));
+        initialStates = initialStates.filter(is => currentCharIds.has(is.charId));
 
         const stateToSave = {
-            savedAt: new Date().toISOString(),
-            turn: battleState.isStarted ? battleState.turn : 0,
-            characters: characters.map((char) => ({
-                sourceType: char.sheetId ? 'sheet' : 'template',
-                id: char.sheetId || char.templateId,
-                type: char.type,
-                img: char.img, // ★変更点1
-                area: char.area,
-                stackCount: char.stackCount,
+            turn: isSetupPhase ? 0 : battleState.turn,
+            initialStates: initialStates, // 配列として保存
+            currentStates: characters.map(char => ({
+                charId: char.id, // ★ キーを char.id に変更
                 actionValue: char.actionValue,
                 isDestroyed: char.isDestroyed || false,
                 hasWithdrawn: char.hasWithdrawn || false,
                 damagedPartNames: Object.values(char.partsStatus).flat()
                     .filter(p => p.damaged).map(p => p.name),
-                usedManeuvers: Array.from(char.usedManeuvers),
-                activeBuffs: char.activeBuffs,
-                regrets: char.regrets
+                usedManeuvers: Array.from(char.usedManeuvers)
             }))
         };
-
+        
         localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
 
         if (!isAutoSaveEnabled) {
@@ -85,91 +107,87 @@ export function saveState() {
         }
     } catch (error) {
         console.error("状態の保存に失敗しました:", error);
-        alert("状態の保存に失敗しました。");
     }
 }
 
 /**
- * ローカルストレージから状態を復元する
- * @param {object} undeadTemplates - data-handlerから読み込まれたアンデッドのテンプレートデータ
+ * localStorageからセッションを復元する
  */
 export async function loadState(undeadTemplates) {
     const savedDataString = localStorage.getItem(STORAGE_KEY);
-    // 保存データがない場合は何もしない（念のためのガード処理）
-    if (!savedDataString) {
-        console.warn("loadState was called, but no saved data was found.");
-        return false;
-    }
+    if (!savedDataString) return false;
 
     isLoading = true;
-    ui.showToastNotification('状態を復元しています...', 5000);
+    ui.showLoadingProgress('セッションデータを準備中...');
 
     try {
         const savedState = JSON.parse(savedDataString);
-        charManager.clearAllCharacters();
+        
+        charManager.clearCharacters();
         battleLogic.resetToSetupPhase();
 
-        // --- フェーズ1: 全キャラクターのベースデータを準備 ---
-        const charCreationData = await Promise.all(savedState.characters.map(async (charData) => {
-            let baseData;
-            if (charData.sourceType === 'sheet') {
-                const sourceData = await fetchVampireBloodSheet(charData.id);
-                const converted = convertVampireBloodSheet(sourceData);
-                if (!converted) throw new Error(`ID: ${charData.id} の変換に失敗`);
-                converted.sheetId = charData.id;
-                baseData = converted;
-            } else {
-                const template = undeadTemplates[charData.id];
-                if (!template) throw new Error(`テンプレートID: ${charData.id} が見つかりません`);
-                baseData = JSON.parse(JSON.stringify(template));
-                baseData.templateId = charData.id;
-            }
-            return { baseData, savedState: charData };
-        }));
+        // ★★★ initialStates が配列になったことに伴うループ処理の変更 ★★★
+        const totalChars = savedState.initialStates.length;
+        let loadedCount = 0;
 
-        // --- フェーズ2: キャラクターの生成と状態適用をまとめて実行 ---
-        const restoredCharacters = charCreationData.map(({ baseData, savedState }) => {
-
-            // ステップA: まずデフォルトのデータでキャラクターを生成
-            const newChar = charManager.createCharacterForLoad(baseData, savedState.type);
+        for (const initialState of savedState.initialStates) {
+            const charName = initialState.id;
+            ui.updateLoadingProgress(loadedCount, totalChars, charName);
             
-            // ステップB: ★★★ 生成された直後に、保存されたデータで状態を上書き ★★★
+            let charObject;
+            if (initialState.sourceType === 'sheet') {
+                const sourceData = await fetchVampireBloodSheet(initialState.id);
+                charObject = convertVampireBloodSheet(sourceData);
+                charObject.sheetId = initialState.id;
+            } else {
+                const template = undeadTemplates[initialState.id];
+                if (!template) throw new Error(`テンプレートID: ${initialState.id} が見つかりません`);
+                charObject = JSON.parse(JSON.stringify(template));
+                charObject.templateId = initialState.id;
+            }
+
+            // 初期状態のデータでキャラクターを生成
+            const newChar = charManager.addCharacterFromObject(charObject, initialState.type);
+            
+            // 初期状態のカスタム値（配置など）を適用
             charManager.updateCharacter(newChar.id, {
-                img:           savedState.img, // 画像パスをここで上書き
-                area:          savedState.area,
-                actionValue:   savedState.actionValue,
-                stackCount:    savedState.stackCount,
-                isDestroyed:   savedState.isDestroyed,
-                hasWithdrawn:  savedState.hasWithdrawn,
-                usedManeuvers: new Set(savedState.usedManeuvers),
-                activeBuffs:   savedState.activeBuffs || [],
-                regrets:       savedState.regrets
+                area: initialState.area,
+                stackCount: initialState.stackCount,
+                img: initialState.img,
+                regrets: initialState.regrets
             });
 
-            // ステップC: 損傷パーツを適用
-            const damagedPartNames = new Set(savedState.damagedPartNames);
-            Object.values(newChar.partsStatus).flat().forEach(part => {
-                if (damagedPartNames.has(part.name)) {
-                    part.damaged = true;
-                }
-            });
-
-            // ステップD: 最終的な値を再計算
-            charManager.recalculateMaxActionValue(newChar);
-
-            return newChar;
-        });
-
-        // --- フェーズ3: 戦闘状態の復元 ---
-        if (savedState.turn === 0) {
-            battleLogic.resetToSetupPhase();
-            ui.renderCharacterCards();
-            ui.updateMarkers();
-            ui.checkBattleStartCondition();
-        } else {
-            battleLogic.restoreBattleState(savedState.turn, restoredCharacters);
+            loadedCount++;
+            ui.updateLoadingProgress(loadedCount, totalChars, newChar.name);
+            await new Promise(resolve => setTimeout(resolve, 50)); // 短い待機
         }
 
+        if (savedState.turn > 0) {
+            savedState.currentStates.forEach(currentState => {
+                // ★★★ IDのマッチングを char.id に変更 ★★★
+                const charToUpdate = charManager.getCharacters().find(c => c.id === currentState.charId);
+                if (charToUpdate) {
+                    charManager.updateCharacter(charToUpdate.id, {
+                        actionValue: currentState.actionValue,
+                        isDestroyed: currentState.isDestroyed,
+                        hasWithdrawn: currentState.hasWithdrawn,
+                        usedManeuvers: new Set(currentState.usedManeuvers)
+                    });
+                    const damagedNames = new Set(currentState.damagedPartNames);
+                    Object.values(charToUpdate.partsStatus).flat().forEach(part => {
+                        if (damagedNames.has(part.name)) {
+                            part.damaged = true;
+                        }
+                    });
+                    charManager.recalculateMaxActionValue(charToUpdate);
+                }
+            });
+            battleLogic.restoreBattleState(savedState.turn, charManager.getCharacters());
+        } else {
+            ui.renderCharacterCards();
+            ui.updateBattleStatusUI();
+        }
+        ui.checkBattleStartCondition();
         ui.showToastNotification('セッションを復元しました。', 2000);
         return true;
 
@@ -181,7 +199,61 @@ export async function loadState(undeadTemplates) {
         return false;
     } finally {
         isLoading = false;
+        ui.hideLoadingProgress();
     }
+}
+
+/**
+ * 「初期画面に戻る」ための関数
+ */
+export async function restoreInitialState() { // ★ async を追加
+    const savedDataString = localStorage.getItem(STORAGE_KEY);
+    if (!savedDataString) {
+        console.warn("保存されたデータが見つかりません。");
+        return;
+    }
+    
+    try {
+        const savedState = JSON.parse(savedDataString);
+        
+        charManager.clearCharacters();
+        battleLogic.resetToSetupPhase();
+
+        const initialStates = savedState.initialStates || [];
+
+        // ★★★ for...of ループに変更し、await を使用 ★★★
+        for (const initialState of initialStates) {
+            let charObject;
+            if (initialState.sourceType === 'sheet') {
+                // 保管所からデータを再取得
+                const sourceData = await fetchVampireBloodSheet(initialState.id);
+                charObject = convertVampireBloodSheet(sourceData);
+                charObject.sheetId = initialState.id;
+
+            } else {
+                // テンプレートからデータを取得
+                charObject = JSON.parse(JSON.stringify(data.getUndeadTemplates()[initialState.id]));
+                charObject.templateId = initialState.id;
+            }
+            
+            // 取得したデータでキャラクターを再生成
+            const newChar = charManager.addCharacterFromObject(charObject, initialState.type);
+
+            // 保存されていた初期状態（配置、スタック数など）を適用
+            charManager.updateCharacter(newChar.id, {
+                area: initialState.area,
+                stackCount: initialState.stackCount,
+                img: initialState.img,
+                regrets: initialState.regrets
+            });
+        }
+        
+    } catch (error) {
+        console.error("初期状態への復元に失敗しました:", error);
+        // エラーが発生してもUIは更新を試みる
+    }
+    
+    // UI更新は呼び出し元で行うため、ここでは行わない
 }
 
 export function hasSavedState() {
@@ -198,7 +270,7 @@ export function clearSavedState() {
  * @param {string} sheetId - シートID
  * @returns {Promise<object>} - 取得したキャラクターデータ
  */
-function fetchVampireBloodSheet(sheetId) {
+export function fetchVampireBloodSheet(sheetId) {
     return new Promise((resolve, reject) => {
         const callbackName = `jsonpCallback_${Date.now()}`;
         window[callbackName] = (data) => {
@@ -217,6 +289,7 @@ function fetchVampireBloodSheet(sheetId) {
         document.head.appendChild(script);
     });
 }
+
 /**
  * 現在のセッション状態をJSONファイルとしてダウンロードする
  */

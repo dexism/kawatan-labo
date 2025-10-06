@@ -228,6 +228,31 @@ label.action-queue-item.is-checked span {
     grid-template-columns: 1fr 1fr;
     gap: 5px;
 }
+/* in-battle-controls のグリッド定義を修正 */
+.in-battle-controls {
+    display: grid;
+    /* ★ 2列から3列に変更 */
+    grid-template-columns: 1fr 1fr; 
+    gap: 5px;
+}
+
+/* ★★★ 以下のスタイルを末尾に追加 ★★★ */
+#resetBattleBtn {
+    /* ボタンを2列全体に広げる */
+    grid-column: 1 / -1; 
+}
+
+/* 危険な操作を示すためのボタンスタイル */
+.phase-btn-danger {
+    background-color: var(--color-accent-red);
+    color: white;
+    border-color: var(--color-accent-red);
+    box-shadow: none;
+}
+.phase-btn-danger:hover:not(:disabled) {
+    background-color: var(--color-accent-red);
+    opacity: 0.8;
+}
 
 /* ★★★ 表示/非表示の切り替えロジック ★★★ */
 
