@@ -6,7 +6,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.7.4";
+export const version = "1.7.5";
 
 // --- モジュールのインポート ---
 import * as data from './data-handler.js';
@@ -421,4 +421,31 @@ export function clearCharacters() {
     characters = [];
     nextUniqueId = 1;
     console.log("All characters cleared.");
+}
+
+/**
+ * 指定されたキャラクターにバフを追加する
+ * @param {string} characterId - 対象キャラクターのID
+ * @param {object} buff - 追加するバフオブジェクト
+ */
+export function addBuff(characterId, buff) {
+    const character = getCharacterById(characterId);
+    if (character) {
+        if (!character.activeBuffs) {
+            character.activeBuffs = [];
+        }
+        character.activeBuffs.push(buff);
+    }
+}
+
+/**
+ * 指定されたキャラクターから特定の期間を持つバフを削除する
+ * @param {string} characterId - 対象キャラクターのID
+ * @param {string} durationType - 削除するバフの期間 (例: 'until_damage_applied')
+ */
+export function clearTemporaryBuffs(characterId, durationType) {
+    const character = getCharacterById(characterId);
+    if (character && character.activeBuffs) {
+        character.activeBuffs = character.activeBuffs.filter(buff => buff.duration !== durationType);
+    }
 }

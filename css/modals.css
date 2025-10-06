@@ -1006,3 +1006,20 @@
     border-radius: 10px;
     transition: width 0.4s ease-out; /* 幅の変更をアニメーションさせる */
 }
+
+/* modals.css の末尾に以下を追加 */
+
+/* ================================
+   ダメージ計算モーダル専用スタイル
+================================ */
+.damage-calc-section {
+    margin-bottom: 10px;
+}
+
+.damage-calc-section .section-header {
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    margin-bottom: 5px;
+    padding-left: 5px;
+}

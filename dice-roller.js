@@ -6,7 +6,7 @@
 /**
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.3.20";
+export const version = "1.3.22";
 
 // import { showModal } from './ui-manager.js';
 import { showModal, showToastNotification } from './ui-manager.js';
@@ -189,11 +189,16 @@ export function performDiceRoll(rollData) {
         const modifier = modifierStr ? parseInt(modifierStr, 10) : 0;
         const numDice = parseInt(numDiceStr, 10) || 1;
 
+        // rollDataからperformerを取得
+        const performer = rollData.performer;
+        // performerのタイプに応じてダイスの色を決定
+        const diceColor = (performer && performer.type === 'enemy') ? 0xcc00cc : 0xffffff;
+
         // 振るダイスの設定を作成
         const rollConfig = {
             dices: Array.from({ length: numDice }, (_, i) => ({
                 id: `system_d${i}`,
-                color: 0xffffff
+                color: diceColor // 決定した色を適用
             }))
         };
         
@@ -248,7 +253,6 @@ export function performDiceRoll(rollData) {
             const modifierText = modifier > 0 ? `+${modifier}` : (modifier < 0 ? `${modifier}` : "");
             const color = (bestResult === '大成功' || bestResult === '成功') ? '#007bff' : '#dc3545';
             
-            // 例: 2NC ＞ [1,6] ＞ 6[1,6] ＞ 成功
             const resultText = `<span style="color: ${color};">🎲 ${input.toUpperCase()} ＞ [${rawValues.join(',')}]${modifierText} ＞ ${maxFinalValue}[${finalValues.join(',')}]<br>${bestResult}<br>${bestResultDetails}</span>`;
 
             // 5. ログとトーストに表示
@@ -257,9 +261,10 @@ export function performDiceRoll(rollData) {
                 showToastNotification(resultText, 2000);
             }
 
-            // 6. battle-logicに最終結果を渡す
+            // 6. battle-logicに最終結果と「判定値」を渡す
             if (callback) {
-                callback(bestResult, bestHitLocation, resultText);
+                // bestResult, bestHitLocation, resultText に加えて、maxFinalValue を渡す
+                callback(bestResult, bestHitLocation, resultText, maxFinalValue);
             }
         });
     } else if (d10Match) {

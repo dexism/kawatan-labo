@@ -2,7 +2,7 @@
  * @file state-manager.js
  * @description アプリケーションのセッション状態の保存と復元を担当するモジュール
  */
-export const version = "2.0.0"; // 大幅なロジック変更のためメジャーバージョンアップ
+export const version = "2.0.3"; // 大幅なロジック変更のためメジャーバージョンアップ
 
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
@@ -159,7 +159,12 @@ export async function loadState(undeadTemplates) {
 
             loadedCount++;
             ui.updateLoadingProgress(loadedCount, totalChars, newChar.name);
-            await new Promise(resolve => setTimeout(resolve, 50)); // 短い待機
+            if (initialState.sourceType === 'sheet') {
+                await new Promise(resolve => setTimeout(resolve, 200));
+            } else {
+                await new Promise(resolve => setTimeout(resolve, 50));
+            }
+            // await new Promise(resolve => setTimeout(resolve, 50)); // 短い待機
         }
 
         if (savedState.turn > 0) {
@@ -188,6 +193,10 @@ export async function loadState(undeadTemplates) {
             ui.updateBattleStatusUI();
         }
         ui.checkBattleStartCondition();
+
+        ui.updateLoadingProgress(totalChars, totalChars, "読み込み完了");
+        await new Promise(resolve => setTimeout(resolve, 500)); // 待機
+        
         ui.showToastNotification('セッションを復元しました。', 2000);
         return true;
 

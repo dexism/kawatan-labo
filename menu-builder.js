@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.10.40"; // バージョンを更新
+export const version = "1.10.42"; // バージョンを更新
 
 import * as data from './data-handler.js';
 import * as charManager from './character-manager.js';
@@ -299,9 +299,38 @@ function createManeuverItem(maneuverObj, char) {
                 ui.showModal({ title: `【${maneuver.name}】の対象を選択`, items: menuItems });
                 return;
             }
-            
+
             if (maneuver.tags.includes('移動')) {
-                buildMoveMenu(char, maneuver, e);
+                // 射程が「自身」の場合は、従来の移動先選択メニューを表示
+                if (maneuver.range === '自身') {
+                    buildMoveMenu(char, maneuver, e);
+                } 
+                // 射程が「自身」以外の場合は、ターゲット選択 -> 方向選択フローに移行
+                else {
+                    const target = await selectTargetForAction(char, maneuver, handleOutsideClick);
+                    if (target) {
+                        // ターゲット選択後に方向を選択するモーダルを表示
+                        const direction = await new Promise(resolve => {
+                            ui.showModal({
+                                title: `【${maneuver.name}】移動方向を選択`,
+                                items: [
+                                    { label: '奈落方向へ', onClick: () => resolve('奈落方向') },
+                                    { label: '楽園方向へ', onClick: () => resolve('楽園方向') }
+                                ],
+                                onRender: (modal) => {
+                                    // モーダル外クリックでキャンセル
+                                    modal.onclick = (event) => { if (event.target === modal) resolve(null); };
+                                }
+                            });
+                        });
+                        
+                        if (direction) {
+                            // maneuverオブジェクトに移動方向を一時的に格納して宣言
+                            const modifiedManeuver = { ...maneuver, targetArea: direction };
+                            battleLogic.declareManeuver(char, modifiedManeuver, target);
+                        }
+                    }
+                }
                 return;
             }
 
@@ -842,29 +871,22 @@ function getCharacterManeuvers(char) {
     const arbitraryManeuver = data.getManeuverByName('任意');
     if (arbitraryManeuver) allManeuvers.push({ data: arbitraryManeuver, sourceType: 'common' });
     
-    // 1. HTML要素の状態から、現在アクティブなタイミングを判定する
+    // 1. HTML要素のクラスを直接参照し、現在アクティブなタイミングを判定する
     const activeIndicators = new Set();
-    const damageIndicator = document.getElementById('damagePhaseIndicator');
-
-    // ダメージインジケータが点灯しているかを直接確認
-    const isDamageTimingActive = damageIndicator && damageIndicator.classList.contains('active');
-
-    if (isDamageTimingActive) {
+    if (document.getElementById('actionPhaseIndicator')?.classList.contains('active')) {
+        activeIndicators.add('アクション');
+    }
+    if (document.getElementById('rapidPhaseIndicator')?.classList.contains('active')) {
+        activeIndicators.add('ラピッド');
+    }
+    if (document.getElementById('judgePhaseIndicator')?.classList.contains('active')) {
+        activeIndicators.add('ジャッジ');
+    }
+    // ダメージインジケータも同様に直接チェックする
+    if (document.getElementById('damagePhaseIndicator')?.classList.contains('active')) {
         activeIndicators.add('ダメージ');
     }
-    if (document.getElementById('actionPhaseIndicator')?.classList.contains('active')) activeIndicators.add('アクション');
-    if (document.getElementById('rapidPhaseIndicator')?.classList.contains('active')) activeIndicators.add('ラピッド');
-    if (document.getElementById('judgePhaseIndicator')?.classList.contains('active')) activeIndicators.add('ジャッジ');
     
-    // ★★★ 修正はここまで ★★★
-    /*
-    const activeIndicators = new Set();
-    if (document.getElementById('actionPhaseIndicator')?.classList.contains('active')) activeIndicators.add('アクション');
-    if (document.getElementById('rapidPhaseIndicator')?.classList.contains('active')) activeIndicators.add('ラピッド');
-    if (document.getElementById('judgePhaseIndicator')?.classList.contains('active')) activeIndicators.add('ジャッジ');
-    if (document.getElementById('damagePhaseIndicator')?.classList.contains('active')) activeIndicators.add('ダメージ');
-    */
-
     return allManeuvers.map(m => {
         const maneuver = m.data;
         let isUsable = true;

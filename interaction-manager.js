@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "2.3.12"; // パッチバージョンを更新
+export const version = "2.4.14"; // パッチバージョンを更新
 
 import * as data from './data-handler.js'; 
 import * as charManager from './character-manager.js';
@@ -302,17 +302,29 @@ export function handleJudgeItemClick(index) {
 export function handleDamageItemClick(index) {
     const { damageQueue } = battleLogic.getBattleState();
     const damageInfo = damageQueue[index];
+    if (!damageInfo || damageInfo.applied) return;
 
-    if (damageInfo && !damageInfo.applied) {
-        const character = charManager.getCharacterById(damageInfo.target.id);
-        if (!character) return;
+    const character = charManager.getCharacterById(damageInfo.target.id);
+    if (!character) return;
+    
+    // ★★★ 修正箇所 ★★★
+    // パーツ選択モーダルを直接呼び出すのではなく、
+    // 新しいダメージ計算モーダルを呼び出す。
+    showDamageCalculationModal(damageInfo, (finalDamage) => {
+        // ダメージ計算モーダルで「確定」が押された後の処理 (元のロジックをここに移動)
         const onConfirmCallback = () => { battleLogic.applyDamage(index); };
 
-        if (character.category === 'レギオン' || Object.values(character.partsStatus).flat().filter(p => !p.damaged).length <= damageInfo.amount) {
+        if (finalDamage <= 0) {
+            ui.addLog(`＞ ${character.name}への攻撃は完全に防がれ、ダメージはありませんでした。`);
+            ui.removeDamagePrompt(character.id);
+            onConfirmCallback(); // ダメージ0でも処理済みとしてキューから消す
+            return; // これ以降の処理（損傷モーダル表示など）を中断
+        }
+
+        if (character.category === 'レギオン' || Object.values(character.partsStatus).flat().filter(p => !p.damaged).length <= finalDamage) {
             if (character.category === 'レギオン') {
-                ui.addLog(`レギオンへの攻撃！ ${damageInfo.amount}体が失われます。`);
-                // charManager.damagePart(character.id, null, damageInfo.amount);
-                const wasDestroyed = charManager.damagePart(character.id, null, damageInfo.amount);
+                ui.addLog(`レギオンへの攻撃！ ${finalDamage}体が失われます。`);
+                const wasDestroyed = charManager.damagePart(character.id, null, finalDamage);
                 if (wasDestroyed) {
                     ui.showToastNotification(`${character.name}は完全破壊されました`);
                 }
@@ -321,12 +333,17 @@ export function handleDamageItemClick(index) {
                 charManager.updateCharacter(character.id, { isDestroyed: true });
                 ui.showToastNotification(`${character.name}は完全破壊されました`);
             }
+            // データが変更された直後に、カードとマーカーの表示を即時更新する
+            ui.updateSingleCharacterCard(character.id);
+            ui.updateMarkers();
+
             ui.removeDamagePrompt(character.id);
             onConfirmCallback();
         } else {
-            showDamageModal(character, damageInfo.amount, damageInfo.location, onConfirmCallback);
+            // 元のパーツ損傷モーダルには、計算済みの finalDamage を渡す
+            showDamageModal(character, finalDamage, damageInfo.location, onConfirmCallback);
         }
-    }
+    });
 }
 
 function showDamageModal(target, damageAmount, hitLocation, onConfirmCallback) {
@@ -467,3 +484,89 @@ export function handleDamageMarkerClick(characterId) {
         console.warn(`Damage marker clicked for ${characterId}, but no applicable damage found in the queue.`);
     }
 }
+
+/**
+ * ダメージ計算の確認モーダルを表示する
+ * @param {object} damageInfo - battleState.damageQueue から取得したダメージ情報
+ * @param {function(number)} onConfirmCallback - 確定ボタンが押されたときに、最終ダメージ量を引数にして呼び出されるコールバック
+ */
+function showDamageCalculationModal(damageInfo, onConfirmCallback) {
+    const { sourceAction, target, amount, rollValue } = damageInfo;
+    const { performer, sourceManeuver } = sourceAction;
+
+    let bonusDamage = 0;
+    const bonusSources = [];
+    
+    // 1. 大成功による追加ダメージを計算
+    if (rollValue >= 11) {
+        bonusDamage = rollValue - 10;
+        bonusSources.push(`<div>【大成功】+${bonusDamage}</div>`);
+    }
+
+    // 2. 防御側のダメージ軽減効果を探す
+    let defenseValue = 0;
+    const defenseSources = [];
+
+    // 1. アクティブなバフ（今回宣言した【うろこ】など）をチェック
+    if (target.activeBuffs) {
+        target.activeBuffs.forEach(buff => {
+            if (buff.stat === 'defense' && buff.duration === 'until_damage_applied') {
+                defenseValue += buff.value || 0;
+                defenseSources.push(`<div>${target.name}の【${buff.source}】-${buff.value}</div>`);
+            }
+        });
+    }
+
+    // 2. オートタイミングの永続防御効果（ガントレットなど）をチェック
+    const allManeuvers = Object.values(target.partsStatus).flat()
+        .map(p => !p.damaged ? data.getManeuverByName(p.name) : null)
+        .filter(m => m && m.timing === 'オート' && m.effects);
+
+    allManeuvers.forEach(maneuver => {
+        const defenseEffect = maneuver.effects.find(e => e.ref === 'GENERIC_DEFENSE' || e.ref === 'APPLY_PASSIVE_DEFENSE');
+        if (defenseEffect) {
+            const reduction = defenseEffect.params.value || 0;
+            defenseValue += reduction;
+            defenseSources.push(`<div>${target.name}の【${maneuver.name}】-${reduction}</div>`);
+        }
+    });
+
+    // 3. 最終ダメージを計算
+    const finalDamage = Math.max(0, amount + bonusDamage - defenseValue);
+    
+    // 4. モーダル用のHTMLを構築
+    const bodyHtml = `
+        <div class="attack-confirm-summary">
+            ${performer.name}【${sourceManeuver.name}】 → ${target.name}
+        </div>
+        <div class="damage-calc-section">
+            <div class="section-header">《基本ダメージ》</div>
+            <div class="modifier-list"><div>【${sourceManeuver.name}】${amount}</div></div>
+        </div>
+        <div class="damage-calc-section">
+            <div class="section-header">《追加ダメージ》</div>
+            <div class="modifier-list">${bonusSources.length > 0 ? bonusSources.join('') : '<div class="modifier-none">- なし -</div>'}</div>
+        </div>
+        <div class="damage-calc-section">
+            <div class="section-header">《防御》</div>
+            <div class="modifier-list">${defenseSources.length > 0 ? defenseSources.join('') : '<div class="modifier-none">- なし -</div>'}</div>
+        </div>
+    `;
+
+    const footerHtml = `<button id="executeDamageBtn" class="welcome-modal-close-btn">${damageInfo.location}：${finalDamage}点を確定</button>`;
+    
+    // 5. 汎用モーダルで表示
+    ui.showModal({
+        title: 'ダメージ計算',
+        bodyHtml,
+        footerHtml,
+        onRender: (modal, closeFn) => {
+            modal.querySelector('#executeDamageBtn').onclick = () => {
+                onConfirmCallback(finalDamage);
+                closeFn();
+            };
+        }
+    });
+}
+
+

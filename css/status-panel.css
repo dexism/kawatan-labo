@@ -239,7 +239,16 @@ label.action-queue-item.is-checked span {
 /* ★★★ 以下のスタイルを末尾に追加 ★★★ */
 #resetBattleBtn {
     /* ボタンを2列全体に広げる */
-    grid-column: 1 / -1; 
+    display: grid;
+    justify-content: center;
+    justify-items: center;
+    grid-template-columns: 1fr;
+    margin: 10px;
+    padding: 5px 10px;
+
+    font-size: 14px;
+    box-sizing: border-box;
+
 }
 
 /* 危険な操作を示すためのボタンスタイル */
@@ -248,10 +257,11 @@ label.action-queue-item.is-checked span {
     color: white;
     border-color: var(--color-accent-red);
     box-shadow: none;
+    border: 2px solid var(--color-accent-red)
 }
 .phase-btn-danger:hover:not(:disabled) {
-    background-color: var(--color-accent-red);
-    opacity: 0.8;
+    background-color: gold;
+    color: var(--color-accent-red);
 }
 
 /* ★★★ 表示/非表示の切り替えロジック ★★★ */

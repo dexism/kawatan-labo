@@ -101,6 +101,7 @@ body {
     "action"
     "damage"
     "log"
+    "service"
     "settings";
   align-content: start;
   /* border-left: 1px solid var(--color-border); */
@@ -144,6 +145,10 @@ body {
   grid-area: status;
   z-index: 80;
 }
+.grid-area-service-panel {
+  grid-area: service;
+  z-index: 80;
+}
 .grid-area-timing-panel {
   grid-area: timing;
   z-index: 90;
@@ -164,7 +169,7 @@ body {
 .grid-area-log-panel {
     grid-area: log;
     align-self: stretch;
-    height: 100%;
+    height: auto;
     z-index: 90;
 }
 /* ================================
@@ -190,7 +195,8 @@ body {
       "damage"
       "player"
       "timing"
-      "log";
+      "log"
+      "service";
     grid-template-columns: 1fr;
     grid-template-rows: auto;
     align-content: start;
