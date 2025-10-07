@@ -1023,3 +1023,42 @@
     margin-bottom: 5px;
     padding-left: 5px;
 }
+
+/* クリップボードにコピー */
+.sheet-memory p {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0px;
+}
+
+.sheet-memory .memory-text-container {
+    flex-grow: 1;
+}
+
+.copy-description-btn {
+    background: none;
+    border: none;
+    border-radius: 5px;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0;
+    flex-shrink: 0;
+    align-self: left;
+    transition: all 0.2s;
+}
+
+.copy-description-btn:hover {
+    background-color: var(--color-surface-1);
+    color: var(--color-text);
+}
+
+.copy-description-btn:active {
+    transform: scale(0.9);
+}
+
+.sheet-user-memo {
+    color: var(--color-text-muted);
+    font-size: 0.9em;
+}

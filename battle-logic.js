@@ -1,5 +1,3 @@
-// battle-logic.js の全体を置き換える
-
 /**
  * @file battle-logic.js
  * @description 戦闘の進行、状態管理、ルール判定、アクション解決を担当するモジュール。
@@ -8,7 +6,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.16.70"; // パッチバージョンを更新
+export const version = "1.18.73"; // 機能修正とリファクタリングのためバージョン更新
 
 import * as charManager from './character-manager.js';
 import * as ui from './ui-manager.js';
@@ -28,6 +26,7 @@ let battleState = {
     turn: 1,
     count: 0,
     activeActors: [],
+    actorsForThisCount: new Set(), // このカウントで行動する権利を持つキャラクターIDのセット
     phase: 'SETUP',
     actionQueue: [],
     rapidQueue: [],
@@ -38,6 +37,17 @@ let battleState = {
     shouldScrollToCount: false,
 };
 
+/**
+ * 指定されたカウント数で新しいカウント処理を開始する共通関数
+ * @param {number} newCount - 開始する新しいカウント数
+ */
+function startCount(newCount) {
+    battleState.count = newCount;
+    battleState.shouldScrollToCount = true; // グリッドをスクロールさせるフラグを立てる
+    resetAndStartNewCount(); // 行動権利者のリストアップなどを行う
+    determineNextStep(); // 最終的な状態評価とUI更新をトリガーする
+}
+
 // ===================================================================================
 //  公開 API (戦闘開始・状態取得)
 // ===================================================================================
@@ -47,12 +57,13 @@ export function startBattle() {
     battleState.turn = 1;
     
     const allChars = charManager.getCharacters();
-    battleState.count = Math.max(0, ...allChars.map(c => c.actionValue));
+    const initialCount = Math.max(0, ...allChars.map(c => c.actionValue));
 
+    // UIを戦闘モードに切り替えるためにカードを再描画
     ui.renderCharacterCards();
-    battleState.shouldScrollToCount = true;
     
-    determineNextStep();
+    // 共通のカウント開始処理を呼び出す
+    startCount(initialCount);
 }
 
 export function getBattleState() {
@@ -97,12 +108,10 @@ export function declareManeuver(char, maneuver, target = null, judgeTargetDeclar
         charManager.updateCharacter(char.id, { actionValue: char.actionValue - cost });
     }
     // ターン制限のあるマニューバを使用済みとしてマーク
-    // (タイミングに関わらず先に処理)
     if (char.turnLimitedManeuvers.has(maneuver.name)) {
         char.usedManeuvers.add(maneuver.name);
     }
 
-    // ★★★ 宣言を各種キューに追加し、アクションタイミングの場合のみ追加処理を行う ★★★
     switch (maneuver.timing) {
         case 'ラピッド':
             battleState.rapidQueue.push(declaration);
@@ -115,29 +124,21 @@ export function declareManeuver(char, maneuver, target = null, judgeTargetDeclar
             break;
         case 'ダメージ':
             ui.addLog(`◆[ダメージ] ${char.name}が【${maneuver.name}】を宣言。`);
-            
-            // 防御効果を持つマニューバかチェック
             const defenseEffect = maneuver.effects?.find(e => e.ref === 'GENERIC_DEFENSE');
             if (defenseEffect) {
                 const defenseValue = defenseEffect.params.value || 0;
-                // ダメージ適用までの一時的なバフとしてキャラクターに追加
                 charManager.addBuff(char.id, {
                     source: maneuver.name,
                     stat: 'defense',
                     value: defenseValue,
-                    duration: 'until_damage_applied' // このダメージ専用の期間
+                    duration: 'until_damage_applied'
                 });
             }
             break;
         case 'アクション':
-        default: // 'アクション' または 不明なタイミングはこちら
-            // 1. hasActedThisCountフラグを立てる
+        default:
             charManager.updateCharacter(char.id, { hasActedThisCount: true });
-
-            // 2. activeActorsリストから宣言者を除外する
             battleState.activeActors = battleState.activeActors.filter(actor => actor.id !== char.id);
-            
-            // 3. アクションキューに追加
             battleState.actionQueue.push(declaration);
             ui.addLog(`◆[アクション] ${char.name}が【${maneuver.name}】を宣言。`);
             break;
@@ -167,23 +168,22 @@ export function toggleActionCheckedState(index) {
 // ===================================================================================
 
 export function determineNextStep() {
-    // isStarted フラグに基づいて処理を分岐
     if (!battleState.isStarted) {
-        // 【戦闘準備中】
         battleState.phase = 'SETUP';
         battleState.activeActors = [];
         ui.updateBattleStatusUI();
         return;
     }
+    
+    // 1. 行動権利者リストの中から、「まだアクション宣言をしていない」かつ「行動値が1以上」のキャラクターを抽出する
+    const potentialActorIds = Array.from(battleState.actorsForThisCount).filter(id => {
+        const char = charManager.getCharacterById(id);
+        return char && !char.hasActedThisCount && char.actionValue > 0;
+    });
 
-    // 【戦闘中】
-    // 1. 行動権を持つキャラクターを特定
-    const potentialActors = charManager.getCharacters().filter(c =>
-        c.actionValue >= battleState.count &&
-        !c.hasActedThisCount &&
-        !c.isDestroyed &&
-        !c.hasWithdrawn
-    );
+    const potentialActors = potentialActorIds.map(id => charManager.getCharacterById(id));
+    
+    // 2. 行動権を持つキャラクターを特定
     const actingEnemies = potentialActors.filter(c => c.type === 'enemy');
     
     if (actingEnemies.length > 0) {
@@ -192,17 +192,17 @@ export function determineNextStep() {
         battleState.activeActors = potentialActors.filter(c => c.type === 'pc');
     }
 
-    // 2. フェーズを決定
+    // 3. フェーズを決定
     const hasAnyPotentialActors = battleState.activeActors.length > 0;
-    const hasUncheckedRapids = battleState.rapidQueue.some(a => !a.checked);
-    const hasUncheckedActions = battleState.actionQueue.some(a => !a.checked);
+    const hasUnresolvedRapids = battleState.rapidQueue.some(r => !r.checked);
+    const hasUnresolvedActions = battleState.actionQueue.some(a => !a.checked);
     const hasPendingDamage = battleState.damageQueue.some(d => !d.applied);
     
     if (hasAnyPotentialActors) {
         battleState.phase = 'ACTION_DECLARATION';
-    } else if (hasUncheckedRapids) {
+    } else if (hasUnresolvedRapids) {
         battleState.phase = 'RAPID_RESOLUTION';
-    } else if (hasUncheckedActions) { // judgeキューは考慮しない方がシンプル
+    } else if (hasUnresolvedActions) {
         battleState.phase = 'ACTION_RESOLUTION';
     } else if (hasPendingDamage) {
         battleState.phase = 'DAMAGE_RESOLUTION';
@@ -215,7 +215,6 @@ export function determineNextStep() {
         }
     }
 
-    // 3. UIを更新
     ui.updateBattleStatusUI();
 }
 
@@ -266,10 +265,8 @@ export function advanceCount() {
         .filter(val => val < battleState.count);
 
     if (nextPossibleActionValues.length > 0) {
-        battleState.count = Math.max(...nextPossibleActionValues);
-        battleState.shouldScrollToCount = true;
-        resetAndStartNewCount();
-        determineNextStep();
+        const newCount = Math.max(...nextPossibleActionValues);
+        startCount(newCount);
     } else {
         startMadnessPhase();
     }
@@ -282,12 +279,13 @@ function resetAndStartNewCount() {
     battleState.judgeQueue = [];
     battleState.damageQueue = [];
 
-    // 1. カウント開始時点で行動権を持つキャラクターをリストアップして保持する
     const allCharacters = charManager.getCharacters().filter(c => !c.isDestroyed && !c.hasWithdrawn);
-    battleState.activeActors = allCharacters.filter(c => c.actionValue >= battleState.count);
+    battleState.actorsForThisCount = new Set(
+        allCharacters
+            .filter(c => c.actionValue >= battleState.count)
+            .map(c => c.id)
+    );
     
-    // 2. hasActedThisCountフラグをリセット
-    //    (activeActorsの判定とは独立させる)
     allCharacters.forEach(c => c.hasActedThisCount = false);
 
     ui.updateAllQueuesUI();
@@ -315,17 +313,25 @@ export async function resolveRapidByIndex(index) {
     determineNextStep(); // 状態を再評価
 }
 
-export async function resolveActionByIndex(index, totalBonus = 0) { // デフォルト値を設定
+export async function resolveActionByIndex(index, totalBonus = 0) {
     const declaration = battleState.actionQueue[index];
     if (!declaration || declaration.checked) return;
     
     const { targets } = checkTargetAvailability(declaration.performer, declaration.sourceManeuver);
     if (declaration.target && !targets.some(t => t.id === declaration.target.id)) {
-        ui.addLog(`＞ 解決失敗: ${declaration.target.name} は射程外です。`);
+        ui.addLog(`解決失敗: ${declaration.target.name} は射程外です。`);
         declaration.checked = true;
-        determineNextStep();
+        // ★★★ 修正箇所 ★★★
+        // 失敗した場合でも、次のステップに進む前に移動キューを解決する必要があるかチェックする
+        const allActionsChecked = battleState.actionQueue.every(d => d.checked);
+        if (allActionsChecked) {
+            resolveQueuedMoves();
+        } else {
+            determineNextStep();
+        }
         return;
     }
+    
     await resolveSingleAction(declaration, totalBonus);
     declaration.checked = true;
 
@@ -375,19 +381,20 @@ export function startMadnessPhase() {
 export function proceedToNextTurn() {
     battleState.turn++;
     
-    // ターン終了時に 'end_of_turn' のバフをクリアする
     charManager.getCharacters().forEach(char => {
-        char.activeBuffs = char.activeBuffs.filter(buff => buff.duration !== 'end_of_turn');
+        if (char.activeBuffs) {
+            char.activeBuffs = char.activeBuffs.filter(buff => buff.duration !== 'end_of_turn');
+        }
     });
 
     charManager.startNewTurn();
-    const allChars = charManager.getCharacters();
-    const maxActionValue = Math.max(0, ...allChars.map(c => c.actionValue));
-    battleState.count = maxActionValue > 0 ? maxActionValue : 0;
-    battleState.shouldScrollToCount = true;
+    const allChars = charManager.getCharacters().filter(c => !c.isDestroyed && !c.hasWithdrawn);
+    
+    const maxActionValue = allChars.length > 0 ? Math.max(0, ...allChars.map(c => c.actionValue)) : 0;
+    
     ui.renderCharacterCards();
-    resetAndStartNewCount();
-    determineNextStep();
+
+    startCount(maxActionValue);
 }
 
 export function applyDamage(index) {
@@ -712,16 +719,10 @@ export function restoreBattleState(turn, characters) {
     battleState.isStarted = true;
     battleState.turn = turn;
     
-    // 復元されたキャラクターの行動値から現在のカウントを決定
-    battleState.count = Math.max(0, ...characters.map(c => c.actionValue));
-    battleState.shouldScrollToCount = true;
-
-    // UIを戦闘モードに移行させる
     ui.renderCharacterCards(); 
     
-    // カウントの初期化と次のステップの決定
-    resetAndStartNewCount();
-    determineNextStep(); 
+    const newCount = Math.max(0, ...characters.map(c => c.actionValue));
+    startCount(newCount);
 }
 
 /**

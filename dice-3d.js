@@ -14,21 +14,21 @@ const settings = {
     gravity:           -1.00,   // 重力加速度 (m/s²) -9.82
     dice: {
         radius:         0.01,   // ダイスの外接球半径 (m)
-        mass:           0.005,  // 質量 (kg)
+        mass:           0.01,   // 質量 (kg)
         angularDamping: 0.1,    // 回転の減衰 (0-1)
         initialPosition: { xPercent: 80, yPercent: 80 }, // 右下(%)
-        initialHeight:  0.1,    // 投擲する高さ (m)
+        initialHeight:  0.05,    // 投擲する高さ (m)
         throw: {
-            speed:           { min: 0.1, max: 0.2 }, // 初速 [m/s]
-            azimuth:         { min: 320, max: 350 }, // 水平方向 [deg]
-            elevation:       { min: -10, max:  40 }, // 射出角度 [deg]
-            angularVelocity: { min:   5, max:  10 }  // [rad/s]
+            speed:           { min: 0.3, max: 0.4 }, // 初速 [m/s]
+            azimuth:         { min: 280, max: 350 }, // 水平方向 [deg]
+            elevation:       { min: -10, max:   0 }, // 射出角度 [deg]
+            angularVelocity: { min:  -5, max:   5 }  // [rad/s]
         }
     },
     physics: {
         frictionGround:    0.1, // 床の摩擦
         frictionWall:      0.1, // 壁の摩擦
-        restitutionGround: 0.3, // 床の反発係数
+        restitutionGround: 0.5, // 床の反発係数
         restitutionWall:   0.9  // 壁の反発係数
     },
     camera: {
@@ -44,7 +44,7 @@ const settings = {
     },
     timeouts: {
         stopCheck:    100,      // 停止チェックの間隔 (ms)
-        forceResult: 3000,      // 強制終了までの時間 (ms)
+        forceResult: 3500,      // 強制終了までの時間 (ms)
         hide:        1000       // 結果表示後に非表示になるまでの時間 (ms)
     }
 };
@@ -61,6 +61,7 @@ let forceResultTimeout;
 let containerElement;
 let viewportSize;
 let isDiceReady = false;
+let boundaries = { x: 0, z: 0 };
 
 // ★★★ 複数ダイス管理用の変数 ★★★
 const MAX_DICE_COUNT = 5; // 同時に振れるダイスの最大数
@@ -499,60 +500,6 @@ function createWalls() {
     trayMeshes.length = 0;
 
     if (!viewportSize) return;
-
-    // 1. 表示用の床（ダイストレイ）
-    const trayWidth = viewportSize.width * settings.tray.sizeRatio;
-    const trayHeight = viewportSize.height * settings.tray.sizeRatio;
-/*
-    // 2. 表示用の床メッシュを作成 (変数名を統一)
-    const trayGeometry = new THREE.PlaneGeometry(trayWidth, trayHeight);
-    const trayMaterial = new THREE.MeshStandardMaterial({
-        color: 0x333333,
-        transparent: true,
-        opacity: 0.3
-    });
-
-    const trayMesh = new THREE.Mesh(trayGeometry, trayMaterial);
-    trayMesh.rotation.x = -Math.PI / 2;
-    trayMesh.position.y = 0.001;
-    scene.add(trayMesh);
-    trayMeshes.push(trayMesh);
-*/
-    // 3. 物理的な壁のパラメータを定義
-    const wallHeight = settings.tray.wallHeight;
-    const wallThickness = settings.tray.wallThickness;
-
-    // 4. CANNON.Boxに渡す「半分の長さ」を計算 (変数名を統一)
-    const wallShapeX = new CANNON.Box(new CANNON.Vec3(trayWidth / 2, wallHeight / 2, wallThickness / 2));
-    const wallShapeZ = new CANNON.Box(new CANNON.Vec3(wallThickness / 2, wallHeight / 2, trayHeight / 2)); // trayDepth を trayHeight に変更
-    
-    // 5. 物理的な壁を4つ作成 (変数名を統一)
-    /*
-    const wallPositions = [
-        new CANNON.Vec3(0, 0, trayHeight / 2),  // ★ Y座標を0に変更
-        new CANNON.Vec3(0, 0, -trayHeight / 2), // ★ Y座標を0に変更
-        new CANNON.Vec3(trayWidth / 2, 0, 0),  // ★ Y座標を0に変更
-        new CANNON.Vec3(-trayWidth / 2, 0, 0)   // ★ Y座標を0に変更
-    ];
-    */
-    const wallPositions = [
-        new CANNON.Vec3(0, wallHeight / 2, trayHeight / 2),  // ★ Y座標を高さの半分に変更
-        new CANNON.Vec3(0, wallHeight / 2, -trayHeight / 2), // ★ Y座標を高さの半分に変更
-        new CANNON.Vec3(trayWidth / 2, wallHeight / 2, 0),  // ★ Y座標を高さの半分に変更
-        new CANNON.Vec3(-trayWidth / 2, wallHeight / 2, 0)   // ★ Y座標を高さの半分に変更
-    ];
-
-    const wallBodies = [
-        new CANNON.Body({ mass: 0, shape: wallShapeX, position: wallPositions[0], material: wallMaterial }),
-        new CANNON.Body({ mass: 0, shape: wallShapeX, position: wallPositions[1], material: wallMaterial }),
-        new CANNON.Body({ mass: 0, shape: wallShapeZ, position: wallPositions[2], material: wallMaterial }),
-        new CANNON.Body({ mass: 0, shape: wallShapeZ, position: wallPositions[3], material: wallMaterial }),
-    ];
-    
-    wallBodies.forEach(body => {
-        world.addBody(body);
-        walls.push(body);
-    });
 }
 
 function onWindowResize() {
@@ -562,8 +509,6 @@ function onWindowResize() {
     const height = containerElement.clientHeight;
 
     if (width === 0 || height === 0) return;
-
-    // ★★★ 画面の物理スケールに基づいてFOVを動的に計算する ★★★
 
     // 1. 画面幅に応じて、適用するスケールを決定
     const scaleFactor = (width <= settings.camera.breakpoint_px)
@@ -587,6 +532,10 @@ function onWindowResize() {
     const vpWidth = vpHeight * aspectRatio;
     viewportSize = { width: vpWidth, height: vpHeight };
 
+    // 跳ね返りの境界線を計算して保持する
+    boundaries.x = (viewportSize.width * settings.tray.sizeRatio) / 2;
+    boundaries.z = (viewportSize.height * settings.tray.sizeRatio) / 2;
+
     // 6. 壁を再生成し、カメラのパラメータを更新
     createWalls();
     camera.aspect = aspectRatio;
@@ -609,8 +558,41 @@ function animate() {
     // ★★★ アクティブなダイスすべてを更新 ★★★
     activeDice.forEach(die => {
         die.model.position.copy(die.body.position);
-        // die.model.position.copy(die.body.position).divideScalar(100);
         die.model.quaternion.copy(die.body.quaternion);
+
+        const pos = die.body.position;
+        const vel = die.body.velocity;
+        const angVel = die.body.angularVelocity;
+
+        // X軸（左右）の境界チェックと反転
+        if (pos.x < -boundaries.x) {
+            pos.x = -boundaries.x; // めり込み防止
+            if (vel.x < 0) {
+                vel.x *= -1; // 速度を反転
+                angVel.z *= -1; // Z軸周りの回転を反転
+            }
+        } else if (pos.x > boundaries.x) {
+            pos.x = boundaries.x;
+            if (vel.x > 0) {
+                vel.x *= -1;
+                angVel.z *= -1;
+            }
+        }
+
+        // Z軸（前後）の境界チェックと反転
+        if (pos.z < -boundaries.z) {
+            pos.z = -boundaries.z;
+            if (vel.z < 0) {
+                vel.z *= -1;
+                angVel.x *= -1; // X軸周りの回転を反転
+            }
+        } else if (pos.z > boundaries.z) {
+            pos.z = boundaries.z;
+            if (vel.z > 0) {
+                vel.z *= -1;
+                angVel.x *= -1;
+            }
+        }
     });
     
     if (renderer && scene && camera) {

@@ -61,7 +61,7 @@ export function buildDiceMenu() {
                 // 標準の prompt() の代わりに、汎用モーダル showModal() を使用する
                 const bodyHtml = `
                     <p style="text-align: center; margin-bottom: 15px;">ダイスコマンドを入力してください。</p>
-                    <input type="text" id="diceCommandInput" value="3d6" 
+                    <input type="text" id="diceCommandInput" value="5NC" 
                            class="modal-input-text" autofocus
                            inputmode="latin" style="ime-mode: disabled;">
                 `;

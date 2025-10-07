@@ -99,9 +99,10 @@ function initializeAppUI() {
 function showWelcomeAndUpdates() {
     return new Promise(resolve => {
         const LATEST_UPDATE_NOTES = `
-        <div class="modal-header modal-header-sub">📢主な更新内容:7.10.6.23</div>
+        <div class="modal-header modal-header-sub">📢主な更新内容:7.10.7.17</div>
         <div class="modal-body welcome-modal-body">
-            <p>◆ <strong>防御・妨害・追加ダメージ</strong>を実装しました。</p>
+            <p>◆ <strong>【✏️画像の変更】※透過png対応</strong>：「🪪人形設計図」において<strong>画像の変更</strong>機能を追加しました。
+            <p>◆ <strong>防御・妨害・追加ダメージ・転倒</strong>を実装しました。</p>
             <p>◆ <strong>状態の自動保存・復元機能</strong>を実装しました。（自動保存ON/OFF対応）</p>
             <p>◆ <strong>データの誤記を訂正</strong>しました。
             <p>◆ <strong>【保管所から読込み】【保管所で見る】【保管所から再読込み】</strong>：キャラクターシート保管所との連携を強化しました。
@@ -111,7 +112,6 @@ function showWelcomeAndUpdates() {
             <p>◆ <strong>支援</strong>がダイスロールに適用できるようになりました。
             <p>◆ ユーザーが<strong>画像を追加</strong>できるようになりました。
             <p>◆ <strong>【新着/IDリスト】</strong>：キャラクターシート保管所の<strong>キャラクターリスト表示</strong>機能を追加しました。
-            <p>◆ <strong>【✏️画像の変更】</strong>：「🪪人形設計図」において<strong>画像の変更</strong>機能を追加しました。
             <p>◆ <strong>マニューバリスト</strong>を更新し、<strong>表示機能を拡張</strong>しました。
             <p>◆ その他、軽微なUI調整と不具合の修正を行いました。
         </div>

@@ -497,7 +497,7 @@ export function updateCharacterHighlights(activeActors) {
 
 export function updatePhaseUI(state) {
     if (!state) return;
-    const { phase, actionQueue, activeActors, count } = state; // ★ count を追加
+    const { phase, activeActors } = state;
 
     const indicators = {
         action: document.getElementById('actionPhaseIndicator'),
@@ -506,43 +506,16 @@ export function updatePhaseUI(state) {
         damage: document.getElementById('damagePhaseIndicator'),
     };
 
-    let showAction = false;
-    let showRapid = false;
-    let showJudge = false;
-    let showDamage = false;
-    
-    // 【アクション】行動可能なアクターがいる場合に点灯
-    if (activeActors.length > 0) {
-        showAction = true;
-    }
+    // 【アクション】行動可能なアクターがいる場合にのみ点灯
+    const showAction = activeActors.length > 0;
 
-    // 【ラピッド】未チェックのラピッド宣言があるか、またはアクション宣言に対して割り込み可能な場合に点灯
-    if (actionQueue.length > 0) {
-        showRapid = true;
-        showJudge = true;
-    }
+    // 【ラピッド/ジャッジ】アクションタイミングが終了した後に点灯
+    const showRapid = !showAction;
+    const showJudge = !showAction;
 
-    // 【ジャッジ】未チェックのジャッジ宣言があるか、またはアクション宣言に対して割り込み可能な場合に点灯
-    if (phase === 'JUDGE_RESOLUTION' || phase === 'ACTION_RESOLUTION') {
-        showJudge = true;
-    }
+    // 【ダメージ】未適用のダメージ処理がある場合に点灯 (これはルール通り)
+    const showDamage = phase === 'DAMAGE_RESOLUTION' || (state.actionQueue.every(a => a.checked) && state.damageQueue.some(d => !d.applied));
 
-    // 【ダメージ】未適用のダメージ処理がある場合に点灯
-    if (phase === 'DAMAGE_RESOLUTION') {
-        showDamage = true;
-    }
-
-    // --- アクションが全てチェック済みの場合の制御 ---
-    const allActionsChecked = actionQueue.length > 0 && actionQueue.every(a => a.checked);
-    if (allActionsChecked) {
-        // アクション、ラピッド、ジャッジを強制的に消灯
-        showAction = false;
-        showRapid = false;
-        showJudge = false;
-        
-    }
-
-    // 判定結果をUIに反映
     indicators.action.classList.toggle('active', showAction);
     indicators.rapid.classList.toggle('active', showRapid);
     indicators.judge.classList.toggle('active', showJudge);
@@ -594,11 +567,11 @@ function updateQueueUI(elementId, queue, headerText) {
     const header = container ? container.querySelector('.accordion-header') : null;
     if (!header) return;
     const state = battleLogic.getBattleState();
-    const isRapidActive = state.phase === 'RAPID_RESOLUTION';
-    // const isJudgeActive = state.phase === 'JUDGE_RESOLUTION';
-    const isActionActive = state.phase === 'ACTION_RESOLUTION';
+    
+    const isActionTimingActive = state.activeActors.length > 0;
     const hasUncheckedRapids = state.rapidQueue.some(r => !r.checked);
     const hasUncheckedJudges = state.judgeQueue.some(j => !j.checked);
+
     let textSpan = header.querySelector('span');
     if (!textSpan) {
         const originalText = header.textContent;
@@ -616,14 +589,15 @@ function updateQueueUI(elementId, queue, headerText) {
         queue.forEach((declaration, index) => {
             const labelEl = document.createElement('label');
             labelEl.className = 'action-queue-item';
+            
             let isDisabled = false;
+            // 新しい有効化条件を適用
             if (elementId === 'rapidDeclarationList') {
-                isDisabled = !isRapidActive;
+                isDisabled = isActionTimingActive;
             } else if (elementId === 'judgeDeclarationList') {
-                // ★★★ ここを修正 ★★★
-                isDisabled = hasUncheckedRapids;
+                isDisabled = isActionTimingActive || hasUncheckedRapids;
             } else if (elementId === 'actionDeclarationList') {
-                isDisabled = !isActionActive || hasUncheckedRapids || hasUncheckedJudges;
+                isDisabled = isActionTimingActive || hasUncheckedRapids || hasUncheckedJudges;
             }
 
             if (declaration.checked) isDisabled = true;
@@ -633,11 +607,8 @@ function updateQueueUI(elementId, queue, headerText) {
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.checked = declaration.checked;
-
-            // チェックボックスはただの飾りとし、クリックイベントは labelEl に設定する
             checkbox.disabled = true;
 
-            // is-disabled クラスが付いていない（＝クリック可能）な場合のみ、クリックイベントを設定
             if (!isDisabled) {
                 if (elementId === 'rapidDeclarationList') {
                     labelEl.onclick = () => interactionManager.handleRapidItemClick(index);

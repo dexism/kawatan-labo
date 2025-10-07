@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.10.42"; // バージョンを更新
+export const version = "1.10.45"; // バージョンを更新
 
 import * as data from './data-handler.js';
 import * as charManager from './character-manager.js';
@@ -468,7 +468,7 @@ export function showCharacterSheetModal(char) {
         <div class="sheet-header">
             ${char.sheetId ? `
             <div class="sheet-charasheet-link">
-                <button class="sheet-link-btn" data-sheet-id="${char.sheetId}">保管所で見る ID: ${char.sheetId}</button>
+                <button class="sheet-link-btn" data-sheet-id="${char.sheetId}">保管所で開く ID: ${char.sheetId}</button>
                 <button class="sheet-reload-btn" data-sheet-id="${char.sheetId}">保管所から再読込み</button>
             </div>
             ` : ''}
@@ -544,14 +544,41 @@ export function showCharacterSheetModal(char) {
         ${isDoll ? `
         <div class="sheet-section sheet-hint">
             <h4>暗示</h4>
-            ${char.hint && char.hint.name ? `<p><b>【${char.hint.key}:${char.hint.name}】</b><br>${char.hint.description}</p>` : '<p>（暗示は設定されていません）</p>'}
+            ${char.hint && char.hint.name 
+                ? `<p>${char.hint.key || ''}<b>【${char.hint.name}】</b><br>${char.hint.description || '（詳細情報なし）'}</p>` 
+                : '<p>（暗示は設定されていません）</p>'}
         </div>
         <div class="sheet-section sheet-memory">
             <h4>記憶のカケラ</h4>
-            ${char.memories && char.memories.length > 0
-                ? char.memories.map(mem => `<p><b>【${mem.name}】</b><br>${mem.memo}</p>`).join('')
-                : '<p>（記憶のカケラはありません）</p>'
-            }
+            ${(() => {
+                if (!char.memories || char.memories.length === 0) {
+                    return '<p>（記憶のカケラはありません）</p>';
+                }
+                const allMemories = data.getMemoryFragmentData();
+                return char.memories.map(mem => {
+                    const memoryMasterEntry = Object.entries(allMemories).find(([key, value]) => value.name === mem.name);
+                    
+                    if (memoryMasterEntry) {
+                        const [key, masterData] = memoryMasterEntry;
+                        const description = masterData.description;
+                        const userMemoHtml = mem.memo ? `<br><span class="sheet-user-memo"><i>${mem.memo}</i></span>` : '';
+                        
+                        // 説明文全体をコピーするためのテキストを生成
+                        const textToCopy = `${key}【${mem.name}】\n${description}`;
+                        
+                        return `
+                            <p>
+                                <span class="memory-text-container">
+                                    ${key}<b>【${mem.name}】</b><br>${description}${userMemoHtml}
+                                </span>
+                                <button class="copy-description-btn" data-copy-text="${encodeURIComponent(textToCopy)}">📋</button>
+                            </p>`;
+                    } else {
+                        const userMemoHtml = mem.memo ? `<br><span class="sheet-user-memo"><i>${mem.memo}</i></span>` : '';
+                        return `<p><span class="memory-text-container"><b>【${mem.name}】</b> (カスタム)${userMemoHtml}</span></p>`;
+                    }
+                }).join('');
+            })()}
         </div>
         <div class="sheet-section sheet-regrets">
             <h4>未練</h4>
@@ -627,7 +654,6 @@ export function showCharacterSheetModal(char) {
             modal.querySelector('.modal-content').classList.add('sheet-modal-content');
             modal.querySelector('.modal-body').classList.add('sheet-modal-body');
 
-            // ★★★ ここからが修正箇所 ★★★
             const customCloseFn = () => {
                 stateManager.autoSave(); // モーダルを閉じる直前に保存
                 closeFn(); // 元の閉じる関数を実行
@@ -642,7 +668,32 @@ export function showCharacterSheetModal(char) {
                     customCloseFn();
                 }
             };
-            // ★★★ 修正はここまで ★★★
+
+            const linkBtn = modal.querySelector('.sheet-link-btn');
+            if (linkBtn) {
+                linkBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    const sheetId = linkBtn.dataset.sheetId;
+                    if (sheetId) {
+                        const url = `https://charasheet.vampire-blood.net/${sheetId}`;
+                        // 新しいタブで安全にページを開く
+                        window.open(url, '_blank', 'noopener,noreferrer');
+                    }
+                };
+            }
+
+            modal.querySelectorAll('.copy-description-btn').forEach(button => {
+                button.onclick = (e) => {
+                    e.stopPropagation();
+                    const textToCopy = decodeURIComponent(button.dataset.copyText);
+                    navigator.clipboard.writeText(textToCopy).then(() => {
+                        ui.showToastNotification('コピーしました！', 1500);
+                    }).catch(err => {
+                        console.error('コピーに失敗しました', err);
+                        ui.showToastNotification('コピーに失敗しました', 1500);
+                    });
+                };
+            });
 
             const editImageBtn = modal.querySelector('.sheet-edit-image-btn');
             if (editImageBtn) {
@@ -891,20 +942,19 @@ function getCharacterManeuvers(char) {
         const maneuver = m.data;
         let isUsable = true;
 
-        // 1. パーツ損傷、使用済み、タイミングのチェック (変更なし)
+        // 1.【最優先ルール】行動値が0以下の場合、オート以外のマニューバは使用不可
+        if (char.actionValue <= 0 && maneuver.timing !== 'オート') {
+            isUsable = false;
+        }
+
+        // 2. パーツ損傷、使用済み、タイミングのチェック
         if (m.isDamaged) isUsable = false;
         if (char.usedManeuvers.has(maneuver.name)) isUsable = false;
         if (maneuver.timing !== 'オート' && !activeIndicators.has(maneuver.timing)) {
             isUsable = false;
         }
-
-        // 2. コスト支払いの可否チェックをルールに合わせて変更
-        // 「すでに行動値が0以下の場合」は、オート以外のマニューバは使用不可
-        if (char.actionValue <= 0 && maneuver.timing !== 'オート') {
-            isUsable = false;
-        }
         
-        // 3. アクションタイミングとターゲットのチェック (変更なし)
+        // 3. アクションタイミングとターゲットのチェック
         if (maneuver.timing === 'アクション' && isUsable) {
             const isActiveActor = battleState.activeActors.some(a => a.id === char.id);
             if (!isActiveActor) isUsable = false;
@@ -1215,13 +1265,11 @@ function showImageSelectionModal(characterToUpdate, closeDetailsModalFn) {
                     let width = image.width;
                     let height = image.height;
 
-                    // 画像が既に最大サイズより小さい場合は、リサイズしない
                     if (width <= maxSize && height <= maxSize) {
                         resolve(image.src);
                         return;
                     }
 
-                    // アスペクト比を維持して新しいサイズを計算
                     if (width > height) {
                         if (width > maxSize) {
                             height *= maxSize / width;
@@ -1239,12 +1287,18 @@ function showImageSelectionModal(characterToUpdate, closeDetailsModalFn) {
                     canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     
-                    // canvasに縮小して描画
                     ctx.drawImage(image, 0, 0, width, height);
                     
-                    // canvasからJPEG形式のデータURLとして画像を取り出す (品質80%)
-                    // PNGよりJPEGの方がファイルサイズを小さくしやすいため
-                    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                    // ★★★ ここからが修正箇所です ★★★
+                    let dataUrl;
+                    // 元のファイルタイプがPNGまたはGIFの場合、透過を維持するためにPNGとして出力
+                    if (file.type === 'image/png' || file.type === 'image/gif') {
+                        dataUrl = canvas.toDataURL('image/png');
+                    } else {
+                        // それ以外の画像形式(JPEGなど)は、圧縮率の高いJPEGとして出力
+                        dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                    }
+                    // ★★★ 修正はここまでです ★★★
                     
                     resolve(dataUrl);
                 };
