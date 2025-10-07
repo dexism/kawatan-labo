@@ -6,7 +6,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.7.5";
+export const version = "1.8.6";
 
 // --- モジュールのインポート ---
 import * as data from './data-handler.js';
@@ -135,22 +135,34 @@ function mergeCharactersOnBoard() {
 export function initializeManeuverLimits(character) {
     character.usedManeuvers = new Set();
     character.turnLimitedManeuvers = new Set();
+    
     const allManeuverNames = [
         ...(character.skills || []),
         ...Object.values(character.partsStatus || {}).flat().map(p => p.name)
     ];
+
     allManeuverNames.forEach(name => {
         const maneuver = data.getManeuverByName(name);
         if (!maneuver) return;
+
         let hasTurnLimit = false;
-        if (maneuver.hasOwnProperty('usageLimit')) {
-            hasTurnLimit = maneuver.usageLimit;
+        
+        // 1. まず、マニューバの effect に "limit_per_turn": "none" が含まれているかチェック
+        const hasNoLimitEffect = maneuver.effects?.some(effect => 
+            effect.params && effect.params.limit_per_turn === 'none'
+        );
+
+        if (hasNoLimitEffect) {
+            // "limit_per_turn": "none" があれば、ターン制限はない
+            hasTurnLimit = false;
         } else {
+            // 2. 上記で見つからない場合、従来のタイミングに基づくルールを適用
             const limitedTimings = ['ジャッジ', 'ダメージ', 'ラピッド'];
             if (limitedTimings.includes(maneuver.timing)) {
                 hasTurnLimit = true;
             }
         }
+        
         if (hasTurnLimit) {
             character.turnLimitedManeuvers.add(name);
         }

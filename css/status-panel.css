@@ -14,7 +14,9 @@
     align-items: baseline;
 }
 h2.section-title {
-    padding-left: 5px;
+    padding: 0 5px;
+    margin: 3px;
+    width: auto;
 }
 /* --- バトルステータス --- */
 .status-grid {

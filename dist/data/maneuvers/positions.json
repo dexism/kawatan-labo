@@ -114,7 +114,12 @@
     "description_raw": "自身が与えたダメージに対してのみ使用可。コストとして、あなたは任意の未練に狂気点1点を加える。与ダメージ+2",
     "flavor_text": "お前たちのせいで。許さない。許さない。絶対に許さない。バラバラにしてやる。粉々にしてやる。",
     "source": { "book": "基本ルールブック", "page": 67 }, 
-    "effects": [{ "ref": "INCREASE_DEALT_DAMAGE", "params": { "value": 2 } }]
+    "effects": [{
+      "ref": "INCREASE_DAMAGE_DEALT",
+      "params": {
+        "value": 2
+      }
+    }]
   },
   "HL-05": {
     "name": "奈落の引力", "category": "移動", 

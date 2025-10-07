@@ -108,7 +108,15 @@
     "description_raw": "白兵攻撃マニューバの攻撃判定において、出目+1してもよい。",
     "flavor_text": "振りかざし、当てる。あなたの腕と目と脳はそのために調整され、磨かれた。死と破壊をもたらすために。",
     "source": { "book": "基本ルールブック", "page": 73 }, 
-    "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "attackCheckBonus", "value": 1, "duration": "permanent", "condition": "白兵攻撃" } }]
+    "effects": [{
+      "ref": "APPLY_CONDITIONAL_BUFF",
+      "params": {
+        "trigger": "attacking_with_melee",
+        "buffs": [
+          { "stat": "attackCheckBonus", "value": 1 }
+        ]
+      }
+    }]
   },
   "TN-02": {
     "name": "災禍", "category": "攻撃", 
@@ -128,7 +136,16 @@
     "description_raw": "同カウント内に他の姉妹が攻撃対象とした敵に攻撃判定する際、自身の攻撃判定+1、与ダメージ+1",
     "flavor_text": "タイミングを見定め、同時攻撃で最大の効果を上げる。呼吸の止まった体でも、息を合わせることに意味があるのだ。",
     "source": { "book": "基本ルールブック", "page": 73 }, 
-    "effects": [{ "ref": "APPLY_CONDITIONAL_BUFF", "params": { "trigger": "attacking_same_target_as_ally_this_count", "buffs": [{ "stat": "attackCheckBonus", "value": 1 }, { "stat": "damageBonus", "value": 1 }] } }]
+    "effects": [{
+      "ref": "APPLY_CONDITIONAL_BUFF",
+      "params": {
+        "trigger": "attacking_same_target_as_ally_this_count",
+        "buffs": [
+          { "stat": "attackCheckBonus", "value": 1 },
+          { "stat": "damageBonus", "value": 1 }
+        ]
+      }
+    }]
   },
   "TN-04": {
     "name": "刹那", "category": "防御", 

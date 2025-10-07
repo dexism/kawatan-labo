@@ -42,7 +42,13 @@
     "description_raw": "自身がダメージを与えた際のみ使用可。コストとして、あなたは任意の基本パーツを1つ損傷する。白兵・肉弾ダメージ+1(重複不可)。1ターンに何度でも使用してよい。",
     "flavor_text": "体の後部に突いたジェット噴射口。格闘戦の威力を格段に高め、自らの肉体を崩壊させつつ高い威力を発揮する。",
     "source": { "book": "基本ルールブック", "page": 89 }, 
-    "effects": [{ "ref": "MOVE_ON_DEALING_DAMAGE", "params": { "cost": "damage_this_part", "target": "all_characters", "distance": 1 } }]
+    "effects": [{
+      "ref": "INCREASE_DAMAGE_DEALT",
+      "params": {
+        "value": 1,
+        "condition": ["肉弾攻撃", "白兵攻撃"]
+      }
+    }]
   },
   "R1-05": {
     "name": "シザーハンズ", "category": "攻撃", "allowedLocations": "腕",
@@ -207,7 +213,13 @@
     "description_raw": "自身がダメージを与えた際のみ使用可。白兵・肉弾ダメージ+2。",
     "flavor_text": "体内から突き破るようにして生える棘や角。組み合った戦いにおいて、追い討ちの効果を発揮することができる。",
     "source": { "book": "基本ルールブック", "page": 90 }, 
-    "effects": [{ "ref": "INCREASE_DEALT_DAMAGE", "params": { "value": 2, "condition": ["肉弾攻撃", "白兵攻撃"] } }]
+    "effects": [{
+      "ref": "INCREASE_DAMAGE_DEALT",
+      "params": {
+        "value": 2,
+        "condition": ["肉弾攻撃", "白兵攻撃"]
+      }
+    }]
   },
   "R2-09": {
     "name": "テンタクル", "category": "妨害", "allowedLocations": "任意",

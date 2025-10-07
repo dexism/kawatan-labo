@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "2.4.14"; // パッチバージョンを更新
+export const version = "2.5.16"; // パッチバージョンを更新
 
 import * as data from './data-handler.js'; 
 import * as charManager from './character-manager.js';
@@ -491,23 +491,42 @@ export function handleDamageMarkerClick(characterId) {
  * @param {function(number)} onConfirmCallback - 確定ボタンが押されたときに、最終ダメージ量を引数にして呼び出されるコールバック
  */
 function showDamageCalculationModal(damageInfo, onConfirmCallback) {
-    const { sourceAction, target, amount, rollValue } = damageInfo;
+    const { sourceAction, target, amount, rollValue, damageBonusSources } = damageInfo;
     const { performer, sourceManeuver } = sourceAction;
 
     let bonusDamage = 0;
     const bonusSources = [];
     
-    // 1. 大成功による追加ダメージを計算
+    // 1. 大成功による追加ダメージ (変更なし)
     if (rollValue >= 11) {
-        bonusDamage = rollValue - 10;
-        bonusSources.push(`<div>【大成功】+${bonusDamage}</div>`);
+        const criticalBonus = rollValue - 10;
+        bonusDamage += criticalBonus;
+        bonusSources.push(`<div>【大成功】+${criticalBonus}</div>`);
     }
 
-    // 2. 防御側のダメージ軽減効果を探す
+    // 2. オートスキルによるボーナス (【殺劇】など、変更なし)
+    if (damageBonusSources) {
+        damageBonusSources.forEach(bonus => {
+            bonusDamage += bonus.value;
+            bonusSources.push(`<div>【${bonus.source}】+${bonus.value}</div>`);
+        });
+    }
+
+    // 3. ダメージタイミングで宣言された追加ダメージ効果（【スパイク】など）をチェック
+    if (performer.activeBuffs) {
+        performer.activeBuffs.forEach(buff => {
+            if (buff.stat === 'damageBonus' && buff.duration === 'until_damage_applied') {
+                bonusDamage += buff.value || 0;
+                bonusSources.push(`<div>【${buff.source}】+${buff.value}</div>`);
+            }
+        });
+    }
+
+    // 4. 防御側のダメージ軽減効果を探す
     let defenseValue = 0;
     const defenseSources = [];
 
-    // 1. アクティブなバフ（今回宣言した【うろこ】など）をチェック
+    // 5. アクティブなバフ（今回宣言した【うろこ】など）をチェック
     if (target.activeBuffs) {
         target.activeBuffs.forEach(buff => {
             if (buff.stat === 'defense' && buff.duration === 'until_damage_applied') {
@@ -517,7 +536,7 @@ function showDamageCalculationModal(damageInfo, onConfirmCallback) {
         });
     }
 
-    // 2. オートタイミングの永続防御効果（ガントレットなど）をチェック
+    // 6. オートタイミングの永続防御効果（ガントレットなど）をチェック
     const allManeuvers = Object.values(target.partsStatus).flat()
         .map(p => !p.damaged ? data.getManeuverByName(p.name) : null)
         .filter(m => m && m.timing === 'オート' && m.effects);
@@ -531,10 +550,10 @@ function showDamageCalculationModal(damageInfo, onConfirmCallback) {
         }
     });
 
-    // 3. 最終ダメージを計算
+    // 7. 最終ダメージを計算
     const finalDamage = Math.max(0, amount + bonusDamage - defenseValue);
     
-    // 4. モーダル用のHTMLを構築
+    // 8. モーダル用のHTMLを構築
     const bodyHtml = `
         <div class="attack-confirm-summary">
             ${performer.name}【${sourceManeuver.name}】 → ${target.name}
@@ -555,7 +574,7 @@ function showDamageCalculationModal(damageInfo, onConfirmCallback) {
 
     const footerHtml = `<button id="executeDamageBtn" class="welcome-modal-close-btn">${damageInfo.location}：${finalDamage}点を確定</button>`;
     
-    // 5. 汎用モーダルで表示
+    // 9. 汎用モーダルで表示
     ui.showModal({
         title: 'ダメージ計算',
         bodyHtml,

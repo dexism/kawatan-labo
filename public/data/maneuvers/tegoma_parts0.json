@@ -377,5 +377,32 @@
     "flavor_text": "これといった機能のないパーツ。しかし、機能などなくとも最低限の盾としては活用できるものだ。",
     "source": { "book": "ESP", "page": 50 },
     "effects": []
+  },
+  "P0-89": { 
+    "name": "怪物の手", "category": "攻撃", 
+    "tags": ["攻撃", "アクション"], 
+    "timing": "アクション", "cost": "3", "range": "0", 
+    "description": "肉弾攻撃3", 
+    "description_raw": "肉弾攻撃3", 
+    "source": { "book": "基本ルールブック", "page": 151 }, 
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 3 } }] 
+  },
+  "P0-90": { 
+    "name": "感覚制御マスク", "category": "支援", 
+    "tags": ["支援", "ジャッジ"], 
+    "timing": "ジャッジ", "cost": "1", "range": "自身", 
+    "description": "支援2", 
+    "description_raw": "支援2", 
+    "source": { "book": "基本ルールブック", "page": 151 }, 
+    "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "value": 2 } }] 
+  },
+  "P0-13": { 
+    "name": "超強化筋肉", "category": "防御", 
+    "tags": ["防御", "ダメージ"], 
+    "timing": "ダメージ", "cost": "0", "range": "自身", 
+    "description": "防御2", 
+    "description_raw": "防御2", 
+    "source": { "book": "基本ルールブック", "page": 151 }, 
+    "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 2 } }] 
   }
 }

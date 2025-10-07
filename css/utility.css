@@ -36,7 +36,8 @@
   content: '▲';
   transition: all 0.5s ease;
   flex-shrink: 0;
-  margin: 0 10px;
+  padding: 0;
+  margin: 0;
   font-size: 0.8em;
 }
 /* 開閉されるコンテンツ部分 */

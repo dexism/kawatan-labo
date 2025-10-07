@@ -134,7 +134,13 @@
     "description_raw": "自身がダメージを与えた際のみ使用可。白兵・肉弾ダメージ+1。",
     "flavor_text": "棘だらけの針金。これを体中に巻きつけたアンデッドの攻撃は、相手の体をより強く深く抉るだろう。",
     "source": { "book": "基本ルールブック", "page": 84 }, 
-    "effects": [{ "ref": "INCREASE_DEALT_DAMAGE", "params": { "value": 1, "condition": ["肉弾攻撃", "白兵攻撃"] } }]
+    "effects": [{
+      "ref": "INCREASE_DAMAGE_DEALT",
+      "params": {
+        "value": 1,
+        "condition": ["肉弾攻撃", "白兵攻撃"]
+      }
+    }]
   },
   "A2-02": {
     "name": "仕込みブーツ", "category": "攻撃", "allowedLocations": "脚",

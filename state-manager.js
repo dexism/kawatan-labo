@@ -2,7 +2,7 @@
  * @file state-manager.js
  * @description アプリケーションのセッション状態の保存と復元を担当するモジュール
  */
-export const version = "2.0.3"; // 大幅なロジック変更のためメジャーバージョンアップ
+export const version = "2.1.4"; // 大幅なロジック変更のためメジャーバージョンアップ
 
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
@@ -40,7 +40,6 @@ export function autoSave() {
  * 現在の状態をlocalStorageに保存する
  */
 // state-manager.js
-
 export function saveState() {
     try {
         const battleState = battleLogic.getBattleState();
@@ -54,7 +53,6 @@ export function saveState() {
 
         const isSetupPhase = !battleState.isStarted;
         
-        // ★★★ キーを char.id に変更し、キャラクターの配列として保存するように変更 ★★★
         let initialStates = Array.isArray(existingState.initialStates) ? [...existingState.initialStates] : [];
 
         characters.forEach(char => {
@@ -63,12 +61,12 @@ export function saveState() {
             // 戦闘準備中、または新規キャラクターの場合に初期状態を更新/作成
             if (isSetupPhase || existingIndex === -1) {
                 const initialState = {
-                    charId: char.id, // ★ 内部ユニークIDをキーとして保存
+                    charId: char.id,
                     sourceType: char.sheetId ? 'sheet' : 'template',
                     id: char.sheetId || char.templateId,
                     type: char.type,
                     img: char.img,
-                    area: char.area,
+                    area: char.area, // 初期配置エリアとして保存
                     stackCount: char.stackCount,
                     regrets: char.regrets.map(r => ({ name: r.name, points: r.points }))
                 };
@@ -80,15 +78,15 @@ export function saveState() {
             }
         });
         
-        // 削除されたキャラクターを initialStates から除去
         const currentCharIds = new Set(characters.map(c => c.id));
         initialStates = initialStates.filter(is => currentCharIds.has(is.charId));
 
         const stateToSave = {
             turn: isSetupPhase ? 0 : battleState.turn,
-            initialStates: initialStates, // 配列として保存
+            initialStates: initialStates,
             currentStates: characters.map(char => ({
-                charId: char.id, // ★ キーを char.id に変更
+                charId: char.id,
+                area: char.area, // 戦闘中の現在エリアを保存
                 actionValue: char.actionValue,
                 isDestroyed: char.isDestroyed || false,
                 hasWithdrawn: char.hasWithdrawn || false,
@@ -169,15 +167,17 @@ export async function loadState(undeadTemplates) {
 
         if (savedState.turn > 0) {
             savedState.currentStates.forEach(currentState => {
-                // ★★★ IDのマッチングを char.id に変更 ★★★
                 const charToUpdate = charManager.getCharacters().find(c => c.id === currentState.charId);
                 if (charToUpdate) {
+                    // currentStates の情報でキャラクターの状態を上書きする
                     charManager.updateCharacter(charToUpdate.id, {
+                        area: currentState.area, // ★ 戦闘中の最新エリアを適用
                         actionValue: currentState.actionValue,
                         isDestroyed: currentState.isDestroyed,
                         hasWithdrawn: currentState.hasWithdrawn,
                         usedManeuvers: new Set(currentState.usedManeuvers)
                     });
+
                     const damagedNames = new Set(currentState.damagedPartNames);
                     Object.values(charToUpdate.partsStatus).flat().forEach(part => {
                         if (damagedNames.has(part.name)) {

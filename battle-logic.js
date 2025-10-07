@@ -6,7 +6,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.18.73"; // 機能修正とリファクタリングのためバージョン更新
+export const version = "1.19.78"; // 機能修正とリファクタリングのためバージョン更新
 
 import * as charManager from './character-manager.js';
 import * as ui from './ui-manager.js';
@@ -46,6 +46,83 @@ function startCount(newCount) {
     battleState.shouldScrollToCount = true; // グリッドをスクロールさせるフラグを立てる
     resetAndStartNewCount(); // 行動権利者のリストアップなどを行う
     determineNextStep(); // 最終的な状態評価とUI更新をトリガーする
+}
+
+/**
+ * アクションタイミング終了時に、条件を満たすオートバフを判定し適用する
+ */
+function applyAutoBuffsAtActionEnd() {
+    const actionDeclarations = battleState.actionQueue;
+    let appliedBuffsLog = new Map(); // ログの重複を避けるためのマップ
+
+    actionDeclarations.forEach(declaration => {
+        const { performer, target, sourceManeuver } = declaration;
+        if (!performer) return;
+
+        // キャラクターが持つ全てのオートタイミングスキルをチェック
+        performer.skills.forEach(skillName => {
+            const maneuver = data.getManeuverByName(skillName);
+            if (!maneuver || maneuver.timing !== 'オート' || !maneuver.effects) return;
+
+            maneuver.effects.forEach(effect => {
+                if (effect.ref !== 'APPLY_CONDITIONAL_BUFF') return;
+
+                const params = effect.params;
+                let conditionMet = false;
+
+                // --- 条件判定ロジック ---
+                switch (params.trigger) {
+                    case 'attacking_same_target_as_ally_this_count':
+                        if (target) {
+                            conditionMet = actionDeclarations.some(otherDecl =>
+                                otherDecl.performer.type === 'pc' &&
+                                otherDecl.performer.id !== performer.id &&
+                                otherDecl.target?.id === target.id
+                            );
+                        }
+                        break;
+                    
+                    case 'attacking_with_melee':
+                        const attackEffect = sourceManeuver.effects?.find(e => e.ref === 'GENERIC_ATTACK');
+                        if (attackEffect && attackEffect.params.attack_type === '白兵') {
+                            conditionMet = true;
+                        }
+                        break;
+                        
+                    // --- 新しい条件はここに追加 ---
+                }
+
+                // 条件を満たした場合、バフを適用
+                if (conditionMet) {
+                    params.buffs.forEach(buff => {
+                        charManager.addBuff(performer.id, {
+                            source: maneuver.name,
+                            stat: buff.stat,
+                            value: buff.value,
+                            duration: 'onetime_next_action'
+                        });
+                    });
+                    
+                    // ログ出力の準備
+                    if (!appliedBuffsLog.has(performer.id)) {
+                        appliedBuffsLog.set(performer.id, new Set());
+                    }
+                    appliedBuffsLog.get(performer.id).add(maneuver.name);
+                }
+            });
+        });
+    });
+
+    // ログをまとめて出力
+    appliedBuffsLog.forEach((skillNames, performerId) => {
+        const performer = charManager.getCharacterById(performerId);
+        if (performer) {
+            ui.addLog(`${performer.name}の【${Array.from(skillNames).join('】【')}】が適用されます。`);
+        }
+    });
+
+    // UI更新
+    ui.renderCharacterCards();
 }
 
 // ===================================================================================
@@ -107,6 +184,10 @@ export function declareManeuver(char, maneuver, target = null, judgeTargetDeclar
     if (cost > 0) {
         charManager.updateCharacter(char.id, { actionValue: char.actionValue - cost });
     }
+    // 適用されたボーナスの情報をログに出力
+    if (maneuver.appliedBonuses && maneuver.appliedBonuses.length > 0) {
+        ui.addLog(`オート効果: 【${maneuver.appliedBonuses.join('】【')}】が適用されます。`);
+    }
     // ターン制限のあるマニューバを使用済みとしてマーク
     if (char.turnLimitedManeuvers.has(maneuver.name)) {
         char.usedManeuvers.add(maneuver.name);
@@ -124,6 +205,10 @@ export function declareManeuver(char, maneuver, target = null, judgeTargetDeclar
             break;
         case 'ダメージ':
             ui.addLog(`◆[ダメージ] ${char.name}が【${maneuver.name}】を宣言。`);
+            
+            let effectApplied = false;
+
+            // --- 防御効果の処理 ---
             const defenseEffect = maneuver.effects?.find(e => e.ref === 'GENERIC_DEFENSE');
             if (defenseEffect) {
                 const defenseValue = defenseEffect.params.value || 0;
@@ -133,6 +218,34 @@ export function declareManeuver(char, maneuver, target = null, judgeTargetDeclar
                     value: defenseValue,
                     duration: 'until_damage_applied'
                 });
+                effectApplied = true;
+            }
+
+            // --- 与ダメージ増加効果の処理 ---
+            const damageIncreaseEffect = maneuver.effects?.find(e => e.ref === 'INCREASE_DAMAGE_DEALT');
+            if (damageIncreaseEffect) {
+                // どの攻撃に対する効果かを特定するため、未適用のダメージキューを探す
+                const pendingDamage = battleState.damageQueue.find(d => 
+                    d.sourceAction.performer.id === char.id && !d.applied
+                );
+                
+                if (pendingDamage) {
+                    const damageIncreaseValue = damageIncreaseEffect.params.value || 0;
+                    // バフを攻撃者(performer)に付与
+                    charManager.addBuff(char.id, {
+                        source: maneuver.name,
+                        stat: 'damageBonus',
+                        value: damageIncreaseValue,
+                        duration: 'until_damage_applied' // このダメージ専用の期間
+                    });
+                    effectApplied = true;
+                } else {
+                    ui.addLog(`＞ 【${maneuver.name}】の効果対象となるダメージが見つかりません。`);
+                }
+            }
+
+            if (effectApplied) {
+                ui.updateSingleCharacterCard(char.id); // 💡を表示するためにカードを更新
             }
             break;
         case 'アクション':
@@ -140,7 +253,8 @@ export function declareManeuver(char, maneuver, target = null, judgeTargetDeclar
             charManager.updateCharacter(char.id, { hasActedThisCount: true });
             battleState.activeActors = battleState.activeActors.filter(actor => actor.id !== char.id);
             battleState.actionQueue.push(declaration);
-            ui.addLog(`◆[アクション] ${char.name}が【${maneuver.name}】を宣言。`);
+            // ログ出力の宣言者を char ではなく declaration.performer に統一
+            ui.addLog(`◆[アクション] ${declaration.performer.name}が【${maneuver.name}】を宣言。`);
             break;
     }
 
@@ -192,6 +306,8 @@ export function determineNextStep() {
         battleState.activeActors = potentialActors.filter(c => c.type === 'pc');
     }
 
+    const prevPhase = battleState.phase;
+
     // 3. フェーズを決定
     const hasAnyPotentialActors = battleState.activeActors.length > 0;
     const hasUnresolvedRapids = battleState.rapidQueue.some(r => !r.checked);
@@ -213,6 +329,11 @@ export function determineNextStep() {
         } else {
             battleState.phase = 'TURN_END_PREPARATION';
         }
+    }
+    
+    // アクション宣言フェーズから別のフェーズに移る瞬間を検知
+    if (prevPhase === 'ACTION_DECLARATION' && battleState.phase !== 'ACTION_DECLARATION') {
+        applyAutoBuffsAtActionEnd();
     }
 
     ui.updateBattleStatusUI();
@@ -574,6 +695,39 @@ function performMoveCharacter(action, context) {
 
 function performApplyBuff(action, context) {
     const { performer } = context;
+
+    // actionオブジェクトに 'buffs' プロパティがあるかチェック(APPLY_CONDITIONAL_BUFF用)
+    if (action.buffs) {
+        // 条件をチェック
+        let conditionMet = false;
+        if (action.condition === 'attacking_same_target_as_ally_this_count') {
+            const targetId = context.target?.id;
+            if (targetId) {
+                // 同じカウントで、他の姉妹が同じターゲットにアクションを宣言しているかチェック
+                conditionMet = battleState.actionQueue.some(decl =>
+                    decl.performer.type === 'pc' &&
+                    decl.performer.id !== performer.id &&
+                    decl.target?.id === targetId
+                );
+            }
+        }
+
+        if (conditionMet) {
+            ui.addLog(`＞ 【${context.declaration.sourceManeuver.name}】の効果が発動！`);
+            action.buffs.forEach(buff => {
+                // 一時的なバフとしてキャラクターに追加
+                charManager.addBuff(performer.id, {
+                    source: context.declaration.sourceManeuver.name,
+                    stat: buff.stat,
+                    value: buff.value,
+                    duration: 'onetime_next_action' // このアクション1回限りのバフ
+                });
+                ui.addLog(`＞ (次の攻撃判定に+${buff.value}, 与ダメージに+${buff.value})`);
+            });
+        }
+        return; // APPLY_CONDITIONAL_BUFF の処理はここで終了
+    }
+
     // actionオブジェクトに 'buff' プロパティが存在するかチェック
     const buff = action.buff ? action.buff : action;
 
@@ -605,25 +759,77 @@ function performApplyBuff(action, context) {
 
 async function performAttackRoll(action, context) {
     const { performer, target, declaration } = context;
-    if (!target) {
-        ui.addLog(`＞ 攻撃対象がいません。`);
-        return;
-    }
     const bonus = context.totalAttackBonus || 0;
     const diceCommand = `NA${bonus >= 0 ? `+${bonus}` : bonus}`;
+
+    // ★★★ onHit効果を先に整理しておく ★★★
+    const onHitEffects = action.on_hit_effects || action.on_hit || [];
+    
     return new Promise(resolve => {
         performDiceRoll({
             command: diceCommand,
             showToast: true,
-            performer: performer, // 行動主体を渡す
-            // コールバックで rollValue を受け取る
-            callback: (result, hitLocation, resultText, rollValue) => {
-                const hit = result && !result.includes('失敗');
-                if (hit) {
-                    ui.addLog(`${target.name}に命中！`);
-                    let currentDamage = action.damage || 0;
+            performer: performer,
+            callback: async (result, hitLocation, resultText, rollValue) => { // ★ asyncを追加
+                // 1. 大失敗の処理
+                if (result === '大失敗') {
+                    ui.addLog(`＞ 攻撃は大失敗！誤爆の対象を選択してください。`);
 
-                    // damageQueue に rollValue を追加で保存する
+                    // 誤爆対象の候補をリストアップ
+                    const friendlyFireCandidates = [];
+                    // a) 攻撃者自身を追加
+                    friendlyFireCandidates.push(performer);
+
+                    // b) 攻撃対象エリアにいる味方を追加
+                    const targetArea = target ? target.area : performer.area; // ターゲットがいなければ自身のエリア
+                    const alliesInArea = charManager.getCharacters().filter(c =>
+                        c.type === performer.type &&      // 味方で
+                        c.id !== performer.id &&           // 自身以外で
+                        c.area === targetArea &&           // 対象エリアにいて
+                        !c.isDestroyed && !c.isWithdrawn   // 活動中
+                    );
+                    friendlyFireCandidates.push(...alliesInArea);
+
+                    // 候補者を選択するモーダルを表示
+                    const selectedTarget = await new Promise(selectTargetPromise => {
+                        const menuItems = friendlyFireCandidates.map(char => ({
+                            label: char.name,
+                            onClick: () => selectTargetPromise(char)
+                        }));
+                        ui.showModal({
+                            title: '大失敗：誤爆対象を選択',
+                            items: menuItems
+                        });
+                    });
+                    
+                    // ダメージキューを作成
+                    if (selectedTarget) {
+                        // 爆発以外の効果は除去
+                        const fumbleOnHit = onHitEffects.includes('EXPLOSION') ? ['EXPLOSION'] : [];
+                        
+                        battleState.damageQueue.push({
+                            id: `damage_${Date.now()}_${Math.random()}`,
+                            target: selectedTarget, // 選択された対象
+                            amount: action.damage || 0,
+                            location: '任意', // ルール通り、箇所は任意選択
+                            sourceAction: declaration,
+                            applied: false,
+                            rollValue: rollValue || 0,
+                            onHitEffects: fumbleOnHit // 爆発効果のみ引き継ぐ
+                        });
+                        ui.addLog(`＞ ${selectedTarget.name}に誤爆！ 【${action.damage || 0}】点のダメージ！`);
+                    }
+                    
+                    resolve({ hit: false, on_hit: [] }); // 大失敗なので命中ではない
+                    return;
+                }
+
+                // 2. 通常の命中/失敗処理
+                const hit = result.includes('成功');
+                if (hit) {
+                    ui.addLog(`＞ ${target.name}に命中！`);
+                    let currentDamage = (action.damage || 0);
+                    
                     battleState.damageQueue.push({
                         id: `damage_${Date.now()}_${Math.random()}`,
                         target: target,
@@ -631,13 +837,18 @@ async function performAttackRoll(action, context) {
                         location: hitLocation,
                         sourceAction: declaration,
                         applied: false,
-                        rollValue: rollValue || 0 // rollValue がなければ0を保存
+                        rollValue: rollValue || 0,
+                        onHitEffects: onHitEffects // 全ての効果を引き継ぐ
                     });
-                    ui.addLog(`${target.name}に${currentDamage}点(暫定)のダメージ！`);
+                    ui.addLog(`＞ 【${currentDamage}】点のダメージ！`);
                 } else {
-                    // ui.addLog(`攻撃は失敗しました。`);
+                    ui.addLog(`＞ 攻撃は失敗しました。`);
                 }
-                resolve({ hit, on_hit: action.on_hit || [] });
+                
+                // 使用済みの一回きりのバフをクリア
+                charManager.clearTemporaryBuffs(performer.id, 'onetime_next_action');
+
+                resolve({ hit, on_hit: onHitEffects });
             }
         });
     });

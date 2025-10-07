@@ -1,8 +1,3 @@
-
-
-
-
-
 {
     "//": "========================================",
     "//": "==    汎用効果定義データベース v2.0   ==",
@@ -150,6 +145,17 @@
 
     "//": "---------- その他・特殊処理 ----------",
 
+    "APPLY_CONDITIONAL_BUFF": {
+        "name": "条件付きバフ適用",
+        "description": "特定の条件を満たした場合に、複数のステータスにバフを適用する。",
+        "actions": [{
+            "action_type": "apply_buff",
+            "target": "self",
+            "buffs": "$params.buffs",
+            "condition": "$params.trigger",
+            "duration": "onetime_next_action"
+        }]
+    },
     "WAIT": { 
         "name": "待機", "description": "何もせず手番を終了する。", "actions": [{ "action_type": "wait" }] 
     },
