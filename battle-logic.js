@@ -6,7 +6,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.19.78"; // 機能修正とリファクタリングのためバージョン更新
+export const version = "1.20.80"; // 機能修正とリファクタリングのためバージョン更新
 
 import * as charManager from './character-manager.js';
 import * as ui from './ui-manager.js';
@@ -26,6 +26,7 @@ let battleState = {
     turn: 1,
     count: 0,
     activeActors: [],
+    potentialActors: [],
     actorsForThisCount: new Set(), // このカウントで行動する権利を持つキャラクターIDのセット
     phase: 'SETUP',
     actionQueue: [],
@@ -255,6 +256,8 @@ export function declareManeuver(char, maneuver, target = null, judgeTargetDeclar
             battleState.actionQueue.push(declaration);
             // ログ出力の宣言者を char ではなく declaration.performer に統一
             ui.addLog(`◆[アクション] ${declaration.performer.name}が【${maneuver.name}】を宣言。`);
+            // アクション宣言があったので、ATK/TGTマーカーを更新する
+            ui.updateActionDeclarationMarkers();
             break;
     }
 
@@ -297,7 +300,10 @@ export function determineNextStep() {
 
     const potentialActors = potentialActorIds.map(id => charManager.getCharacterById(id));
     
-    // 2. 行動権を持つキャラクターを特定
+    // 計算した potentialActors を battleState に保存する
+    battleState.potentialActors = potentialActors;
+
+    // 2. 行動権を持つキャラクターを特定 (手番優先順位の考慮)
     const actingEnemies = potentialActors.filter(c => c.type === 'enemy');
     
     if (actingEnemies.length > 0) {
@@ -399,6 +405,9 @@ function resetAndStartNewCount() {
     battleState.rapidQueue = [];
     battleState.judgeQueue = [];
     battleState.damageQueue = [];
+
+    // カウントがリセットされ、キューが空になったのでマーカーもクリアする
+    ui.updateActionDeclarationMarkers();
 
     const allCharacters = charManager.getCharacters().filter(c => !c.isDestroyed && !c.hasWithdrawn);
     battleState.actorsForThisCount = new Set(
@@ -991,4 +1000,25 @@ function performModifyActionValue(action, context) {
     // UIを更新
     ui.updateMarkers();
     ui.updateSingleCharacterCard(target.id);
+}
+/**
+ * 【menu-builder.jsから呼び出される】
+ * 指定されたダメージキューのターゲットを、新しいターゲット（庇う者）に変更する
+ * @param {string} damageId - 付け替え対象のダメージキューアイテムのID
+ * @param {object} newTarget - 新しいターゲットとなるキャラクターオブジェクト
+ */
+export function redirectDamage(damageId, newTarget) {
+    const damageInfo = battleState.damageQueue.find(d => d.id === damageId);
+
+    if (damageInfo && newTarget) {
+        const originalTarget = damageInfo.target;
+        damageInfo.target = newTarget;
+
+        ui.addLog(`＞ 【庇う】 ${newTarget.name} が ${originalTarget.name} へのダメージを肩代わりしました。`);
+
+        // UIを更新
+        ui.updateAllQueuesUI();
+        ui.removeDamagePrompt(originalTarget.id);
+        ui.createDamagePrompt(newTarget.id, damageInfo.amount); // 新しいターゲットにプロンプトを表示
+    }
 }

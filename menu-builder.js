@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.11.48"; // バージョンを更新
+export const version = "1.11.52"; // バージョンを更新
 
 import * as data from './data-handler.js';
 import * as charManager from './character-manager.js';
@@ -22,10 +22,21 @@ const rows = ["奈落", "地獄", "煉獄", "花園", "楽園"];
 let resolveTargetSelection = null;
 let activeFilter = '宣言';
 
+let cleanupTargetSelection = () => {};
+
 const handleOutsideClick = (e) => {
     const menu = document.getElementById('maneuverMenu');
+    
     if (menu && !menu.contains(e.target) && menuOpener && !menuOpener.contains(e.target)) {
         closeAllMenus();
+    }
+
+    // --- ターゲット選択中に、ターゲット外をクリックしたらキャンセルする処理 ---
+    if (resolveTargetSelection) {
+        if (!e.target.closest('.target-selectable')) {
+            // ★ resolve(null) を直接呼び出すことで、selectTargetForAction内の後片付けが実行される
+            resolveTargetSelection(null);
+        }
     }
 };
 
@@ -36,6 +47,15 @@ const handleOutsideClick = (e) => {
  * @param {HTMLElement} element - メニューを開く起点となった要素
  */
 export function buildManeuverMenu(char, element) {
+    // もし現在ターゲット選択中であれば、それをキャンセルして終了させる
+    // resolveTargetSelection は selectTargetForAction の中で定義される Promise の resolve 関数
+    if (resolveTargetSelection) {
+        // resolve(null) を呼び出すことで、キャンセル処理が実行され、状態がリセットされる
+        resolveTargetSelection(null);
+        // resolveTargetSelection を手動でリセット
+        resolveTargetSelection = null;
+    }
+
     closeAllMenus();
     menuOpener = element;
     const menu = document.getElementById('maneuverMenu');
@@ -263,7 +283,12 @@ function createManeuverItem(maneuverObj, char) {
     } else {
         item.onclick = async (e) => {
             e.stopPropagation();
-            closeAllMenus();
+            // ★★★ 攻撃マニューバの場合は、メニューを閉じる処理をここで行う ★★★
+            if (maneuver.tags.includes('攻撃')) {
+                closeAllMenus();
+            } else {
+                 setTimeout(() => closeAllMenus(), 0); // 他のマニューバは宣言後に閉じる
+            }
 
             if (maneuver.name === '任意') {
                 const bodyHtml = `<div class="action-cost-form"><div class="action-cost-selector">${[1,2,3,4,5].map(v => `<label><input type="radio" name="action-cost" value="${v}" ${v===1?'checked':''}> <span>${v}</span></label>`).join('')}</div></div>`;
@@ -285,7 +310,49 @@ function createManeuverItem(maneuverObj, char) {
                 return;
             }
 
-            // ★★★ 妨害と支援のジャッジ処理を統合 ★★★
+           // --- 【庇う】のような効果を持つマニューバの特別処理 ---
+            const takeDamageEffect = maneuver.effects?.find(e => e.ref === 'TAKE_DAMAGE_FOR_ALLY');
+            if (takeDamageEffect) {
+                // ① 庇う対象となるダメージをリストアップ
+                const targetableDamages = battleLogic.getBattleState().damageQueue.filter(damage => {
+                    if (!damage.applied && damage.target.type === char.type && damage.target.id !== char.id) {
+                        return checkTargetAvailability(char, maneuver, [damage.target]).hasTarget;
+                    }
+                    return false;
+                });
+
+                if (targetableDamages.length === 0) {
+                    ui.addLog("庇う対象がいません。");
+                    return;
+                }
+
+                // ② 対象選択フォームを表示
+                const selectedDamage = await new Promise(resolve => {
+                    const menuItems = targetableDamages.map(damage => ({
+                        label: `【${damage.sourceAction.sourceManeuver.name}】→ ${damage.target.name} (${damage.amount}点)`,
+                        onClick: () => resolve(damage)
+                    }));
+                    ui.showModal({ 
+                        title: `【${maneuver.name}】庇う対象を選択`, 
+                        items: menuItems,
+                        onRender: (modal, closeFn) => {
+                            modal.onclick = (event) => { if(event.target === modal) { closeFn(); resolve(null); } };
+                        }
+                    });
+                });
+
+                // ③ 選択されたら、まず宣言を行い、その後にダメージを付け替える
+                if (selectedDamage) {
+                    // declareManeuver はコスト支払いとログ出力を担当する
+                    battleLogic.declareManeuver(char, maneuver); 
+                    // redirectDamage はダメージキューの書き換えとUI更新を担当する
+                    battleLogic.redirectDamage(selectedDamage.id, char);
+                }
+                return; // 処理を終了
+            }
+
+
+            // --- ジャッジ（支援・妨害）の特別処理 ---
             const isInterruptJudge = maneuver.timing === 'ジャッジ' && maneuver.range !== '自身';
             if (isInterruptJudge) {
                 // 妨害/支援の対象となるアクション宣言をリストアップ
@@ -343,6 +410,7 @@ function createManeuverItem(maneuverObj, char) {
             }
 
             if (maneuver.tags.includes('攻撃')) {
+                // ★★★ 修正箇所: 第3引数として handleOutsideClick を渡す ★★★
                 const target = await selectTargetForAction(char, maneuver, handleOutsideClick);
                 if (target) {
                     battleLogic.declareManeuver(char, maneuver, target);
@@ -486,8 +554,12 @@ export function showCharacterSheetModal(char) {
         </div>
         <div class="sheet-basic-info">
             <div class="sheet-input-group">
+                <label>表示名</label>
+                <input type="text" id="displayNameInput" value="${char.displayName}">
+            </div>
+            <div class="sheet-input-group">
                 <label>名前</label>
-                <input type="text" value="${char.name}" disabled>
+                <input type="text" value="${char.originalName}" disabled>
             </div>
             ${isDoll ? `
             <div class="sheet-input-group">
@@ -755,6 +827,20 @@ export function showCharacterSheetModal(char) {
                     }
                 };
             }
+
+            const displayNameInput = modal.querySelector('#displayNameInput');
+            if (displayNameInput) {
+                displayNameInput.onchange = (e) => {
+                    const newDisplayName = e.target.value;
+                    if (newDisplayName) {
+                        charManager.updateCharacter(char.id, { displayName: newDisplayName });
+                        // カードとマーカーの名前を即時更新
+                        ui.updateSingleCharacterCard(char.id);
+                        ui.updateMarkers();
+                        stateManager.autoSave();
+                    }
+                };
+            }
         }
     });
 }
@@ -912,7 +998,7 @@ export function closeAllMenus() {
  * @param {object} char - 対象キャラクター
  * @returns {Array<object>} - isUsableなどの状態が付与されたマニューバオブジェクトの配列
  */
-function getCharacterManeuvers(char) {
+export function getCharacterManeuvers(char) {
     const battleState = battleLogic.getBattleState();
     const allManeuvers = [];
     const rows = ["奈落", "地獄", "煉獄", "花園", "楽園"];
@@ -931,6 +1017,9 @@ function getCharacterManeuvers(char) {
     const arbitraryManeuver = data.getManeuverByName('任意');
     if (arbitraryManeuver) allManeuvers.push({ data: arbitraryManeuver, sourceType: 'common' });
     
+    // キャラクターが損傷状態にあるかを事前に判定しておく
+    const isCharDamaged = Object.values(char.partsStatus).flat().some(part => part.damaged);
+
     // 1. HTML要素のクラスを直接参照し、現在アクティブなタイミングを判定する
     const activeIndicators = new Set();
     if (document.getElementById('actionPhaseIndicator')?.classList.contains('active')) {
@@ -960,56 +1049,60 @@ function getCharacterManeuvers(char) {
         if (maneuver.timing !== 'オート' && !activeIndicators.has(maneuver.timing)) {
             isUsable = false;
         }
-        
-        // --- ジャッジタイミングの特別ルールを、条件分岐で明確に分離 ---
+
+        // --- マニューバ固有の有効化条件チェック ---
+        if (isUsable && maneuver.effects) {
+            // "is_damaged" の条件を持つ効果があるかチェック
+            const needsDamage = maneuver.effects.some(e => e.params?.condition === 'is_damaged');
+            
+            if (needsDamage && !isCharDamaged) {
+                // ダメージが必要なのにキャラクターが無傷の場合、使用不可にする
+                isUsable = false;
+            }
+        }
+
+        // ★★★ ダメージタイミングの特別ルールを追加 ★★★
+        if (isUsable && maneuver.timing === 'ダメージ') {
+            // 【庇う】のような効果を持つかチェック
+            const hasTakeDamageEffect = maneuver.effects?.some(e => e.ref === 'TAKE_DAMAGE_FOR_ALLY');
+
+            if (hasTakeDamageEffect) {
+                // 射程内に、ダメージを受ける予定の「味方」がいるかチェック
+                const isAllyTakingDamageInRange = battleState.damageQueue.some(damage => {
+                    if (!damage.applied && damage.target.type === char.type && damage.target.id !== char.id) {
+                        const { hasTarget } = checkTargetAvailability(char, maneuver, [damage.target]);
+                        return hasTarget;
+                    }
+                    return false;
+                });
+
+                if (!isAllyTakingDamageInRange) {
+                    isUsable = false;
+                }
+            }
+        }
+
+        // --- 3. ジャッジタイミングの厳格な判定 ---
         if (isUsable && maneuver.timing === 'ジャッジ') {
             
-            const isSupport = maneuver.category === '支援' || maneuver.tags.includes('支援');
-            const isHindrance = maneuver.category === '妨害' || maneuver.tags.includes('妨害');
-
-            // 支援でも妨害でもないジャッジマニューバは、ここでは判定しない
-            if (isSupport || isHindrance) {
-                let canSupport = false;
-                let canHinder = false;
-
-                // --- 支援条件のチェック ---
-                if (isSupport) {
-                    // ケースA: 「自身」を対象とする支援 (例: 【ボルトヘッド】)
-                    if (maneuver.range === '自身') {
-                        // 条件：自身が「攻撃」を宣言しているか？
-                        if (battleState.actionQueue.some(d => d.performer.id === char.id && d.sourceManeuver.tags.includes('攻撃'))) {
-                            canSupport = true;
-                        }
-                    }
-                    // ケースB: 「他者」を対象とする支援 (例: 【うで】)
-                    else {
-                        // 条件：射程内にいる「味方」が「攻撃」を宣言しているか？
-                        if (battleState.actionQueue.some(d => {
-                            if (d.performer.type === char.type && d.sourceManeuver.tags.includes('攻撃')) {
-                                return checkTargetAvailability(char, maneuver, [d.performer]).hasTarget;
-                            }
-                            return false;
-                        })) {
-                            canSupport = true;
-                        }
-                    }
+            // ケースA: 「自身」を対象とする支援 (例: 【ボルトヘッド】)
+            if (maneuver.category === '支援' && maneuver.range === '自身') {
+                const hasDeclaredAttack = battleState.actionQueue.some(declaration =>
+                    declaration.performer.id === char.id &&
+                    declaration.sourceManeuver.tags.includes('攻撃')
+                );
+                if (!hasDeclaredAttack) {
+                    isUsable = false;
                 }
-
-                // --- 妨害条件のチェック ---
-                if (isHindrance) {
-                    // 条件：射程内にいる「敵」が「攻撃」を宣言しているか？
-                    if (battleState.actionQueue.some(d => {
-                        if (d.performer.type !== char.type && d.sourceManeuver.tags.includes('攻撃')) {
-                            return checkTargetAvailability(char, maneuver, [d.performer]).hasTarget;
-                        }
-                        return false;
-                    })) {
-                        canHinder = true;
-                    }
-                }
+            }
+            
+            // ケースB: 「他者」を対象とする支援・妨害 (例: 【うで】【あし】【助言】)
+            else if (maneuver.range !== '自身') {
+                // onclickで使われている判定ロジックを、ここでも全く同じように使用する
+                const targetableDeclarations = getTargetableDeclarations(char, maneuver);
                 
-                // 最終的な論理演算：支援か妨害のどちらかの条件を満たしていれば使用可能
-                if (!canSupport && !canHinder) {
+                // 妨害/支援できる対象のアクション宣言が1件もなければ、使用不可とする
+                if (targetableDeclarations.length === 0) {
                     isUsable = false;
                 }
             }
@@ -1017,8 +1110,11 @@ function getCharacterManeuvers(char) {
 
         // --- アクションタイミングの特別ルール ---
         if (maneuver.timing === 'アクション' && isUsable) {
-            const isActiveActor = battleState.activeActors.some(a => a.id === char.id);
-            if (!isActiveActor) isUsable = false;
+            // battleState の「このカウントの行動権利者リスト」に自身が含まれているかで判断する
+            const hasRightToAct = battleState.actorsForThisCount.has(char.id);
+            if (!hasRightToAct) {
+                isUsable = false;
+            }
         }
 
         // --- 汎用的なターゲット存在チェック ---
@@ -1521,37 +1617,6 @@ export function checkTargetAvailability(actor, maneuver, targetChars = null) {
     return { hasTarget: availableTargets.length > 0, targets: availableTargets };
 }
 
-async function selectTargetForAction(actor, maneuver, handleGlobalClick) {
-    return new Promise(resolve => {
-        const handleTargetSelection = (targetChar) => {
-            if (!resolveTargetSelection) return;
-            const resolveFunc = resolveTargetSelection;
-            cleanupTargetSelection();
-            resolveFunc(targetChar);
-        };
-        const cleanupTargetSelection = () => {
-            resolveTargetSelection = null;
-            document.querySelectorAll('.target-selectable').forEach(selectable => selectable.classList.remove('target-selectable'));
-            document.removeEventListener('click', handleGlobalClick);
-        };
-        
-        resolveTargetSelection = resolve;
-        ui.addLog(`>> ${actor.name}のターゲットを選択してください。(対象外クリックでキャンセル)`);
-        
-        const { targets } = checkTargetAvailability(actor, maneuver);
-        if (targets.length > 0) ui.scrollToFirstCharacter(targets);
-
-        const targetIds = new Set(targets.map(t => t.id));
-        document.querySelectorAll('.char, .marker').forEach(el => {
-            if (targetIds.has(el.dataset.id)) {
-                el.classList.add('target-selectable');
-                el.onclick = (e) => { e.stopPropagation(); handleTargetSelection(charManager.getCharacterById(el.dataset.id)); };
-            }
-        });
-        document.addEventListener('click', handleGlobalClick);
-    });
-}
-
 /**
  * 戦闘準備中にキャラクターの配置先エリアを選択するためのメニューを構築・表示する
  * @param {object} char - 配置するキャラクターオブジェクト
@@ -1578,6 +1643,49 @@ export function buildPlacementMenu(char, element, event) {
     ui.showModal({ title: `${char.name} の配置先を選択`, items: menuItems });
 }
 
+async function selectTargetForAction(actor, maneuver, handleGlobalClick) {
+    // 既存のターゲット選択があれば、先にキャンセルする
+    if (resolveTargetSelection) resolveTargetSelection(null);
+
+    return new Promise(resolve => {
+        const cleanup = (value) => {
+            resolveTargetSelection = null;
+            document.querySelectorAll('.target-selectable').forEach(el => {
+                el.classList.remove('target-selectable');
+                el.onclick = null;
+            });
+            document.removeEventListener('click', handleGlobalClick);
+            resolve(value);
+        };
+        
+        // グローバル変数に resolve 関数をセットし、ターゲット選択状態に入る
+        resolveTargetSelection = cleanup;
+        
+        const { targets } = checkTargetAvailability(actor, maneuver);
+        if (targets.length === 0) {
+             ui.addLog("＞ 射程内に有効なターゲットがいません。");
+             cleanup(null);
+             return;
+        }
+
+        // ui.addLog(`>> ${actor.name}のターゲットを選択してください。(対象外クリックでキャンセル)`);
+        if (targets.length > 0) ui.scrollToFirstCharacter(targets);
+
+        const targetIds = new Set(targets.map(t => t.id));
+        document.querySelectorAll('.char, .marker').forEach(el => {
+            if (targetIds.has(el.dataset.id)) {
+                el.classList.add('target-selectable');
+                el.onclick = (e) => { 
+                    e.stopPropagation(); 
+                    cleanup(charManager.getCharacterById(el.dataset.id));
+                };
+            }
+        });
+
+        // handleGlobalClick (実体は handleOutsideClick) を document に登録する
+        setTimeout(() => document.addEventListener('click', handleGlobalClick), 0);
+    });
+}
 /**
  * 攻撃宣言の確認モーダルを表示する
  * @param {object} performer - 攻撃の実行者

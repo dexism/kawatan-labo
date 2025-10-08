@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>『永い後日談のネクロニカ』バトルパート支援ツール 7.10.7.17</title>
+<title>『永い後日談のネクロニカ』バトルパート支援ツール 7.10.8.22</title>
 
 <!-- Favicon設定 -->
 <link rel="icon" href="/assets/favicon-cJD5s49M.ico" type="image/x-icon">
@@ -13,8 +13,8 @@
 
 <!-- 分割した外部スタイルシートの読み込み -->
 
-  <script type="module" crossorigin src="/assets/index-CC3Y5fI9.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-CBBF69ql.css">
+  <script type="module" crossorigin src="/assets/index-B_MF7LwH.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-Cn9OlPdu.css">
 </head>
 <body>
 <div id="dice3d-container"></div>
@@ -174,9 +174,11 @@
           
           <h2 class="section-title">セッションデータ管理</h2>
           <div class="settings-content" id="session-controls">
-              <button id="saveStateToFileBtn" class="session-btn">ファイルに保存</button>
-              <button id="saveStateBtn" class="session-btn">ブラウザに保存</button>
-              <button id="clearStateBtn" class="session-btn session-btn-danger">保存データ削除</button>
+            <input type="file" id="fileInput" accept=".json" style="display: none;">
+            <button id="saveStateToFileBtn" class="session-btn">ファイルに保存</button>
+            <button id="saveStateBtn" class="session-btn">ブラウザに保存</button>
+            <button id="loadStateFromFileBtn" class="session-btn">ファイルから読込み</button>
+            <button id="clearStateBtn" class="session-btn session-btn-danger">保存データ削除</button>
           </div>
           
           <h2 class="section-title">自動保存</h2>

@@ -6,13 +6,14 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.12.74";
+export const version = "1.12.75";
 
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
 import * as interactionManager from './interaction-manager.js';
 import * as data from './data-handler.js';
 import { getCategoryClass } from './ui-helpers.js';
+import { getCharacterManeuvers } from './menu-builder.js';
 
 let toastTimer = null;
 const rows = ["奈落", "地獄", "煉獄", "花園", "楽園"];
@@ -301,6 +302,8 @@ function createCharacterCard(char, isSetupPhase) {
             <div class="status-tape status-tape-withdrawn">ESCAPE 戦場離脱 ESCAPE</div>
         </div>
         <div class="char-img-container">
+            <div class="char-bubble-marker-container" data-id="${char.id}"></div>
+            <div class="char-action-marker-container" data-id="${char.id}"></div>
             <div class="damage-prompt-container"></div> 
             <div class="char-area-name ${areaClass}">${char.area}</div>
             <div class="char-name-overlay">${char.name}</div>
@@ -415,7 +418,7 @@ export function updateMarkers() {
 }
 
 export function updateBattleStatusUI() {
-    const { isStarted, turn, count, activeActors, shouldScrollToCount } = battleLogic.getBattleState();
+    const { isStarted, turn, count, activeActors, potentialActors, shouldScrollToCount } = battleLogic.getBattleState();
     
     const timingArea = document.getElementById('timingArea');
     const battleWrap = document.getElementById('battleWrap');
@@ -486,6 +489,40 @@ export function updateBattleStatusUI() {
 
     updatePhaseUI(battleLogic.getBattleState());
     updateAllQueuesUI();
+    // 「行動可能か」を示すマーカー("ACT", "RAP"など)を更新する
+    const allCharacters = charManager.getCharacters();
+
+    // const potentialActorIds = new Set(potentialActors.map(char => char.id));
+
+    allCharacters.forEach(char => {
+        clearBubbleMarkers(char.id, 'char-bubble-marker-container');
+
+        if (isStarted && !char.isDestroyed && !char.hasWithdrawn) {
+            const usableManeuvers = getCharacterManeuvers(char);
+            
+            // アクション可能かチェック（シンプルな条件に戻す）
+            const canAct = usableManeuvers.some(m => m.data.timing === 'アクション' && m.isUsable);
+            if (canAct) {
+                addBubbleMarker(char.id, 'ACT', 'char-bubble-marker-container', '#36c', 'white');
+            }
+            
+            // (ラピッド、ジャッジ、ダメージの判定は変更なし)
+            const canRapid = usableManeuvers.some(m => m.data.timing === 'ラピッド' && m.isUsable);
+            if (canRapid) {
+                addBubbleMarker(char.id, 'RAP', 'char-bubble-marker-container', '#c63', 'white');
+            }
+            const canJudge = usableManeuvers.some(m => m.data.timing === 'ジャッジ' && m.isUsable);
+            if (canJudge) {
+                addBubbleMarker(char.id, 'JDG', 'char-bubble-marker-container', '#396', 'white');
+            }
+            const canDamage = usableManeuvers.some(m => m.data.timing === 'ダメージ' && m.isUsable);
+            if (canDamage) {
+                addBubbleMarker(char.id, 'DMG', 'char-bubble-marker-container', '#933', 'white');
+            }
+        }
+    });
+
+    updateActionDeclarationMarkers();
 }
 
 export function updateCharacterHighlights(activeActors) {
@@ -497,7 +534,8 @@ export function updateCharacterHighlights(activeActors) {
 
 export function updatePhaseUI(state) {
     if (!state) return;
-    const { phase, activeActors } = state;
+    // ★★★ actionQueue だけでなく、他のキューも受け取る ★★★
+    const { phase, activeActors, actionQueue, rapidQueue, judgeQueue, damageQueue } = state;
 
     const indicators = {
         action: document.getElementById('actionPhaseIndicator'),
@@ -506,15 +544,30 @@ export function updatePhaseUI(state) {
         damage: document.getElementById('damagePhaseIndicator'),
     };
 
-    // 【アクション】行動可能なアクターがいる場合にのみ点灯
+    const hasUnresolvedActions = actionQueue.some(a => !a.checked);
+    const hasUnresolvedRapids = rapidQueue.some(r => !r.checked);
+    const hasUnresolvedJudges = judgeQueue.some(j => !j.checked);
+    const hasPendingDamage = damageQueue.some(d => !d.applied);
+
+    // 【アクション】行動可能なアクターがいる場合にのみ点灯 (変更なし)
     const showAction = activeActors.length > 0;
 
-    // 【ラピッド/ジャッジ】アクションタイミングが終了した後に点灯
-    const showRapid = !showAction;
-    const showJudge = !showAction;
+    // 点灯条件：アクション宣言が1つ以上ある
+    const conditionToTurnOn = actionQueue.length > 0;
+    
+    // 消灯条件：ラピッド、ジャッジ、アクションのキューに未解決アイテムが「ない」
+    const conditionToTurnOff = !hasUnresolvedRapids && !hasUnresolvedJudges && !hasUnresolvedActions;
 
-    // 【ダメージ】未適用のダメージ処理がある場合に点灯 (これはルール通り)
-    const showDamage = phase === 'DAMAGE_RESOLUTION' || (state.actionQueue.every(a => a.checked) && state.damageQueue.some(d => !d.applied));
+    let showRapid = false;
+    if (conditionToTurnOn && !conditionToTurnOff) {
+        showRapid = true;
+    }
+
+    // 【ジャッジ】アクションタイミングが終了し、かつ未解決のアクションが残っている場合に点灯 (変更なし)
+    const showJudge = !showAction && hasUnresolvedActions;
+
+    // 【ダメージ】の判定ロジック (変更なし)
+    const showDamage = phase === 'DAMAGE_RESOLUTION' || (actionQueue.every(a => a.checked) && hasPendingDamage);
 
     indicators.action.classList.toggle('active', showAction);
     indicators.rapid.classList.toggle('active', showRapid);
@@ -964,5 +1017,83 @@ export function hideLoadingProgress() {
     const overlay = document.getElementById('loading-overlay');
     if (overlay) {
         overlay.classList.remove('is-visible');
+    }
+}
+/**
+ * 指定したキャラクターカードに「ふきだしマーカー」を追加する
+ * @param {string} characterId - 対象キャラクターのID
+ * @param {string} text - マーカーに表示する文字列
+ * @param {string} containerClass - マーカーを追加するコンテナのクラス名
+ * @param {string} [backgroundColor] - マーカーの背景色
+ * @param {string} [borderColor] - マーカーの枠線の色
+ */
+export function addBubbleMarker(characterId, text, containerClass, backgroundColor = 'rgba(0,0,0,0.7)', borderColor = 'white') {
+    const container = document.querySelector(`.${containerClass}[data-id="${characterId}"]`);
+    if (!container) return;
+
+    const marker = document.createElement('div');
+    marker.className = 'bubble-marker';
+    marker.textContent = text;
+    marker.style.backgroundColor = backgroundColor;
+    marker.style.borderColor = borderColor;
+
+    container.appendChild(marker);
+}
+
+/**
+ * 指定したキャラクターカードの特定のコンテナ内の「ふきだしマーカー」を削除する
+ * @param {string} characterId - 対象キャラクターのID
+ * @param {string} containerClass - クリアするコンテナのクラス名
+ */
+export function clearBubbleMarkers(characterId, containerClass) {
+    const container = document.querySelector(`.${containerClass}[data-id="${characterId}"]`);
+    if (container) {
+        container.innerHTML = '';
+    }
+}
+
+/**
+ * 現在のアクションキューに基づいて「ATK」と「TGT」のマーカーを更新する
+ */
+export function updateActionDeclarationMarkers() {
+    const { actionQueue, isStarted } = battleLogic.getBattleState();
+    const allCharacters = charManager.getCharacters();
+
+    // 「何をしているか」のコンテナだけをクリアする
+    allCharacters.forEach(char => clearBubbleMarkers(char.id, 'char-action-marker-container'));
+
+    if (isStarted) {
+        actionQueue.forEach(declaration => {
+            if (!declaration.checked) { // 未解決の宣言のみ
+                const { performer, target, sourceManeuver } = declaration;
+
+                // --- ① 攻撃者のマーカーを決定 ---
+                if (performer) {
+                    let markerText = 'ACT';
+                    let markerColor = '#666'; // デフォルト (その他)
+
+                    if (sourceManeuver.tags.includes('攻撃')) {
+                        markerText = '攻撃';
+                        markerColor = '#c33';
+                    } else if (sourceManeuver.tags.includes('移動')) {
+                        markerText = '移動';
+                        markerColor = '#36c';
+                    } else if (sourceManeuver.category === '支援' || sourceManeuver.tags.includes('支援')) {
+                        markerText = '支援';
+                        markerColor = '#396';
+                    } else if (sourceManeuver.category === '妨害' || sourceManeuver.tags.includes('妨害')) {
+                        markerText = '妨害';
+                        markerColor = '#c63';
+                    }
+                    
+                    addBubbleMarker(performer.id, markerText, 'char-action-marker-container', markerColor, 'white');
+                }
+
+                // --- ② 被攻撃者のマーカー (TGT) ---
+                if (target) {
+                    addBubbleMarker(target.id, 'TGT', 'char-action-marker-container', '#a33', 'white');
+                }
+            }
+        });
     }
 }

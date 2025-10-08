@@ -6,7 +6,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.8.6";
+export const version = "1.8.7";
 
 // --- モジュールのインポート ---
 import * as data from './data-handler.js';
@@ -67,7 +67,17 @@ function createCharacterInstanceFromObject(characterObject, type, initialArea) {
     const newChar = JSON.parse(JSON.stringify(characterObject));
     newChar.id = `char_${nextUniqueId++}`;
     newChar.type = type;
-    
+
+    // 1. 本来の名前を originalName として保存
+    newChar.originalName = characterObject.name || '名称未設定';
+    // 2. 表示名を displayName として設定（デフォルトは本来の名前）
+    newChar.displayName = characterObject.name || '名称未設定';
+    // 3. 互換性のために従来の name プロパティも displayName を指すようにする
+    Object.defineProperty(newChar, 'name', {
+        get() { return this.displayName; },
+        set(value) { this.displayName = value; }
+    });
+
     // 状態の初期化
     newChar.partsStatus = {};
     let partIdCounter = 0;
@@ -304,6 +314,11 @@ export function moveCharacter(id, direction) {
 export function updateCharacter(id, updates) {
     const char = getCharacterById(id);
     if (char) {
+        // 'name' への更新は 'displayName' への更新として扱う
+        if (updates.name) {
+            updates.displayName = updates.name;
+            delete updates.name;
+        }
         Object.assign(char, updates);
         if (char.isDestroyed || char.hasWithdrawn) {
             char.actionValue = 0;

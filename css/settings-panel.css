@@ -25,7 +25,6 @@
     border-radius: 5px;
     transition: all 0.2s ease-in-out;
 }
-
 /* ラジオボタン本体は非表示にする */
 .theme-switcher-container input[type="radio"] {
     display: none;
@@ -39,10 +38,18 @@
     padding: 2px 10px;
     border-radius: 20px;
 }
+/* セッション管理 */
+#session-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 2列グリッド */
+    gap: 5px; /* ボタン間の隙間 */
+}
+
 .session-btn {
+    font-size: 12px;
     width: 100%;
-    padding: 3px;
-    margin-bottom: 5px;
+    padding: 5px 3px;
+    margin: 0;
     border-radius: 30px;
     cursor: pointer;
     font-weight: bold;

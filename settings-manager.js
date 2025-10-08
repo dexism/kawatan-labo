@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.2.6";
+export const version = "1.2.8";
 
 import * as stateManager from './state-manager.js';
 
@@ -57,6 +57,35 @@ export function initialize() {
         });
     });
 
+    const loadFromFileBtn = document.getElementById('loadStateFromFileBtn');
+    const fileInput = document.getElementById('fileInput');
+
+    if (loadFromFileBtn && fileInput) {
+        // 「ファイルから読込み」ボタンがクリックされたら、隠れているinput要素をクリックする
+        loadFromFileBtn.onclick = () => {
+            // 同じファイルを連続で選択できるように、inputの値をリセットする
+            fileInput.value = '';
+            fileInput.click();
+        };
+
+        // ユーザーがファイルを選択したら、changeイベントが発火する
+        fileInput.onchange = (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+
+            // ファイルの読み込みが完了したときに実行される
+            reader.onload = (e) => {
+                const jsonString = e.target.result;
+                // state-manager の新しい関数を呼び出して、復元処理を依頼する
+                stateManager.loadStateFromFile(jsonString);
+            };
+            
+            // ファイルの読み込みを開始
+            reader.readAsText(file);
+        };
+    }
     console.log("Settings Manager initialized.");
 }
 

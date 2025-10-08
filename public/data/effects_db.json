@@ -156,6 +156,14 @@
             "duration": "onetime_next_action"
         }]
     },
+    "TAKE_DAMAGE_FOR_ALLY": {
+        "name": "味方のダメージを肩代わり",
+        "description": "射程内にいる味方が受ける予定のダメージを、代わりに自身が受ける。",
+        "actions": [{
+            "action_type": "redirect_damage_from_ally",
+            "range": "$params.range"
+        }]
+    },
     "WAIT": { 
         "name": "待機", "description": "何もせず手番を終了する。", "actions": [{ "action_type": "wait" }] 
     },

@@ -243,7 +243,7 @@
   background:          #dff;
   outline: 2px solid   cyan;
   transform: scale(1.1);
-  z-index: 100;
+  z-index: 101;
 }
 body.is-dragging .char.hover-highlight {
   transform: scale(1);
@@ -303,6 +303,64 @@ body.is-dragging .char.hover-highlight {
   color:            black;
   transform: rotate(2deg); 
   top: 55%;
+}
+/* main-content.css の末尾に追加 */
+
+/* ================================
+   ふきだしマーカー
+================================ */
+
+/* マーカーを格納するコンテナ */
+.char-bubble-marker-container {
+    position: absolute;
+    top: 62px;
+    left: -15px;
+    left: 0;
+    width: 100%;
+    height: 30px; /* マーカーの高さに合わせる */
+
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    gap: 4px; /* マーカー間の隙間 */
+    
+    pointer-events: none; /* マウスイベントを透過させる */
+    z-index: 10; /* 他のオーバーレイより手前に表示 */
+}
+/* 「何をしているか」を表示するマーカーのコンテナ */
+.char-action-marker-container {
+    position: absolute;
+    top: 97px; /* bubble-marker-container の下に配置 */
+    left: 0;
+    width: 100%;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    pointer-events: none;
+    z-index: 10;
+}
+/* ふきだしマーカー本体 */
+.bubble-marker {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%; /* 円形にする */
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 0 5px black;
+    box-shadow: 0 0 5px var(--color-8);
+    
+    /* デフォルトの背景色と枠線 */
+    background-color: red;
+    border: 2px solid white;
+    box-sizing: border-box;
 }
 
 /* 「アンデッドを追加」カード */
@@ -400,15 +458,16 @@ body.is-dragging .char.hover-highlight {
   color:            #000;
   border: 2px solid #fff;
 }
-/* ダメージボタン */
+/* ダメージマーカー */
 .damage-prompt-container {
     position: absolute;
-    top: 0; left: 0;
+    top: 113px; 
+    left: 0;
     width: 100%;
     height: 100%;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: start;
     pointer-events: none;
     z-index: 9;
 }
@@ -418,7 +477,7 @@ body.is-dragging .char.hover-highlight {
     border: 2px solid    white;
     box-shadow: 0 0 10px black;
     border-radius: 8px;
-    padding: 8px 16px;
+    padding: 2px 10px;
     font-size: 1.2em;
     font-weight: bold;
     cursor: pointer;
