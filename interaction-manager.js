@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "2.5.16"; // パッチバージョンを更新
+export const version = "2.5.17"; // パッチバージョンを更新
 
 import * as data from './data-handler.js'; 
 import * as charManager from './character-manager.js';
@@ -83,7 +83,10 @@ export function setupAllEventListeners() {
     
     const saveBtn = document.getElementById('saveStateBtn');
     if (saveBtn) {
-        saveBtn.onclick = stateManager.saveState;
+        saveBtn.onclick = () => {
+            // 手動保存であることを示すフラグを引数として渡す
+            stateManager.saveState(true);
+        };
     }
 
     const clearBtn = document.getElementById('clearStateBtn');

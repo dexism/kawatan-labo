@@ -33,6 +33,7 @@ h2 {
   --cell-width:    40px;
   --cell-height:   40px;
   --right-width:  300px;
+  --card-size:    160px;
   /* Sizing & Spacing */
   --spacing-small:         5px;
   --spacing-medium:       10px;

@@ -2,7 +2,7 @@
  * @file state-manager.js
  * @description アプリケーションのセッション状態の保存と復元を担当するモジュール
  */
-export const version = "2.1.11"; // ファイルロード機能の実装とリファクタリング
+export const version = "2.1.12"; // ファイルロード機能の実装とリファクタリング
 
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
@@ -33,10 +33,15 @@ export function setAutoSave(isEnabled) {
 
 export function autoSave() {
     if (isLoading || !isAutoSaveEnabled) return;
+    // ★ 手動保存ではないので、引数なしで呼び出す
     saveState();
 }
 
-export function saveState() {
+/**
+ * 現在の状態をlocalStorageに保存する
+ * @param {boolean} [isManualSave=false] - 手動保存ボタンからの呼び出しかどうかを示すフラグ
+ */
+export function saveState(isManualSave = false) {
     try {
         const battleState = battleLogic.getBattleState();
         const characters = charManager.getCharacters();
@@ -97,11 +102,12 @@ export function saveState() {
         
         localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
 
-        if (!isAutoSaveEnabled) {
+        if (isManualSave) {
             ui.showToastNotification('現在の状態を保存しました', 2000);
-        } else {
+        } else if (isAutoSaveEnabled) {
             console.log("Session auto-saved.");
         }
+
     } catch (error) {
         console.error("状態の保存に失敗しました:", error);
     }
@@ -151,9 +157,9 @@ export async function loadState(undeadTemplates) {
 }
 
 /**
- * 【新設・完全版】状態を復元する共通の実行関数
+ * 【修正版】状態を復元する共通の実行関数
  * @param {object} stateObject - 復元する状態オブジェクト
- * @param {object} [undeadTemplates] - undead.json のマスターデータ (localStorageからのロード時のみ必要)
+ * @param {object} [undeadTemplates] - undead.json のマスターデータ
  */
 async function executeLoad(stateObject, undeadTemplates) {
     const templates = undeadTemplates || data.getUndeadTemplates();
@@ -170,7 +176,8 @@ async function executeLoad(stateObject, undeadTemplates) {
             img: c.img,
             area: c.area,
             stackCount: c.stackCount,
-            regrets: c.regrets
+            regrets: c.regrets,
+            displayName: c.displayName
         }));
 
         const currentStates = stateObject.currentStates || stateObject.characters;
@@ -202,13 +209,11 @@ async function executeLoad(stateObject, undeadTemplates) {
             const newChar = charManager.addCharacterFromObject(charObject, initialState.type);
             idMap.set(initialState.charId, newChar.id);
             
+            // ★★★ 修正箇所 ★★★
+            // ここでは initialState の情報のみを適用する
             charManager.updateCharacter(newChar.id, {
-                area: initialState.area,
-                stackCount: initialState.stackCount,
-                displayName: currentState.displayName || charToUpdate.originalName,
-                img: initialState.img,
-                regrets: initialState.regrets,
                 displayName: initialState.displayName || newChar.originalName
+                // area や stackCount は、後の currentStates で上書きされるので、ここでは適用しない
             });
 
             loadedCount++;
@@ -228,9 +233,12 @@ async function executeLoad(stateObject, undeadTemplates) {
                 const charToUpdate = charManager.getCharacterById(newCharId);
                 
                 if (charToUpdate) {
+                    // ★★★ 修正箇所 ★★★
+                    // currentState の全ての情報をここで適用する
                     charManager.updateCharacter(charToUpdate.id, {
                         area: currentState.area,
                         stackCount: currentState.stackCount,
+                        displayName: currentState.displayName || charToUpdate.originalName,
                         actionValue: currentState.actionValue,
                         isDestroyed: currentState.isDestroyed,
                         hasWithdrawn: currentState.hasWithdrawn,
@@ -247,6 +255,18 @@ async function executeLoad(stateObject, undeadTemplates) {
             });
             battleLogic.restoreBattleState(turn, charManager.getCharacters());
         } else {
+            // 戦闘準備中の場合は initialStates の情報を適用
+            initialStates.forEach(initialState => {
+                const newCharId = idMap.get(initialState.charId);
+                if(newCharId) {
+                    charManager.updateCharacter(newCharId, {
+                        area: initialState.area,
+                        stackCount: initialState.stackCount,
+                        img: initialState.img,
+                        regrets: initialState.regrets,
+                    });
+                }
+            });
             ui.renderCharacterCards();
             ui.updateBattleStatusUI();
         }
@@ -347,6 +367,7 @@ export function saveStateToFile() {
             characters: characters.map((char) => ({
                 sourceType: char.sheetId ? 'sheet' : 'template',
                 id: char.sheetId || char.templateId,
+                displayName: char.displayName,
                 type: char.type,
                 img: char.img,
                 area: char.area,

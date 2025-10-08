@@ -6,7 +6,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.12.75";
+export const version = "1.12.76";
 
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
@@ -302,6 +302,9 @@ function createCharacterCard(char, isSetupPhase) {
             <div class="status-tape status-tape-withdrawn">ESCAPE 戦場離脱 ESCAPE</div>
         </div>
         <div class="char-img-container">
+            <img src="${char.img}" alt="${char.name}">
+        </div>
+        <div class="char-stats"></div>
             <div class="char-bubble-marker-container" data-id="${char.id}"></div>
             <div class="char-action-marker-container" data-id="${char.id}"></div>
             <div class="damage-prompt-container"></div> 
@@ -311,10 +314,6 @@ function createCharacterCard(char, isSetupPhase) {
             ${actionValueDisplay}
             ${madnessHtml} 
             ${partsStatusHtml} 
-            <img src="${char.img}" alt="${char.name}">
-        </div>
-        <div class="char-stats">
-        </div>
         ${isSetupPhase ? setupPhaseActions : ''}
     `;
     return card;
@@ -509,7 +508,7 @@ export function updateBattleStatusUI() {
             // (ラピッド、ジャッジ、ダメージの判定は変更なし)
             const canRapid = usableManeuvers.some(m => m.data.timing === 'ラピッド' && m.isUsable);
             if (canRapid) {
-                addBubbleMarker(char.id, 'RAP', 'char-bubble-marker-container', '#c63', 'white');
+                addBubbleMarker(char.id, 'RPD', 'char-bubble-marker-container', '#c63', 'white');
             }
             const canJudge = usableManeuvers.some(m => m.data.timing === 'ジャッジ' && m.isUsable);
             if (canJudge) {
@@ -970,7 +969,6 @@ export function showModal(options) {
     // --- 5. モーダルを表示 ---
     modal.classList.add('is-visible');
 }
-// ファイルの末尾に、以下の3つの関数を追加してください。
 
 /**
  * ローディング進捗バーを表示する

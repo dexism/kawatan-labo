@@ -6,7 +6,7 @@
 /**
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.3.22";
+export const version = "1.3.23";
 
 // import { showModal } from './ui-manager.js';
 import { showModal, showToastNotification } from './ui-manager.js';
@@ -43,15 +43,15 @@ export function initializeDiceRoller(data) {
 export function buildDiceMenu() {
     // メニュー項目のデータ構造を定義
     const menuItems = [
-        { label: 'ダイスロール', isTitle: true },
-        { label: 'NA  攻撃判定', onClick: () => performDiceRoll({ command: 'NA', showToast: true }) },
-        { label: 'NC  判定', onClick: () => performDiceRoll({ command: 'NC', showToast: true }) },
-        { label: 'NM  姉妹への未練', onClick: () => performDiceRoll({ command: 'NM', showToast: true }) },
+        { label: '🎲 ダイスロール', isTitle: true },
+        { label: 'NA 攻撃判定', onClick: () => performDiceRoll({ command: 'NA', showToast: true }) },
+        { label: 'NC 判定', onClick: () => performDiceRoll({ command: 'NC', showToast: true }) },
+        { label: 'NM 姉妹への未練', onClick: () => performDiceRoll({ command: 'NM', showToast: true }) },
         { label: 'NME 敵への未練', onClick: () => performDiceRoll({ command: 'NME', showToast: true }) },
         { label: 'NMN 中立者への未練', onClick: () => performDiceRoll({ command: 'NMN', showToast: true }) },
-        { label: 'NT  たからもの表', onClick: () => performDiceRoll({ command: 'NT', showToast: true }) },
-        { label: 'NK  記憶のカケラ', onClick: () => performDiceRoll({ command: 'NK', showToast: true }) },
-        { label: 'NH  暗示表', onClick: () => performDiceRoll({ command: 'NH', showToast: true }) },
+        { label: 'NT たからもの表', onClick: () => performDiceRoll({ command: 'NT', showToast: true }) },
+        { label: 'NK 記憶のカケラ', onClick: () => performDiceRoll({ command: 'NK', showToast: true }) },
+        { label: 'NH 暗示表', onClick: () => performDiceRoll({ command: 'NH', showToast: true }) },
         { label: '1D10', onClick: () => performDiceRoll({ command: '1d10', showToast: true }) },
         { label: '1D100', onClick: () => performDiceRoll({ command: '1d100', showToast: true }) },
         
@@ -101,7 +101,7 @@ export function buildDiceMenu() {
         }
     ];
 
-    showModal({ title: 'ダイスロール', items: menuItems });
+    showModal({ title: '🎲 ダイスロール', items: menuItems });
 }
 
 // --- 以下はこのファイル内でのみ使われるヘルパー関数 ---

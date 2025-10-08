@@ -44,10 +44,7 @@
     /* 表示/非表示のアニメーション */
     opacity: 0;
     visibility: hidden;
-    transition:
-        opacity 0.2s ease,
-        visibility 0.2s;
-
+    transition: all 0.2s ease;
     /* 非表示時はクリックイベントを無効化 */
     pointer-events: none; 
 }
@@ -86,11 +83,9 @@
     pointer-events: auto;
 
     /* 初期状態：少し下にあり、透明 */
-    transform: translateY(80%);
-    opacity: 0.2;
-    transition:
-        transform 0.2s ease-out,
-        opacity   0.2s ease-out;
+    transform: translateY(100%);
+    opacity: 1;
+    transition: all 0.2s ease-out;
     padding: 10px;
 }
 /* モーダル表示時に、コンテンツをスライドインさせる */
@@ -615,7 +610,7 @@
     padding: 0;
     box-sizing: border-box;
     overflow-y: auto;
-    justify-content: center;
+    justify-content: start;
     height: auto;
 }
 
