@@ -78,11 +78,13 @@ h2.section-title {
     padding: 5px;
 }
 .phase-indicator.active {
-    text-shadow: 0 0 10px #0f0;
-    box-shadow:  0 0 10px #0f0;
-    background:           #080;
-    color:                #afa;
-    border: 2px solid     #0f0;
+    box-shadow:  
+        0 0  5px         #0ff,
+        0 0 20px         #0ff;
+    text-shadow: 0 0 5px #0ff;
+    background:          #cff;
+    color:               #000;
+    border: 2px solid    #0ff;
     z-index: 100;
 }
 /* カウントダウン／ターン終了 */

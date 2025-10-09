@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "2.5.17"; // パッチバージョンを更新
+export const version = "2.6.19"; // パッチバージョンを更新
 
 import * as data from './data-handler.js'; 
 import * as charManager from './character-manager.js';
@@ -49,27 +49,30 @@ export function setupAllEventListeners() {
         startBattleBtn.onclick = () => {
             if (startBattleBtn.disabled) return;
             battleLogic.startBattle();
+            ui.updateAllUI(); // ★ UI更新を追加
         };
     }
 
-    document.getElementById('countdownBtn').onclick = () => battleLogic.advanceCount();
-    document.getElementById('endTurnBtn').onclick = () => battleLogic.startMadnessPhase();
+    document.getElementById('countdownBtn').onclick = () => {
+        battleLogic.advanceCount();
+        ui.updateAllUI(); // ★ UI更新を追加
+    };
 
-    const resetBtn = document.getElementById('resetBattleBtn');
+    document.getElementById('endTurnBtn').onclick = () => {
+        battleLogic.startMadnessPhase();
+        ui.showMadnessModal(); // ★ startMadnessPhaseは状態を変えるだけなので、モーダル表示はここ
+    };
+
+    const resetBtn = document.getElementById('resetBattleBtn'); // ← 正しいID
     if (resetBtn) {
-        resetBtn.onclick = async () => { // ★ async を追加
+        resetBtn.onclick = async () => {
             if (confirm('バトルパートを終了して、戦闘開始直前の状態に戻します。よろしいですか？')) {
                 ui.showToastNotification("盤面を初期状態に戻しています...", 2000);
                 
-                // battle-logicのリセットを先に実行
-                battleLogic.resetToSetupPhase();
-
-                // ★★★ stateManagerの非同期処理が完了するのを待つ ★★★
                 await stateManager.restoreInitialState();
+                battleLogic.resetToSetupPhase();
                 
-                // 完了後にUIを再描画
-                ui.renderCharacterCards();
-                ui.updateBattleStatusUI();
+                ui.updateAllUI();
 
                 ui.showToastNotification("初期状態に戻りました。", 2000);
             }
@@ -129,24 +132,58 @@ export function setupCharacterEventListeners() {
             };
 
             const deleteBtn = element.querySelector('[data-action="delete"]');
-            if (deleteBtn) { deleteBtn.onclick = (e) => { e.stopPropagation(); charManager.removeCharacter(id); ui.renderCharacterCards(); ui.checkBattleStartCondition(); selectedCardElement = null; }; }
+            if (deleteBtn) {
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    charManager.removeCharacter(id);
+                    ui.updateAllUI(); // 修正: renderCharacterCards/checkBattleStartCondition を updateAllUI に一本化
+                    selectedCardElement = null;
+                };
+            }
             
             const detailsBtn = element.querySelector('[data-action="details"]');
-            if (detailsBtn) { detailsBtn.onclick = (e) => { e.stopPropagation(); showCharacterSheetModal(char); }; }
+            if (detailsBtn) {
+                detailsBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    showCharacterSheetModal(char);
+                };
+            }
 
             const placeBtn = element.querySelector('[data-action="place"]');
             if (placeBtn) { 
                 placeBtn.onclick = (e) => { 
                     e.stopPropagation(); 
                     buildPlacementMenu(char, element, e); 
+                    // ★★★ ここにUI更新を追加 ★★★
+                    // buildPlacementMenu はモーダルを表示するだけ。
+                    // 実際に状態が変わるのはモーダル内のボタンが押された後だが、
+                    // 現状の menu-builder の作りでは、変更を検知して更新するのが難しい。
+                    // そのため、暫定的にモーダルを閉じた後にUIが更新されることを期待する。
+                    // → ここでの修正は一旦見送り、menu-builder 側の onclick で対応するのが現実的。
                 }; 
             }
             
+            // 変数定義をイベントリスナー設定の前に移動
             const leftBtn = element.querySelector('[data-action="move-left"]');
-            if (leftBtn) { leftBtn.onclick = (e) => { e.stopPropagation(); charManager.moveCharacter(id, 'left'); ui.renderCharacterCards(); selectedCardElement = null; }; }
-            
             const rightBtn = element.querySelector('[data-action="move-right"]');
-            if (rightBtn) { rightBtn.onclick = (e) => { e.stopPropagation(); charManager.moveCharacter(id, 'right'); ui.renderCharacterCards(); selectedCardElement = null; }; }
+
+            if (leftBtn) {
+                leftBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    charManager.moveCharacter(id, 'left');
+                    ui.updateAllUI(); // 修正: renderCharacterCards を updateAllUI に一本化
+                    selectedCardElement = null;
+                };
+            }
+            
+            if (rightBtn) {
+                rightBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    charManager.moveCharacter(id, 'right');
+                    ui.updateAllUI(); // 修正: renderCharacterCards を updateAllUI に一本化
+                    selectedCardElement = null;
+                };
+            }
 
             const sameTypeChars = charManager.getCharacters().filter(c => c.type === char.type);
             const relativeIndex = sameTypeChars.findIndex(c => c.id === id);
@@ -268,38 +305,43 @@ export function setupMadnessModalEventListeners(pcs) {
         selections.forEach((regretId, pcId) => charManager.addMadnessPoint(pcId, regretId));
         modal.classList.remove('is-visible');
         battleLogic.proceedToNextTurn();
+        ui.updateAllUI(); // ★ UI更新を追加
     };
 }
 
 // --- ユーザー操作の処理（イベントハンドラ）---
 export function handleQueueCheck(queueType, index, isChecked) {
     battleLogic.handleQueueCheck(queueType, index, isChecked);
+    ui.updateAllUI(); // ★ UI更新を追加
 }
 
 export function handleRapidItemClick(index) {
-    battleLogic.resolveRapidByIndex(index);
+    battleLogic.resolveRapidByIndex(index).then(() => {
+        ui.updateAllUI(); // ★ UI更新を追加
+    });
 }
 
 export function handleActionItemClick(index) {
-    // 1. 宣言内容を取得
     const state = battleLogic.getBattleState();
     const declaration = state.actionQueue[index];
     if (!declaration) return;
 
     const { performer, target, sourceManeuver } = declaration;
 
-    // 2. 攻撃マニューバかどうかを判定
     if (sourceManeuver.tags.includes('攻撃')) {
-        // 3. 攻撃なら確認モーダルを表示
+        // 攻撃の場合は確認モーダルを表示。UI更新はモーダル側が担当する。
         showAttackConfirmationModal(performer, target, sourceManeuver, index);
     } else {
-        // 4. 攻撃でなければ直接解決
-        battleLogic.resolveActionByIndex(index);
+        // 攻撃以外は、解決後に即座にUIを更新する。
+        battleLogic.resolveActionByIndex(index).then(() => {
+            ui.updateAllUI();
+        });
     }
 }
 
 export function handleJudgeItemClick(index) {
     battleLogic.checkJudgeItem(index);
+    ui.updateAllUI(); // ★ UI更新を追加
 }
 
 export function handleDamageItemClick(index) {
@@ -310,18 +352,18 @@ export function handleDamageItemClick(index) {
     const character = charManager.getCharacterById(damageInfo.target.id);
     if (!character) return;
     
-    // ★★★ 修正箇所 ★★★
-    // パーツ選択モーダルを直接呼び出すのではなく、
-    // 新しいダメージ計算モーダルを呼び出す。
     showDamageCalculationModal(damageInfo, (finalDamage) => {
-        // ダメージ計算モーダルで「確定」が押された後の処理 (元のロジックをここに移動)
-        const onConfirmCallback = () => { battleLogic.applyDamage(index); };
+        // ダメージ適用後にUIを更新するためのコールバック
+        const onConfirmCallback = () => {
+            battleLogic.applyDamage(index);
+            ui.updateAllUI(); // ★ UI更新をここに追加
+        };
 
         if (finalDamage <= 0) {
             ui.addLog(`＞ ${character.name}への攻撃は完全に防がれ、ダメージはありませんでした。`);
             ui.removeDamagePrompt(character.id);
-            onConfirmCallback(); // ダメージ0でも処理済みとしてキューから消す
-            return; // これ以降の処理（損傷モーダル表示など）を中断
+            onConfirmCallback();
+            return;
         }
 
         if (character.category === 'レギオン' || Object.values(character.partsStatus).flat().filter(p => !p.damaged).length <= finalDamage) {
@@ -336,14 +378,10 @@ export function handleDamageItemClick(index) {
                 charManager.updateCharacter(character.id, { isDestroyed: true });
                 ui.showToastNotification(`${character.name}は完全破壊されました`);
             }
-            // データが変更された直後に、カードとマーカーの表示を即時更新する
-            ui.updateSingleCharacterCard(character.id);
-            ui.updateMarkers();
-
             ui.removeDamagePrompt(character.id);
-            onConfirmCallback();
+            onConfirmCallback(); // 状態変更後にコールバックを呼び出す
         } else {
-            // 元のパーツ損傷モーダルには、計算済みの finalDamage を渡す
+            // showDamageModal は、内部の確定ボタンで onConfirmCallback を呼び出す
             showDamageModal(character, finalDamage, damageInfo.location, onConfirmCallback);
         }
     });
@@ -446,9 +484,8 @@ function showDamageModal(target, damageAmount, hitLocation, onConfirmCallback) {
     confirmBtn.onclick = () => {
         selectedParts.forEach(partId => charManager.damagePart(target.id, partId));
         modal.classList.remove('is-visible');
-        ui.hideManeuverCard();
-        ui.updateSingleCharacterCard(target.id);
-        ui.updateMarkers();
+        // onConfirmCallback が battleLogic.applyDamage を呼び、
+        // その後に ui.updateAllUI() を呼び出すのが正しいフロー
         if (onConfirmCallback) onConfirmCallback();
     };
     

@@ -5,9 +5,10 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.2.8";
+export const version = "1.2.9";
 
 import * as stateManager from './state-manager.js';
+import * as ui from './ui-manager.js';
 
 export function initialize() {
     const themeRadios = document.querySelectorAll('input[name="theme-switcher"]');
@@ -69,17 +70,22 @@ export function initialize() {
         };
 
         // ユーザーがファイルを選択したら、changeイベントが発火する
-        fileInput.onchange = (event) => {
+        fileInput.onchange = async (event) => { // ★ async を追加
             const file = event.target.files[0];
             if (!file) return;
 
             const reader = new FileReader();
 
-            // ファイルの読み込みが完了したときに実行される
-            reader.onload = (e) => {
+            reader.onload = async (e) => { // ★ async を追加
                 const jsonString = e.target.result;
-                // state-manager の新しい関数を呼び出して、復元処理を依頼する
-                stateManager.loadStateFromFile(jsonString);
+                // ★★★ ここからが修正箇所です ★★★
+                // 1. stateManagerに復元処理を依頼し、成否を受け取る
+                const success = await stateManager.loadStateFromFile(jsonString);
+                
+                // 2. 成功した場合のみ、UI全体を更新する
+                if (success) {
+                    ui.updateAllUI();
+                }
             };
             
             // ファイルの読み込みを開始

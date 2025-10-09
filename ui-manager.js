@@ -6,7 +6,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.12.76";
+export const version = "1.13.79";
 
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
@@ -21,9 +21,28 @@ const cols = Array.from({ length: 26 }, (_, i) => 20 - i);
 
 export function initialize() { console.log("UI Manager initialized."); }
 
+/**
+ * 【新設】アプリケーションのUI全体を、現在の最新状態に基づいて完全に再描画する司令塔
+ */
+export function updateAllUI() {
+    const battleState = battleLogic.getBattleState();
+    const characters = charManager.getCharacters();
+
+    // 1. キャラクターカードの再描画
+    renderCharacterCards();
+    
+    // 2. バトルグリッド上のマーカーを再描画
+    updateMarkers();
+
+    // 3. 右側パネルの全要素（インジケータ、キュー、マーカー）を更新
+    //    updateBattleStatusUI の責務を、右側パネルの更新に限定する
+    updateStatusPanel(battleState, characters);
+}
+
 // ===================================================================================
 //  UI構築 / 描画関数 (Build / Render)
 // ===================================================================================
+
 export function buildGrid() {
   document.documentElement.style.setProperty('--col-count', cols.length);
   document.documentElement.style.setProperty('--row-count', rows.length);
@@ -174,7 +193,7 @@ function createCharacterCard(char, isSetupPhase) {
             const points = regret.points || 0;
             let line = '';
             for (let i = 0; i < 4; i++) {
-                line += (i < points) ? '◆' : '◇';
+                line += (i < points) ? '◆' : '・';
             }
             const madnessClass = (points >= 4) ? 'is-madness' : '';
             return `<div class="${madnessClass}">${line}</div>`;
@@ -210,12 +229,12 @@ function createCharacterCard(char, isSetupPhase) {
                 
                 const symbols = sortedParts.map(item => {
                     if (item.isTreasure) {
-                        return item.damaged ? '☆' : '★';
+                        return item.damaged ? '・' : '★';
                     }
                     if (item.isBasicPart) {
-                        return item.damaged ? '□' : '■';
+                        return item.damaged ? '・' : '■';
                     }
-                    return item.damaged ? '〇' : '●';
+                    return item.damaged ? '・' : '●';
                 }).join('');
 
                 if (loc === 'body' && !char.partsStatus[loc].some(p => p.name !== treasureName)) {
@@ -241,14 +260,14 @@ function createCharacterCard(char, isSetupPhase) {
             let enhancementLine = '';
             if (enhancementParts.length > 0) {
                 const damagedCount = enhancementParts.filter(p => p.damaged).length;
-                const symbols = '〇'.repeat(damagedCount) + '●'.repeat(enhancementParts.length - damagedCount);
+                const symbols = '・'.repeat(damagedCount) + '●'.repeat(enhancementParts.length - damagedCount);
                 enhancementLine = `<div>${symbols}：強</div>`;
             }
 
             let basicLine = '';
             if (basicParts.length > 0) {
                 const damagedCount = basicParts.filter(p => p.damaged).length;
-                const symbols = '□'.repeat(damagedCount) + '■'.repeat(basicParts.length - damagedCount);
+                const symbols = '・'.repeat(damagedCount) + '■'.repeat(basicParts.length - damagedCount);
                 basicLine = `<div>${symbols}：基</div>`;
             }
             
@@ -416,111 +435,81 @@ export function updateMarkers() {
     interactionManager.setupCharacterEventListeners();
 }
 
-export function updateBattleStatusUI() {
-    const { isStarted, turn, count, activeActors, potentialActors, shouldScrollToCount } = battleLogic.getBattleState();
+/**
+ * 【改名・修正】右側パネルの状態と、それに関連するUI（ハイライト、マーカー）を更新する
+ * @param {object} state - battleLogic.getBattleState() から取得した現在の戦闘状態
+ * @param {Array<object>} characters - charManager.getCharacters() から取得したキャラクターのリスト
+ */
+function updateStatusPanel(state, characters) {
+    const { isStarted, turn, count, activeActors, potentialActors, shouldScrollToCount } = state;
     
+    // --- DOM要素の取得 ---
     const timingArea = document.getElementById('timingArea');
     const battleWrap = document.getElementById('battleWrap');
+    const turnIndicator = document.getElementById('turnIndicator');
+    const countIndicator = document.getElementById('countIndicator');
+    const cavEl = document.getElementById('currentActionValue');
+    const resetBtn = document.getElementById('resetBattleBtn');
 
     if (timingArea) {
         if (isStarted) {
             timingArea.classList.remove('setup-phase');
             timingArea.classList.add('battle-phase');
             battleWrap.classList.remove('setup-phase');
+            if (resetBtn) resetBtn.disabled = false; // 戦闘中はボタンを有効化
         } else {
             timingArea.classList.add('setup-phase');
             timingArea.classList.remove('battle-phase');
             battleWrap.classList.add('setup-phase');
+            if (resetBtn) resetBtn.disabled = true; // 戦闘準備中はボタンを非活性化
         }
     }
-
-    const oldTurnText = document.getElementById('turnIndicator').textContent;
-    if (String(turn) !== oldTurnText && isStarted) {
-        addLog(`【ターン ${turn} 開始】`);
-    }
     
-    const turnIndicator = document.getElementById('turnIndicator');
-    const countIndicator = document.getElementById('countIndicator');
-    const cavEl = document.getElementById('currentActionValue');
-
     if (!isStarted) {
         turnIndicator.textContent = '-';
         countIndicator.textContent = '-';
         cavEl.textContent = `カウント -`;
-        document.querySelectorAll('.highlight-char').forEach(card => card.classList.remove('highlight-char'));
-        battleWrap.querySelectorAll('.highlight-col').forEach(el => el.classList.remove('highlight-col'));
-        updatePhaseUI(battleLogic.getBattleState());
-        return;
+    } else {
+        if (String(turn) !== turnIndicator.textContent) addLog(`【ターン ${turn} 開始】`);
+        turnIndicator.textContent = turn;
+        countIndicator.textContent = count;
+        cavEl.textContent = `カウント ${count}`;
     }
     
-    turnIndicator.textContent = turn;
-    countIndicator.textContent = count;
-    cavEl.textContent = `カウント ${count}`;
+    battleWrap.querySelectorAll('.highlight-col').forEach(el => el.classList.remove('highlight-col'));
+    if(isStarted) {
+        battleWrap.querySelectorAll(`.cell[data-col="${count}"], .col-header[data-col="${count}"]`).forEach(el => el.classList.add('highlight-col'));
+        if (shouldScrollToCount) {
+            const scrollWrapper = document.querySelector('.battle-grid-scroll-wrapper');
+            const targetColHeader = battleWrap.querySelector(`.col-header[data-col="${count}"]`);
+            if (scrollWrapper && targetColHeader) {
+                scrollWrapper.scrollTo({ left: targetColHeader.offsetLeft - scrollWrapper.offsetLeft - 50, behavior: 'smooth' });
+            }
+            battleLogic.clearScrollFlag();
+        }
+    }
 
+    const activeActorIds = new Set(activeActors.map(c => c.id));
     document.querySelectorAll('.char').forEach(card => {
-        card.classList.toggle('highlight-char', activeActors.some(c => c.id === card.dataset.id));
+        card.classList.toggle('highlight-char', activeActorIds.has(card.dataset.id));
     });
 
-    battleWrap.querySelectorAll('.highlight-col').forEach(el => el.classList.remove('highlight-col'));
-    battleWrap.querySelectorAll(`.cell[data-col="${count}"], .col-header[data-col="${count}"]`).forEach(el => el.classList.add('highlight-col'));
+    if (activeActors.length > 0) scrollToFirstCharacter(activeActors);
 
-    if (shouldScrollToCount) {
-        const scrollWrapper = document.querySelector('.battle-grid-scroll-wrapper');
-        const targetColHeader = battleWrap.querySelector(`.col-header[data-col="${count}"]`);
-        const rowHeader = battleWrap.querySelector('.row-header');
-
-        if (scrollWrapper && targetColHeader && rowHeader) {
-            const rowHeaderWidth = rowHeader.offsetWidth;
-            const targetOffsetLeft = targetColHeader.offsetLeft;
-            const scrollToPosition = targetOffsetLeft - rowHeaderWidth;
-
-            scrollWrapper.scrollTo({
-                left: scrollToPosition,
-                behavior: 'smooth'
-            });
-        }
-        battleLogic.clearScrollFlag();
-    }
-
-    if (activeActors.length > 0) {
-        scrollToFirstCharacter(activeActors);
-    }
-
-    updatePhaseUI(battleLogic.getBattleState());
-    updateAllQueuesUI();
-    // 「行動可能か」を示すマーカー("ACT", "RAP"など)を更新する
-    const allCharacters = charManager.getCharacters();
-
-    // const potentialActorIds = new Set(potentialActors.map(char => char.id));
-
-    allCharacters.forEach(char => {
+    const potentialActorIds = new Set(potentialActors.map(char => char.id));
+    characters.forEach(char => {
         clearBubbleMarkers(char.id, 'char-bubble-marker-container');
-
         if (isStarted && !char.isDestroyed && !char.hasWithdrawn) {
             const usableManeuvers = getCharacterManeuvers(char);
-            
-            // アクション可能かチェック（シンプルな条件に戻す）
-            const canAct = usableManeuvers.some(m => m.data.timing === 'アクション' && m.isUsable);
-            if (canAct) {
-                addBubbleMarker(char.id, 'ACT', 'char-bubble-marker-container', '#36c', 'white');
-            }
-            
-            // (ラピッド、ジャッジ、ダメージの判定は変更なし)
-            const canRapid = usableManeuvers.some(m => m.data.timing === 'ラピッド' && m.isUsable);
-            if (canRapid) {
-                addBubbleMarker(char.id, 'RPD', 'char-bubble-marker-container', '#c63', 'white');
-            }
-            const canJudge = usableManeuvers.some(m => m.data.timing === 'ジャッジ' && m.isUsable);
-            if (canJudge) {
-                addBubbleMarker(char.id, 'JDG', 'char-bubble-marker-container', '#396', 'white');
-            }
-            const canDamage = usableManeuvers.some(m => m.data.timing === 'ダメージ' && m.isUsable);
-            if (canDamage) {
-                addBubbleMarker(char.id, 'DMG', 'char-bubble-marker-container', '#933', 'white');
-            }
+            if (potentialActorIds.has(char.id)) addBubbleMarker(char.id, 'ACT', 'char-bubble-marker-container', '#36c', 'white');
+            if (usableManeuvers.some(m => m.data.timing === 'ラピッド' && m.isUsable)) addBubbleMarker(char.id, 'RPD', 'char-bubble-marker-container', '#c63', 'white');
+            if (usableManeuvers.some(m => m.data.timing === 'ジャッジ' && m.isUsable)) addBubbleMarker(char.id, 'JDG', 'char-bubble-marker-container', '#396', 'white');
+            if (usableManeuvers.some(m => m.data.timing === 'ダメージ' && m.isUsable)) addBubbleMarker(char.id, 'DMG', 'char-bubble-marker-container', '#933', 'white');
         }
     });
 
+    updatePhaseUI(state);
+    updateAllQueuesUI();
     updateActionDeclarationMarkers();
 }
 
@@ -1072,16 +1061,16 @@ export function updateActionDeclarationMarkers() {
 
                     if (sourceManeuver.tags.includes('攻撃')) {
                         markerText = '攻撃';
-                        markerColor = '#c33';
+                        markerColor = '#f0f';
                     } else if (sourceManeuver.tags.includes('移動')) {
                         markerText = '移動';
-                        markerColor = '#36c';
+                        markerColor = '#0f0';
                     } else if (sourceManeuver.category === '支援' || sourceManeuver.tags.includes('支援')) {
                         markerText = '支援';
-                        markerColor = '#396';
+                        markerColor = '#0ff';
                     } else if (sourceManeuver.category === '妨害' || sourceManeuver.tags.includes('妨害')) {
                         markerText = '妨害';
-                        markerColor = '#c63';
+                        markerColor = '#ff0';
                     }
                     
                     addBubbleMarker(performer.id, markerText, 'char-action-marker-container', markerColor, 'white');
@@ -1089,7 +1078,7 @@ export function updateActionDeclarationMarkers() {
 
                 // --- ② 被攻撃者のマーカー (TGT) ---
                 if (target) {
-                    addBubbleMarker(target.id, 'TGT', 'char-action-marker-container', '#a33', 'white');
+                    addBubbleMarker(target.id, 'TGT', 'char-action-marker-container', '#f00', 'white');
                 }
             }
         });

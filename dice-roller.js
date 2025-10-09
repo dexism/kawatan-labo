@@ -6,7 +6,7 @@
 /**
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.3.23";
+export const version = "1.3.24";
 
 // import { showModal } from './ui-manager.js';
 import { showModal, showToastNotification } from './ui-manager.js';
@@ -208,12 +208,14 @@ export function performDiceRoll(rollData) {
                 return;
             }
 
-            // ★★★ お客様ご提示の正しい判定ロジック ★★★
-
             // 1. 各ダイスの出目(1-10)と、それに修正値を加えた「判定値」の配列を計算
             const rawValues = results.map(r => r.value === 0 ? 10 : r.value);
             const finalValues = rawValues.map(v => v + modifier);
             
+            // 数値として昇順にソートする (a - b)
+            rawValues.sort((a, b) => a - b);
+            finalValues.sort((a, b) => a - b);
+
             // 2. 判定値の最大値(max)と最小値(min)を取得
             const maxFinalValue = Math.max(...finalValues);
             const minFinalValue = Math.min(...finalValues);
@@ -270,7 +272,6 @@ export function performDiceRoll(rollData) {
     } else if (d10Match) {
         const command = d10Match[1];
         
-        // ★★★ 4. 新しいAPIに合わせて呼び出し方を変更 ★★★
         const rollConfig = { dices: [{ color: 0xffffff }] }; // 1個の白いダイス
         roll3DDice(rollConfig, (results) => {
             if (!results || results.length === 0) {
@@ -316,7 +317,6 @@ export function performDiceRoll(rollData) {
             return `🎲 1D100 ＞ ${finalResult} [${tensValue*10} + ${onesValue}]`;
         });
 
-    // ★★★ NKロールも共通関数を呼び出す ★★★
     } else if (cleanedInput === 'nk') {
         performD100Roll(rollData, (finalResult) => {
             const fragment = memoryFragmentsData[finalResult];
@@ -340,6 +340,10 @@ export function performDiceRoll(rollData) {
 
             if (numDice > 0 && sides > 0 && numDice <= 100) {
                 const rolls = Array.from({ length: numDice }, () => Math.floor(Math.random() * sides) + 1);
+
+                // 出目を昇順にソートする
+                rolls.sort((a, b) => a - b);
+
                 const sum = rolls.reduce((a, b) => a + b, 0);
                 const total = sum + modifier;
                 let modifierText = modifier > 0 ? `+${modifier}` : (modifier < 0 ? `${modifier}` : "");

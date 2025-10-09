@@ -7,7 +7,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-const appVersion = "1.3.16";
+const appVersion = "1.3.17";
 
 // --- モジュールのインポート ---
 import * as data from './data-handler.js';
@@ -17,7 +17,7 @@ import {
     addLog as uiAddLog, 
     buildGrid, 
     renderCharacterCards, 
-    updateBattleStatusUI, 
+    updateAllUI,
     checkBattleStartCondition, 
     displayVersionInfo, 
     showModal 
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 function initializeAppUI() {
     buildGrid();
     renderCharacterCards();
-    updateBattleStatusUI();
+    updateAllUI();
     setupAllEventListeners();
     checkBattleStartCondition();
 }
@@ -99,7 +99,7 @@ function initializeAppUI() {
 function showWelcomeAndUpdates() {
     return new Promise(resolve => {
         const LATEST_UPDATE_NOTES = `
-        <div class="modal-header modal-header-sub">📢主な更新内容:7.10.9.2</div>
+        <div class="modal-header modal-header-sub">📢主な更新内容:7.10.9.18</div>
         <div class="modal-body welcome-modal-body">
             <p>◆ <strong>セッションのファイルへの保存・ファイルから読込み</strong>を実装しました。</p>
             <p>◆ <strong>【✏️画像の変更】※透過png対応</strong>：「🪪人形設計図」において<strong>画像の変更</strong>機能を追加しました。
@@ -166,9 +166,14 @@ function showRestoreModal() {
             onRender: (modal, closeFn) => {
                 // 「はい、復元する」ボタンの処理
                 modal.querySelector('#restoreBtn').onclick = async () => {
-                    // ★★★ 確認メッセージなしで即座にモーダルを閉じる ★★★
                     closeFn();
-                    await stateManager.loadState(data.getUndeadTemplates());
+                    // loadState の返り値（成功したかどうか）を受け取る
+                    const success = await stateManager.loadState(data.getUndeadTemplates());
+                    
+                    // ロードが成功した場合のみ、UIを更新する
+                    if (success) {
+                        updateAllUI();
+                    }
                     resolve();
                 };
                 

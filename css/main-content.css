@@ -34,7 +34,7 @@
 .char {
     position: relative;
     width:  var(--card-size);
-    height: var(--card-size);
+    height: calc(1.4 * var(--card-size));
     flex-shrink: 0;
     text-align: center;
     background-color: var(--color-background-1);
@@ -49,9 +49,11 @@
 
 .char img {
     width: 100%;
-    width: 100%;
+    margin-top: 15px;
     aspect-ratio: 1 / 1;
     object-fit: contain;
+    border-radius: 7px;
+    /* background-color: var(--color-background-1); */
 }
 
 /* カード上のオーバーレイ要素 */
@@ -108,7 +110,7 @@
     text-align: left;
 }
 .char-action-value {
-    font-size: 30px;
+    font-size: 26px;
     font-weight: bold;
     line-height: 1.2;
     text-shadow:
@@ -118,51 +120,52 @@
     color:    red;
 }
 .char-action-subtext {
-    font-size: 10px;
+    font-size: 11px;
     font-weight: bold;
     line-height: 1.2;
     text-shadow:
-        0 0 3px white,
-        0 0 3px white,
-        0 0 3px white,
-        0 0 3px white;
-    color:    black;
+        0 0 2px var(--color-background-1),
+        0 0 2px var(--color-background-1),
+        0 0 2px var(--color-background-1),
+        0 0 2px var(--color-background-1);
+    color:      var(--color-fore-3);
 }
 /* 右上 パーツ数 */
 .char-parts-count {
     position: absolute;
     top:   2px;
     right: 8px;
-    font-size: 30px;
+    font-size: 26px;
     font-weight: bold;
     line-height: 1.2;
     text-shadow:
         0 0 6px black,
         0 0 6px black, 
         0 0 6px black;
-    color:    cyan;
+    color:      cyan;
     pointer-events: none;
     z-index: 5;
 }
 /* 右上 スタック数 */
 .char-stack-count {
     position: absolute;
-    top: 4px;
-    right: 4px;
-    min-width: 24px;
-    height: 24px;
-    padding: 2px 6px;
-    border-radius: 50%;
+    top:   5px;
+    right: 5px;
+    padding: 0 4px;
+    border-radius: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
+    font-size: 16px;
     font-weight: bold;
     background-color:     #36c;
     color:                white;
-    border: 3px solid     white;
+    border: 2px solid     white;
     text-shadow: 0 0 3px  black;
-    box-shadow: 0 1px 3px black;
+    box-shadow: 
+        0 -2px 5px inset black,
+        0  2px 5px inset white,
+        0  1px 3px black;
     z-index: 6;
 }
 /* 狂気点とパーツ状態の表示 */
@@ -315,9 +318,8 @@ body.is-dragging .char.hover-highlight {
 /* マーカーを格納するコンテナ */
 .char-bubble-marker-container {
     position: absolute;
-    top: 62px;
-    left: -15px;
-    left: 0;
+    bottom: 35px;
+    left: 5px;
     width: 100%;
     height: 30px; /* マーカーの高さに合わせる */
 
@@ -329,10 +331,36 @@ body.is-dragging .char.hover-highlight {
     pointer-events: none; /* マウスイベントを透過させる */
     z-index: 10; /* 他のオーバーレイより手前に表示 */
 }
+/* ふきだしマーカー本体 */
+.bubble-marker {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 12px;
+    font-weight: bold;
+    color:               white;
+    text-shadow: 
+        0 1px 4px        black,
+        0 1px 4px        black;
+    box-shadow: 
+        0 -2px 4px inset black,
+        0  2px 4px inset white,
+        0  2px 4px       black;
+    
+    /* デフォルトの背景色と枠線 */
+    background-color: red;
+    border: 1px solid white;
+    box-sizing: border-box;
+}
 /* 「何をしているか」を表示するマーカーのコンテナ */
 .char-action-marker-container {
     position: absolute;
-    top: 97px; /* bubble-marker-container の下に配置 */
+    bottom: 72px;
     left: 0;
     width: 100%;
     height: 30px;
@@ -344,25 +372,11 @@ body.is-dragging .char.hover-highlight {
     z-index: 10;
 }
 /* ふきだしマーカー本体 */
-.bubble-marker {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%; /* 円形にする */
-    
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    font-size: 12px;
-    font-weight: bold;
-    color: white;
-    text-shadow: 0 0 5px black;
-    box-shadow: 0 0 5px var(--color-8);
-    
-    /* デフォルトの背景色と枠線 */
-    background-color: red;
-    border: 2px solid white;
-    box-sizing: border-box;
+.char-action-marker-container .bubble-marker {
+    width: 40px;
+    height: 28px;
+    border-radius: 20px;
+    font-size: 16px;
 }
 
 /* 「アンデッドを追加」カード */
@@ -467,24 +481,29 @@ body.is-dragging .char.hover-highlight {
 /* ダメージマーカー */
 .damage-prompt-container {
     position: absolute;
-    top: 113px; 
+    bottom: 105px; 
     left: 0;
     width: 100%;
     height: 100%;
     display: flex;
     justify-content: center;
-    align-items: start;
+    align-items: end;
     pointer-events: none;
     z-index: 9;
 }
 .damage-prompt-button {
-    background-color:    rgba(255, 0, 0, 0.8);
+    background-color:    rgba(255, 0, 0, 0.7);
     color:               white;
     border: 2px solid    white;
-    box-shadow: 0 0 10px black;
-    border-radius: 8px;
-    padding: 2px 10px;
-    font-size: 1.2em;
+    box-shadow: 
+        0 0 10px inset   black,
+        0 0 10px         black;
+    text-shadow: 
+        0 0 5px black,
+        0 0 5px black;
+    border-radius: 10px;
+    padding: 0 10px;
+    font-size: 20px;
     font-weight: bold;
     cursor: pointer;
     pointer-events: auto;
