@@ -1,7 +1,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "2.0.7"; // パッチバージョンを更新
+export const version = "2.1.8"; // パッチバージョンを更新
 
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
@@ -45,7 +45,7 @@ const settings = {
     timeouts: {
         stopCheck:    100,      // 停止チェックの間隔 (ms)
         forceResult: 3500,      // 強制終了までの時間 (ms)
-        hide:        1000       // 結果表示後に非表示になるまでの時間 (ms)
+        hide:        2000       // 結果表示後に非表示になるまでの時間 (ms)
     }
 };
 
@@ -146,34 +146,32 @@ export async function init(container) {
     world.addContactMaterial(new CANNON.ContactMaterial(diceMaterial, wallMaterial, {
         restitution: settings.physics.restitutionWall, friction: settings.physics.frictionWall
     }));
-    // ★★★ ダイス同士の接触ルールを追加 ★★★
+    
+    // ▼▼▼ ここからが今回の修正箇所です ▼▼▼
+    // ★★★ ダイス同士の物理計算を無効化するため、以下の行をコメントアウトまたは削除 ★★★
+    /*
     world.addContactMaterial(new CANNON.ContactMaterial(diceMaterial, diceMaterial, {
-        restitution: 0.5, // 反発係数 (0-1)。少し弾むように設定
-        friction:    0.1  // 摩擦係数 (0-1)。滑りやすく設定
+        restitution: 0.5,
+        friction:    0.1
     }));
+    */
+    // ▲▲▲ 修正はここまでです ▲▲▲
+
     // 物理床
     const groundBody = new CANNON.Body({ mass: 0, material: groundMaterial });
     groundBody.addShape(new CANNON.Plane());
     groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
     world.addBody(groundBody);
 
-/*    // 物理蓋
-    const ceilingBody = new CANNON.Body({ mass: 0, material: groundMaterial });
-    ceilingBody.addShape(new CANNON.Plane());
-    // X軸に180度回転させて下を向かせる
-    ceilingBody.quaternion.setFromEuler(Math.PI / 2, 0, 0);
-    ceilingBody.position.set(0, settings.tray.wallHeight, 0); // 壁と同じ高さを参照
-    world.addBody(ceilingBody);
-*/
     createWalls();
 
     const loadPromises = [];
     for (let i = 0; i < MAX_DICE_COUNT; i++) {
-        loadPromises.push(loadDiceModel()); // loadDiceModelがPromiseを返すように変更
+        loadPromises.push(loadDiceModel());
     }
     await Promise.all(loadPromises);
 
-    isDiceReady = true; // ★★★ 準備完了フラグを立てる ★★★
+    isDiceReady = true;
     console.log("3D Dice pool ready.");
 
     animate();
@@ -555,7 +553,66 @@ function animate() {
     }
     lastTime = time;
 
-    // ★★★ アクティブなダイスすべてを更新 ★★★
+    // ▼▼▼ ここからが今回の修正箇所です ▼▼▼
+    // --- 手動でのダイス同士の衝突判定と反発処理 ---
+    const collisionThreshold = settings.dice.radius * 2 * 0.85; // 直径の90%
+    const restitution = 0.8; // 反発係数
+
+    for (let i = 0; i < activeDice.length; i++) {
+        for (let j = i + 1; j < activeDice.length; j++) {
+            const dieA = activeDice[i];
+            const dieB = activeDice[j];
+
+            const posA = dieA.body.position;
+            const posB = dieB.body.position;
+
+            const dx = posB.x - posA.x;
+            const dz = posB.z - posA.z;
+            
+            const distance = Math.sqrt(dx * dx + dz * dz);
+
+            if (distance < collisionThreshold) {
+                // 衝突発生
+                
+                // 1. 反発軸ベクトルを計算（正規化）
+                const normal = new CANNON.Vec3(dx / distance, 0, dz / distance);
+                
+                // 2. めり込みを補正
+                const overlap = collisionThreshold - distance;
+                posA.x -= normal.x * overlap / 2;
+                posA.z -= normal.z * overlap / 2;
+                posB.x += normal.x * overlap / 2;
+                posB.z += normal.z * overlap / 2;
+
+                // 3. 速度を反発させる
+                const vA = dieA.body.velocity;
+                const vB = dieB.body.velocity;
+                
+                // 接触面に対する相対速度
+                const relativeVelocity = new CANNON.Vec3(vB.x - vA.x, 0, vB.z - vA.z);
+                const velocityAlongNormal = relativeVelocity.dot(normal);
+
+                if (velocityAlongNormal < 0) {
+                    const impulse = -(1 + restitution) * velocityAlongNormal / 2; // 質量が同じなので /2
+                    
+                    vA.x -= impulse * normal.x;
+                    vA.z -= impulse * normal.z;
+                    vB.x += impulse * normal.x;
+                    vB.z += impulse * normal.z;
+
+                    // 4. 角速度（回転）も反転させてリアルさを出す
+                    const angVelA = dieA.body.angularVelocity;
+                    const angVelB = dieB.body.angularVelocity;
+                    angVelA.y *= -1;
+                    angVelB.y *= -1;
+                }
+            }
+        }
+    }
+    // ▲▲▲ 修正はここまでです ▲▲▲
+
+
+    // アクティブなダイスすべてを更新
     activeDice.forEach(die => {
         die.model.position.copy(die.body.position);
         die.model.quaternion.copy(die.body.quaternion);
@@ -566,10 +623,10 @@ function animate() {
 
         // X軸（左右）の境界チェックと反転
         if (pos.x < -boundaries.x) {
-            pos.x = -boundaries.x; // めり込み防止
+            pos.x = -boundaries.x;
             if (vel.x < 0) {
-                vel.x *= -1; // 速度を反転
-                angVel.z *= -1; // Z軸周りの回転を反転
+                vel.x *= -1;
+                angVel.z *= -1;
             }
         } else if (pos.x > boundaries.x) {
             pos.x = boundaries.x;
@@ -584,7 +641,7 @@ function animate() {
             pos.z = -boundaries.z;
             if (vel.z < 0) {
                 vel.z *= -1;
-                angVel.x *= -1; // X軸周りの回転を反転
+                angVel.x *= -1;
             }
         } else if (pos.z > boundaries.z) {
             pos.z = boundaries.z;

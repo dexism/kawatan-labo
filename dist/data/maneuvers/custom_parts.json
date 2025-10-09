@@ -26,7 +26,7 @@
   },
   "R1-03": {
     "name": "セイバートゥース", "category": "攻撃", "allowedLocations": "頭",
-    "tags": ["攻撃", "アクション"],
+    "tags": ["攻撃", "アクション", "肉弾攻撃"],
     "timing": "アクション", "cost": 2, "range": "0",
     "description": "肉弾攻撃2", 
     "description_raw": "肉弾攻撃2。",
@@ -52,7 +52,7 @@
   },
   "R1-05": {
     "name": "シザーハンズ", "category": "攻撃", "allowedLocations": "腕",
-    "tags": ["攻撃", "アクション", "切断"],
+    "tags": ["攻撃", "アクション", "肉弾攻撃", "切断"],
     "timing": "アクション", "cost": 2, "range": "0",
     "description": "肉弾攻撃1+切断", 
     "description_raw": "肉弾攻撃1+切断。",
@@ -95,7 +95,7 @@
   },
   "R1-09": {
     "name": "リモートアタック", "category": "攻撃", "allowedLocations": "任意",
-    "tags": ["攻撃", "アクション", "転倒"],
+    "tags": ["攻撃", "アクション", "肉弾攻撃", "転倒"],
     "timing": "アクション", "cost": 3, "range": "0～1",
     "description": "肉弾攻撃1+転倒", 
     "description_raw": "肉弾攻撃1+転倒。",
@@ -137,7 +137,7 @@
   "//": "--- レベル2 改造 (R2) ---",
   "R2-01": {
     "name": "ゾンビボム", "category": "攻撃", "allowedLocations": "任意",
-    "tags": ["攻撃", "ダメージ", "爆発", "全体攻撃", "損傷"],
+    "tags": ["攻撃", "ダメージ", "砲撃攻撃", "爆発", "全体攻撃", "損傷"],
     "timing": "ダメージ", "cost": 0, "range": "0",
     "description": "このパーツが損傷した際、砲撃攻撃2+爆発+全体攻撃", 
     "description_raw": "このパーツが損傷した際のみ使用可。判定値8(ジャッジタイミング発生)の「砲撃攻撃2+爆発+全体攻撃」を与える。",
@@ -157,7 +157,7 @@
   },
   "R2-03": {
     "name": "エレクトリッガー", "category": "攻撃", "allowedLocations": "任意",
-    "tags": ["攻撃", "アクション", "転倒"],
+    "tags": ["攻撃", "アクション", "肉弾攻撃", "転倒"],
     "timing": "アクション", "cost": 2, "range": "0",
     "description": "肉弾攻撃1+転倒", 
     "description_raw": "肉弾攻撃1+転倒。",
@@ -167,7 +167,7 @@
   },
   "R2-04": {
     "name": "ドリル", "category": "攻撃", "allowedLocations": "任意",
-    "tags": ["攻撃", "アクション", "防御"],
+    "tags": ["攻撃", "アクション", "白兵攻撃", "防御"],
     "timing": "アクション", "cost": 3, "range": "0",
     "description": "白兵攻撃2、「防御」無効", 
     "description_raw": "白兵攻撃2、この攻撃に対して「防御」は全て無効。",
@@ -177,7 +177,7 @@
   },
   "R2-05": {
     "name": "アサシンブレード", "category": "攻撃", "allowedLocations": "任意",
-    "tags": ["攻撃", "ラピッド", "連撃"],
+    "tags": ["攻撃", "ラピッド", "白兵攻撃", "連撃"],
     "timing": "ラピッド", "cost": 2, "range": "0",
     "description": "白兵攻撃2+連撃1", 
     "description_raw": "白兵攻撃2+連撃1。",
@@ -187,7 +187,7 @@
   },
   "R2-06": {
     "name": "レーザービーム", "category": "攻撃", "allowedLocations": "任意",
-    "tags": ["攻撃", "アクション", "切断"],
+    "tags": ["攻撃", "アクション", "射撃攻撃", "切断"],
     "timing": "アクション", "cost": 3, "range": "0～3",
     "description": "射撃攻撃1+切断", 
     "description_raw": "射撃攻撃1+切断。",
@@ -347,17 +347,17 @@
   },
   "R3-08": {
     "name": "パイルバンカー", "category": "攻撃", "allowedLocations": "任意",
-    "tags": ["攻撃", "アクション", "防御", "移動"],
+    "tags": ["攻撃", "アクション", "白兵攻撃", "防御", "移動"],
     "timing": "アクション", "cost": 2, "range": "0",
     "description": "白兵攻撃2、「防御」無効、命中時対象に移動1", 
-    "description_raw": "白兵攻撃２、この攻撃に対して「防御」は全て無効。なお、攻撃が命中したなら対象を「移動1」してもよい。",
+    "description_raw": "白兵攻撃2、この攻撃に対して「防御」は全て無効。なお、攻撃が命中したなら対象を「移動1」してもよい。",
     "flavor_text": "金属杭を高振動と共に高速射出し、敵の防御を打ち抜きつつ吹き飛ばす。",
     "source": { "book": "基本ルールブック", "page": 91, "errata": "1.6.1" }, 
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 2, "defense_piercing": true, "on_hit": ["MOVE_TARGET_1_OPTIONAL"] } }]
   },
   "R3-09": {
     "name": "ライトセイバー", "category": "攻撃", "allowedLocations": "任意",
-    "tags": ["攻撃", "アクション", "切断", "連撃"],
+    "tags": ["攻撃", "アクション", "白兵攻撃", "切断", "連撃"],
     "timing": "アクション", "cost": 2, "range": "0",
     "description": "白兵攻撃1+切断+連撃1", 
     "description_raw": "白兵攻撃1+切断+連撃1。",

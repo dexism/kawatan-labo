@@ -4,7 +4,7 @@
  * @file battle-logic.js
  * @description 戦闘の進行、状態管理、ルール判定、アクション解決を担当するモジュール。
  */
-export const version = "1.21.81"; // UI分離リファクタリング完了版
+export const version = "1.22.83"; // UI分離リファクタリング完了版
 
 import * as charManager from './character-manager.js';
 import * as ui from './ui-manager.js';
@@ -157,7 +157,15 @@ export function clearScrollFlag() {
 }
 
 export function declareManeuver(char, maneuver, target = null, judgeTargetDeclaration = null) {
-    const declaration = { id: `decl_${Date.now()}_${Math.random()}`, performer: char, target: target, sourceManeuver: maneuver, timing: maneuver.timing, summary: { name: maneuver.name } };
+    const declaration = {
+        id: `decl_${Date.now()}_${Math.random()}`,
+        performer: char,
+        target: target,
+        sourceManeuver: maneuver,
+        timing: maneuver.timing,
+        summary: { name: maneuver.name }
+    };
+
     const cost = isNaN(Number(maneuver.cost)) ? 0 : Number(maneuver.cost);
     if (cost > 0) charManager.updateCharacter(char.id, { actionValue: char.actionValue - cost });
     if (char.turnLimitedManeuvers.has(maneuver.name)) char.usedManeuvers.add(maneuver.name);
@@ -189,6 +197,7 @@ export function declareManeuver(char, maneuver, target = null, judgeTargetDeclar
             ui.addLog(`◆[アクション] ${char.name}が【${maneuver.name}】を宣言。`);
             break;
     }
+    
     determineNextStep();
 }
 
@@ -197,6 +206,8 @@ export function determineNextStep() {
         battleState.phase = 'SETUP';
         battleState.activeActors = [];
         battleState.potentialActors = [];
+        // ★ UI更新命令を追加
+        ui.updateAllUI();
         return;
     }
     
@@ -231,6 +242,9 @@ export function determineNextStep() {
     if (prevPhase === 'ACTION_DECLARATION' && battleState.phase !== 'ACTION_DECLARATION') {
         applyAutoBuffsAtActionEnd();
     }
+    
+    // ★ UI更新命令を関数の最後に追加
+    ui.updateAllUI();
 }
 
 export function advanceCount() {
@@ -295,7 +309,10 @@ export function advancePhase() {
 export async function resolveRapidByIndex(index) {
     const declaration = battleState.rapidQueue[index];
     if (!declaration || declaration.checked) return;
+
+    // 全てのラピッドマニューバを効果解決エンジンに通すように統一
     await resolveSingleAction(declaration);
+
     declaration.checked = true;
     determineNextStep();
 }
@@ -360,10 +377,56 @@ export function applyDamage(index) {
 function resolveQueuedMoves() {
     if (battleState.moveQueue.length > 0) {
         ui.addLog("--- 移動解決フェーズ ---");
-        charManager.applyQueuedMoves(battleState.moveQueue);
+
+        const finalMoveQueue = battleState.moveQueue.map(move => {
+            const originalDeclaration = battleState.actionQueue.find(decl => decl.id === move.declarationId);
+            
+            let totalDebuff = 0;
+            if (originalDeclaration && originalDeclaration.debuffs) {
+                originalDeclaration.debuffs.forEach(debuff => {
+                    totalDebuff += debuff.value || 0;
+                });
+            }
+
+            const rows = ["奈落", "地獄", "煉獄", "花園", "楽園"];
+            const char = charManager.getCharacterById(move.characterId);
+            const currentIndex = rows.indexOf(char.area);
+            const targetIndex = rows.indexOf(move.targetArea);
+            const originalDistance = Math.abs(targetIndex - currentIndex);
+            
+            const finalDistance = Math.max(0, originalDistance + totalDebuff);
+
+            if (finalDistance < originalDistance) {
+                ui.addLog(`＞ ${char.name}の移動は妨害され、移動距離が${originalDistance - finalDistance}減少！`);
+            }
+
+            if (finalDistance === 0) {
+                 if (originalDistance > 0) ui.addLog(`＞ ${char.name}の移動は完全に妨害された！`);
+                return null;
+            }
+            
+            let finalIndex;
+            if (targetIndex > currentIndex) {
+                finalIndex = Math.min(rows.length - 1, currentIndex + finalDistance);
+            } else {
+                finalIndex = Math.max(0, currentIndex - finalDistance);
+            }
+            
+            const newTargetArea = rows[finalIndex];
+            if (char.area !== newTargetArea) {
+                ui.addLog(`＞ ${char.name}は ${newTargetArea} へ移動する。`);
+            }
+            
+            return {
+                characterId: move.characterId,
+                targetArea: newTargetArea
+            };
+        }).filter(move => move !== null);
+        
+        charManager.applyQueuedMoves(finalMoveQueue);
         battleState.moveQueue = [];
     }
-    checkAllDamageApplied(); 
+    checkAllDamageApplied();
 }
 
 function checkAllDamageApplied() {
@@ -439,7 +502,11 @@ async function resolveSingleAction(declaration, totalBonus = 0) {
 async function executeEffect(effectRef, context) {
     let onHitEffects = [];
     const effectDefinition = data.getEffectDefinition(effectRef.ref);
-    if (!effectDefinition) return onHitEffects;
+    if (!effectDefinition) {
+        // 効果定義が見つからない場合は警告を出し、何もしない
+        console.warn(`[Engine] Effect definition not found for: ${effectRef.ref}`);
+        return onHitEffects;
+    }
     
     const params = effectRef.params || {};
     for (const actionTemplate of effectDefinition.actions) {
@@ -461,9 +528,30 @@ async function executeEffect(effectRef, context) {
             case 'modify_action_value':
                 performModifyActionValue(concreteAction, context);
                 break;
+            
+            // ▼▼▼ ここからが今回の修正箇所です ▼▼▼
+            case 'modify_move_distance':
+                // 移動妨害効果を対象の移動宣言に紐付ける処理
+                const { performer, declaration } = context;
+                const moveDeclaration = declaration.target; // 移動妨害マニューバの宣言時、targetには対象の「移動宣言」が入っている
+                
+                if (moveDeclaration && moveDeclaration.sourceManeuver.tags.includes('移動')) {
+                    if (!moveDeclaration.debuffs) {
+                        moveDeclaration.debuffs = [];
+                    }
+                    moveDeclaration.debuffs.push({
+                        source: declaration.sourceManeuver.name,
+                        value: concreteAction.value || 0
+                    });
+                    ui.addLog(`＞ ${performer.name}が【${declaration.sourceManeuver.name}】で${moveDeclaration.performer.name}の移動を妨害！`);
+                }
+                break;
+            // ▲▲▲ 修正はここまでです ▲▲▲
+
             case 'deal_damage':
             case 'chain_attack':
             case 'severance_roll':
+                // これらは on_hit などで呼び出されるキーワード効果であり、ここでは何もしない
                 break;
             default:
                 ui.addLog(`＞ [Engine] 未対応: ${concreteAction.action_type}`);
@@ -535,18 +623,50 @@ function performMoveCharacter(action, context) {
     const { performer, target, declaration } = context;
     const moveTarget = action.target === 'self' ? performer : target;
     if (!moveTarget) return;
+
     const directionOrArea = declaration.sourceManeuver.targetArea;
     if (!directionOrArea) return;
+
     let movePower = 1;
     if (action.distance) {
         const rangeParts = String(action.distance).split('-');
         movePower = parseInt(rangeParts[1] || rangeParts[0], 10);
     }
-    const finalDistance = Math.max(0, movePower);
+
+    // ▼▼▼ ここからが今回の修正箇所です (buildMoveMenu と同じロジック) ▼▼▼
+    let moveBonus = 0;
+    const allActorManeuvers = [
+        ...moveTarget.skills.map(name => data.getManeuverByName(name)),
+        ...Object.values(moveTarget.partsStatus).flat().filter(p => !p.damaged).map(p => data.getManeuverByName(p.name))
+    ].filter(m => m);
+
+    for (const actorManeuver of allActorManeuvers) {
+        if (actorManeuver.timing === 'オート' && actorManeuver.effects) {
+            for (const effect of actorManeuver.effects) {
+                if (effect.ref === 'APPLY_BUFF' && effect.params?.stat === 'moveDistanceBonus') {
+                    const condition = effect.params.condition;
+                    if (condition && Array.isArray(condition)) {
+                        const maneuverTags = declaration.sourceManeuver.tags || [];
+                        if (condition.some(cond => maneuverTags.includes(cond))) {
+                            moveBonus += effect.params.value || 0;
+                        }
+                    } else {
+                        moveBonus += effect.params.value || 0;
+                    }
+                }
+            }
+        }
+    }
+    const finalMovePower = movePower + moveBonus;
+    // ▲▲▲ 修正はここまでです ▲▲▲
+    
+    const finalDistance = Math.max(0, finalMovePower);
     if (finalDistance === 0) return;
+
     const rows = ["奈落", "地獄", "煉獄", "花園", "楽園"];
     const currentIndex = rows.indexOf(moveTarget.area);
     let newArea;
+
     if (directionOrArea.endsWith('方向')) {
         let newIndex = currentIndex;
         if (directionOrArea === '奈落方向') newIndex = Math.max(0, currentIndex - finalDistance);
@@ -555,12 +675,19 @@ function performMoveCharacter(action, context) {
     } else {
         newArea = directionOrArea;
     }
+
     if (declaration.timing === 'ラピッド') {
-        ui.addLog(`＞ [ラピッド解決] ${moveTarget.name}が${newArea}へ移動しました。`);
+        // ui.addLog(`＞ [ラピッド解決] ${moveTarget.name}が${newArea}へ移動しました。`); // ← この行を削除
+        if (moveTarget.area !== newArea) {
+             ui.addLog(`＞ [ラピッド解決] ${moveTarget.name}は ${newArea} へ移動した。`);
+        }
         charManager.updateCharacter(moveTarget.id, { area: newArea });
     } else {
-        ui.addLog(`＞ 移動予約: ${moveTarget.name} が ${newArea} へ`);
-        battleState.moveQueue.push({ characterId: moveTarget.id, targetArea: newArea });
+        if (moveTarget.area !== newArea) {
+             ui.addLog(`＞ 移動予約: ${moveTarget.name} が ${newArea} へ`);
+        }
+        // 宣言IDをmoveQueueに追加
+        battleState.moveQueue.push({ characterId: moveTarget.id, targetArea: newArea, declarationId: declaration.id });
     }
 }
 

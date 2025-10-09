@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "2.6.19"; // パッチバージョンを更新
+export const version = "2.7.21"; // パッチバージョンを更新
 
 import * as data from './data-handler.js'; 
 import * as charManager from './character-manager.js';
@@ -49,13 +49,13 @@ export function setupAllEventListeners() {
         startBattleBtn.onclick = () => {
             if (startBattleBtn.disabled) return;
             battleLogic.startBattle();
-            ui.updateAllUI(); // ★ UI更新を追加
+            // ui.updateAllUI(); // ★ UI更新を追加
         };
     }
 
     document.getElementById('countdownBtn').onclick = () => {
         battleLogic.advanceCount();
-        ui.updateAllUI(); // ★ UI更新を追加
+        // ui.updateAllUI(); // ★ UI更新を追加
     };
 
     document.getElementById('endTurnBtn').onclick = () => {
@@ -305,20 +305,20 @@ export function setupMadnessModalEventListeners(pcs) {
         selections.forEach((regretId, pcId) => charManager.addMadnessPoint(pcId, regretId));
         modal.classList.remove('is-visible');
         battleLogic.proceedToNextTurn();
-        ui.updateAllUI(); // ★ UI更新を追加
+        // ui.updateAllUI(); // ★ UI更新を追加
     };
 }
 
 // --- ユーザー操作の処理（イベントハンドラ）---
 export function handleQueueCheck(queueType, index, isChecked) {
     battleLogic.handleQueueCheck(queueType, index, isChecked);
-    ui.updateAllUI(); // ★ UI更新を追加
+    // ui.updateAllUI(); // ★ UI更新を追加
 }
 
 export function handleRapidItemClick(index) {
-    battleLogic.resolveRapidByIndex(index).then(() => {
-        ui.updateAllUI(); // ★ UI更新を追加
-    });
+    battleLogic.resolveRapidByIndex(index); //.then(() => {
+        // ui.updateAllUI(); // ★ UI更新を追加
+    // });
 }
 
 export function handleActionItemClick(index) {
@@ -333,15 +333,15 @@ export function handleActionItemClick(index) {
         showAttackConfirmationModal(performer, target, sourceManeuver, index);
     } else {
         // 攻撃以外は、解決後に即座にUIを更新する。
-        battleLogic.resolveActionByIndex(index).then(() => {
-            ui.updateAllUI();
-        });
+        battleLogic.resolveActionByIndex(index); //.then(() => {
+            // ui.updateAllUI();
+        // });
     }
 }
 
 export function handleJudgeItemClick(index) {
     battleLogic.checkJudgeItem(index);
-    ui.updateAllUI(); // ★ UI更新を追加
+    // ui.updateAllUI(); // ★ UI更新を追加
 }
 
 export function handleDamageItemClick(index) {
@@ -356,7 +356,7 @@ export function handleDamageItemClick(index) {
         // ダメージ適用後にUIを更新するためのコールバック
         const onConfirmCallback = () => {
             battleLogic.applyDamage(index);
-            ui.updateAllUI(); // ★ UI更新をここに追加
+            // ui.updateAllUI(); // ★ UI更新をここに追加
         };
 
         if (finalDamage <= 0) {
