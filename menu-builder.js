@@ -1048,7 +1048,6 @@ export function getCharacterManeuvers(char) {
     const battleState = battleLogic.getBattleState();
     const allManeuvers = [];
 
-    // キャラクターが持つスキルとパーツからマニューバリストを生成
     (char.skills || []).forEach(skillName => {
         const maneuver = data.getManeuverByName(skillName);
         if (maneuver) allManeuvers.push({ data: maneuver, sourceType: 'skill', sourceName: skillName });
@@ -1058,7 +1057,6 @@ export function getCharacterManeuvers(char) {
         if (maneuver) allManeuvers.push({ data: maneuver, sourceType: 'part', sourceName: part.name, isDamaged: part.damaged });
     });
 
-    // 一般動作（待機、任意）を追加
     const waitManeuver = data.getManeuverByName('待機');
     if (waitManeuver) allManeuvers.push({ data: waitManeuver, sourceType: 'common' });
     const arbitraryManeuver = data.getManeuverByName('任意');
@@ -1066,29 +1064,35 @@ export function getCharacterManeuvers(char) {
     
     const isCharDamaged = Object.values(char.partsStatus).flat().some(part => part.damaged);
 
-    // battleStateから現在アクティブなタイミングを判断
+    // --- 現在アクティブなタイミングを判断 ---
     const activeIndicators = new Set();
-    const { phase, activeActors, actionQueue, rapidQueue, judgeQueue, damageQueue } = battleState;
+    const { phase, activeActors, actionQueue, damageQueue } = battleState;
 
+    // ▼▼▼ ここからが今回の修正箇所です ▼▼▼
     if (activeActors.some(a => a.id === char.id)) {
+        // このキャラクターが行動権を持つ場合、アクションタイミングに加えて
+        // ラピッドタイミングも有効化する
         activeIndicators.add('アクション');
+        activeIndicators.add('ラピッド');
     }
+    // ▲▲▲ 修正はここまでです ▲▲▲
     
     const isActionPhaseOver = activeActors.length === 0;
     if (isActionPhaseOver) {
-        // ラピッドタイミングは、アクション宣言が終わってからターン終了までの間
         activeIndicators.add('ラピッド');
-        // ジャッジタイミングは、未解決のアクション宣言がある場合のみ
         if (actionQueue.some(a => !a.checked)) {
             activeIndicators.add('ジャッジ');
         }
     }
-    // ダメージタイミングは、ダメージ解決フェーズか、アクション解決後で未適用のダメージがある場合
     if (phase === 'DAMAGE_RESOLUTION' || (actionQueue.every(a => a.checked) && damageQueue.some(d => !d.applied))) {
         activeIndicators.add('ダメージ');
     }
 
-    // 各マニューバの使用可否を判定
+    if (actionQueue.some(a => !a.checked && a.performer.id === char.id)) {
+        activeIndicators.add('ラピッド');
+        activeIndicators.add('ジャッジ');
+    }
+
     return allManeuvers.map(m => {
         const maneuver = m.data;
         let isUsable = true;
@@ -1097,7 +1101,10 @@ export function getCharacterManeuvers(char) {
         if (char.actionValue <= 0 && maneuver.timing !== 'オート') isUsable = false;
         if (m.isDamaged) isUsable = false;
         if (char.usedManeuvers.has(maneuver.name) && maneuver.usageLimit !== false) isUsable = false;
-        if (maneuver.timing !== 'オート' && !activeIndicators.has(maneuver.timing)) isUsable = false;
+        
+        if (maneuver.timing !== 'オート' && !activeIndicators.has(maneuver.timing)) {
+            isUsable = false;
+        }
         
         // --- 2. マニューバ固有の有効化条件チェック ---
         if (isUsable && maneuver.effects?.some(e => e.params?.condition === 'is_damaged') && !isCharDamaged) {
@@ -1110,24 +1117,34 @@ export function getCharacterManeuvers(char) {
             const isHindrance = maneuver.category === '妨害' || maneuver.tags.includes('妨害');
             let canUse = false;
 
-            if (isSupport) { // 支援マニューバの場合
-                if (maneuver.range === '自身') { // 自身の攻撃を支援
-                    if (battleState.actionQueue.some(d => d.performer.id === char.id && d.sourceManeuver.tags.includes('攻撃'))) {
+            if (isSupport) {
+                if (maneuver.range === '自身') {
+                    if (battleState.actionQueue.some(d => !d.checked && d.performer.id === char.id && d.sourceManeuver.tags.includes('攻撃'))) {
                         canUse = true;
                     }
-                } else { // 味方の攻撃を支援
-                    if (battleState.actionQueue.some(d => d.performer.type === char.type && d.sourceManeuver.tags.includes('攻撃') && checkTargetAvailability(char, maneuver, [d.performer]).hasTarget)) {
+                } else {
+                    const isSelfAttacking = battleState.actionQueue.some(d => !d.checked && d.performer.id === char.id && d.sourceManeuver.tags.includes('攻撃'));
+                    if (isSelfAttacking) {
                         canUse = true;
+                    } else {
+                        const attackingAllies = battleState.actionQueue
+                            .filter(d => !d.checked && d.performer.type === char.type && d.performer.id !== char.id && d.sourceManeuver.tags.includes('攻撃'))
+                            .map(d => d.performer);
+                        if (attackingAllies.length > 0) {
+                            if (checkTargetAvailability(char, maneuver, attackingAllies).hasTarget) {
+                                canUse = true;
+                            }
+                        }
                     }
                 }
             }
-            if (!canUse && isHindrance) { // 妨害マニューバの場合
-                if (maneuver.range === '自身') { // 自身への攻撃を妨害
-                     if (battleState.actionQueue.some(d => d.target?.id === char.id && d.sourceManeuver.tags.includes('攻撃'))) {
+            if (!canUse && isHindrance) {
+                if (maneuver.range === '自身') {
+                     if (battleState.actionQueue.some(d => !d.checked && d.target?.id === char.id && d.sourceManeuver.tags.includes('攻撃'))) {
                         canUse = true;
                     }
-                } else { // 敵の攻撃を妨害
-                    if (battleState.actionQueue.some(d => d.performer.type !== char.type && d.sourceManeuver.tags.includes('攻撃') && checkTargetAvailability(char, maneuver, [d.performer]).hasTarget)) {
+                } else {
+                    if (battleState.actionQueue.some(d => !d.checked && d.performer.type !== char.type && d.sourceManeuver.tags.includes('攻撃') && checkTargetAvailability(char, maneuver, [d.performer]).hasTarget)) {
                         canUse = true;
                     }
                 }
@@ -1138,41 +1155,30 @@ export function getCharacterManeuvers(char) {
         // --- 4. ダメージタイミングの厳格な判定 ---
         if (isUsable && maneuver.timing === 'ダメージ') {
             let canUseInDamagePhase = false;
-
-            // << 条件A: 防御マニューバか？ >>
             const isDefense = maneuver.category === '防御' || maneuver.tags.includes('防御');
             if (isDefense) {
                 if (maneuver.range === '自身') {
-                    // 要件3: 自身がダメージキューの対象にいる場合に有効化
                     if (battleState.damageQueue.some(d => !d.applied && d.target.id === char.id)) {
                         canUseInDamagePhase = true;
                     }
-                } else { // 射程が自身以外の防御マニューバ (味方を守るなど)
+                } else {
                     if (battleState.damageQueue.some(d => !d.applied && d.target.type === char.type && checkTargetAvailability(char, maneuver, [d.target]).hasTarget)) {
                         canUseInDamagePhase = true;
                     }
                 }
             }
-            
-            // << 条件B: 与ダメージ増加マニューバか？ >>
             const isDamageIncrease = maneuver.tags.includes('強化');
             if (!canUseInDamagePhase && isDamageIncrease && maneuver.range === '自身') {
-                // 要件2: 自身がダメージキューの実行者である場合に有効化
                 if (battleState.damageQueue.some(d => !d.applied && d.sourceAction.performer.id === char.id)) {
                     canUseInDamagePhase = true;
                 }
             }
-
-            // << 条件C: 肩代わり（庇う）マニューバか？ >>
             const isTakeDamage = maneuver.effects?.some(e => e.ref === 'TAKE_DAMAGE_FOR_ALLY');
             if (!canUseInDamagePhase && isTakeDamage) {
-                // 庇う対象となる味方のダメージがキューにあるかチェック
                 if (battleState.damageQueue.some(d => !d.applied && d.target.type === char.type && d.target.id !== char.id && checkTargetAvailability(char, maneuver, [d.target]).hasTarget)) {
                     canUseInDamagePhase = true;
                 }
             }
-
-            // 上記のいずれの条件も満たさなければ、このダメージタイミングのマニューバは使用不可
             if (!canUseInDamagePhase) {
                 isUsable = false;
             }
@@ -1181,13 +1187,11 @@ export function getCharacterManeuvers(char) {
         // --- 4.5. 移動妨害タイミングの厳格な判定 ---
         if (isUsable && maneuver.tags && maneuver.tags.includes('移動妨害')) {
             let canDebuff = false;
-            // アクションキューの中から、射程内の敵が行う「移動」宣言を探す
             for (const declaration of battleState.actionQueue) {
                 if (!declaration.checked &&
                     declaration.performer.type !== char.type &&
                     declaration.sourceManeuver.tags.includes('移動'))
                 {
-                    // 射程チェック（妨害マニューバの射程で、移動宣言者との距離を測る）
                     if (checkTargetAvailability(char, maneuver, [declaration.performer]).hasTarget) {
                         canDebuff = true;
                         break;
@@ -1198,23 +1202,15 @@ export function getCharacterManeuvers(char) {
                 isUsable = false;
             }
         }
-
-        // --- 5. アクションタイミングの特別ルール ---
-        if (maneuver.timing === 'アクション' && isUsable) {
-            if (!battleState.activeActorIds.has(char.id)) {
-                isUsable = false;
-            }
-        }
-
-        // --- 6. 汎用的なターゲット存在チェック (ジャッジ以外) ---
+        
+        // --- 5. 汎用的なターゲット存在チェック ---
         if (isUsable && maneuver.timing !== 'オート' && maneuver.timing !== 'ジャッジ') {
             if (!checkTargetAvailability(char, maneuver).hasTarget) {
                 isUsable = false;
             }
         }
 
-        // --- 7. 最終的なマスク処理 ---
-        // 要件1: オートタイミングのマニューバは宣言できないので、常にマスクする
+        // --- 6. 最終的なマスク処理 ---
         if (maneuver.timing === 'オート') {
             isUsable = false;
         }
@@ -1674,28 +1670,22 @@ export function checkTargetAvailability(actor, maneuver, targetChars = null) {
 
     let rangeBonus = 0;
 
-    const allActorManeuvers = [
+    const allActorManevers = [
         ...actor.skills.map(name => data.getManeuverByName(name)),
         ...Object.values(actor.partsStatus).flat().filter(p => !p.damaged).map(p => data.getManeuverByName(p.name))
     ].filter(m => m);
 
-    for (const actorManeuver of allActorManeuvers) {
+    for (const actorManeuver of allActorManevers) {
         if (actorManeuver.timing === 'オート' && actorManeuver.effects) {
             for (const effect of actorManeuver.effects) {
                 if (effect.ref === 'APPLY_BUFF' && effect.params?.stat === 'rangeBonus') {
                     const condition = effect.params.condition;
                     if (condition && Array.isArray(condition)) {
-                        
-                        // ▼▼▼ ここからが今回の修正箇所です ▼▼▼
-                        // --- シンプルで厳密な判定ロジックに戻す ---
                         const maneuverTags = maneuver.tags || [];
-                        // condition配列内のいずれかの文字列が、maneuverTags配列に「完全一致」で含まれているかチェック
                         if (condition.some(cond => maneuverTags.includes(cond))) {
                             rangeBonus += effect.params.value || 0;
                         }
-                        // ▲▲▲ 修正はここまでです ▲▲▲
-
-                    } else { // 条件がない場合は無条件でボーナスを加算
+                    } else {
                         rangeBonus += effect.params.value || 0;
                     }
                 }
@@ -1721,9 +1711,14 @@ export function checkTargetAvailability(actor, maneuver, targetChars = null) {
             continue;
         }
         
-        if (actor.type === char.type && maneuver.tags && maneuver.tags.includes('攻撃')) {
+        // ▼▼▼ ここからが今回の修正箇所です ▼▼▼
+        // 「攻撃」かつ「支援」でないマニューバは、味方を対象にできない
+        const isAttack = maneuver.tags && maneuver.tags.includes('攻撃');
+        const isSupport = maneuver.category === '支援' || (maneuver.tags && maneuver.tags.includes('支援'));
+        if (actor.type === char.type && isAttack && !isSupport) {
             continue;
         }
+        // ▲▲▲ 修正はここまでです ▲▲▲
 
         const targetAreaIndex = rows.indexOf(char.area);
         if (targetAreaIndex === -1) continue;

@@ -370,7 +370,11 @@ export function scrollToFirstCharacter(characters) {
     const firstCharacterId = characters[0].id;
     const targetCard = document.querySelector(`.char[data-id="${firstCharacterId}"]`);
     if (!targetCard) return;
-    targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+    targetCard.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center', 
+        inline: 'center' 
+    });
 }
 
 export function addLog(message) {
@@ -441,7 +445,7 @@ export function updateMarkers() {
  * @param {Array<object>} characters - charManager.getCharacters() から取得したキャラクターのリスト
  */
 function updateStatusPanel(state, characters) {
-    const { isStarted, turn, count, activeActors, potentialActors, shouldScrollToCount } = state;
+    const { isStarted, turn, count, phase, activeActors, potentialActors, shouldScrollToCount } = state;
     
     // --- DOM要素の取得 ---
     const timingArea = document.getElementById('timingArea');
@@ -456,12 +460,12 @@ function updateStatusPanel(state, characters) {
             timingArea.classList.remove('setup-phase');
             timingArea.classList.add('battle-phase');
             battleWrap.classList.remove('setup-phase');
-            if (resetBtn) resetBtn.disabled = false; // 戦闘中はボタンを有効化
+            if (resetBtn) resetBtn.disabled = false;
         } else {
             timingArea.classList.add('setup-phase');
             timingArea.classList.remove('battle-phase');
             battleWrap.classList.add('setup-phase');
-            if (resetBtn) resetBtn.disabled = true; // 戦闘準備中はボタンを非活性化
+            if (resetBtn) resetBtn.disabled = true;
         }
     }
     
@@ -483,7 +487,7 @@ function updateStatusPanel(state, characters) {
             const scrollWrapper = document.querySelector('.battle-grid-scroll-wrapper');
             const targetColHeader = battleWrap.querySelector(`.col-header[data-col="${count}"]`);
             if (scrollWrapper && targetColHeader) {
-                scrollWrapper.scrollTo({ left: targetColHeader.offsetLeft - scrollWrapper.offsetLeft - 50, behavior: 'smooth' });
+                scrollWrapper.scrollTo({ left: targetColHeader.offsetLeft - scrollWrapper.offsetLeft -97, behavior: 'smooth' });
             }
             battleLogic.clearScrollFlag();
         }
@@ -494,7 +498,35 @@ function updateStatusPanel(state, characters) {
         card.classList.toggle('highlight-char', activeActorIds.has(card.dataset.id));
     });
 
-    if (activeActors.length > 0) scrollToFirstCharacter(activeActors);
+    // ▼▼▼ ここからが今回の修正箇所です ▼▼▼
+    // --- 現在のフェーズに応じてUI要素へ自動スクロール ---
+    let focusElement = null;
+    switch (phase) {
+        case 'ACTION_DECLARATION':
+            if (activeActors.length > 0) {
+                focusElement = document.querySelector(`.char[data-id="${activeActors[0].id}"]`);
+            }
+            break;
+        case 'RAPID_RESOLUTION':
+            focusElement = document.getElementById('rapidDeclarationArea');
+            break;
+        case 'ACTION_RESOLUTION':
+            // アクションキューとジャッジキューは同じエリアにあるため、親コンテナにスクロール
+            focusElement = document.getElementById('actionDeclarationArea');
+            break;
+        case 'DAMAGE_RESOLUTION':
+            focusElement = document.getElementById('damageProcessingArea');
+            break;
+    }
+
+    if (focusElement) {
+        focusElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+            inline: 'nearest'
+        });
+    }
+    // ▲▲▲ 修正はここまでです ▲▲▲
 
     const potentialActorIds = new Set(potentialActors.map(char => char.id));
     characters.forEach(char => {
