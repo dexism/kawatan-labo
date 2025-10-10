@@ -60,7 +60,7 @@ h2.section-title {
 }
 .control-container {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: auto 1fr;
     gap: 5px;
     padding: 5px;
 }
@@ -223,15 +223,20 @@ label.action-queue-item.is-checked span {
 /* 戦闘中コントロールのコンテナ */
 .in-battle-controls {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 5px;
-}
-/* in-battle-controls のグリッド定義を修正 */
-.in-battle-controls {
-    display: grid;
     /* ★ 2列から3列に変更 */
     grid-template-columns: 1fr 1fr; 
     gap: 5px;
+}
+/* ★ リファレンスボタンのスタイルを追加 */
+.ref-btn {
+    padding: 8px 12px;
+    font-size: 1.2rem;
+    border: none;
+    box-shadow: none;
+    background: none;
+}
+.ref-btn:hover {
+    background-color: var(--color-shadow);
 }
 
 /* ★★★ 以下のスタイルを末尾に追加 ★★★ */

@@ -6,13 +6,13 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.13.80";
+export const version = "1.14.81";
 
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
 import * as interactionManager from './interaction-manager.js';
 import * as data from './data-handler.js';
-import { getCategoryClass } from './ui-helpers.js';
+import { getCategoryClass, getManeuverSourceText } from './ui-helpers.js';
 import { getCharacterManeuvers } from './menu-builder.js';
 
 let toastTimer = null;
@@ -832,45 +832,6 @@ export function showManeuverCard(baseElementRect, itemRect, character, maneuverO
     if (top < 10) top = 20;
     cardEl.style.left = `${left}px`;
     cardEl.style.top = `${top}px`;
-}
-
-function getManeuverSourceText(maneuver) {
-    // IDがなければ"不明"と表示
-    if (!maneuver.id) return '不明';
-    const coreData = data.getCoreData();
-    const id = maneuver.id;
-    const prefix = id.substring(0, 2);
-    // --- ポジションスキルの判定 ---
-    if (coreData.positions[prefix]) {
-        return `ポジションスキル：${coreData.positions[prefix].name}`;
-    }
-    // --- クラススキルの判定 ---
-    if (coreData.classes[prefix]) {
-        if (id.endsWith('-SP')) return `特化スキル：${coreData.classes[prefix].name}`;
-        return `クラススキル：${coreData.classes[prefix].name}`;
-    }
-    // --- 基本パーツの判定 ---
-    if (prefix === 'BP') return '基本パーツ';
-    // --- 強化パーツの判定 ---
-    const enhType = id.substring(0, 1), enhLevel = id.substring(1, 2);
-    if (coreData.enhancementTypes[enhType] && ['1', '2', '3'].includes(enhLevel)) {
-        return `強化パーツ：${enhLevel}レベル${coreData.enhancementTypes[enhType].name}`;
-    }
-    // --- 手駒専用パーツの判定 ---
-    if (id.startsWith('P')) {
-        const maliceLevel = parseInt(id.substring(1, 2), 10) / 2;
-        return `手駒専用パーツ：悪意${maliceLevel}`;
-    }
-    // --- 手駒専用スキルの判定 ---
-    if (coreData.pawnSkills[prefix]) {
-        return coreData.pawnSkills[prefix].name;
-    }
-    // --- 一般動作の判定 (core-data.jsonに追加した場合) ---
-    // if (coreData.commonAction && coreData.commonAction[prefix]) {
-    if (coreData.commonAction[prefix]) {
-        return coreData.commonAction[prefix].name;
-    }
-    return 'スキル';
 }
 
 function getPartLocationText(maneuver, character) {

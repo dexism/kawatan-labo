@@ -243,3 +243,89 @@
     align-items: center;
     justify-content: center;
 }
+
+/* ================================
+   リファレンスメニュー専用スタイル
+================================ */
+.reference-filter-container {
+    /* padding: 5px; */
+    /* border-bottom: 1px solid var(--color-border); */
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    overflow-y: auto;
+    max-height: 50vh;
+}
+/* リファレンスメニューのアコーディオンヘッダーのスタイル調整 */
+#maneuverMenu .accordion-container {
+    padding: 5px;
+    border-bottom: 1px solid var(--color-border);
+}
+#maneuverMenu .accordion-header {
+    padding: 0 5px; /* 上下左右の余白を調整 */
+    font-size: 14px; /* 文字サイズを少し大きく */
+    font-weight: bold;
+    color: var(--color-text);
+}
+/* ▲▲▲ ここまで追加 ▲▲▲ */
+
+.filter-group {
+    background-color: var(--color-surface-dark);
+    border-radius: 10px;
+    padding: 8px;
+}
+.filter-group-title {
+    margin: 0;
+    font-size: 12px;
+    color: var(--color-text);
+    padding-bottom: 3px;
+}
+.filter-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+.filter-buttons .filter-btn {
+    padding: 2px 0;
+    font-size: 12px;
+    border-radius: 20px;
+}
+/* ヘッダー全体 (Flexboxコンテナ) */
+.item-reference-header {
+    display: flex;
+    justify-content: space-between; /* 両端揃え */
+    align-items: baseline;          /* テキストの下端を揃える */
+    margin: 0;
+    padding: 0;
+    border-radius: 3px;
+}
+
+/* 出典元カテゴリ (左側) */
+.item-source-category {
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--color-text);
+    background-color: var(--color-fore-4);
+    color: var(--color-background-2);
+    padding: 1px 10px;
+    border-radius: 10px;
+    margin: 0;
+    display: inline-block; /* テキストの長さに合わせて幅を調整 */
+}
+/* 出典情報 (右側) */
+.item-source-info {
+    text-align: right;
+    font-size: 12px;
+    color: var(--color-8);
+    white-space: nowrap; /* 改行を防ぐ */
+}
+/* フレーバーテキスト (下側) */
+.item-flavor-text {
+    font-weight: normal;
+    font-style: italic;
+    color: var(--color-8);
+    margin-top: 3px;
+    padding-top: 3px;
+    border-top: 1px dashed var(--color-border);
+    font-size: 12px;
+}

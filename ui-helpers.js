@@ -2,7 +2,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.0.1";
+export const version = "1.1.2";
 
 import * as data from './data-handler.js';
 
@@ -15,4 +15,52 @@ export function getCategoryClass(categoryName) {
     const coreData = data.getCoreData();
     const category = coreData.maneuverCategories.find(c => c.name === categoryName);
     return category ? category.slug : 'other';
+}
+/**
+ * マニューバデータから、そのマニューバの出典元（ポジション、クラスなど）を示すテキストを生成する
+ * @param {object} maneuver - マニューバのマスターデータ
+ * @returns {string} - 表示用の出典元テキスト (例: "ポジションスキル：アリス")
+ */
+export function getManeuverSourceText(maneuver) {
+    // IDがなければ"不明"と表示
+    if (!maneuver.id) return '不明';
+    
+    const coreData = data.getCoreData();
+    if (!coreData || !coreData.positions) return 'データ読込中...';
+
+    const id = maneuver.id;
+    const prefix = id.substring(0, 2);
+    
+    // --- ポジションスキルの判定 ---
+    if (coreData.positions[prefix]) {
+        return `ポジションスキル：${coreData.positions[prefix].name}`;
+    }
+    // --- クラススキルの判定 ---
+    if (coreData.classes[prefix]) {
+        if (id.endsWith('-SP')) return `特化スキル：${coreData.classes[prefix].name}`;
+        return `クラススキル：${coreData.classes[prefix].name}`;
+    }
+    // --- 基本パーツの判定 ---
+    if (prefix === 'BP') return '基本パーツ';
+    // --- 強化パーツの判定 ---
+    const enhType = id.substring(0, 1);
+    const enhLevel = id.substring(1, 2);
+    if (coreData.enhancementTypes[enhType] && ['1', '2', '3'].includes(enhLevel)) {
+        return `強化パーツ：${enhLevel}レベル${coreData.enhancementTypes[enhType].name}`;
+    }
+    // --- 手駒専用パーツの判定 ---
+    if (id.startsWith('P')) {
+        const maliceLevel = parseInt(id.substring(1, 2), 10) / 2;
+        return `手駒専用パーツ：悪意${maliceLevel}`;
+    }
+    // --- 手駒専用スキルの判定 ---
+    if (coreData.pawnSkills[prefix]) {
+        return coreData.pawnSkills[prefix].name;
+    }
+    // --- 一般動作の判定 ---
+    if (coreData.commonAction && coreData.commonAction[prefix]) {
+        return coreData.commonAction[prefix].name;
+    }
+    
+    return 'スキル'; // どれにも当てはまらない場合のデフォルト
 }

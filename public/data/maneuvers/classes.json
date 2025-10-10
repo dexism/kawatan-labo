@@ -393,7 +393,7 @@
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "damageBonus", "value": 1, "duration": "permanent", "condition": ["肉弾攻撃", "白兵攻撃"] } }]
   },
   "BR-03": {
-    "name": "歪極", "category": "補助", 
+    "name": "歪極", "category": "その他", 
     "tags": ["パーツ追加", "オート"],
     "timing": "オート", "cost": "なし", "range": "効果参照",
     "description": "習得時、レベル3変異パーツを追加で1つ獲得する。このパーツは強化値に縛られない。", 
@@ -495,7 +495,7 @@
     "effects": [{ "ref": "DEAL_STATUS_EFFECT", "params": { "target": "character", "effect": "転倒" } }]
   },
   "RM-05": {
-    "name": "時計仕掛け", "category": "補助", 
+    "name": "時計仕掛け", "category": "その他", 
     "tags": ["パーツ追加", "オート"],
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "習得時、レベル3改造パーツを追加で1つ獲得する。このパーツは強化値に縛られない。", 

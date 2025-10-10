@@ -5,14 +5,14 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.13.59"; // バージョンを更新
+export const version = "1.15.61"; // バージョンを更新
 
 import * as data from './data-handler.js';
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
 import * as ui from './ui-manager.js';
 import { convertVampireBloodSheet } from './character-converter.js';
-import { getCategoryClass } from './ui-helpers.js';
+import { getCategoryClass, getManeuverSourceText } from './ui-helpers.js';
 import { getLocalStorageUsage, clearLocalImageCache } from './settings-manager.js';
 import * as stateManager from './state-manager.js';
 import { calculateManeuverRange } from './battle-helpers.js';
@@ -67,6 +67,11 @@ export function buildManeuverMenu(char, element) {
         { id: '宣言', label: '宣言' },
         { id: 'スキル', label: 'スキル' },
         { id: 'パーツ', label: 'パーツ' },
+        { id: 'オート', label: 'オート' },
+        { id: 'アクション', label: 'アクション' },
+        { id: 'ラピッド', label: 'ラピッド' },
+        { id: 'ジャッジ', label: 'ジャッジ' },
+        { id: 'ダメージ', label: 'ダメージ' },
         { id: 'バフ', label: 'バフ' },
         { id: '移動', label: '移動' },
         { id: '攻撃', label: '攻撃' },
@@ -238,15 +243,15 @@ function createManeuverItem(maneuverObj, char) {
 
                 // タイプ2: パーツが「損傷していない時」に常にアクティブな効果
                 const unconditionalRefs = [
-                    'APPLY_BUFF',                      // 例:【カンフー】(最大行動値+)
-                    'REDUCE_MOVE_COST',                // 例:【奈落の引力】
-                    'NEGATE_STATUS_EFFECT',            // 例:【巨体】【不動】
-                    'APPLY_PASSIVE_DEFENSE',           // 例:【ガントレット】
-                    'PREVENT_INTERRUPTION',            // 例:【刹那】
-                    'MODIFY_ATTACK_RESULT',            // 例:【必中】
-                    'APPLY_CONDITIONAL_BUFF',          // 例:【殺劇】(条件を満たせば発動する能力自体は常時有効)
-                    'IMMUNITY',                        // 例:【対策装備】
-                    'NEGATE_DAMAGE_EFFECT'             // 例:【オートセパレート】
+                    'APPLY_BUFF',
+                    'REDUCE_MOVE_COST',
+                    'NEGATE_STATUS_EFFECT',
+                    'APPLY_PASSIVE_DEFENSE',
+                    'PREVENT_INTERRUPTION',
+                    'MODIFY_ATTACK_RESULT',
+                    // 'APPLY_CONDITIONAL_BUFF',
+                    'IMMUNITY',
+                    'NEGATE_DAMAGE_EFFECT'
                 ];
 
                 // --- 判定 ---
@@ -255,9 +260,22 @@ function createManeuverItem(maneuverObj, char) {
                     isEffectActive = true;
                 }
 
-                const hasUnconditionalEffect = maneuver.effects.some(e => unconditionalRefs.includes(e.ref));
-                if (hasUnconditionalEffect && !isDamaged) {
-                    isEffectActive = true;
+                // isEffectActiveがまだfalseで、パーツが損傷していない場合のみ、無条件効果をチェック
+                if (!isEffectActive && !isDamaged) {
+                    for (const effect of maneuver.effects) {
+                        // ケースA: 特定エリアでのみ有効なバフ (例: 【地獄の住人】)
+                        if (effect.ref === 'APPLY_BUFF' && effect.params?.duration === 'while_in_area') {
+                            if (char.area === effect.params.area) {
+                                isEffectActive = true;
+                                break; // 条件を満たしたのでループを抜ける
+                            }
+                        } 
+                        // ケースB: 上記以外の常に有効な効果 (例: 【カンフー】)
+                        else if (unconditionalRefs.includes(effect.ref)) {
+                            isEffectActive = true;
+                            break; // 条件を満たしたのでループを抜ける
+                        }
+                    }
                 }
             }
         }
@@ -272,20 +290,57 @@ function createManeuverItem(maneuverObj, char) {
 
     if (maneuverObj.isActiveBuff) {
         statusIconCol.innerHTML = `<input type="checkbox" class="maneuver-checkbox" checked disabled>`;
-    } else if (char.turnLimitedManeuvers.has(maneuver.name)) {
+    } else if (char && char.turnLimitedManeuvers && char.turnLimitedManeuvers.has(maneuver.name)) {
         const isChecked = char.usedManeuvers.has(maneuver.name);
         statusIconCol.innerHTML = `<input type="checkbox" class="maneuver-checkbox" ${isChecked ? 'checked' : ''} disabled>`;
     }
 
     const rightCol = document.createElement('div');
     rightCol.className = 'item-right-col';
-    rightCol.innerHTML = `
+    rightCol.innerHTML += `
         <div class="item-row-1">
             <span class="item-name">【${maneuver.name}】</span>
             <span class="item-stats">《${maneuver.timing}/${maneuver.cost}/${maneuver.range}》</span>
         </div>
         <div class="item-row-2">${maneuver.description_raw || ''}</div>
     `;
+
+    // ▼▼▼ ここからが修正箇所です ▼▼▼
+
+    // リファレンス表示時（charオブジェクトにidがないダミーの場合）に追加情報を表示
+    if (!char.id) {
+        // ▼▼▼ ここからが修正箇所です ▼▼▼
+
+        // ヘッダー部分を生成
+        const sourceHeaderText = getManeuverSourceText(maneuver);
+        let sourceInfoText = '';
+        if (maneuver.source) {
+            sourceInfoText = maneuver.source.book || '不明';
+            if (maneuver.source.page) {
+                sourceInfoText += ` (p${maneuver.source.page})`;
+            }
+        }
+        
+        const headerEl = document.createElement('div');
+        headerEl.className = 'item-reference-header';
+        headerEl.innerHTML = `
+            <span class="item-source-category">${sourceHeaderText}</span>
+            <span class="item-source-info">${sourceInfoText}</span>
+        `;
+        // rightCol の先頭にヘッダーを追加
+        rightCol.prepend(headerEl);
+
+        // フレーバーテキストを追加 (これは変更なし)
+        if (maneuver.flavor_text) {
+            const flavorTextEl = document.createElement('div');
+            flavorTextEl.className = 'item-row-3 item-flavor-text';
+            flavorTextEl.textContent = maneuver.flavor_text;
+            rightCol.appendChild(flavorTextEl);
+        }
+
+        // ▲▲▲ 修正はここまでです ▲▲▲
+    }
+    // ▲▲▲ 修正はここまでです ▲▲▲
 
     item.appendChild(categoryCol);
     item.appendChild(passiveIconCol);
@@ -507,6 +562,21 @@ function filterManeuvers(maneuvers, filterId, char) {
         case 'パーツ':
             results = maneuvers.filter(m => m.sourceType === 'part' && !excludedNames.includes(m.data.name));
             break;
+        case 'オート':
+            results = maneuvers.filter(m => m.data.tags.includes('オート') && !excludedNames.includes(m.data.name));
+            break;
+        case 'アクション':
+            results = maneuvers.filter(m => m.data.tags.includes('アクション') && !excludedNames.includes(m.data.name));
+            break;
+        case 'ラピッド':
+            results = maneuvers.filter(m => m.data.tags.includes('ラピッド') && !excludedNames.includes(m.data.name));
+            break;
+        case 'ジャッジ':
+            results = maneuvers.filter(m => m.data.tags.includes('ジャッジ') && !excludedNames.includes(m.data.name));
+            break;
+        case 'ダメージ':
+            results = maneuvers.filter(m => m.data.tags.includes('ダメージ') && !excludedNames.includes(m.data.name));
+            break;
         case '移動':
             results = maneuvers.filter(m => (m.data.tags.includes('移動') || m.data.tags.includes('移動妨害')) && !excludedNames.includes(m.data.name));
             break;
@@ -567,10 +637,56 @@ function filterManeuvers(maneuvers, filterId, char) {
     
     // 3. 最後に、「バフ」フィルター専用の絞り込みを行う
     if (filterId === 'バフ') {
-        return results.filter(m => 
-            m.isActiveBuff || // 種類を問わず、アクティブなバフはすべて表示
-            (m.data.timing === 'オート' && m.data.effects && m.data.effects.some(e => e.ref === 'APPLY_BUFF' || e.ref === 'REDUCE_MOVE_COST'))
-        );
+        
+        // createManeuverItem内の💡表示ロジックをここで再現してフィルタリングする
+        return results.filter(m => {
+            // ケース1: すでにアクティブなバフとしてマークされているもの
+            if (m.isActiveBuff) {
+                return true;
+            }
+
+            // ケース2: オートタイミングのマニューバであること
+            if (m.data.timing !== 'オート' || !m.data.effects) {
+                return false;
+            }
+
+            // ケース3: 💡アイコンの点灯条件を満たすかどうか
+            let isEffectActive = false;
+            const maneuver = m.data;
+            const isDamaged = m.isDamaged;
+
+            // --- 損傷時にのみアクティブになる効果 ---
+            const conditionalRefs = ['MODIFY_MAX_ACTION_VALUE_ON_DAMAGE', 'ATTACK_ON_DAMAGE'];
+            if (maneuver.effects.some(e => conditionalRefs.includes(e.ref)) && isDamaged) {
+                isEffectActive = true;
+            }
+
+            // --- 損傷していない時にアクティブになる効果 ---
+            if (!isEffectActive && !isDamaged) {
+                const unconditionalRefs = [
+                    'APPLY_BUFF', 'REDUCE_MOVE_COST', 'NEGATE_STATUS_EFFECT', 
+                    'APPLY_PASSIVE_DEFENSE', 'PREVENT_INTERRUPTION', 'MODIFY_ATTACK_RESULT', 
+                    'IMMUNITY', 'NEGATE_DAMAGE_EFFECT'
+                ];
+                
+                for (const effect of maneuver.effects) {
+                    // エリア指定がある場合
+                    if (effect.ref === 'APPLY_BUFF' && effect.params?.duration === 'while_in_area') {
+                        if (char.area === effect.params.area) {
+                            isEffectActive = true;
+                            break;
+                        }
+                    } 
+                    // その他の常時有効効果
+                    else if (unconditionalRefs.includes(effect.ref)) {
+                        isEffectActive = true;
+                        break;
+                    }
+                }
+            }
+            
+            return isEffectActive;
+        });
     }
     
     return results;
@@ -1948,4 +2064,241 @@ export function showAttackConfirmationModal(performer, target, maneuver, index) 
             };
         }
     });
+}
+
+// --- リファレンス機能 ---
+
+let activeReferenceFilters = {}; // リファレンス用のフィルター状態を管理
+
+/**
+ * 全マニューバを検索・閲覧できるリファレンスUIを構築する
+ */
+export function buildReferenceMenu() {
+    closeAllMenus();
+    const menu = document.getElementById('maneuverMenu');
+    menu.innerHTML = ''; 
+
+    const filterGroups = {
+        'スキル': ['アリス', 'ホリック', 'オートマトン', 'ジャンク', 'コート', 'ソロリティ', 'ステーシー', 'タナトス', 'ゴシック', 'レクイエム', 'バロック', 'ロマネスク', 'サイケデリック', '特化スキル'],
+        'パーツ': ['基本パーツ', '武装', '変異', '改造', '手駒専用', '頭', '腕', '胴', '脚', '任意'],
+        'タイミング': ['オート', 'アクション', 'ラピッド', 'ジャッジ', 'ダメージ'],
+        'カテゴリ': ['攻撃', '防御', '支援', '妨害', '強化'],
+        '最大射程': ['自身', '0', '1', '2', '3']
+    };
+
+    const header = document.createElement('div');
+    header.className = 'maneuver-menu-header';
+    header.innerHTML = `
+        <span class="header-icon">📖</span>
+        <span class="header-title">全マニューバリファレンス</span>
+        <button class="header-close-btn">&times;</button>
+    `;
+    menu.appendChild(header);
+    header.querySelector('.header-close-btn').onclick = closeAllMenus;
+
+    // ▼▼▼ ここからが修正箇所です ▼▼▼
+
+    // フィルター全体を囲むアコーディオンコンテナを作成
+    const accordionContainer = document.createElement('div');
+    // 最初は開いた状態にするため is-closed は付けない
+    accordionContainer.className = 'accordion-container'; 
+    menu.appendChild(accordionContainer);
+
+    // アコーディオンのヘッダー（クリックで開閉する部分）を作成
+    const accordionHeader = document.createElement('div');
+    accordionHeader.className = 'accordion-header';
+    accordionHeader.innerHTML = '<span>フィルター表示</span>'; // テキストを変更
+    accordionContainer.appendChild(accordionHeader);
+    
+    // アコーディオンのコンテンツ部分（フィルターボタン群が入る）を作成
+    const filterContainer = document.createElement('div');
+    filterContainer.className = 'reference-filter-container accordion-content'; // accordion-contentクラスを追加
+    accordionContainer.appendChild(filterContainer);
+
+    // アコーディオンの開閉イベントを設定
+    accordionHeader.onclick = () => {
+        accordionContainer.classList.toggle('is-closed');
+    };
+
+    // ▲▲▲ 修正はここまでです ▲▲▲
+
+    const listContainer = document.createElement('div');
+    listContainer.className = 'maneuver-menu-list-container';
+    menu.appendChild(listContainer);
+    
+    // フィルター状態の初期化（初回のみ）
+    if (Object.keys(activeReferenceFilters).length === 0) {
+        Object.keys(filterGroups).forEach(groupName => {
+            activeReferenceFilters[groupName] = [];
+        });
+    }
+
+    const renderReferenceList = () => {
+        listContainer.innerHTML = '';
+        const allManeuversSource = data.getAllManeuvers();
+        const allManeuvers = Object.keys(allManeuversSource).map(id => {
+            // IDをキーとして持つオブジェクトから、IDをプロパティとして持つオブジェクトに変換する
+            return { id: id, ...allManeuversSource[id] };
+        });
+        const filtered = filterManeuversForReference(allManeuvers, activeReferenceFilters);
+        
+        const categoryOrder = data.getCoreData().maneuverCategories.map(c => c.name);
+        filtered.sort((a, b) => {
+            const categoryA = a.category === '行動値増加' ? '行動値' : a.category;
+            const categoryB = b.category === '行動値増加' ? '行動値' : b.category;
+            let indexA = categoryOrder.indexOf(categoryA);
+            if (indexA === -1) indexA = categoryOrder.length;
+            let indexB = categoryOrder.indexOf(categoryB);
+            if (indexB === -1) indexB = categoryOrder.length;
+            if (indexA !== indexB) return indexA - indexB;
+            return a.name.localeCompare(b.name, 'ja');
+        });
+
+        if (filtered.length === 0) {
+            listContainer.innerHTML = `<div class="maneuver-item is-empty">条件に一致するマニューバはありません</div>`;
+        } else {
+            filtered.forEach(maneuver => {
+                const maneuverObj = { data: maneuver, isUsable: true }; 
+                const item = createManeuverItem(maneuverObj, {}); // ダミーのcharオブジェクトを渡す
+                item.onclick = null; // リファレンスではクリックしても何もしない
+                listContainer.appendChild(item);
+            });
+        }
+    };
+    
+    for (const groupName in filterGroups) {
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'filter-group';
+        groupDiv.innerHTML = `<h4 class="filter-group-title">${groupName}</h4>`;
+        
+        const buttonsDiv = document.createElement('div');
+        buttonsDiv.className = 'filter-buttons';
+        
+        filterGroups[groupName].forEach(filterName => {
+            const btn = document.createElement('button');
+            btn.className = 'filter-btn';
+            btn.textContent = filterName;
+            
+            if (activeReferenceFilters[groupName].includes(filterName)) {
+                btn.classList.add('is-active');
+            }
+            
+            btn.onclick = () => {
+                btn.classList.toggle('is-active');
+                const index = activeReferenceFilters[groupName].indexOf(filterName);
+                if (index > -1) {
+                    activeReferenceFilters[groupName].splice(index, 1);
+                } else {
+                    activeReferenceFilters[groupName].push(filterName);
+                }
+                renderReferenceList();
+            };
+            buttonsDiv.appendChild(btn);
+        });
+        groupDiv.appendChild(buttonsDiv);
+        filterContainer.appendChild(groupDiv);
+    }
+
+    renderReferenceList();
+    menu.classList.add('is-visible');
+    setTimeout(() => { document.addEventListener('click', handleOutsideClick); }, 0);
+}
+
+/**
+ * リファレンス用に全マニューバをフィルターする
+ * @param {Array<object>} maneuvers - 全マニューバの配列
+ * @param {object} filters - アクティブなフィルターのオブジェクト
+ * @returns {Array<object>} フィルター後のマニューバ配列
+ */
+function filterManeuversForReference(maneuvers, filters) {
+    const coreData = data.getCoreData();
+    // ★ coreDataから直接positionsとclassesを取得
+    const positions = coreData.positions;
+    const classes = coreData.classes;
+
+    return maneuvers.filter(m => {
+        for (const groupName in filters) {
+            const activeInGroup = filters[groupName];
+            if (activeInGroup.length === 0) continue;
+
+            let matchInGroup = activeInGroup.some(filterName => 
+                // ★ 正しいマスターデータを渡すように修正
+                checkManeuverMatch(m, groupName, filterName, { positions: positions, classes: classes })
+            );
+
+            if (!matchInGroup) {
+                return false;
+            }
+        }
+        return true;
+    });
+}
+
+/**
+ * 特定のマニューバがフィルター条件に一致するかを判定するヘルパー関数
+ */
+function checkManeuverMatch(maneuver, groupName, filterName, masterData) {
+    const id = maneuver.id || '';
+    const prefix = id.substring(0, 2);
+    const typePrefix = id.substring(0, 1);
+
+    switch (groupName) {
+        case 'スキル':
+            // 特化スキルの判定
+            if (filterName === '特化スキル') {
+                return id.endsWith('-SP');
+            }
+            // ポジションスキルの判定
+            const posKey = Object.keys(masterData.positions).find(k => masterData.positions[k].name === filterName);
+            if (posKey && prefix === posKey) {
+                return true;
+            }
+            // クラススキルの判定
+            const classKey = Object.keys(masterData.classes).find(k => masterData.classes[k].name === filterName);
+            if (classKey && prefix === classKey) {
+                return true;
+            }
+            return false; // どのスキルにも一致しなかった
+
+        case 'パーツ':
+            // IDプレフィックスによる判定
+            if (filterName === '基本パーツ') return prefix === 'BP';
+            if (filterName === '武装') return typePrefix === 'A';
+            if (filterName === '変異') return typePrefix === 'M';
+            if (filterName === '改造') return typePrefix === 'R';
+            if (filterName === '手駒専用') return typePrefix === 'P';
+
+            // allowedLocations（装備箇所）による判定
+            if (maneuver.allowedLocations) {
+                if (filterName === '頭') return maneuver.allowedLocations === '頭';
+                if (filterName === '腕') return maneuver.allowedLocations === '腕';
+                if (filterName === '胴') return maneuver.allowedLocations === '胴';
+                if (filterName === '脚') return maneuver.allowedLocations === '脚';
+                if (filterName === '任意') return maneuver.allowedLocations === '任意';
+            }
+            return false; // どのパーツ条件にも一致しなかった
+
+        case 'タイミング':
+            return maneuver.timing === filterName;
+
+        case 'カテゴリ':
+            // カテゴリ名またはタグのいずれかに一致すればOK
+            return maneuver.category === filterName || (maneuver.tags && maneuver.tags.includes(filterName));
+
+        case '最大射程':
+            const rangeStr = String(maneuver.range || '');
+            if (filterName === '自身') return rangeStr === '自身';
+            
+            const numFilter = parseInt(filterName, 10);
+            if (isNaN(numFilter)) return false;
+            
+            if (rangeStr.includes('～')) {
+                const max = parseInt(rangeStr.split('～')[1], 10);
+                return max === numFilter;
+            } else if (!isNaN(parseInt(rangeStr, 10))) {
+                return parseInt(rangeStr, 10) === numFilter;
+            }
+            return false;
+    }
+    return false;
 }

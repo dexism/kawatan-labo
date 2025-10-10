@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "2.7.21"; // パッチバージョンを更新
+export const version = "2.8.22"; // パッチバージョンを更新
 
 import * as data from './data-handler.js'; 
 import * as charManager from './character-manager.js';
@@ -16,7 +16,8 @@ import {
     buildManeuverMenu, showCharacterSheetModal, 
     showUndeadListModal, buildMoveMenu, 
     buildPlacementMenu, closeAllMenus, 
-    showAttackConfirmationModal 
+    showAttackConfirmationModal,
+    buildReferenceMenu
 } from './menu-builder.js';
 import * as stateManager from './state-manager.js';
 
@@ -62,6 +63,14 @@ export function setupAllEventListeners() {
         battleLogic.startMadnessPhase();
         ui.showMadnessModal(); // ★ startMadnessPhaseは状態を変えるだけなので、モーダル表示はここ
     };
+
+    const refBtn = document.getElementById('showReferenceBtn');
+    if (refBtn) {
+        refBtn.onclick = () => {
+            // menu-builder.js に新しく作成する関数を呼び出す
+            buildReferenceMenu();
+        };
+    }
 
     const resetBtn = document.getElementById('resetBattleBtn'); // ← 正しいID
     if (resetBtn) {
