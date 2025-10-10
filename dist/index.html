@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>『永い後日談のネクロニカ』バトルパート支援ツール 7.10.10.14</title>
+<title>『永い後日談のネクロニカ』バトルパート支援ツール 7.10.11.2</title>
 
 <!-- Favicon設定 -->
 <link rel="icon" href="/assets/favicon-cJD5s49M.ico" type="image/x-icon">
@@ -13,10 +13,15 @@
 
 <!-- 分割した外部スタイルシートの読み込み -->
 
-  <script type="module" crossorigin src="/assets/index-_FTw0Nu-.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-DfWQqpcU.css">
+  <script type="module" crossorigin src="/assets/index-57OkgB6t.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-BFlN68NN.css">
 </head>
 <body>
+<div id="splash">
+  <h2>永い後日談の</h2>
+  <h1>ネクロニカ</h1>
+</div>
+
 <div id="dice3d-container"></div>
 
 <!-- ヘッダー -->
@@ -59,7 +64,6 @@
     </aside>
 
   </div>
-  <!-- /main -->
 
   <!-- 右列 -->
   <div class="right-column">
@@ -106,13 +110,6 @@
       </div>
     </aside>
 
-    <!-- パート表示パネル -->
-    <aside class="grid-area-service-panel">
-      <div class="section status control-container">
-        <button id="resetBattleBtn" class="phase-btn phase-btn-danger">戦闘を中断して初期画面に戻る</button>
-      </div>
-    </aside>
-
     <!-- ラピッド宣言パネル -->
     <aside class="grid-area-rapid-panel">
       <div class="section accordion-container is-closed" id="rapidDeclarationArea">
@@ -129,7 +126,7 @@
           <h2 class="section-title accordion-header">ジャッジ宣言はありません</h2>
 
           <div class="accordion-content">
-              <div id="judgeDeclarationList" class="action-queue-list"></div>
+              <div id="judgeDeclarationList" class="action-queue-list is-stack-style"></div>
           </div>
       </div>
     </aside>
@@ -149,10 +146,10 @@
     <!-- ダメージ処理パネル -->
     <aside class="grid-area-damage-panel">
       <div class="section accordion-container is-closed" id="damageProcessingArea">
-        <h2 class="section-title accordion-header">ダメージ処理はありません</h2>
+        <h2 class="section-title accordion-header">ダメージ宣言はありません</h2>
 
         <div class="accordion-content">
-            <div id="damageProcessingList" class="action-queue-list">
+            <div id="damageProcessingList" class="action-queue-list is-stack-style">
             </div>
         </div>
       </div>
@@ -162,7 +159,7 @@
     <aside class="grid-area-log-panel">
       <div class="section log" id="log">
         <h2 class="section-title">ログ</h2>
-        <div id="logEntries" class="log-entries-container" style="height: 300px;"></div>
+        <div id="logEntries" class="log-entries-container"></div>
       </div>
     </aside>
 
@@ -171,6 +168,10 @@
       <div class="section accordion-container is-closed" id="settingsArea">
         <h2 class="section-title accordion-header">設定</h2>
         <div class="section settings accordion-content" id="settingsArea">
+
+          <div class="section status control-container">
+            <button id="resetBattleBtn" class="phase-btn phase-btn-danger">戦闘を中断して初期画面に戻る</button>
+          </div>
           
           <h2 class="section-title">セッションデータ管理</h2>
           <div class="settings-content" id="session-controls">
@@ -245,24 +246,22 @@
             </div>
           </div>
         </div>
-
       </div>
     </aside>
 
-  </div>
+    <!-- フッター -->
+    <footer class="app-footer">
+      <div class="credit-info">
+        <span class="responsive-item">本ツールは「神谷涼」及び「インコグ・ラボ」が権利を有する『永い後日談のネクロニカ』の二次創作です。</span><span class="hide-on-mobile"> | </span>
+        <span class="responsive-item">原作・著作権は原作者および権利者に帰属します。</span><span class="hide-on-mobile"> | </span>
+        <span class="responsive-item">本ツールは非公式であり、商用利用はしていません。</span><span class="hide-on-mobile"> | </span>
+        <span class="responsive-item">© 2025 かわたん.</span>
+      </div>
+      <div class="version-info" id="version-info"></div>
+    </footer>
 
+  </div>
 </main>
-
-<!-- フッター -->
-<footer class="app-footer">
-  <div class="credit-info">
-    <span class="responsive-item">本ツールは「神谷涼」及び「インコグ・ラボ」が権利を有する『永い後日談のネクロニカ』の二次創作です。</span><span class="hide-on-mobile"> | </span>
-    <span class="responsive-item">原作・著作権は原作者および権利者に帰属します。</span><span class="hide-on-mobile"> | </span>
-    <span class="responsive-item">本ツールは非公式であり、商用利用はしていません。</span><span class="hide-on-mobile"> | </span>
-    <span class="responsive-item">© 2025 かわたん.</span>
-  </div>
-  <div class="version-info" id="version-info"></div>
-</footer>
 
 <!-- 画面上にオーバーレイされるUI要素 -->
 <!-- ウェルカムモーダル -->

@@ -100,7 +100,7 @@
     "name": "反射行動", "category": "行動値", "tags": ["行動値", "オート"], "description": "最大行動値+2。", "description_raw": "最大行動値+2", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 2 } }] 
   },
   "P0-17": { 
-    "name": "はなびら", "category": "その他", "tags": ["オート"], "description": "効果なし。", "description_raw": "効果なし", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "なし", "effects": [] 
+    "name": "はなびら", "category": "生贄", "tags": ["オート", "生贄"], "description": "効果なし。", "description_raw": "効果なし", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "なし", "effects": [] 
   },
   "P0-18": { 
     "name": "シュレッダー", "category": "攻撃", "tags": ["攻撃", "アクション", "白兵攻撃", "切断", "支援"], "description": "白兵攻撃2+切断、判定+1。", "description_raw": "白兵攻撃2+切断、攻撃判定+1", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "2", "range": "0", "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 2, "attack_bonus": 1, "on_hit": ["SEVERANCE"] } }] 
@@ -127,7 +127,7 @@
   "P0-24": { 
     "name": "サブエンジン", "category": "行動値", "tags": ["行動値", "オート"], "description": "最大行動値+1。", "description_raw": "最大行動値+1", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 1 } }] },
   "P0-25": { 
-    "name": "装甲板", "category": "その他", "tags": ["オート"], "description": "効果なし。", "description_raw": "効果なし", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "なし", "effects": [] },
+    "name": "装甲板", "category": "生贄", "tags": ["オート", "生贄"], "description": "効果なし。", "description_raw": "効果なし", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "なし", "effects": [] },
   "P0-26": { 
     "name": "殺戮本能", "category": "行動値", "tags": ["行動値", "オート"], "description": "最大行動値+2。", "description_raw": "最大行動値+2", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 2 } }] },
   "P0-27": { 
@@ -222,9 +222,9 @@
   "P0-52": { 
     "name": "選ばれし骨格", "category": "行動値", "tags": ["行動値", "オート"], "description": "最大行動値+1。", "description_raw": "最大行動値+1", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 1 } }] },
   "P0-53": { 
-    "name": "選ばれし臓腑", "category": "その他", "tags": ["オート"], "description": "効果なし。", "description_raw": "効果なし", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "なし", "effects": [] },
+    "name": "選ばれし臓腑", "category": "生贄", "tags": ["オート", "生贄"], "description": "効果なし。", "description_raw": "効果なし", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "なし", "effects": [] },
   "P0-54": { 
-    "name": "麗しきドレス", "category": "その他", "tags": ["オート"], "description": "効果なし。", "description_raw": "効果なし", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "なし", "effects": [] },
+    "name": "麗しきドレス", "category": "生贄", "tags": ["オート", "生贄"], "description": "効果なし。", "description_raw": "効果なし", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "なし", "effects": [] },
   "P0-55": { 
     "name": "女王の歩み", "category": "移動", "tags": ["移動", "アクション", "移動妨害"], "description": "移動1、「移動妨害」無効。", "description_raw": "移動1、「移動妨害」無効", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "3", "range": "自身", "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": 1, "ignore_move_debuff": true } }] },
   "P0-56": { 
@@ -271,7 +271,7 @@
     "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 1 } }] 
   },
   "P0-65": { 
-    "name": "脚", "category": "その他", "tags": ["オート"], "description": "効果なし。", "description_raw": "効果なし", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "なし", "effects": [] 
+    "name": "脚", "category": "生贄", "tags": ["オート", "生贄"], "description": "効果なし。", "description_raw": "効果なし", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "なし", "effects": [] 
   },
   "P0-66": { 
     "name": "大鉈", "category": "攻撃", "tags": ["攻撃", "アクション", "白兵攻撃"], "description": "白兵攻撃2。", "description_raw": "白兵攻撃2", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "2", "range": "0", "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 2 } }] 
@@ -283,7 +283,7 @@
     "name": "よろめくあし", "category": "移動", "tags": ["移動", "アクション"], "description": "移動1。", "description_raw": "移動1", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "3", "range": "自身", "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": 1 } }] 
   },
   "P0-69": { 
-    "name": "きのこ", "category": "その他", "tags": ["オート"], "description": "効果なし。", "description_raw": "効果なし", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "なし", "effects": [] 
+    "name": "きのこ", "category": "生贄", "tags": ["オート", "生贄"], "description": "効果なし。", "description_raw": "効果なし", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "なし", "effects": [] 
   },
   "P0-70": { 
     "name": "分解ガス", "category": "攻撃", "tags": ["攻撃", "アクション", "射撃攻撃", "全体攻撃"], "description": "射撃攻撃1+全体攻撃。", "description_raw": "射撃攻撃1+全体攻撃", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "3", "range": "1", "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "射撃", "damage": 1, "on_hit": ["AREA_ATTACK"] } }] 
@@ -344,8 +344,8 @@
     "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": 1, "direction": "performer_choice", "ignore_move_debuff": true } }]
   },
   "P0-78": {
-    "name": "過剰筋肉", "category": "その他",
-    "tags": ["オート"],
+    "name": "過剰筋肉", "category": "生贄",
+    "tags": ["オート", "生贄"],
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "なし（【はらわた】相当）",
     "description_raw": "なし（【はらわた】相当）",
@@ -364,8 +364,8 @@
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "maxActionValue", "value": 2, "duration": "permanent_while_undamaged" } }]
   },
   "P0-80": {
-    "name": "のうしょう", "category": "その他",
-    "tags": ["オート"],
+    "name": "のうしょう", "category": "生贄",
+    "tags": ["オート", "生贄"],
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "なし（【はらわた】相当）",
     "description_raw": "なし（【はらわた】相当）",
@@ -404,8 +404,8 @@
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "maxActionValue", "value": 1, "duration": "permanent_while_undamaged" } }]
   },
   "P0-84": {
-    "name": "構築関節", "category": "その他",
-    "tags": ["オート"],
+    "name": "構築関節", "category": "生贄",
+    "tags": ["オート", "生贄"],
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "なし（【はらわた】相当）",
     "description_raw": "なし（【はらわた】相当）",
@@ -432,8 +432,8 @@
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "maxActionValue", "value": 1, "duration": "permanent_while_undamaged" } }]
   },
   "P0-87": {
-    "name": "痩せた腕", "category": "その他",
-    "tags": ["オート"],
+    "name": "痩せた腕", "category": "生贄",
+    "tags": ["オート", "生贄"],
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "なし（【よぶんなにく】相当）",
     "description_raw": "なし（【よぶんなにく】相当）",
@@ -442,8 +442,8 @@
     "effects": []
   },
   "P0-88": {
-    "name": "痩せた脚", "category": "その他",
-    "tags": ["オート"],
+    "name": "痩せた脚", "category": "生贄",
+    "tags": ["オート", "生贄"],
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "なし（【よぶんなにく】相当）",
     "description_raw": "なし（【よぶんなにく】相当）",
@@ -467,7 +467,7 @@
     "description": "支援2", 
     "description_raw": "支援2", 
     "source": { "book": "基本ルールブック", "page": 151 }, 
-    "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "value": 2 } }] 
+    "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "target": "any_roll", "value": 2 } }]
   },
   "P0-13": { 
     "name": "超強化筋肉", "category": "防御", 

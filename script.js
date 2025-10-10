@@ -7,7 +7,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-const appVersion = "1.3.19";
+const appVersion = "1.3.20";
 
 // --- モジュールのインポート ---
 import * as data from './data-handler.js';
@@ -34,6 +34,7 @@ import { version as uiManagerVersion } from './ui-manager.js';
 import { version as uiHelpersVersion } from './ui-helpers.js';
 import { version as interactionManagerVersion } from './interaction-manager.js';
 import { version as battleLogicVersion } from './battle-logic.js';
+import { version as battleHelpersVersion } from './battle-helpers.js';
 import { version as settingsManagerVersion } from './settings-manager.js';
 import { version as stateManagerVersion } from './state-manager.js';
 import { version as diceRollerVersion } from './dice-roller.js';
@@ -64,6 +65,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         // 2. UIの骨格を先に描画
         initializeAppUI();
 
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
         // 3. ウェルカムモーダルと更新情報を表示し、ユーザーが閉じるのを待つ
         await showWelcomeAndUpdates();
 
@@ -74,6 +77,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // 5. すべての初期化モーダルが完了した後、バージョン情報を表示
         displayAppVersionInfo();
+
+        // 6. スプラッシュ消去
+        const splash = document.getElementById('splash');
+        splash.classList.add('fade-out');
+        // setTimeout(() => splash.remove(), 1000);
 
     } catch (error) {
         console.error("アプリケーションの初期化に失敗しました。", error);
@@ -99,7 +107,7 @@ function initializeAppUI() {
 function showWelcomeAndUpdates() {
     return new Promise(resolve => {
         const LATEST_UPDATE_NOTES = `
-        <div class="modal-header modal-header-sub">📢主な更新内容:7.10.10.14</div>
+        <div class="modal-header modal-header-sub">📢主な更新内容:7.10.11.2</div>
         <div class="modal-body welcome-modal-body">
             <p>◆ <strong>防御・妨害・追加ダメージ・転倒・移動妨害</strong>を実装しました。</p>
             <p>◆ <strong>セッションのファイルへの保存・ファイルから読込み</strong>を実装しました。</p>
@@ -199,6 +207,7 @@ function displayAppVersionInfo() {
     const versionInfo = {
         app: appVersion,
         "battle-logic": battleLogicVersion,
+        "battle-helper": battleHelpersVersion,
         "character-manager": charManagerVersion,
         "data-handler": dataVersion,
         "dice-roller": diceRollerVersion,
@@ -208,7 +217,7 @@ function displayAppVersionInfo() {
         "ui-helpers": uiHelpersVersion,
         "ui-manager": uiManagerVersion,
         "settings-manager": settingsManagerVersion,
-        "state-manager": stateManager.version,
+        "state-manager": stateManagerVersion,
         "character-converter": characterConverterVersion
     };
     displayVersionInfo(versionInfo);

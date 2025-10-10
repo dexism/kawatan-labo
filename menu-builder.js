@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.13.57"; // バージョンを更新
+export const version = "1.13.59"; // バージョンを更新
 
 import * as data from './data-handler.js';
 import * as charManager from './character-manager.js';
@@ -15,6 +15,7 @@ import { convertVampireBloodSheet } from './character-converter.js';
 import { getCategoryClass } from './ui-helpers.js';
 import { getLocalStorageUsage, clearLocalImageCache } from './settings-manager.js';
 import * as stateManager from './state-manager.js';
+import { calculateManeuverRange } from './battle-helpers.js';
 
 // --- モジュール内変数 ---
 let menuOpener = null;
@@ -71,6 +72,9 @@ export function buildManeuverMenu(char, element) {
         { id: '攻撃', label: '攻撃' },
         { id: '支援', label: '支援' },
         { id: '妨害', label: '妨害' },
+        { id: '防御', label: '防御' },
+        { id: '強化', label: '強化' },
+        { id: '生贄', label: '生贄' },
         { id: 'すべて', label: 'すべて' }
     ];
 
@@ -324,6 +328,48 @@ function createManeuverItem(maneuverObj, char) {
                 return;
             }
 
+            const isDefenseManeuver = 
+                maneuver.timing === 'ダメージ' && 
+                maneuver.tags.includes('防御') &&
+                !maneuver.effects?.some(e => e.ref === 'TAKE_DAMAGE_FOR_ALLY');
+
+            if (isDefenseManeuver) {
+                // 防御可能なダメージのリストを取得 (未適用かつ射程内の味方のダメージのみ)
+                const targetableDamages = battleLogic.getBattleState().damageQueue.filter(damage => {
+                    if (!damage.applied && damage.target.type === char.type) {
+                        return checkTargetAvailability(char, maneuver, [damage.target]).hasTarget;
+                    }
+                    return false;
+                });
+
+                if (targetableDamages.length === 0) {
+                    ui.addLog("防御対象となるダメージがありません。");
+                    return;
+                }
+
+                // モーダルを表示して防御対象を選択させる
+                const selectedDamage = await new Promise(resolve => {
+                    const menuItems = targetableDamages.map(damage => ({
+                        label: `【${damage.sourceAction.sourceManeuver.name}】→ ${damage.target.name} (${damage.amount}点)`,
+                        onClick: () => resolve(damage)
+                    }));
+                    ui.showModal({ 
+                        title: `【${maneuver.name}】防御対象を選択`, 
+                        items: menuItems,
+                        onRender: (modal, closeFn) => {
+                            // モーダル外のクリックでキャンセルできるようにする
+                            modal.onclick = (event) => { if(event.target === modal) { closeFn(); resolve(null); } };
+                        }
+                    });
+                });
+
+                if (selectedDamage) {
+                    // battleLogic.declareManeuver の第3引数に「防御されるキャラクター」を渡す
+                    battleLogic.declareManeuver(char, maneuver, selectedDamage.target);
+                }
+                return; // この後の処理に進まないようにここで終了
+            }
+
             const takeDamageEffect = maneuver.effects?.find(e => e.ref === 'TAKE_DAMAGE_FOR_ALLY');
             if (takeDamageEffect) {
                 const targetableDamages = battleLogic.getBattleState().damageQueue.filter(damage => {
@@ -462,16 +508,25 @@ function filterManeuvers(maneuvers, filterId, char) {
             results = maneuvers.filter(m => m.sourceType === 'part' && !excludedNames.includes(m.data.name));
             break;
         case '移動':
-            results = maneuvers.filter(m => m.data.tags.includes('移動') && !excludedNames.includes(m.data.name));
+            results = maneuvers.filter(m => (m.data.tags.includes('移動') || m.data.tags.includes('移動妨害')) && !excludedNames.includes(m.data.name));
             break;
         case '攻撃':
             results = maneuvers.filter(m => m.data.tags.includes('攻撃') && !excludedNames.includes(m.data.name));
             break;
+        case '防御':
+            results = maneuvers.filter(m => m.data.tags.includes('防御') && !excludedNames.includes(m.data.name));
+            break;
+        case '強化':
+            results = maneuvers.filter(m => m.data.tags.includes('強化') && !excludedNames.includes(m.data.name));
+            break;
         case '支援':
-            results = maneuvers.filter(m => (m.data.tags.includes('支援') || m.data.tags.includes('強化')) && !excludedNames.includes(m.data.name));
+            results = maneuvers.filter(m => m.data.tags.includes('支援') && !excludedNames.includes(m.data.name));
             break;
         case '妨害':
-            results = maneuvers.filter(m => (m.data.tags.includes('妨害') || m.data.tags.includes('脆弱')) && !excludedNames.includes(m.data.name));
+            results = maneuvers.filter(m => (m.data.tags.includes('妨害') || m.data.tags.includes('脆弱') || m.data.tags.includes('移動妨害')) && !excludedNames.includes(m.data.name));
+            break;
+        case '生贄':
+            results = maneuvers.filter(m => m.data.tags.includes('生贄') && !excludedNames.includes(m.data.name));
             break;
         case 'バフ':
         case 'すべて':
@@ -1668,34 +1723,10 @@ export function checkTargetAvailability(actor, maneuver, targetChars = null) {
         return { hasTarget: true, targets: [] };
     }
 
-    let rangeBonus = 0;
-
-    const allActorManevers = [
-        ...actor.skills.map(name => data.getManeuverByName(name)),
-        ...Object.values(actor.partsStatus).flat().filter(p => !p.damaged).map(p => data.getManeuverByName(p.name))
-    ].filter(m => m);
-
-    for (const actorManeuver of allActorManevers) {
-        if (actorManeuver.timing === 'オート' && actorManeuver.effects) {
-            for (const effect of actorManeuver.effects) {
-                if (effect.ref === 'APPLY_BUFF' && effect.params?.stat === 'rangeBonus') {
-                    const condition = effect.params.condition;
-                    if (condition && Array.isArray(condition)) {
-                        const maneuverTags = maneuver.tags || [];
-                        if (condition.some(cond => maneuverTags.includes(cond))) {
-                            rangeBonus += effect.params.value || 0;
-                        }
-                    } else {
-                        rangeBonus += effect.params.value || 0;
-                    }
-                }
-            }
-        }
-    }
-
-    const rangeParts = String(range).toString().split('～');
-    const minRange = parseInt(rangeParts[0], 10);
-    const maxRange = parseInt(rangeParts[1] || rangeParts[0], 10) + rangeBonus;
+    // ▼▼▼ ここからが今回の修正箇所です ▼▼▼
+    // 汎用ヘルパー関数を呼び出して有効射程を計算
+    const { minRange, maxRange } = calculateManeuverRange(actor, maneuver);
+    // ▲▲▲ 修正はここまでです ▲▲▲
 
     if (isNaN(minRange)) {
         return { hasTarget: true, targets: [] };
@@ -1711,14 +1742,11 @@ export function checkTargetAvailability(actor, maneuver, targetChars = null) {
             continue;
         }
         
-        // ▼▼▼ ここからが今回の修正箇所です ▼▼▼
-        // 「攻撃」かつ「支援」でないマニューバは、味方を対象にできない
         const isAttack = maneuver.tags && maneuver.tags.includes('攻撃');
         const isSupport = maneuver.category === '支援' || (maneuver.tags && maneuver.tags.includes('支援'));
         if (actor.type === char.type && isAttack && !isSupport) {
             continue;
         }
-        // ▲▲▲ 修正はここまでです ▲▲▲
 
         const targetAreaIndex = rows.indexOf(char.area);
         if (targetAreaIndex === -1) continue;
@@ -1861,7 +1889,7 @@ export function showAttackConfirmationModal(performer, target, maneuver, index) 
                 shouldApply = true;
             }
             // ケースB: 自身の攻撃判定に介入するジャッジ（自己支援）
-            else if (judgeEffect.params.target === 'self_roll' && judgeDecl.performer.id === performer.id) {
+            else if ((judgeEffect.params.target === 'self_roll' || judgeEffect.params.target === 'any_roll') && judgeDecl.performer.id === performer.id) {
                 shouldApply = true;
             }
 

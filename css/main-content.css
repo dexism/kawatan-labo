@@ -382,7 +382,7 @@ body.is-dragging .char.hover-highlight {
 /* 「アンデッドを追加」カード */
 .add-char-card {
     width: var(--card-size);
-    height: var(--card-size);
+    height: calc(1.4 * var(--card-size));
     flex-shrink: 0;
     border: 4px dashed var(--color-text-muted);
     border-radius: 10px;
@@ -390,30 +390,33 @@ body.is-dragging .char.hover-highlight {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    align-content: center;
     cursor: pointer;
     color: var(--color-text-muted);
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     transition: all 0.2s ease;
+    font-weight: bold;
 }
 .add-char-card:hover {
     background:   var(--color-surface-1);
     border-color: var(--color-text);
     color:        var(--color-text);
 }
+.add-char-text-2 {
+    display: flex;
+    font-size: 26px;
+    height: 30px;
+}
 .add-char-plus {
     font-size: 50px;
-    font-weight: bold;
     line-height: 1;
 }
 .add-char-text {
+    display: flex;
     font-size: 16px;
-    font-weight: bold;
-}
-.add-char-text-2 {
-    font-size: 26px;
-    font-weight: bold;
+    height: 30px;
 }
 /* カードホバー時のアクションボタン */
 .card-actions-overlay {
@@ -533,7 +536,7 @@ body.is-dragging .char.hover-highlight {
 */
 .battle-wrap {
     display: grid;
-    grid-template-columns: var(--header-width) repeat(var(--col-count), var(--cell-width));
+    grid-template-columns: var(--header-width) repeat(var(--col-count), minmax(var(--cell-width),auto));
     grid-template-rows: var(--cell-height) repeat(var(--row-count), minmax(var(--cell-height), auto));
     text-align: center;
     text-shadow:
@@ -588,12 +591,15 @@ body.is-dragging .char.hover-highlight {
     display: flex;
     flex-direction: column;
     align-items: center;
+    align-content: flex-start;
+    justify-items: flex-start;
     justify-content: flex-start;
     background-color: var(--color-card);
     overflow: visible;
-    width: var(--cell-width);
+    min-width: var(--cell-width);
     min-height: var(--cell-height);
     border-radius: 3px;
+
 }
 /* --- グリッドセルのエリアカラー --- */
 /* 透明度を加えて、ヘッダーより少し薄い色にする */
@@ -623,6 +629,7 @@ body.is-dragging .char.hover-highlight {
 .marker {
     position: relative;
     display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
     pointer-events: auto;

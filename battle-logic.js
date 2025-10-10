@@ -1,17 +1,17 @@
-// battle-logic.js の全体を置き換える
-
 /**
  * @file battle-logic.js
  * @description 戦闘の進行、状態管理、ルール判定、アクション解決を担当するモジュール。
  */
-export const version = "1.22.83"; // UI分離リファクタリング完了版
+export const version = "1.22.84"; // UI分離リファクタリング完了版
 
 import * as charManager from './character-manager.js';
 import * as ui from './ui-manager.js';
 import { performDiceRoll } from './dice-roller.js';
+import * as interactionManager from './interaction-manager.js';
 import * as data from './data-handler.js';
 import * as stateManager from './state-manager.js';
-import { checkTargetAvailability } from './menu-builder.js';
+import { calculateManeuverRange } from './battle-helpers.js';
+// import { checkTargetAvailability } from './menu-builder.js';
 
 // ===================================================================================
 //  戦闘状態 (State)
@@ -181,13 +181,36 @@ export function declareManeuver(char, maneuver, target = null, judgeTargetDeclar
             ui.addLog(`◆[ジャッジ] ${char.name}が【${maneuver.name}】を宣言。`);
             break;
         case 'ダメージ':
-            ui.addLog(`◆[ダメージ] ${char.name}が【${maneuver.name}】を宣言。`);
+            // ログに防御対象がいれば表示するように修正
+            let logMessage = `◆[ダメージ] ${char.name}が【${maneuver.name}】を宣言。`;
+            if (target && target.id !== char.id) {
+                logMessage += ` (対象: ${target.name})`;
+            }
+            ui.addLog(logMessage);
+
             const defenseEffect = maneuver.effects?.find(e => e.ref === 'GENERIC_DEFENSE');
-            if (defenseEffect) charManager.addBuff(char.id, { source: maneuver.name, stat: 'defense', value: defenseEffect.params.value || 0, duration: 'until_damage_applied' });
+            if (defenseEffect) {
+                // targetが指定されていればそのキャラ、なければ使用者自身にバフをかける
+                const defenseTarget = target || char;
+                charManager.addBuff(defenseTarget.id, { 
+                    source: maneuver.name, 
+                    stat: 'defense', 
+                    value: defenseEffect.params.value || 0, 
+                    duration: 'until_damage_applied' 
+                });
+            }
+            
             const damageIncreaseEffect = maneuver.effects?.find(e => e.ref === 'INCREASE_DAMAGE_DEALT');
             if (damageIncreaseEffect) {
                 const pendingDamage = battleState.damageQueue.find(d => d.sourceAction.performer.id === char.id && !d.applied);
-                if (pendingDamage) charManager.addBuff(char.id, { source: maneuver.name, stat: 'damageBonus', value: damageIncreaseEffect.params.value || 0, duration: 'until_damage_applied' });
+                if (pendingDamage) {
+                    charManager.addBuff(char.id, { 
+                        source: maneuver.name, 
+                        stat: 'damageBonus', 
+                        value: damageIncreaseEffect.params.value || 0, 
+                        duration: 'until_damage_applied' 
+                    });
+                }
             }
             break;
         case 'アクション':
@@ -584,19 +607,57 @@ async function performAttackRoll(action, context) {
             command: diceCommand, showToast: true, performer,
             callback: async (result, hitLocation, resultText, rollValue) => {
                 if (result === '大失敗') {
-                    const candidates = [performer, ...charManager.getCharacters().filter(c => c.type === performer.type && c.id !== performer.id && c.area === (target?.area || performer.area) && !c.isDestroyed && !c.isWithdrawn)];
-                    const selected = await new Promise(res => {
-                        const items = candidates.map(c => ({ label: c.name, onClick: () => res(c) }));
-                        ui.showModal({ title: '大失敗：誤爆対象を選択', items });
-                    });
-                    if (selected) {
-                        battleState.damageQueue.push({
-                            id: `damage_${Date.now()}_${Math.random()}`, target: selected, amount: action.damage || 0,
-                            location: '任意', sourceAction: declaration, applied: false, rollValue: rollValue || 0,
-                            onHitEffects: onHitEffects.includes('EXPLOSION') ? ['EXPLOSION'] : []
+                    // ▼▼▼ ここからが今回の修正箇所です ▼▼▼
+                    const maneuver = declaration.sourceManeuver;
+                    const { minRange, maxRange } = calculateManeuverRange(performer, maneuver);
+                    let candidates = [];
+
+                    if (!isNaN(minRange)) {
+                        const allAreas = ["奈落", "地獄", "煉獄", "花園", "楽園"];
+                        const performerAreaIndex = allAreas.indexOf(performer.area);
+                        
+                        // 射程内の味方（自身を含む）を候補として抽出
+                        candidates = charManager.getCharacters().filter(c => {
+                            if (c.type !== performer.type || c.isDestroyed || c.isWithdrawn) {
+                                return false;
+                            }
+                            const targetAreaIndex = allAreas.indexOf(c.area);
+                            if (targetAreaIndex === -1) return false;
+                            
+                            const distance = Math.abs(performerAreaIndex - targetAreaIndex);
+                            return distance >= minRange && distance <= maxRange;
                         });
-                        ui.addLog(`＞ ${selected.name}に誤爆！ 【${action.damage || 0}】点のダメージ！`);
                     }
+                    // ▲▲▲ 修正はここまでです ▲▲▲
+                    
+                    if (candidates.length > 0) {
+                        const selected = await new Promise(res => {
+                            const items = candidates.map(c => ({ label: c.name, onClick: () => res(c) }));
+                            // モーダルの外側クリックでキャンセルできるように onRender を追加
+                            ui.showModal({ 
+                                title: '大失敗：誤爆対象を選択', 
+                                items,
+                                onRender: (modal, closeFn) => {
+                                    const closeModalHandler = () => { closeFn(); res(null); };
+                                    modal.querySelector('#closeSimpleMenuModalBtn').onclick = closeModalHandler;
+                                    modal.onclick = (e) => { if (e.target === modal) closeModalHandler(); };
+                                }
+                            });
+                        });
+
+                        if (selected) {
+                            // ダメージ処理のロジックは元のコードを尊重
+                            battleState.damageQueue.push({
+                                id: `damage_${Date.now()}_${Math.random()}`, target: selected, amount: 1, // 大失敗のダメージは1点
+                                location: '任意', sourceAction: declaration, applied: false, rollValue: rollValue || 0,
+                                isFumble: true
+                            });
+                            ui.addLog(`＞ ${selected.name}に誤爆！ 1点のダメージ！`);
+                        }
+                    } else {
+                        ui.addLog("＞ 幸い、誤射の範囲に味方はいなかった。");
+                    }
+
                     resolve({ hit: false, on_hit: [] });
                     return;
                 }

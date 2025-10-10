@@ -95,8 +95,8 @@
     "effects": [{ "ref": "REDUCE_NEXT_MANEUVER_COST", "params": { "value": 1, "minimum": 0, "count": 1 } }]
   },
   "BP-08": {
-    "name": "はらわた", "category": "その他", "allowedLocations": "胴",
-    "tags": ["オート"],
+    "name": "はらわた", "category": "生贄", "allowedLocations": "胴",
+    "tags": ["オート", "生贄"],
     "timing": "オート", "cost": "なし", "range": "なし",
     "description": "効果なし", 
     "description_raw": "なし",

@@ -3,10 +3,11 @@
 ================================ */
 html, body {
   width:  100%;
-  height: 100%; /* htmlとbody要素自体に高さを与える */
-  margin: 0;
+  height: 100vh; /* htmlとbody要素自体に高さを与える */
+  margin:  0;
   padding: 0;
   box-sizing: border-box;
+  overflow: hidden;
 }
 body {
   font-family: sans-serif;
@@ -22,7 +23,41 @@ h2 {
   margin-bottom: 4px;
   font-size: 1.0rem;
 }
+#splash {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  padding-top: 30vh;
+  background-color: var(--color-background-1);
+  color: var(--color-fore-1);
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  font-weight: bold;
+  text-align: center;
+  flex-direction: column;
+  z-index: 1000;
+  /* opacity: 1;
+  transition: opacity 1s ease; */
+  transition: all 1s;
+}
+#splash h1 {
+  display: block;
+  font-size: 2.0rem;
+  margin: 0;
+  padding: 0;
+}
+#splash h2 {
+  display: block;
+  font-size: 1.4rem;
+  margin: 0;
+  padding: 0;
+}
 
+#splash.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
 /* ================================
  * @description CSSカスタムプロパティ（変数）を定義します。
 ================================ */
@@ -93,6 +128,7 @@ h2 {
   --color-surface-dark: var(--color-a); /* 宣言リストの背景 */
   --color-log-bg:       var(--color-f);
   --color-border:       var(--color-a);
+  --color-shadow-1:     rgba(255, 255, 255, 0.5);
   --color-accent-red:   #c33;
   --color-accent-gold:  gold;
   --color-accent-cyan:  cyan;
@@ -147,6 +183,7 @@ html[data-theme="dark"] {
     --color-surface-dark: var(--color-2);
     --color-log-bg:       var(--color-0);
     --color-border:       var(--color-6);
+    --color-shadow-1:     rgba(0, 0, 0, 0.5);
     --color-accent-red:   #ff5555;
     --color-accent-gold:  #ffd700;
     --color-accent-cyan:  #00ffff;
@@ -198,6 +235,7 @@ html[data-theme="dark"] {
     --color-surface-dark: var(--color-2);
     --color-log-bg:       var(--color-0);
     --color-border:       var(--color-6);
+    --color-shadow-1:     rgba(0, 0, 0, 0.5);
     --color-accent-red:   #ff5555;
     --color-accent-gold:  #ffd700;
     --color-accent-cyan:  #00ffff;
