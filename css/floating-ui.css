@@ -200,6 +200,10 @@
 .category-color-heal {         background-color: var(--color-heal); }
 .category-color-utility {      background-color: var(--color-utility); }
 .category-color-sacrifice {    background-color: var(--color-sacrifice); }
+.category-color-enhancement {  background-color: var(--color-enhancement); }  /* ★追加 */
+.category-color-dialogue {     background-color: var(--color-dialogue); }      /* ★追加 */
+.category-color-reinforcement {background-color: var(--color-reinforcement);} /* ★追加 */
+.category-color-madness {      background-color: var(--color-madness); }       /* ★追加 */
 .category-color-other {        background-color: var(--color-other); }
 
 /* マニューバ項目のフレックスボックス設定 */

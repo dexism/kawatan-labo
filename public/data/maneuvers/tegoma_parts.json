@@ -5,7 +5,7 @@
 
   "//": "---------- 悪意点 0.5 (P1) ----------",
   "P1-01": {
-    "name": "よぶんなにく", "category": "補助",
+    "name": "よぶんなにく", "category": "生贄",
     "tags": ["オート"],
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "1体の手駒に複数を所有させてよい。",
@@ -67,7 +67,7 @@
     "effects": [{ "ref": "TRANSFORM", "params": { "trigger": "on_this_part_damaged" } }]
   },
   "P2-04": {
-    "name": "肉漁り虫", "category": "補助", 
+    "name": "肉漁り虫", "category": "増援", 
     "tags": ["増援", "アクション"],
     "timing": "アクション", "cost": 2, "range": "0～1",
     "description": "コストとしてレギオン5体を消費し、ヘビトンボ1体を増援する。", 
@@ -172,7 +172,7 @@
     "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "target": "other_roll", "value": 2 } }]
   },
   "P3-07": {
-    "name": "死者融合", "category": "補助", 
+    "name": "死者融合", "category": "増援", 
     "tags": ["増援", "アクション"],
     "timing": "アクション", "cost": 2, "range": "0～1",
     "description": "コストとしてレギオンを1d10体消費し、ブッチャー1体を増援する。", 
@@ -241,7 +241,7 @@
     "effects": [{ "ref": "NEGATE_STATUS_EFFECT", "params": { "effects_to_negate": ["転倒", "移動"], "optional": true } }]
   },
   "P3-13": {
-    "name": "不安の種", "category": "補助",
+    "name": "不安の種", "category": "その他",
     "tags": ["アクション", "狂気点操作"],
     "timing": "アクション", "cost": 2, "range": "0～1",
     "description": "ドールの未練1つを「依存」に変更する。戦闘終了時に元に戻る。",
@@ -251,7 +251,7 @@
     "effects": [{ "ref": "CHANGE_REGRET_TYPE_TEMPORARY", "params": { "to": "依存" } }]
   },
   "P3-14": {
-    "name": "悪意の芽", "category": "補助",
+    "name": "悪意の芽", "category": "その他",
     "tags": ["アクション", "狂気点操作"],
     "timing": "アクション", "cost": 2, "range": "0～1",
     "description": "ドールの未練1つを「嫌悪」に変更する。戦闘終了時に元に戻る。",
@@ -261,7 +261,7 @@
     "effects": [{ "ref": "CHANGE_REGRET_TYPE_TEMPORARY", "params": { "to": "嫌悪" } }]
   },
   "P3-15": {
-    "name": "妄想の華", "category": "補助",
+    "name": "妄想の華", "category": "その他",
     "tags": ["アクション", "狂気点操作"],
     "timing": "アクション", "cost": 2, "range": "0～1",
     "description": "ドールの未練1つを「信頼」に変更する。戦闘終了時に元に戻る。",
@@ -393,7 +393,7 @@
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "精神", "damage": 1, "on_hit": ["AREA_ATTACK"] } }]
   },
   "P4-04": {
-    "name": "亡者の目覚め", "category": "補助", 
+    "name": "亡者の目覚め", "category": "増援", 
     "tags": ["増援", "アクション"],
     "timing": "アクション", "cost": 3, "range": "0～1",
     "description": "射程0～1のエリアにゾンビを1d10体増援する。", 
@@ -423,7 +423,7 @@
     "effects": [{ "ref": "GRANT_IMMUNITY_TO_AREA", "params": { "effects_to_grant": ["転倒", "移動"], "target_type": "piece" } }]
   },
   "P4-07": {
-    "name": "死者暴走", "category": "補助", 
+    "name": "死者暴走", "category": "増援", 
     "tags": ["増援", "アクション"],
     "timing": "アクション", "cost": 2, "range": "0～1",
     "description": "コストとしてレギオン1体を消費し、グール1体を増援する。", 
@@ -483,8 +483,8 @@
     "effects": [{ "ref": "GUARDIAN_MECHANIC", "params": {} }]
   },
   "P4-13": {
-    "name": "狂気の波調", "category": "補助",
-    "tags": ["アクション", "補助", "狂気点操作"],
+    "name": "狂気の波調", "category": "攻撃",
+    "tags": ["アクション", "攻撃", "狂気点操作"],
     "timing": "アクション", "cost": 4, "range": "効果参照",
     "description": "5カウント後、舞台上のドール全員の未練に狂気点1点追加。自身がパーツ損傷で無効。残りカウント5以上ないと宣言不可。",
     "description_raw": "このマニューバが宣言されたカウントを1として数え始めて5カウント目の終了時、このパーツが損傷していなければ効果が発動する。舞台上の全てのドールは発狂していない未練1つを選び、狂気点1点を加える。このマニューバは残りカウントが5以上なければ宣言できない。",
@@ -535,7 +535,7 @@
     "effects": [{ "ref": "REVIVE_ALLY", "params": { "target_type": "ホラー" } }]
   },
   "P6-02": {
-    "name": "強制再起動", "category": "補助",
+    "name": "強制再起動", "category": "増援",
     "tags": ["アクション", "補助", "配置変更", "増援"],
     "timing": "アクション", "cost": "効果参照", "range": "効果参照",
     "description": "配置時にデータ開示されている、完全解体状態のホラー1体を舞台から消去し、選んだホラーの悪意分の行動値を減らす。消したホラーと同名のホラー1体を「増援」し、あなたと同じエリアに配置。",

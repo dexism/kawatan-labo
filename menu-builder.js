@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.15.63"; // バージョンを更新
+export const version = "1.16.65"; // バージョンを更新
 
 import * as data from './data-handler.js';
 import * as charManager from './character-manager.js';
@@ -22,6 +22,104 @@ let menuOpener = null;
 const rows = ["奈落", "地獄", "煉獄", "花園", "楽園"];
 let resolveTargetSelection = null;
 let activeFilter = '宣言';
+let activeReferenceFilters = {};
+
+// ★★★ ここから新設：共通ソートロジック ★★★
+
+/**
+ * マニューバのIDや情報から、ソート用の優先度を数値で返す
+ * @param {object} maneuver - マニューバのマスターデータ
+ * @returns {number} - 優先度を示す数値（小さいほど先に表示される）
+ */
+function getSortPriority(maneuver) {
+    const id = maneuver.id || '';
+    const prefix = id.substring(0, 2);
+    const typePrefix = id.substring(0, 1);
+
+    // 1. ポジションスキル
+    const posKeys = ['AL', 'HL', 'AM', 'JK', 'CT', 'SR'];
+    const posIndex = posKeys.indexOf(prefix);
+    if (posIndex !== -1) return 1000 + posIndex;
+
+    // 2. クラススキル
+    const classKeys = ['ST', 'TN', 'GT', 'RQ', 'BR', 'RM', 'SY'];
+    const classIndex = classKeys.indexOf(prefix);
+    if (classIndex !== -1) {
+        const basePriority = 2000 + classIndex * 10;
+        return id.endsWith('-SP') ? basePriority : basePriority + 1; // 特化スキルを先に
+    }
+
+    // 3. 基本パーツ
+    if (prefix === 'BP') {
+        const loc = maneuver.allowedLocations;
+        if (loc === '頭') return 3000;
+        if (loc === '腕') return 3001;
+        if (loc === '胴') return 3002;
+        if (loc === '脚') return 3003;
+        return 3004; // その他
+    }
+
+    // 4. 強化パーツ (武装・変異・改造)
+    const level = parseInt(id.substring(1, 2), 10);
+    if (!isNaN(level)) {
+        if (typePrefix === 'A') return 4000 + level;
+        if (typePrefix === 'M') return 5000 + level;
+        if (typePrefix === 'R') return 6000 + level;
+    }
+
+    // 5. 手駒スキル
+    if (prefix === 'PS') return 7000;
+
+    // 6. 手駒専用パーツ
+    if (typePrefix === 'P') {
+        const maliceLevelCode = parseInt(id.substring(1, 2), 10);
+        if (!isNaN(maliceLevelCode)) {
+            return 8000 + maliceLevelCode;
+        }
+    }
+
+    // 7. その他
+    if (prefix === 'TR') return 9000; // たからもの
+    if (prefix === 'CA') return 9100; // 一般動作
+
+    // 8. どの分類にも属さない場合
+    return 9999;
+}
+
+/**
+ * マニューバの配列を、指定された共通ルールに従ってソートする
+ * @param {Array<object>} maneuvers - ソート対象のマニューバオブジェクトの配列
+ * @returns {Array<object>} - ソート後の配列
+ */
+function sortManeuvers(maneuvers) {
+    const categoryOrder = data.getCoreData().maneuverCategories.map(c => c.name);
+
+    maneuvers.sort((a, b) => {
+        const maneuverA = a.data;
+        const maneuverB = b.data;
+
+        // 第1キー: カテゴリ順
+        const categoryA = maneuverA.category === '行動値増加' ? '行動値' : maneuverA.category;
+        const categoryB = maneuverB.category === '行動値増加' ? '行動値' : maneuverB.category;
+        const indexA = categoryOrder.indexOf(categoryA);
+        const indexB = categoryOrder.indexOf(categoryB);
+        if (indexA !== indexB) {
+            return (indexA === -1 ? 99 : indexA) - (indexB === -1 ? 99 : indexB);
+        }
+
+        // 第2キー: カスタム優先度
+        const priorityA = getSortPriority(maneuverA);
+        const priorityB = getSortPriority(maneuverB);
+        if (priorityA !== priorityB) {
+            return priorityA - priorityB;
+        }
+
+        // 第3キー (フォールバック): ID順
+        return (maneuverA.id || '').localeCompare(maneuverB.id || '');
+    });
+
+    return maneuvers;
+}
 
 /**
  * ターゲット選択モードを安全にキャンセルし、UIの状態をリセットする
@@ -127,44 +225,18 @@ export function buildManeuverMenu(char, element) {
 
     // --- マニューバリストのレンダリング関数 ---
     const renderManeuverList = () => {
-        listContainer.innerHTML = ''; // リストをクリア
+        listContainer.innerHTML = '';
         const allManeuvers = getCharacterManeuvers(char);
-        
-        const filteredManeuvers = filterManeuvers(allManeuvers, activeFilter, char);
-        // 1. フィルターに基づいてマニューバを絞り込む
+        let filteredManeuvers = filterManeuvers(allManeuvers, activeFilter, char);
 
-        // ソート処理
-        if (activeFilter !== 'パーツ') { // 「パーツ」タブは部位別表示なのでソートしない
-            // core-data.json からカテゴリの正しい順序を取得
-            const categoryOrder = data.getCoreData().maneuverCategories.map(c => c.name);
-
-            filteredManeuvers.sort((a, b) => {
-                // "行動値増加" を "行動値" として扱うための正規化
-                const categoryA = a.data.category === '行動値増加' ? '行動値' : a.data.category;
-                const categoryB = b.data.category === '行動値増加' ? '行動値' : b.data.category;
-
-                let indexA = categoryOrder.indexOf(categoryA);
-                if (indexA === -1) indexA = categoryOrder.length; // 不明なカテゴリは末尾へ
-
-                let indexB = categoryOrder.indexOf(categoryB);
-                if (indexB === -1) indexB = categoryOrder.length;
-
-                // 第一ソートキー：カテゴリの順序
-                if (indexA !== indexB) {
-                    return indexA - indexB;
-                }
-
-                // 第二ソートキー：マニューバ名 (アルファベット/五十音順)
-                return a.data.name.localeCompare(b.data.name);
-            });
+        // ★★★ ここを変更：新しい共通ソート関数を呼び出す ★★★
+        if (activeFilter !== 'パーツ') {
+            filteredManeuvers = sortManeuvers(filteredManeuvers);
         }
 
-        // 2. 絞り込んだマニューバを描画
         if (activeFilter === 'パーツ') {
-            // 「パーツ」タブ専用の描画
             renderPartsView(filteredManeuvers, char);
         } else {
-            // それ以外のタブの描画
             renderDefaultView(filteredManeuvers, char);
         }
     };
@@ -298,9 +370,22 @@ function createManeuverItem(maneuverObj, char) {
 
     const rightCol = document.createElement('div');
     rightCol.className = 'item-right-col';
+
+    // ★★★ ここからが修正箇所です ★★★
+    let maneuverNameHtml = `【${maneuver.name}】`;
+    // リファレンスモード（char.idがない）で、かつパーツの場合に箇所名を追加
+    if (!char.id) {
+        const sourceText = getManeuverSourceText(maneuver);
+        if (sourceText.includes('パーツ') && maneuver.allowedLocations) {
+            const locationMap = { '頭': '頭', '腕': '腕', '胴': '胴', '脚': '脚', '任意': '任意' };
+            const locationPrefix = locationMap[maneuver.allowedLocations] || '他';
+            maneuverNameHtml = `<span class="item-location-prefix">${locationPrefix}</span>` + maneuverNameHtml;
+        }
+    }
+
     rightCol.innerHTML += `
         <div class="item-row-1">
-            <span class="item-name">【${maneuver.name}】</span>
+            <span class="item-name">${maneuverNameHtml}</span>
             <span class="item-stats">《${maneuver.timing}/${maneuver.cost}/${maneuver.range}》</span>
         </div>
         <div class="item-row-2">${maneuver.description_raw || ''}</div>
@@ -2088,19 +2173,17 @@ export function showAttackConfirmationModal(performer, target, maneuver, index) 
 
 // --- リファレンス機能 ---
 
-let activeReferenceFilters = {}; // リファレンス用のフィルター状態を管理
-
 /**
  * 全マニューバを検索・閲覧できるリファレンスUIを構築する
  */
 export function buildReferenceMenu() {
     closeAllMenus();
     const menu = document.getElementById('maneuverMenu');
-    menu.innerHTML = ''; 
+    menu.innerHTML = '';
     menu.classList.add('is-reference-mode');
 
     const filterGroups = {
-        'カテゴリ': ['攻撃', '防御', '支援', '妨害', '強化'],
+        'カテゴリ': ['移動', '攻撃', '防御', '支援', '妨害', '強化', '修復', '補助', '行動値', '生贄', '対話', '狂気点'],
         'スキル': ['アリス', 'ホリック', 'オートマトン', 'ジャンク', 'コート', 'ソロリティ', 'ステーシー', 'タナトス', 'ゴシック', 'レクイエム', 'バロック', 'ロマネスク', 'サイケデリック', '特化スキル'],
         'パーツ': ['基本パーツ', '武装', '変異', '改造', '手駒専用', '頭', '腕', '胴', '脚', '任意'],
         'タイミング': ['オート', 'アクション', 'ラピッド', 'ジャッジ', 'ダメージ'],
@@ -2117,37 +2200,28 @@ export function buildReferenceMenu() {
     menu.appendChild(header);
     header.querySelector('.header-close-btn').onclick = closeAllMenus;
 
-    // ▼▼▼ ここからが修正箇所です ▼▼▼
-
-    // フィルター全体を囲むアコーディオンコンテナを作成
     const accordionContainer = document.createElement('div');
-    // 最初は開いた状態にするため is-closed は付けない
-    accordionContainer.className = 'accordion-container'; 
+    accordionContainer.className = 'accordion-container';
     menu.appendChild(accordionContainer);
 
-    // アコーディオンのヘッダー（クリックで開閉する部分）を作成
+    // ★変更点1: accordionHeader を renderReferenceList からアクセスできるよう、ここで宣言します。
     const accordionHeader = document.createElement('div');
     accordionHeader.className = 'accordion-header';
-    accordionHeader.innerHTML = '<span>フィルター表示</span>'; // テキストを変更
+    accordionHeader.innerHTML = '<span>フィルター表示</span>'; // 初期テキスト
     accordionContainer.appendChild(accordionHeader);
-    
-    // アコーディオンのコンテンツ部分（フィルターボタン群が入る）を作成
+
     const filterContainer = document.createElement('div');
-    filterContainer.className = 'reference-filter-container accordion-content'; // accordion-contentクラスを追加
+    filterContainer.className = 'reference-filter-container accordion-content';
     accordionContainer.appendChild(filterContainer);
 
-    // アコーディオンの開閉イベントを設定
     accordionHeader.onclick = () => {
         accordionContainer.classList.toggle('is-closed');
     };
 
-    // ▲▲▲ 修正はここまでです ▲▲▲
-
     const listContainer = document.createElement('div');
     listContainer.className = 'maneuver-menu-list-container';
     menu.appendChild(listContainer);
-    
-    // フィルター状態の初期化（初回のみ）
+
     if (Object.keys(activeReferenceFilters).length === 0) {
         Object.keys(filterGroups).forEach(groupName => {
             activeReferenceFilters[groupName] = [];
@@ -2157,37 +2231,38 @@ export function buildReferenceMenu() {
     const renderReferenceList = () => {
         listContainer.innerHTML = '';
         const allManeuversSource = data.getAllManeuvers();
-        const allManeuvers = Object.keys(allManeuversSource).map(id => {
-            // IDをキーとして持つオブジェクトから、IDをプロパティとして持つオブジェクトに変換する
-            return { id: id, ...allManeuversSource[id] };
-        });
-        const filtered = filterManeuversForReference(allManeuvers, activeReferenceFilters);
+        // isUsable: true を明示的に追加してオブジェクトを生成する
+        let allManeuvers = Object.keys(allManeuversSource).map(id => {
+            return {
+                data: { id: id, ...allManeuversSource[id] },
+                isUsable: true // リファレンスでは常に見かけ上「使用可能」にする
+            };
+        }).filter(m => m.data && m.data.name);
+
+        let filtered = filterManeuversForReference(allManeuvers, activeReferenceFilters);
+        const itemCount = filtered.length;
         
-        const categoryOrder = data.getCoreData().maneuverCategories.map(c => c.name);
-        filtered.sort((a, b) => {
-            const categoryA = a.category === '行動値増加' ? '行動値' : a.category;
-            const categoryB = b.category === '行動値増加' ? '行動値' : b.category;
-            let indexA = categoryOrder.indexOf(categoryA);
-            if (indexA === -1) indexA = categoryOrder.length;
-            let indexB = categoryOrder.indexOf(categoryB);
-            if (indexB === -1) indexB = categoryOrder.length;
-            if (indexA !== indexB) return indexA - indexB;
-            return a.name.localeCompare(b.name, 'ja');
-        });
+        const headerSpan = accordionHeader.querySelector('span');
+        if (headerSpan) {
+            headerSpan.textContent = `フィルター表示 （${itemCount}件）`;
+        }
+
+        // ★★★ ここを変更：新しい共通ソート関数を呼び出す ★★★
+        filtered = sortManeuvers(filtered);
 
         if (filtered.length === 0) {
             listContainer.innerHTML = `<div class="maneuver-item is-empty">条件に一致するマニューバはありません</div>`;
         } else {
-            filtered.forEach(maneuver => {
-                const maneuverObj = { data: maneuver, isUsable: true }; 
-                const item = createManeuverItem(maneuverObj, {}); // ダミーのcharオブジェクトを渡す
-                item.onclick = null; // リファレンスではクリックしても何もしない
+            filtered.forEach(maneuverObj => {
+                const item = createManeuverItem(maneuverObj, {});
+                item.onclick = null;
                 listContainer.appendChild(item);
             });
         }
     };
-    
+
     for (const groupName in filterGroups) {
+        // ... (フィルターボタンの生成処理は変更なし) ...
         const groupDiv = document.createElement('div');
         groupDiv.className = 'filter-group';
         groupDiv.innerHTML = `<h4 class="filter-group-title">${groupName}</h4>`;
@@ -2233,18 +2308,17 @@ export function buildReferenceMenu() {
  */
 function filterManeuversForReference(maneuvers, filters) {
     const coreData = data.getCoreData();
-    // ★ coreDataから直接positionsとclassesを取得
     const positions = coreData.positions;
     const classes = coreData.classes;
 
-    return maneuvers.filter(m => {
+    return maneuvers.filter(mObj => { // ★ ラッパーオブジェクト(mObj)で受け取る
+        const maneuver = mObj.data; // ★ 実際のデータは .data プロパティから取得
         for (const groupName in filters) {
             const activeInGroup = filters[groupName];
             if (activeInGroup.length === 0) continue;
 
-            let matchInGroup = activeInGroup.some(filterName => 
-                // ★ 正しいマスターデータを渡すように修正
-                checkManeuverMatch(m, groupName, filterName, { positions: positions, classes: classes })
+            let matchInGroup = activeInGroup.some(filterName =>
+                checkManeuverMatch(maneuver, groupName, filterName, { positions, classes })
             );
 
             if (!matchInGroup) {

@@ -5,7 +5,7 @@
 
   "//": "---------- アリス (AL) ----------",
   "AL-01": {
-    "name": "少女", "category": "補助", 
+    "name": "少女", "category": "対話", 
     "tags": ["対話判定", "ラピッド"],
     "timing": "ラピッド", "cost": 0, "range": "0",
     "description": "対象の姉妹1人と対話判定を行う（バトルパート以外）。", 
@@ -15,7 +15,7 @@
     "effects": [{ "ref": "PERFORM_DIALOGUE_CHECK", "params": { "target": "sister" } }]
   },
   "AL-02": {
-    "name": "癒し", "category": "支援", 
+    "name": "癒し", "category": "対話", 
     "tags": ["支援", "オート", "対話判定"],
     "timing": "オート", "cost": "なし", "range": "効果参照",
     "description": "他者から自身への対話判定に+1の修正。", 
@@ -25,7 +25,7 @@
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "dialogueCheckBonus_received", "value": 1, "duration": "permanent" } }]
   },
   "AL-03": {
-    "name": "負けない心", "category": "支援", 
+    "name": "負けない心", "category": "対話", 
     "tags": ["支援", "オート", "対話判定"],
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "自身の対話判定に+1の修正。", 
@@ -55,7 +55,7 @@
     "effects": [{ "ref": "TELEPORT_TO_AREA", "params": { "target": "self", "area": "楽園" } }]
   },
   "AL-06": {
-    "name": "祈り", "category": "補助",
+    "name": "祈り", "category": "狂気点",
     "tags": ["ラピッド", "狂気点操作"],
     "timing": "ラピッド", "cost": 0, "range": "効果参照",
     "description": "5カウント後、姉妹全員の狂気点を1点減らす。その間に自身がパーツ損傷か狂気点増加すると無効。",
@@ -65,7 +65,7 @@
     "effects": [{ "ref": "DELAYED_MADNESS_REDUCTION", "params": { "delay": 5, "target": "all_sisters_inclusive" } }]
   },
   "AL-07": {
-    "name": "輝く表情", "category": "補助",
+    "name": "輝く表情", "category": "対話",
     "tags": ["オート", "対話判定", "狂気点操作"],
     "timing": "オート", "cost": "なし", "range": "効果参照",
     "description": "対話判定で大成功した場合、対象の狂気点をさらに1点減らしてよい。",
@@ -142,7 +142,7 @@
     "effects": [{ "ref": "TELEPORT_WITH_MADNESS_COST", "params": { "area": "地獄" } }]
   },
   "HL-07": {
-    "name": "狂気の果て", "category": "補助",
+    "name": "狂気の果て", "category": "狂気点",
     "tags": ["ダメージ", "狂気点操作"],
     "timing": "ダメージ", "cost": 0, "range": "自身",
     "description": "自身の未練の狂気点を1点減らす。もし同エリアに他の姉妹がいるなら、その姉妹の狂気点を1点増やす。",
@@ -214,7 +214,7 @@
     "effects": [{ "ref": "NEGATE_MADNESS_WITH_DAMAGE", "params": { "part_type": "基本" } }]
   },
   "AM-07": {
-    "name": "敵は敵", "category": "防御",
+    "name": "敵は敵", "category": "妨害",
     "tags": ["オート", "狂気点操作"],
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "自身に対する精神攻撃は、判定値7以上でなければ狂気点を与えない。",
@@ -383,7 +383,7 @@
     "effects": [{ "ref": "ALLOW_MANEUVER_AS_TIMING", "params": { "target": "all_sisters_inclusive", "maneuver_category": "攻撃", "as_timing": "ラピッド" } }]
   },
   "SR-02": {
-    "name": "克己心", "category": "補助", 
+    "name": "克己心", "category": "対話", 
     "tags": ["狂気判定", "対話判定", "オート"],
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "自身が発狂状態なら、狂気判定と対話判定に+1。", 
@@ -406,7 +406,7 @@
     "effects": [{ "ref": "TELEPORT_TO_AREA", "params": { "target": "all_sisters_inclusive", "area": "花園" } }]
   },
   "SR-04": {
-    "name": "内緒話", "category": "補助", 
+    "name": "内緒話", "category": "対話", 
     "tags": ["対話判定", "オート"],
     "timing": "オート", "cost": "なし", "range": "姉妹",
     "description": "バトルパート開始/終了時、任意の姉妹1体と互いに対話判定を行える。", 
@@ -416,7 +416,7 @@
     "effects": [{ "ref": "PERFORM_DIALOGUE_CHECK_MUTUAL", "params": { "trigger": ["battle_start", "battle_end"] } }]
   },
   "SR-05": {
-    "name": "優雅", "category": "補助", 
+    "name": "優雅", "category": "対話", 
     "tags": ["対話判定", "オート", "振り直し"],
     "timing": "オート", "cost": "なし", "range": "姉妹",
     "description": "狂気点で判定を振りなおす際、任意の姉妹1体に自身への対話判定をさせてもよい。", 
@@ -436,7 +436,7 @@
     "effects": [{ "ref": "REDUCE_ACTION_VALUE", "params": { "target": "savant", "value": 4 } }]
   },
   "SR-07": {
-    "name": "心を鬼にして", "category": "補助",
+    "name": "心を鬼にして", "category": "狂気点",
     "tags": ["オート", "狂気点操作"],
     "timing": "オート", "cost": "なし", "range": "効果参照",
     "description": "自身の攻撃で姉妹のパーツを損傷させた場合、その姉妹の発狂状態の未練の狂気点を1点減らしてよい。",

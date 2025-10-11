@@ -305,7 +305,7 @@
     "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": 1, "direction": "performer_choice" } }]
   },
   "P0-74": {
-    "name": "少女の体", "category": "補助",
+    "name": "少女の体", "category": "狂気点",
     "tags": ["オート", "狂気点操作"],
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "このパーツが損傷した際、損傷させた者は狂気点1点を得る（【トラウマスイッチ】相当）",
@@ -469,7 +469,7 @@
     "source": { "book": "基本ルールブック", "page": 151 }, 
     "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "target": "any_roll", "value": 2 } }]
   },
-  "P0-13": { 
+  "P0-91": { 
     "name": "超強化筋肉", "category": "防御", 
     "tags": ["防御", "ダメージ"], 
     "timing": "ダメージ", "cost": "0", "range": "自身", 

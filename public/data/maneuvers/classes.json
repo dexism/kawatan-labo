@@ -55,7 +55,7 @@
     "effects": [{ "ref": "CANCEL_DAMAGE_EFFECTS", "params": {} }]
   },
   "ST-05": {
-    "name": "失敗作", "category": "補助", 
+    "name": "失敗作", "category": "支援", 
     "tags": ["支援", "損傷", "オート"],
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "常時、攻撃判定と切断判定に+1。ただしターン終了毎にパーツ1つを損傷。", 
@@ -306,7 +306,7 @@
   },
   "RQ-03": {
     "name": "子守唄", "category": "補助", 
-    "tags": ["弱体化", "コスト補正", "オート"],
+    "tags": ["妨害", "コスト補正", "オート"],
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "射撃攻撃の攻撃判定-1、コスト-1(最低1)。", 
     "description_raw": "バトルパートで射撃攻撃マニューバの攻撃判定出目-1、コスト-1(最低1)。",
@@ -567,7 +567,7 @@
     "effects": [{ "ref": "FORCE_FAILURE", "params": { "cost_type": "madness_1", "target_roll": "incoming_attack" } }]
   },
   "SY-04": {
-    "name": "魂の抱擁", "category": "その他",
+    "name": "魂の抱擁", "category": "狂気点",
     "tags": ["アクション", "狂気点操作"],
     "timing": "アクション", "cost": 2, "range": "0～2",
     "description": "『完全解体』状態でも使用可。対象の未練1つから狂気点1点を減らし、自身の未練1つに狂気点1点を加える。", 

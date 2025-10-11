@@ -143,7 +143,7 @@
     ]
   },
   "M2-02": {
-    "name": "おとこのこ", "category": "補助", "allowedLocations": "任意",
+    "name": "おとこのこ", "category": "対話", "allowedLocations": "任意",
     "timing": "オート", "cost": "なし", "range": "自身",
     "tags": ["対話判定", "オート"],
     "description": "対話判定+1", 
@@ -348,8 +348,8 @@
     "effects": [{ "ref": "DISTRIBUTE_DAMAGE", "params": {} }]
   },
   "M3-10": {
-    "name": "きもちいいくすり", "category": "修復", "allowedLocations": "頭",
-    "tags": ["修復", "ダメージ", "狂気点操作"],
+    "name": "きもちいいくすり", "category": "狂気点", "allowedLocations": "頭",
+    "tags": ["ダメージ", "狂気点操作"],
     "timing": "ダメージ", "cost": "1", "range": "自身",
     "description": "自身がダメージを受けた際、任意の未練の狂気点を1点減らす", 
     "description_raw": "自身がダメージを受けた際のみ使用可。任意の未練から、狂気点を1減少させてよい。",

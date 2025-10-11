@@ -7,7 +7,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-const appVersion = "1.4.23";
+const appVersion = "1.4.24";
 
 // --- モジュールのインポート ---
 import * as data from './data-handler.js';
@@ -45,6 +45,9 @@ import { version as Dice3dVersion } from './dice-3d.js';
 // ===================================================================================
 //  アプリケーション初期化フロー
 // ===================================================================================
+window.onload = function() {
+    document.title = `『永い後日談のネクロニカ』バトルパート支援ツール Ver.${appVersion}`;
+};
 
 document.addEventListener('DOMContentLoaded', async () => {
     try {
@@ -107,7 +110,7 @@ function initializeAppUI() {
 function showWelcomeAndUpdates() {
     return new Promise(resolve => {
         const LATEST_UPDATE_NOTES = `
-        <div class="modal-header modal-header-sub">📢主な更新内容:7.10.11.21</div>
+        <div class="modal-header modal-header-sub">📢主な更新内容: Ver.${appVersion}</div>
         <div class="modal-body welcome-modal-body">
             <p>◆ <strong>📖全マニューバリファレンス</strong>を実装しました。</p>
             <p>◆ <strong>防御・妨害・追加ダメージ・転倒・移動妨害</strong>を実装しました。</p>

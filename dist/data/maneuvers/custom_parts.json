@@ -104,7 +104,7 @@
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 1, "on_hit": ["TUMBLE"] } }]
   },
   "R1-10": {
-    "name": "ボイスエフェクト", "category": "補助", "allowedLocations": "頭",
+    "name": "ボイスエフェクト", "category": "対話", "allowedLocations": "頭",
     "tags": ["対話判定", "ラピッド"],
     "timing": "ラピッド", "cost": 2, "range": "0～2",
     "description": "姉妹1体と互いに対話判定可", 
@@ -124,7 +124,7 @@
     "effects": [{ "ref": "REPAIR_LOCATION_ON_BATTLE_END", "params": { "part_type": "基本" } }]
   },
   "R1-12": {
-    "name": "カルマプロセッサ", "category": "補助", "allowedLocations": "頭",
+    "name": "カルマプロセッサ", "category": "狂気点", "allowedLocations": "頭",
     "tags": ["オート", "狂気点操作"],
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "狂気点を1点無効化する代わりに、このパーツを損傷させてもよい。",
@@ -242,7 +242,7 @@
     "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "any_character", "distance": 1, "direction": "performer_choice" } }]
   },
   "R2-11": {
-    "name": "アンテナ", "category": "補助", "allowedLocations": "頭",
+    "name": "アンテナ", "category": "狂気点", "allowedLocations": "頭",
     "tags": ["オート", "狂気点操作"],
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "戦闘中1ターン1回、コストの狂気点1点を無効化。",
@@ -378,7 +378,7 @@
   "R3-11": {
     "name": "サイコブラスター", "category": "攻撃", "allowedLocations": "任意",
     "tags": ["ラピッド", "攻撃", "射撃攻撃", "狂気点操作"],
-    "timing": "ラピッド", "cost": "効果参照", "range": "0～2",
+    "timing": "ラピッド", "cost": "1+狂気点1", "range": "0～2",
     "description": "行動値1減らす代わりに、未練の狂気点を1点加えて射撃攻撃4。",
     "description_raw": "コストの代わりにあなたは現在行動値を1減らした上で、任意の未練に狂気点1点を加える。射撃攻撃4。",
     "flavor_text": "超能力開発の副産物。使用者の自我に強制干渉し、ある種の超能力を無理やり発動させてエネルギーとして発射。敵を破壊する。",

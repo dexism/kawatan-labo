@@ -349,3 +349,15 @@
     border-top: 1px dashed var(--color-border);
     font-size: 13px;
 }
+/* 箇所プレフィックス用のスタイル */
+.item-location-prefix {
+    font-size: 14px;
+    font-weight: bold;
+    border: 1px solid var(--color-fore-7);
+    background-color: var(--color-background-3);
+    color: var(--color-fore-3);
+    border-radius: 15px;
+    width:  20px;
+    height: 20px;
+    padding: 2px 5px;
+}
