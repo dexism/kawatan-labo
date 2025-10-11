@@ -89,9 +89,10 @@ h2.section-title {
 }
 /* カウントダウン／ターン終了 */
 .phase-btn {
-    padding: 8px 4px;
-    font-size: 16px;
+    padding: 8px 0;
+    font-size: 15px;
     border-radius: 5px;
+    width: 100%;
     cursor: pointer;
     font-weight: bold;
     box-shadow:
@@ -108,7 +109,7 @@ h2.section-title {
 .phase-btn:disabled {
     background:       var(--color-surface-dark);
     color:            var(--color-text-muted);
-    border: 0;
+    border-color: transparent;
     cursor: default;
     opacity: 0.6;
     pointer-events: none;
@@ -260,7 +261,7 @@ label.action-queue-item.is-checked span {
     color: white;
     border-color: var(--color-accent-red);
     box-shadow: none;
-    border: 2px solid var(--color-accent-red)
+    border: 2px solid var(--color-accent-red);
 }
 .phase-btn-danger:hover:not(:disabled) {
     background-color: gold;

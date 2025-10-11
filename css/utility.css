@@ -34,7 +34,7 @@
 /* 開閉アイコン (マーカー) */
 .accordion-header::after {
   content: '▲';
-  transition: all 0.5s ease;
+  transition: all 1.0s ease;
   flex-shrink: 0;
   padding: 0;
   margin: 0;
@@ -44,7 +44,7 @@
 .accordion-content {
   max-height: 500px; /* 十分な高さを確保 */
   overflow: hidden;
-  transition: all 0.5s ease;
+  transition: all 0.3s ease;
 }
 /* 閉じた状態のスタイル */
 .accordion-container.is-closed > .accordion-content {

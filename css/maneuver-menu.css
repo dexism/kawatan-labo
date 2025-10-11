@@ -247,22 +247,39 @@
 /* ================================
    リファレンスメニュー専用スタイル
 ================================ */
+#maneuverMenu.is-reference-mode {
+    width:  100%;
+    max-height: 100%;
+    pointer-events: auto;
+}
+#maneuverMenu.is-reference-mode .item-passive-icon-col,
+#maneuverMenu.is-reference-mode .item-status-icon-col {
+    display: none;
+}
+#maneuverMenu.is-reference-mode .maneuver-item-new {
+    width:  100%;
+    max-height: 100%;
+    pointer-events: none;
+}
+/* リファレンスメニューのアコーディオンヘッダーのスタイル調整 */
+#maneuverMenu .accordion-container {
+    height: 100%;
+    margin: 0;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--color-border);
+  box-sizing: border-box;
+}
 .reference-filter-container {
     /* padding: 5px; */
     /* border-bottom: 1px solid var(--color-border); */
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 0px;
     overflow-y: auto;
-    max-height: 50vh;
-}
-/* リファレンスメニューのアコーディオンヘッダーのスタイル調整 */
-#maneuverMenu .accordion-container {
-    padding: 5px;
-    border-bottom: 1px solid var(--color-border);
 }
 #maneuverMenu .accordion-header {
-    padding: 0 5px; /* 上下左右の余白を調整 */
+    padding: 5px; /* 上下左右の余白を調整 */
+  box-sizing: border-box;
     font-size: 14px; /* 文字サイズを少し大きく */
     font-weight: bold;
     color: var(--color-text);
@@ -270,23 +287,25 @@
 /* ▲▲▲ ここまで追加 ▲▲▲ */
 
 .filter-group {
-    background-color: var(--color-surface-dark);
+    background-color: var(--color-background-4);
     border-radius: 10px;
-    padding: 8px;
+    margin: 3px;
+    padding: 5px;
 }
 .filter-group-title {
     margin: 0;
     font-size: 12px;
-    color: var(--color-text);
+    color: var(--color-fore-5);
     padding-bottom: 3px;
 }
 .filter-buttons {
     display: flex;
     flex-wrap: wrap;
-    gap: 5px;
+    justify-content:start;
+    gap: 5px 10px;
 }
 .filter-buttons .filter-btn {
-    padding: 2px 0;
+    padding: 4px 0;
     font-size: 12px;
     border-radius: 20px;
 }
@@ -316,6 +335,7 @@
 .item-source-info {
     text-align: right;
     font-size: 12px;
+    font-weight: normal;
     color: var(--color-8);
     white-space: nowrap; /* 改行を防ぐ */
 }
@@ -327,5 +347,5 @@
     margin-top: 3px;
     padding-top: 3px;
     border-top: 1px dashed var(--color-border);
-    font-size: 12px;
+    font-size: 13px;
 }

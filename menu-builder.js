@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.15.61"; // バージョンを更新
+export const version = "1.15.62"; // バージョンを更新
 
 import * as data from './data-handler.js';
 import * as charManager from './character-manager.js';
@@ -61,6 +61,7 @@ export function buildManeuverMenu(char, element) {
     menuOpener = element;
     const menu = document.getElementById('maneuverMenu');
     menu.innerHTML = ''; // メニューをクリア
+    menu.classList.remove('is-reference-mode');
 
     // --- フィルタリングボタンの定義 ---
     const filters = [
@@ -2077,12 +2078,13 @@ export function buildReferenceMenu() {
     closeAllMenus();
     const menu = document.getElementById('maneuverMenu');
     menu.innerHTML = ''; 
+    menu.classList.add('is-reference-mode');
 
     const filterGroups = {
+        'カテゴリ': ['攻撃', '防御', '支援', '妨害', '強化'],
         'スキル': ['アリス', 'ホリック', 'オートマトン', 'ジャンク', 'コート', 'ソロリティ', 'ステーシー', 'タナトス', 'ゴシック', 'レクイエム', 'バロック', 'ロマネスク', 'サイケデリック', '特化スキル'],
         'パーツ': ['基本パーツ', '武装', '変異', '改造', '手駒専用', '頭', '腕', '胴', '脚', '任意'],
         'タイミング': ['オート', 'アクション', 'ラピッド', 'ジャッジ', 'ダメージ'],
-        'カテゴリ': ['攻撃', '防御', '支援', '妨害', '強化'],
         '最大射程': ['自身', '0', '1', '2', '3']
     };
 
