@@ -2,7 +2,7 @@
  * @file battle-logic.js
  * @description 戦闘の進行、状態管理、ルール判定、アクション解決を担当するモジュール。
  */
-export const version = "1.22.84"; // UI分離リファクタリング完了版
+export const version = "1.22.85"; // UI分離リファクタリング完了版
 
 import * as charManager from './character-manager.js';
 import * as ui from './ui-manager.js';
@@ -11,7 +11,7 @@ import * as interactionManager from './interaction-manager.js';
 import * as data from './data-handler.js';
 import * as stateManager from './state-manager.js';
 import { calculateManeuverRange } from './battle-helpers.js';
-// import { checkTargetAvailability } from './menu-builder.js';
+import { checkTargetAvailability } from './menu-builder.js';
 
 // ===================================================================================
 //  戦闘状態 (State)
@@ -120,7 +120,7 @@ function applyAutoBuffsAtActionEnd() {
     appliedBuffsLog.forEach((skillNames, performerId) => {
         const performer = charManager.getCharacterById(performerId);
         if (performer) {
-            ui.addLog(`＞ オートスキル効果: ${performer.name}の【${Array.from(skillNames).join('】【')}】が適用されます。`);
+            ui.addLog(`> [オート] ${performer.name}の【${Array.from(skillNames).join('】【')}】が適用されます。`);
         }
     });
 }
@@ -173,16 +173,16 @@ export function declareManeuver(char, maneuver, target = null, judgeTargetDeclar
     switch (maneuver.timing) {
         case 'ラピッド':
             battleState.rapidQueue.push(declaration);
-            ui.addLog(`◆[ラピッド] ${char.name}が【${maneuver.name}】を宣言。`);
+            ui.addLog(`◆[ラピッド] ${char.name}が【${maneuver.name}】を宣言`);
             break;
         case 'ジャッジ':
             declaration.judgeTarget = judgeTargetDeclaration;
             battleState.judgeQueue.push(declaration);
-            ui.addLog(`◆[ジャッジ] ${char.name}が【${maneuver.name}】を宣言。`);
+            ui.addLog(`◆[ジャッジ] ${char.name}が【${maneuver.name}】を宣言`);
             break;
         case 'ダメージ':
             // ログに防御対象がいれば表示するように修正
-            let logMessage = `◆[ダメージ] ${char.name}が【${maneuver.name}】を宣言。`;
+            let logMessage = `◆[ダメージ] ${char.name}が【${maneuver.name}】を宣言`;
             if (target && target.id !== char.id) {
                 logMessage += ` (対象: ${target.name})`;
             }
@@ -217,7 +217,7 @@ export function declareManeuver(char, maneuver, target = null, judgeTargetDeclar
         default:
             charManager.updateCharacter(char.id, { hasActedThisCount: true });
             battleState.actionQueue.push(declaration);
-            ui.addLog(`◆[アクション] ${char.name}が【${maneuver.name}】を宣言。`);
+            ui.addLog(`◆[アクション] ${char.name}が【${maneuver.name}】を宣言`);
             break;
     }
     
@@ -229,7 +229,6 @@ export function determineNextStep() {
         battleState.phase = 'SETUP';
         battleState.activeActors = [];
         battleState.potentialActors = [];
-        // ★ UI更新命令を追加
         ui.updateAllUI();
         return;
     }
@@ -266,7 +265,6 @@ export function determineNextStep() {
         applyAutoBuffsAtActionEnd();
     }
     
-    // ★ UI更新命令を関数の最後に追加
     ui.updateAllUI();
 }
 
@@ -358,7 +356,7 @@ export function checkJudgeItem(index) {
     const declaration = battleState.judgeQueue[index];
     if (declaration && !declaration.checked) {
         declaration.checked = true;
-        ui.addLog(`＞ [ジャッジ] ${declaration.performer.name}の【${declaration.sourceManeuver.name}】を解決(チェック)しました。`);
+        ui.addLog(`> 解決: [ジャッジ] ${declaration.performer.name}の【${declaration.sourceManeuver.name}】`);
     }
     determineNextStep();
 }
@@ -369,7 +367,7 @@ export function applySupport(judgeIndex, targetDeclarationId) {
     if (judgeDeclaration && targetDeclaration) {
         judgeDeclaration.target = targetDeclaration;
         judgeDeclaration.checked = true;
-        ui.addLog(`＞ ${judgeDeclaration.performer.name}が【${judgeDeclaration.sourceManeuver.name}】で「${targetDeclaration.sourceManeuver.name}」を対象にしました。`);
+        ui.addLog(`> ${judgeDeclaration.performer.name}が【${judgeDeclaration.sourceManeuver.name}】で「${targetDeclaration.sourceManeuver.name}」を対象にしました。`);
         determineNextStep();
     }
 }
@@ -381,7 +379,6 @@ export function applyDamage(index) {
         const targetId = damageInfo.target.id;
         charManager.clearTemporaryBuffs(targetId, 'until_damage_applied');
         
-        // ★★★ ここからが修正箇所です ★★★
         // 1ターンに1回のダメージマニューバの使用状況をリセットする
         const allCharacters = charManager.getCharacters();
         allCharacters.forEach(char => {
@@ -392,7 +389,6 @@ export function applyDamage(index) {
             });
             usedDamageManeuvers.forEach(name => char.usedManeuvers.delete(name));
         });
-        // ★★★ 修正はここまでです ★★★
     }
     determineNextStep();
 }
@@ -420,11 +416,11 @@ function resolveQueuedMoves() {
             const finalDistance = Math.max(0, originalDistance + totalDebuff);
 
             if (finalDistance < originalDistance) {
-                ui.addLog(`＞ ${char.name}の移動は妨害され、移動距離が${originalDistance - finalDistance}減少！`);
+                ui.addLog(`${char.name}の移動は妨害され、移動距離が${originalDistance - finalDistance}減少！`);
             }
 
             if (finalDistance === 0) {
-                 if (originalDistance > 0) ui.addLog(`＞ ${char.name}の移動は完全に妨害された！`);
+                 if (originalDistance > 0) ui.addLog(`${char.name}の移動は完全に妨害された！`);
                 return null;
             }
             
@@ -437,7 +433,7 @@ function resolveQueuedMoves() {
             
             const newTargetArea = rows[finalIndex];
             if (char.area !== newTargetArea) {
-                ui.addLog(`＞ ${char.name}は ${newTargetArea} へ移動する。`);
+                ui.addLog(`${char.name}は ${newTargetArea} へ移動`);
             }
             
             return {
@@ -467,7 +463,7 @@ function checkAllDamageApplied() {
 export function redirectDamage(damageId, newTarget) {
     const damageInfo = battleState.damageQueue.find(d => d.id === damageId);
     if (damageInfo && newTarget) {
-        ui.addLog(`＞ 【庇う】 ${newTarget.name} が ${damageInfo.target.name} へのダメージを肩代わりしました。`);
+        ui.addLog(`${newTarget.name} が ${damageInfo.target.name} へのダメージを肩代わりしました。`);
         damageInfo.target = newTarget;
     }
     determineNextStep();
@@ -494,16 +490,44 @@ export function resetToSetupPhase() {
 // ===================================================================================
 
 async function resolveSingleAction(declaration, totalBonus = 0) {
-    const { performer, sourceManeuver } = declaration;
-    ui.addLog(`＞ 解決: ${performer.name} の【${sourceManeuver.name}】`);
+    const { performer, sourceManeuver, target, timing } = declaration;
+
+    // --- 解決直前の前提条件（特に射程）を再チェック ---
+    let isStillValid = true;
+    let characterToTestRange = null; // 射程チェックの対象となるキャラクター
+
+    // 移動妨害の場合、ターゲットは「移動宣言の実行者」
+    if (sourceManeuver.tags?.includes('移動妨害') && target) {
+        characterToTestRange = target.performer;
+    } 
+    // 通常の対象指定マニューバの場合
+    else if (target) {
+        characterToTestRange = target;
+    }
+
+    // 射程チェックが必要なマニューバか判定
+    if (characterToTestRange) {
+        const { hasTarget } = checkTargetAvailability(performer, sourceManeuver, [characterToTestRange]);
+        if (!hasTarget) {
+            isStillValid = false;
+        }
+    }
+    
+    // 前提条件を満たさなくなった場合は、マニューバを失敗させて終了
+    if (!isStillValid) {
+        ui.addLog(`[${timing}] ${performer.name}の【${sourceManeuver.name}】は、対象が射程外になったため失敗`);
+        return; // この後の処理をすべて中断
+    }
+
+    ui.addLog(`> 解決: ${performer.name} の【${sourceManeuver.name}】`);
 
     if (sourceManeuver.isEscapeAttempt) {
         await performEscapeRoll({ performer, declaration });
         return; 
     }
     if (!sourceManeuver.effects || sourceManeuver.effects.length === 0) {
-        if (sourceManeuver.name === '待機') ui.addLog(`＞ ${performer.name}は状況をうかがっている。`);
-        else ui.addLog(`＞ 効果の定義がありません。`);
+        if (sourceManeuver.name === '待機') ui.addLog(`${performer.name}は状況をうかがっている。`);
+        else ui.addLog(`※ 効果の定義がありません`);
         return;
     }
 
@@ -515,7 +539,7 @@ async function resolveSingleAction(declaration, totalBonus = 0) {
     }
 
     if (allOnHitEffects.length > 0) {
-        ui.addLog(`＞ 追加効果(${allOnHitEffects.join(',')})が発動！`);
+        ui.addLog(`追加効果(${allOnHitEffects.join(',')})が発動！`);
         for (const effectName of allOnHitEffects) {
             await executeEffect({ ref: effectName, params: {} }, context);
         }
@@ -527,7 +551,7 @@ async function executeEffect(effectRef, context) {
     const effectDefinition = data.getEffectDefinition(effectRef.ref);
     if (!effectDefinition) {
         // 効果定義が見つからない場合は警告を出し、何もしない
-        console.warn(`[Engine] Effect definition not found for: ${effectRef.ref}`);
+        console.warn(`※ [Engine] Effect definition not found for: ${effectRef.ref}`);
         return onHitEffects;
     }
     
@@ -552,12 +576,12 @@ async function executeEffect(effectRef, context) {
                 performModifyActionValue(concreteAction, context);
                 break;
             
-            // ▼▼▼ ここからが今回の修正箇所です ▼▼▼
             case 'modify_move_distance':
                 // 移動妨害効果を対象の移動宣言に紐付ける処理
                 const { performer, declaration } = context;
-                const moveDeclaration = declaration.target; // 移動妨害マニューバの宣言時、targetには対象の「移動宣言」が入っている
-                
+                // 移動妨害マニューバの宣言時、targetには対象の「移動宣言」が入っている
+                const moveDeclaration = declaration.target; 
+
                 if (moveDeclaration && moveDeclaration.sourceManeuver.tags.includes('移動')) {
                     if (!moveDeclaration.debuffs) {
                         moveDeclaration.debuffs = [];
@@ -566,10 +590,9 @@ async function executeEffect(effectRef, context) {
                         source: declaration.sourceManeuver.name,
                         value: concreteAction.value || 0
                     });
-                    ui.addLog(`＞ ${performer.name}が【${declaration.sourceManeuver.name}】で${moveDeclaration.performer.name}の移動を妨害！`);
+                    ui.addLog(`${performer.name}が【${declaration.sourceManeuver.name}】で${moveDeclaration.performer.name}の移動を妨害！`);
                 }
                 break;
-            // ▲▲▲ 修正はここまでです ▲▲▲
 
             case 'deal_damage':
             case 'chain_attack':
@@ -577,7 +600,7 @@ async function executeEffect(effectRef, context) {
                 // これらは on_hit などで呼び出されるキーワード効果であり、ここでは何もしない
                 break;
             default:
-                ui.addLog(`＞ [Engine] 未対応: ${concreteAction.action_type}`);
+                ui.addLog(`※ [Engine] 未対応: ${concreteAction.action_type}`);
         }
     }
     return onHitEffects;
@@ -586,7 +609,7 @@ async function executeEffect(effectRef, context) {
 async function performAttackRoll(action, context) {
     const { performer, target, declaration } = context;
     if (!target) {
-        ui.addLog(`＞ 攻撃対象がいません。`);
+        ui.addLog(`攻撃対象がいません`);
         return { hit: false, on_hit: [] };
     }
     let bonus = context.totalAttackBonus || 0;
@@ -607,7 +630,6 @@ async function performAttackRoll(action, context) {
             command: diceCommand, showToast: true, performer,
             callback: async (result, hitLocation, resultText, rollValue) => {
                 if (result === '大失敗') {
-                    // ▼▼▼ ここからが今回の修正箇所です ▼▼▼
                     const maneuver = declaration.sourceManeuver;
                     const { minRange, maxRange } = calculateManeuverRange(performer, maneuver);
                     let candidates = [];
@@ -628,7 +650,6 @@ async function performAttackRoll(action, context) {
                             return distance >= minRange && distance <= maxRange;
                         });
                     }
-                    // ▲▲▲ 修正はここまでです ▲▲▲
                     
                     if (candidates.length > 0) {
                         const selected = await new Promise(res => {
@@ -652,10 +673,10 @@ async function performAttackRoll(action, context) {
                                 location: '任意', sourceAction: declaration, applied: false, rollValue: rollValue || 0,
                                 isFumble: true
                             });
-                            ui.addLog(`＞ ${selected.name}に誤爆！ 1点のダメージ！`);
+                            ui.addLog(`${selected.name}に誤爆！ 1点のダメージ！`);
                         }
                     } else {
-                        ui.addLog("＞ 幸い、誤射の範囲に味方はいなかった。");
+                        ui.addLog("※ [誤射解決エラー]");
                     }
 
                     resolve({ hit: false, on_hit: [] });
@@ -663,15 +684,15 @@ async function performAttackRoll(action, context) {
                 }
                 const hit = result.includes('成功');
                 if (hit) {
-                    ui.addLog(`＞ ${target.name}に命中！`);
+                    ui.addLog(`${target.name}に命中！`);
                     battleState.damageQueue.push({
                         id: `damage_${Date.now()}_${Math.random()}`, target, amount: (action.damage || 0) + damageBonus,
                         location: hitLocation, sourceAction: declaration, applied: false, rollValue: rollValue || 0,
                         onHitEffects, damageBonusSources: performer.activeBuffs.filter(b => b.duration === 'onetime_next_action' && b.stat === 'damageBonus').map(b => ({ source: b.source, value: b.value }))
                     });
-                    ui.addLog(`＞ 【${(action.damage || 0) + damageBonus}】点のダメージ！`);
+                    ui.addLog(`${target.name}に${(action.damage || 0) + damageBonus}点のダメージ！`);
                 } else {
-                    ui.addLog(`＞ 攻撃は失敗しました。`);
+                    ui.addLog(`攻撃失敗`);
                 }
                 charManager.clearTemporaryBuffs(performer.id, 'onetime_next_action');
                 resolve({ hit, on_hit: onHitEffects });
@@ -694,7 +715,6 @@ function performMoveCharacter(action, context) {
         movePower = parseInt(rangeParts[1] || rangeParts[0], 10);
     }
 
-    // ▼▼▼ ここからが今回の修正箇所です (buildMoveMenu と同じロジック) ▼▼▼
     let moveBonus = 0;
     const allActorManeuvers = [
         ...moveTarget.skills.map(name => data.getManeuverByName(name)),
@@ -718,11 +738,26 @@ function performMoveCharacter(action, context) {
             }
         }
     }
-    const finalMovePower = movePower + moveBonus;
-    // ▲▲▲ 修正はここまでです ▲▲▲
+    const baseMovePower = movePower + moveBonus;
+
+    // 宣言に紐付いた移動妨害デバフを計算
+    let totalDebuff = 0;
+    if (declaration.debuffs) {
+        declaration.debuffs.forEach(debuff => {
+            totalDebuff += debuff.value || 0;
+        });
+    }
+
+    const finalMovePower = Math.max(0, baseMovePower + totalDebuff);
+
+    if (totalDebuff < 0) {
+        ui.addLog(`${moveTarget.name}は移動妨害により、移動距離 -${Math.abs(totalDebuff)}`);
+    }
     
-    const finalDistance = Math.max(0, finalMovePower);
-    if (finalDistance === 0) return;
+    if (finalMovePower === 0) {
+        if (baseMovePower > 0) ui.addLog(`→ ${moveTarget.name}の移動は完全に妨害された！`);
+        return; // 移動しないのでここで処理終了
+    }
 
     const rows = ["奈落", "地獄", "煉獄", "花園", "楽園"];
     const currentIndex = rows.indexOf(moveTarget.area);
@@ -730,24 +765,24 @@ function performMoveCharacter(action, context) {
 
     if (directionOrArea.endsWith('方向')) {
         let newIndex = currentIndex;
-        if (directionOrArea === '奈落方向') newIndex = Math.max(0, currentIndex - finalDistance);
-        else newIndex = Math.min(rows.length - 1, currentIndex + finalDistance);
+        if (directionOrArea === '奈落方向') newIndex = Math.max(0, currentIndex - finalMovePower);
+        else newIndex = Math.min(rows.length - 1, currentIndex + finalMovePower);
         newArea = rows[newIndex];
     } else {
         newArea = directionOrArea;
     }
 
+    // ラピッドタイミングの移動は即時解決する
     if (declaration.timing === 'ラピッド') {
-        // ui.addLog(`＞ [ラピッド解決] ${moveTarget.name}が${newArea}へ移動しました。`); // ← この行を削除
         if (moveTarget.area !== newArea) {
-             ui.addLog(`＞ [ラピッド解決] ${moveTarget.name}は ${newArea} へ移動した。`);
+             ui.addLog(`[ラピッド] ${moveTarget.name}は ${newArea} へ移動`);
         }
         charManager.updateCharacter(moveTarget.id, { area: newArea });
     } else {
+        // アクションタイミングの移動は従来通りmoveQueueに予約する
         if (moveTarget.area !== newArea) {
-             ui.addLog(`＞ 移動予約: ${moveTarget.name} が ${newArea} へ`);
+             ui.addLog(`移動予約：${moveTarget.name} は ${newArea} へ移動`);
         }
-        // 宣言IDをmoveQueueに追加
         battleState.moveQueue.push({ characterId: moveTarget.id, targetArea: newArea, declarationId: declaration.id });
     }
 }
@@ -760,14 +795,15 @@ function performApplyBuff(action, context) {
             charManager.updateCharacter(performer.id, {
                 baseActionValue: (performer.baseActionValue || 6) + buff.value
             });
-            ui.addLog(`＞ ${performer.name}の最大行動値が${buff.value > 0 ? '+' : ''}${buff.value}されました。`);
+            ui.addLog(`${performer.name}：最大行動値 ${buff.value > 0 ? '+' : ''}${buff.value}`);
             break;
         case 'attackCheckBonus':
             performer.activeBuffs.push({
                 source: context.declaration.sourceManeuver.name, stat: buff.stat,
                 value: buff.value, duration: buff.duration
             });
-            ui.addLog(`＞ ${performer.name}は【${context.declaration.sourceManeuver.name}】の効果で、ターン終了まで攻撃判定に+${buff.value}の修正を得た！`);
+            // ui.addLog(`→ ${performer.name}の【${context.declaration.sourceManeuver.name}】：ターン終了まで攻撃判定 +${buff.value}`);
+            ui.addLog(`→ ターン終了まで攻撃判定 +${buff.value}`);
             break;
     }
 }
@@ -778,24 +814,23 @@ function performModifyActionValue(action, context) {
     const value = action.value || 0;
     if (value === 0) return;
     charManager.updateCharacter(target.id, { actionValue: target.actionValue + value });
-    if (value < 0) ui.addLog(`＞ ${target.name} は転倒した！ (行動値${value})`);
-    else ui.addLog(`＞ ${target.name} の行動値が ${value > 0 ? '+' : ''}${value} された。`);
+    if (value < 0) ui.addLog(`${target.name} は転倒した！ (行動値${value})`);
+    else ui.addLog(`${target.name} の行動値が ${value > 0 ? '+' : ''}${value} された。`);
 }
 
 async function performEscapeRoll(context) {
     const { performer } = context;
-    ui.addLog(`＞ ${performer.name}が逃走判定を行います...`);
+    ui.addLog(`> ${performer.name}の逃走判定`);
     return new Promise(resolve => {
         performDiceRoll({
             command: 'NC', showToast: true,
             callback: (result) => {
                 if (result.includes('成功')) {
-                    ui.addLog(`＞ 逃走成功！ ${performer.name}は戦場から離脱しました。`);
+                    ui.addLog(`逃走成功！ ${performer.name}は戦場から離脱`);
                     charManager.updateCharacter(performer.id, { hasWithdrawn: true });
                 } else {
-                    ui.addLog(`＞ 逃走失敗！ ${performer.name}は戦場に留まります。`);
+                    ui.addLog(`逃走失敗！ ${performer.name}は戦場に残留`);
                 }
-                // ★★★ 修正箇所 ★★★
                 // 状態変更が完了したことを呼び出し元に伝えるために resolve() する
                 resolve();
             }

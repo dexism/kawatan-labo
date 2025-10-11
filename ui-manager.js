@@ -6,7 +6,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.14.81";
+export const version = "1.14.82";
 
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
@@ -694,8 +694,28 @@ function updateQueueUI(elementId, queue, headerText) {
 
             labelEl.appendChild(checkbox);
             const textContentSpan = document.createElement('span');
-            let text = `<b>${declaration.performer.name}</b>: 【${declaration.summary.name}】`;
-            if (declaration.target) text += ` → <b>${declaration.target.name}</b>`;
+            let text = `<b>${declaration.performer.name}</b> 【${declaration.summary.name}】`;
+            
+            if (declaration.target) {
+                // targetがキャラクターオブジェクト（nameプロパティを持つ）の場合
+                if (declaration.target.name) {
+                    text += ` → <b>${declaration.target.name}</b>`;
+                }
+                // targetが宣言オブジェクト（移動妨害の対象）の場合
+                else if (declaration.target.performer && declaration.target.sourceManeuver) {
+                    const moveDecl = declaration.target; // 妨害対象の移動宣言
+                    
+                    // 【ワイヤーリール】のように、移動の実行者と対象が異なる場合
+                    if (moveDecl.target && moveDecl.target.id !== moveDecl.performer.id) {
+                        text += ` → <b>${moveDecl.target.name}</b>（${moveDecl.performer.name}の【${moveDecl.sourceManeuver.name}】）`;
+                    } 
+                    // 【ほね】のように、自身を移動させる場合
+                    else {
+                        text += ` → <b>${moveDecl.performer.name}の【${moveDecl.sourceManeuver.name}】</b>`;
+                    }
+                }
+            }
+
             textContentSpan.innerHTML = text;
             labelEl.appendChild(textContentSpan);
             listEl.appendChild(labelEl);

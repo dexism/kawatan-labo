@@ -3,6 +3,11 @@
 ================================ */
 
 /* --- キャラクター表示エリア --- */
+.grid-area-enemy-panel h2.section-title, 
+.grid-area-pc-panel h2.section-title {
+    justify-content: center;
+}
+
 .char-area-wrapper {
     display: flex;
     align-items: center;
@@ -41,10 +46,11 @@
     border: none;
     border-radius: 10px;
     margin: 0;
-    padding: 10px;
+    padding: 5px;
     box-sizing: border-box;
     box-shadow: 0 0 10px var(--color-8);
     transition: all 0.2s ease-out;
+    overflow: visible;
 }
 
 .char img {
@@ -517,7 +523,7 @@ body.is-dragging .char.hover-highlight {
     background-color: red;
 }
 /** ======================
-    バトルグリッド
+    舞台見取図 バトルグリッド
     =================== */
 .battle-grid-scroll-wrapper {
     width: 100%; /* 親要素(画面幅)いっぱいに広がる */
@@ -536,7 +542,7 @@ body.is-dragging .char.hover-highlight {
 */
 .battle-wrap {
     display: grid;
-    grid-template-columns: var(--header-width) repeat(var(--col-count), minmax(var(--cell-width),auto));
+    grid-template-columns: var(--header-width) repeat(var(--col-count), minmax(var(--cell-width), auto));
     grid-template-rows: var(--cell-height) repeat(var(--row-count), minmax(var(--cell-height), auto));
     text-align: center;
     text-shadow:
@@ -587,6 +593,7 @@ body.is-dragging .char.hover-highlight {
     border-radius: 3px;
     z-index: 2;
 }
+/*
 .cell {
     display: flex;
     flex-direction: column;
@@ -599,7 +606,31 @@ body.is-dragging .char.hover-highlight {
     min-width: var(--cell-width);
     min-height: var(--cell-height);
     border-radius: 3px;
+}
+*/
+.cell {
+    display: flex;
+    flex-direction: row;
 
+    flex-wrap: wrap;
+    flex-wrap: wrap; /* 縦積み: wrap 横並べ：nowrap*/
+    
+    flex-basis: fit-content;
+
+    align-items: center;
+    align-content: flex-start;
+    justify-items: flex-start;
+    justify-content: flex-start;
+    
+    overflow: visible;
+    min-width: var(--cell-width);
+    min-height: var(--cell-height);
+    border-radius: 3px;
+    box-sizing: border-box;
+
+    flex-shrink: 0;
+
+    /* text-align: center; を削除（マーカーを左詰めにするため）*/
 }
 /* --- グリッドセルのエリアカラー --- */
 /* 透明度を加えて、ヘッダーより少し薄い色にする */
@@ -618,25 +649,30 @@ body.is-dragging .char.hover-highlight {
 }
 /* アクティブカウント */
 .highlight-col {
+    background-color:  #812;
     box-shadow:
-        0 0 10px inset   gold,
-        0 0 10px         gold;
+        0 0 10px inset gold,
+        0 0 10px       gold;
     outline: 2px solid yellow;
-    /* background-color:  gold; */
 }
 
 /* グリッド上のマーカー */
 .marker {
     position: relative;
-    display: inline-flex;
-    display: flex;
+    display: inline-block;
     align-items: center;
     justify-content: center;
     pointer-events: auto;
     margin: 0;
     border-radius: 5px;
     transition: all 0.2s ease;
+
+    width: var(--cell-width);     /* 幅を40pxに固定 */
+    height: var(--cell-height);   /* 高さを40pxに固定 */
+    display: flex;
+    flex-shrink: 0;               /* ★★★ マーカーが縮むのを防ぐ最重要設定 ★★★ */
 }
+/*
 .marker-img {
     max-width:  var(--cell-width);
     max-height: var(--cell-height);
@@ -647,6 +683,15 @@ body.is-dragging .char.hover-highlight {
     height: auto;
     display: block;
     z-index: 1;
+}
+*/
+.marker-img {
+    width: 100%; /* 親である.markerの幅(40px)に追従 */
+    height: 100%; /* 親である.markerの高さ(40px)に追従 */
+    object-fit: contain;
+    display: flex;
+    z-index: 1;
+    /* 以前のwidth, height, aspect-ratio指定は不要になるので削除・上書き */
 }
 /* 名前のポップアップ */
 .marker::after {

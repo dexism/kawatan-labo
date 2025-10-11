@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.15.62"; // バージョンを更新
+export const version = "1.15.63"; // バージョンを更新
 
 import * as data from './data-handler.js';
 import * as charManager from './character-manager.js';
@@ -23,7 +23,15 @@ const rows = ["奈落", "地獄", "煉獄", "花園", "楽園"];
 let resolveTargetSelection = null;
 let activeFilter = '宣言';
 
-let cleanupTargetSelection = () => {};
+/**
+ * ターゲット選択モードを安全にキャンセルし、UIの状態をリセットする
+ */
+function cancelTargetSelection() {
+    if (resolveTargetSelection) {
+        resolveTargetSelection(null); // Promiseを解決して待機状態を解除
+        resolveTargetSelection = null; // グローバル変数をリセット
+    }
+}
 
 const handleOutsideClick = (e) => {
     const menu = document.getElementById('maneuverMenu');
@@ -35,8 +43,7 @@ const handleOutsideClick = (e) => {
     // --- ターゲット選択中に、ターゲット外をクリックしたらキャンセルする処理 ---
     if (resolveTargetSelection) {
         if (!e.target.closest('.target-selectable')) {
-            // ★ resolve(null) を直接呼び出すことで、selectTargetForAction内の後片付けが実行される
-            resolveTargetSelection(null);
+            cancelTargetSelection(); // 新しい関数を呼び出す
         }
     }
 };
@@ -48,13 +55,8 @@ const handleOutsideClick = (e) => {
  * @param {HTMLElement} element - メニューを開く起点となった要素
  */
 export function buildManeuverMenu(char, element) {
-    // もし現在ターゲット選択中であれば、それをキャンセルして終了させる
-    // resolveTargetSelection は selectTargetForAction の中で定義される Promise の resolve 関数
     if (resolveTargetSelection) {
-        // resolve(null) を呼び出すことで、キャンセル処理が実行され、状態がリセットされる
-        resolveTargetSelection(null);
-        // resolveTargetSelection を手動でリセット
-        resolveTargetSelection = null;
+        cancelTargetSelection(); // 新しい関数を呼び出す
     }
 
     closeAllMenus();
@@ -220,7 +222,6 @@ function createManeuverItem(maneuverObj, char) {
     const passiveIconCol = document.createElement('div');
     passiveIconCol.className = 'item-icon-col item-passive-icon-col';
     
-    // ▼▼▼ ここからが今回の修正箇所です ▼▼▼
     if (maneuverObj.isActiveBuff || maneuver.timing === 'オート') {
         let isEffectActive = false;
         if (maneuverObj.isActiveBuff) {
@@ -284,7 +285,6 @@ function createManeuverItem(maneuverObj, char) {
             passiveIconCol.innerHTML = '<span class="maneuver-icon">💡</span>';
         }
     }
-    // ▲▲▲ 修正はここまでです ▲▲▲
 
     const statusIconCol = document.createElement('div');
     statusIconCol.className = 'item-icon-col item-status-icon-col';
@@ -306,12 +306,8 @@ function createManeuverItem(maneuverObj, char) {
         <div class="item-row-2">${maneuver.description_raw || ''}</div>
     `;
 
-    // ▼▼▼ ここからが修正箇所です ▼▼▼
-
     // リファレンス表示時（charオブジェクトにidがないダミーの場合）に追加情報を表示
     if (!char.id) {
-        // ▼▼▼ ここからが修正箇所です ▼▼▼
-
         // ヘッダー部分を生成
         const sourceHeaderText = getManeuverSourceText(maneuver);
         let sourceInfoText = '';
@@ -338,11 +334,7 @@ function createManeuverItem(maneuverObj, char) {
             flavorTextEl.textContent = maneuver.flavor_text;
             rightCol.appendChild(flavorTextEl);
         }
-
-        // ▲▲▲ 修正はここまでです ▲▲▲
     }
-    // ▲▲▲ 修正はここまでです ▲▲▲
-
     item.appendChild(categoryCol);
     item.appendChild(passiveIconCol);
     item.appendChild(statusIconCol);
@@ -478,11 +470,15 @@ function createManeuverItem(maneuverObj, char) {
                 return;
             }
 
-            // ▼▼▼ ここからが今回の修正箇所です ▼▼▼
             const isMoveDebuff = maneuver.tags && maneuver.tags.includes('移動妨害');
             if (isMoveDebuff) {
                 // 妨害可能な移動宣言（未解決、敵、移動マニューバ、射程内）をリストアップ
-                const targetableMoveDeclarations = battleLogic.getBattleState().actionQueue.filter(decl => {
+                // ★ actionQueueとrapidQueueの両方を検索対象にする
+                const allMoveCandidates = [
+                    ...battleLogic.getBattleState().actionQueue,
+                    ...battleLogic.getBattleState().rapidQueue
+                ];
+                const targetableMoveDeclarations = allMoveCandidates.filter(decl => {
                     return !decl.checked &&
                            decl.performer.type !== char.type &&
                            decl.sourceManeuver.tags.includes('移動') &&
@@ -495,13 +491,29 @@ function createManeuverItem(maneuverObj, char) {
                 }
 
                 // モーダルの選択肢を作成
-                const menuItems = targetableMoveDeclarations.map(targetDecl => ({
-                    label: `${targetDecl.performer.name}: 【${targetDecl.sourceManeuver.name}】`,
-                    onClick: () => {
-                        // battleLogicに、妨害対象の「移動宣言オブジェクト」を渡して宣言する
-                        battleLogic.declareManeuver(char, maneuver, targetDecl);
+                const menuItems = targetableMoveDeclarations.map(targetDecl => {
+                    let labelText = '';
+                    const movePerformer = targetDecl.performer;
+                    const moveManeuver = targetDecl.sourceManeuver;
+                    const moveTarget = targetDecl.target;
+
+                    // 他者を移動させるマニューバの場合 (例: ワイヤーリール)
+                    if (moveTarget && moveTarget.id !== movePerformer.id) {
+                        labelText = `${moveTarget.name}（${movePerformer.name}の【${moveManeuver.name}】）`;
+                    } 
+                    // 自身を移動させるマニューバの場合 (例: ほね)
+                    else {
+                        labelText = `${movePerformer.name}: 【${moveManeuver.name}】`;
                     }
-                }));
+
+                    return {
+                        label: labelText,
+                        onClick: () => {
+                            // battleLogicに、妨害対象の「移動宣言オブジェクト」を渡して宣言する
+                            battleLogic.declareManeuver(char, maneuver, targetDecl);
+                        }
+                    };
+                });
                 
                 ui.showModal({ title: `【${maneuver.name}】の妨害対象を選択`, items: menuItems });
                 return;
@@ -1240,14 +1252,12 @@ export function getCharacterManeuvers(char) {
     const activeIndicators = new Set();
     const { phase, activeActors, actionQueue, damageQueue } = battleState;
 
-    // ▼▼▼ ここからが今回の修正箇所です ▼▼▼
     if (activeActors.some(a => a.id === char.id)) {
         // このキャラクターが行動権を持つ場合、アクションタイミングに加えて
         // ラピッドタイミングも有効化する
         activeIndicators.add('アクション');
         activeIndicators.add('ラピッド');
     }
-    // ▲▲▲ 修正はここまでです ▲▲▲
     
     const isActionPhaseOver = activeActors.length === 0;
     if (isActionPhaseOver) {
@@ -1359,7 +1369,13 @@ export function getCharacterManeuvers(char) {
         // --- 4.5. 移動妨害タイミングの厳格な判定 ---
         if (isUsable && maneuver.tags && maneuver.tags.includes('移動妨害')) {
             let canDebuff = false;
-            for (const declaration of battleState.actionQueue) {
+            
+            const allMoveCandidates = [
+                ...battleState.actionQueue,
+                ...battleState.rapidQueue
+            ];
+
+            for (const declaration of allMoveCandidates) {
                 if (!declaration.checked &&
                     declaration.performer.type !== char.type &&
                     declaration.sourceManeuver.tags.includes('移動'))
@@ -1904,26 +1920,29 @@ export function buildPlacementMenu(char, element, event) {
 
 async function selectTargetForAction(actor, maneuver, handleGlobalClick) {
     // 既存のターゲット選択があれば、先にキャンセルする
-    if (resolveTargetSelection) resolveTargetSelection(null);
+    cancelTargetSelection(); // ★ 念のためここでも呼び出す
 
     return new Promise(resolve => {
-        const cleanup = (value) => {
-            resolveTargetSelection = null;
+        const cleanupAndResolve = (value) => {
+            // クリーンアップ処理
             document.querySelectorAll('.target-selectable').forEach(el => {
                 el.classList.remove('target-selectable');
                 el.onclick = null;
             });
             document.removeEventListener('click', handleGlobalClick);
+            
+            // 状態のリセットとPromiseの解決
+            resolveTargetSelection = null;
             resolve(value);
         };
         
-        // グローバル変数に resolve 関数をセットし、ターゲット選択状態に入る
-        resolveTargetSelection = cleanup;
+        // グローバル変数に cleanupAndResolve 関数をセット
+        resolveTargetSelection = cleanupAndResolve;
         
         const { targets } = checkTargetAvailability(actor, maneuver);
         if (targets.length === 0) {
-             ui.addLog("＞ 射程内に有効なターゲットがいません。");
-             cleanup(null);
+             ui.addLog("> 射程内に有効なターゲットがいません。");
+             cancelTargetSelection(); // ★ ターゲットがいない場合もクリーンアップ
              return;
         }
 
@@ -1936,7 +1955,7 @@ async function selectTargetForAction(actor, maneuver, handleGlobalClick) {
                 el.classList.add('target-selectable');
                 el.onclick = (e) => { 
                     e.stopPropagation(); 
-                    cleanup(charManager.getCharacterById(el.dataset.id));
+                    cleanupAndResolve(charManager.getCharacterById(el.dataset.id));
                 };
             }
         });
