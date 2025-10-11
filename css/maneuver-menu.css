@@ -309,6 +309,103 @@
     font-size: 12px;
     border-radius: 20px;
 }
+
+/* ================================
+   リファレンスアイテムの特殊レイアウト
+================================ */
+
+/* 4つの要素を格納するFlexコンテナ */
+#maneuverMenu.is-reference-mode .reference-item-container {
+  display: block;
+  row-gap: 0px; /* 折り返した際の行間の隙間 */
+}
+
+/* 各テキスト要素のスタイル */
+#maneuverMenu.is-reference-mode .reference-item-container > span {
+  white-space: nowrap; /* ★重要：自身の改行を禁止 */
+  overflow: visible;
+  text-overflow: ellipsis; /* はみ出した場合は...で省略 */
+}
+.ref-container-top {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    align-items: start;
+    flex-wrap: wrap;
+}
+.ref-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    flex-wrap: wrap;
+}
+/* 1行目：出典カテゴリ */
+.ref-source-category {
+    display: flex;
+    font-size: 12px;
+    font-weight: bold;
+    background-color: var(--color-fore-4);
+    color: var(--color-background-2);
+    margin-right: auto;
+    padding: 1px 10px;
+    border-radius: 10px;
+    white-space: nowrap; /* 改行を防ぐ */
+}
+/* 1行目：出典情報 (右寄せ) */
+.ref-source-info {
+    display: flex;
+    margin-left: auto; /* ★重要：右に押しやる */
+    font-size: 12px;
+    font-weight: normal;
+    padding-left: 4px;
+    color: var(--color-8);
+    white-space: nowrap; /* 改行を防ぐ */
+}
+
+/* 箇所プレフィックスのスタイル */
+.item-location-prefix {
+    font-size: 14px;
+    font-weight: bold;
+    border: 1px solid var(--color-fore-7);
+    background-color: var(--color-background-3);
+    color: var(--color-fore-3);
+    border-radius: 15px;
+    width:  20px;
+    height: 20px;
+    margin: 0;
+    padding: 1px 4px;
+}
+/* 2行目：マニューバ名 */
+.ref-maneuver-name {
+    display: flex;
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--color-text);
+    text-align: left;
+    display: inline-block; /* テキストの長さに合わせて幅を調整 */
+    margin-right: auto; /* ★重要：右に押しやる */
+}
+/* 2行目：TCR (右寄せ) */
+.ref-stats {
+    display: flex;
+    margin-left: auto; /* ★重要：右に押しやる */
+    font-size: 14px;
+    color: var(--color-text);
+    text-align: right;
+    white-space: nowrap; /* 改行を防ぐ */
+}
+/* フレーバーテキスト (下側) */
+.item-flavor-text {
+    font-weight: normal;
+    font-style: italic;
+    color: var(--color-8);
+    margin-top: 3px;
+    padding-top: 3px;
+    border-top: 1px dashed var(--color-border);
+    font-size: 13px;
+    text-indent: 1em;
+}
+
 /* ヘッダー全体 (Flexboxコンテナ) */
 .item-reference-header {
     display: flex;
@@ -317,6 +414,8 @@
     margin: 0;
     padding: 0;
     border-radius: 3px;
+border: 1px dashed cyan;
+background-color: red;
 }
 
 /* 出典元カテゴリ (左側) */
@@ -330,6 +429,8 @@
     border-radius: 10px;
     margin: 0;
     display: inline-block; /* テキストの長さに合わせて幅を調整 */
+border: 1px dashed cyan;
+background-color: red;
 }
 /* 出典情報 (右側) */
 .item-source-info {
@@ -338,26 +439,7 @@
     font-weight: normal;
     color: var(--color-8);
     white-space: nowrap; /* 改行を防ぐ */
+border: 1px dashed cyan;
+background-color: red;
 }
-/* フレーバーテキスト (下側) */
-.item-flavor-text {
-    font-weight: normal;
-    font-style: italic;
-    color: var(--color-8);
-    margin-top: 3px;
-    padding-top: 3px;
-    border-top: 1px dashed var(--color-border);
-    font-size: 13px;
-}
-/* 箇所プレフィックス用のスタイル */
-.item-location-prefix {
-    font-size: 14px;
-    font-weight: bold;
-    border: 1px solid var(--color-fore-7);
-    background-color: var(--color-background-3);
-    color: var(--color-fore-3);
-    border-radius: 15px;
-    width:  20px;
-    height: 20px;
-    padding: 2px 5px;
-}
+

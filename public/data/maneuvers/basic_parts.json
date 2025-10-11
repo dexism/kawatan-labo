@@ -17,7 +17,7 @@
     "name": "任意", "category": "一般", 
     "tags": ["アクション"],
     "description": "NCの裁定に基づき、任意の行動値コストを支払って特殊な行動を行う。",
-    "description_raw": "戦闘中でも、敵のマニューバや、状況によって任意判定は発生します。",
+    "description_raw": "NCの裁定に基づき、任意の行動値コストを支払って特殊な行動を行う。",
     "source": { "book": "基本ルールブック", "page": 107 },
     "timing": "アクション", "cost": "任意", "range": "自身",
     "effects": [{ "ref": "ARBITRARY_ACTION", "params": {} }]

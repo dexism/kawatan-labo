@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.16.65"; // バージョンを更新
+export const version = "1.16.66"; // バージョンを更新
 
 import * as data from './data-handler.js';
 import * as charManager from './character-manager.js';
@@ -373,52 +373,49 @@ function createManeuverItem(maneuverObj, char) {
 
     // ★★★ ここからが修正箇所です ★★★
     let maneuverNameHtml = `【${maneuver.name}】`;
-    // リファレンスモード（char.idがない）で、かつパーツの場合に箇所名を追加
+    // リファレンスモード（char.idが存在しない）の場合の特殊なHTML構造
     if (!char.id) {
-        const sourceText = getManeuverSourceText(maneuver);
-        if (sourceText.includes('パーツ') && maneuver.allowedLocations) {
-            const locationMap = { '頭': '頭', '腕': '腕', '胴': '胴', '脚': '脚', '任意': '任意' };
-            const locationPrefix = locationMap[maneuver.allowedLocations] || '他';
-            maneuverNameHtml = `<span class="item-location-prefix">${locationPrefix}</span>` + maneuverNameHtml;
-        }
-    }
-
-    rightCol.innerHTML += `
-        <div class="item-row-1">
-            <span class="item-name">${maneuverNameHtml}</span>
-            <span class="item-stats">《${maneuver.timing}/${maneuver.cost}/${maneuver.range}》</span>
-        </div>
-        <div class="item-row-2">${maneuver.description_raw || ''}</div>
-    `;
-
-    // リファレンス表示時（charオブジェクトにidがないダミーの場合）に追加情報を表示
-    if (!char.id) {
-        // ヘッダー部分を生成
         const sourceHeaderText = getManeuverSourceText(maneuver);
         let sourceInfoText = '';
         if (maneuver.source) {
             sourceInfoText = maneuver.source.book || '不明';
             if (maneuver.source.page) {
-                sourceInfoText += ` (p${maneuver.source.page})`;
+                sourceInfoText += ` p${maneuver.source.page}`;
             }
         }
         
-        const headerEl = document.createElement('div');
-        headerEl.className = 'item-reference-header';
-        headerEl.innerHTML = `
-            <span class="item-source-category">${sourceHeaderText}</span>
-            <span class="item-source-info">${sourceInfoText}</span>
-        `;
-        // rightCol の先頭にヘッダーを追加
-        rightCol.prepend(headerEl);
-
-        // フレーバーテキストを追加 (これは変更なし)
-        if (maneuver.flavor_text) {
-            const flavorTextEl = document.createElement('div');
-            flavorTextEl.className = 'item-row-3 item-flavor-text';
-            flavorTextEl.textContent = maneuver.flavor_text;
-            rightCol.appendChild(flavorTextEl);
+        let maneuverNameHtml = `【${maneuver.name}】`;
+        if (sourceHeaderText.includes('パーツ') && maneuver.allowedLocations) {
+            const locationMap = { '頭': '頭', '腕': '腕', '胴': '胴', '脚': '脚', '任意': '任意' };
+            const locationPrefix = locationMap[maneuver.allowedLocations] || '他';
+            maneuverNameHtml = `<span class="item-location-prefix">${locationPrefix}</span>` + maneuverNameHtml;
         }
+
+        // 4つの要素を一つのコンテナにまとめる
+        rightCol.innerHTML = `
+            <div class="reference-item-container">
+                <div class="ref-container-top">
+                    <div class="ref-source-info">${sourceInfoText}</div>
+                    <div class="ref-source-category">${sourceHeaderText}</div>
+                </div>
+                <div class="ref-container">
+                    <div class="ref-maneuver-name">${maneuverNameHtml}</div>
+                    <div class="ref-stats">《${maneuver.timing}/${maneuver.cost}/${maneuver.range}》</div>
+                </div>
+            </div>
+            <div class="item-row-2">${maneuver.description_raw || ''}</div>
+            ${maneuver.flavor_text ? `<div class="item-row-3 item-flavor-text">${maneuver.flavor_text}</div>` : ''}
+        `;
+    } 
+    // 通常のマニューバメニューの場合（従来通りの構造）
+    else {
+        rightCol.innerHTML = `
+            <div class="item-row-1">
+                <span class="item-name">【${maneuver.name}】</span>
+                <span class="item-stats">《${maneuver.timing}/${maneuver.cost}/${maneuver.range}》</span>
+            </div>
+            <div class="item-row-2">${maneuver.description_raw || ''}</div>
+        `;
     }
     item.appendChild(categoryCol);
     item.appendChild(passiveIconCol);
