@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.16.68"; // バージョンを更新
+export const version = "1.16.69"; // バージョンを更新
 
 import * as data from './data-handler.js';
 import * as charManager from './character-manager.js';
@@ -283,6 +283,10 @@ function createManeuverItem(maneuverObj, char) {
     const item = document.createElement('div');
     item.className = 'maneuver-item-new';
 
+    if (!char.id) {
+        item.classList.add('is-reference-item');
+    }
+
     const categoryCol = document.createElement('div');
     categoryCol.className = 'item-category-col';
     const categoryName = maneuver.category || 'その他';
@@ -397,8 +401,10 @@ function createManeuverItem(maneuverObj, char) {
             // allowedLocationsキーがなければ「ｽｷﾙ」を表示
         //     locationPrefix = 'ｽｷﾙ';
         }
+        // ★★★ ここからが今回の修正箇所です ★★★
+        const descriptionText = maneuver.description_raw || '';
+        const encodedDescription = encodeURIComponent(descriptionText);
 
-        // 4つの要素を一つのコンテナにまとめる
         rightCol.innerHTML = `
             <div class="reference-item-container">
                 <div class="ref-container-top">
@@ -410,7 +416,10 @@ function createManeuverItem(maneuverObj, char) {
                     <div class="ref-stats">《${maneuver.timing}/${maneuver.cost}/${maneuver.range}》</div>
                 </div>
             </div>
-            <div class="item-row-2">${maneuver.description_raw || ''}</div>
+            <div class="item-row-2 has-copy-button">
+                <span>${descriptionText}</span>
+                <button class="copy-description-btn" data-copy-text="${encodedDescription}" title="効果テキストをコピー">📋</button>
+            </div>
             ${maneuver.flavor_text ? `<div class="item-row-3 item-flavor-text">${maneuver.flavor_text}</div>` : ''}
         `;
     } 
@@ -429,9 +438,27 @@ function createManeuverItem(maneuverObj, char) {
     item.appendChild(statusIconCol);
     item.appendChild(rightCol);
 
-    item.addEventListener('mouseenter', () => ui.showManeuverCard(document.getElementById('maneuverMenu').getBoundingClientRect(), item.getBoundingClientRect(), char, maneuverObj));
-    item.addEventListener('mouseleave', () => ui.hideManeuverCard());
+    // リファレンスモードでない（char.idが存在する）場合にのみ、カード表示のイベントリスナーを設定
+    if (char.id) {
+        item.addEventListener('mouseenter', () => ui.showManeuverCard(document.getElementById('maneuverMenu').getBoundingClientRect(), item.getBoundingClientRect(), char, maneuverObj));
+        item.addEventListener('mouseleave', () => ui.hideManeuverCard());
+    }
     
+    // ★★★ コピーボタンにイベントリスナーを追加します ★★★
+    const copyBtn = item.querySelector('.copy-description-btn');
+    if (copyBtn) {
+        copyBtn.onclick = (e) => {
+            e.stopPropagation(); // アイテム全体のクリックイベントを発火させない
+            const textToCopy = decodeURIComponent(e.currentTarget.dataset.copyText);
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                ui.showToastNotification('コピーしました！', 1500);
+            }).catch(err => {
+                console.error('コピーに失敗しました', err);
+                ui.showToastNotification('コピーに失敗しました', 1500);
+            });
+        };
+    }
+
     if (!maneuverObj.isUsable) {
         item.classList.add('is-masked');
         if (maneuverObj.isDamaged) item.classList.add('is-damaged');

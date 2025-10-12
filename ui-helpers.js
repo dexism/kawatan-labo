@@ -2,7 +2,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.1.5";
+export const version = "1.1.6";
 
 import * as data from './data-handler.js';
 
@@ -22,58 +22,44 @@ export function getCategoryClass(categoryName) {
  * @returns {string} - 表示用の出典元テキスト (例: "ポジションスキル：アリス")
  */
 export function getManeuverSourceText(maneuver) {
-    // IDがなければ"不明"と表示
-    if (!maneuver.id) return '不明';
+    if (!maneuver.id) return 'その他';
     
     const coreData = data.getCoreData();
     if (!coreData || !coreData.positions) return 'データ読込中...';
 
     const id = maneuver.id;
     const prefix = id.substring(0, 2);
-    
-    // 悪意点表示用のヘルパー関数
-    const getMaliceText = (m) => {
-        if (typeof m.maliceLevel === 'number') {
-            return ` <span class="malice-level">：悪意${m.maliceLevel}</span>`;
-        }
-        return ''; // maliceLevelキーがなければ何も表示しない
-    };
+    const typePrefix = id.substring(0, 1);
 
-    // --- ポジションスキルの判定 ---
+    let baseText = 'スキル'; // デフォルトのテキスト
+
+    // --- 1. まず、マニューバの基本的な種類を特定する ---
     if (coreData.positions[prefix]) {
-        return `ポジションスキル：${coreData.positions[prefix].name}`;
+        baseText = `ポジションスキル：${coreData.positions[prefix].name}`;
+    } else if (coreData.classes[prefix]) {
+        if (id.endsWith('-SP')) {
+            baseText = `特化スキル：${coreData.classes[prefix].name}`;
+        } else {
+            baseText = `クラススキル：${coreData.classes[prefix].name}`;
+        }
+    } else if (prefix === 'BP') {
+        baseText = '基本パーツ';
+    } else if (['A', 'M', 'R'].includes(typePrefix) && !isNaN(parseInt(id.substring(1, 2), 10))) {
+        const enhLevel = id.substring(1, 2);
+        baseText = `強化パーツ：${enhLevel}レベル${coreData.enhancementTypes[typePrefix].name}`;
+    } else if (id.startsWith('P')) {
+        baseText = '手駒専用パーツ';
+    } else if (coreData.pawnSkills[prefix]) {
+        baseText = coreData.pawnSkills[prefix].name;
+    } else if (coreData.commonAction && coreData.commonAction[prefix]) {
+        baseText = coreData.commonAction[prefix].name;
     }
-    // --- クラススキルの判定 ---
-    if (coreData.classes[prefix]) {
-        if (id.endsWith('-SP')) return `特化スキル：${coreData.classes[prefix].name}`;
-        return `クラススキル：${coreData.classes[prefix].name}`;
-    }
-    // --- 基本パーツの判定 ---
-    if (prefix === 'BP') {
-        return `基本パーツ${getMaliceText(maneuver)}`;
-    }
-    // --- 強化パーツの判定 ---
-    const enhType = id.substring(0, 1);
-    const enhLevel = id.substring(1, 2);
-    if (coreData.enhancementTypes[enhType] && ['1', '2', '3'].includes(enhLevel)) {
-        return `強化パーツ：${enhLevel}レベル${coreData.enhancementTypes[enhType].name}${getMaliceText(maneuver)}`;
-    }
-    // --- 手駒専用スキルの判定 ---
-    if (coreData.pawnSkills[prefix]) {
-        return coreData.pawnSkills[prefix].name;
-    }
-    // --- 手駒専用パーツの判定 ---
-    if (id.startsWith('P')) {
-        // P0パーツとそれ以外で表示を分ける
-        const maliceText = typeof maneuver.maliceLevel === 'number' && maneuver.maliceLevel > 0 
-            ? `：悪意${maneuver.maliceLevel}` 
-            : '';
-        return `手駒専用パーツ${maliceText}`;
-    }
-    // --- 一般動作の判定 ---
-    if (coreData.commonAction && coreData.commonAction[prefix]) {
-        return coreData.commonAction[prefix].name;
+
+    // --- 2. 種類に関わらず、maliceLevel があれば追記する ---
+    let maliceText = '';
+    if (typeof maneuver.maliceLevel === 'number' && maneuver.maliceLevel > 0) {
+        maliceText = `<span class="malice-level">悪意${maneuver.maliceLevel}</span>`;
     }
     
-    return 'その他'; // どれにも当てはまらない場合のデフォルト
+    return baseText + maliceText;
 }

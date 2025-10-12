@@ -45,8 +45,8 @@
     "effects": [{ "ref": "TAKE_DAMAGE_FOR_ALLY", "params": { "limit_per_turn": "none" } }]
   },
   "ST-04": {
-    "name": "肉の盾", "category": "防御", 
-    "tags": ["防御", "ダメージ"], "maliceLevel": 1.5,
+    "name": "肉の盾", "category": "補助", 
+    "tags": ["切断無効", "連撃無効", "全体攻撃無効", "転倒無効", "移動無効", "ダメージ"], "maliceLevel": 1.5,
     "timing": "ダメージ", "cost": 0, "range": "0～1",
     "description": "ダメージに付随する効果（切断、爆発など）を全て打ち消す。", 
     "description_raw": "ダメージに付随する効果全てを打ち消す(切断、連撃、全体攻撃など)",
@@ -70,7 +70,7 @@
   },
   "ST-06": {
     "name": "臓物豚", "category": "修復",
-    "tags": ["修復", "オート"], "maliceLevel": 1.5,
+    "tags": ["修復", "オート"],
     "timing": "オート", "cost": "なし", "range": "姉妹全員",
     "description": "戦闘終了時、自身を含む姉妹全員の、損傷している【はらわた】を修復してよい。", 
     "description_raw": "戦闘終了時、あなたを含む姉妹全員、損傷している【はらわた】を修復してよい。",
@@ -404,7 +404,7 @@
   },
   "BR-04": {
     "name": "業躯", "category": "修復", 
-    "tags": ["修復", "オート"], "maliceLevel": 1.5,
+    "tags": ["修復", "オート"],
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "バトルパート終了時、望むパーツ2つを修復する。", 
     "description_raw": "バトルパート終了時、望むパーツ2つを修復してよい。",

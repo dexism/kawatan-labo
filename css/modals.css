@@ -1032,16 +1032,18 @@
 }
 
 .copy-description-btn {
+    flex-shrink: 0; /* ボタンが縮まないようにする */
     background: none;
     border: none;
     border-radius: 5px;
-    color: var(--color-text-muted);
+    color: var(--color-8);
     cursor: pointer;
-    font-size: 16px;
+    font-size: 20px;
+    margin:  0;
     padding: 0;
-    flex-shrink: 0;
-    align-self: left;
+    line-height: 1;
     transition: all 0.2s;
+    align-self: end; /* ボタンを垂直方向の中央に配置 */
 }
 
 .copy-description-btn:hover {

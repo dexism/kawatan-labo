@@ -115,7 +115,7 @@
   },
   "R1-11": {
     "name": "ジャンクパーツ", "category": "修復", "allowedLocations": "任意",
-    "tags": ["オート", "修復", "破壊"], "maliceLevel": 1,
+    "tags": ["オート", "修復", "破壊"],
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "このパーツが戦闘終了時に破壊されていなければ、このパーツが装備された箇所の基本パーツは全て修復される。",
     "description_raw": "このパーツが破壊されず戦闘終了したなら、このパーツが装備された箇所の基本パーツは全て損傷前の状態に戻る。",
@@ -326,8 +326,8 @@
     "effects": [{ "ref": "CHOICE_JUDGE_MOD", "params": { "options": [{ "type": "支援", "value": 2 }, { "type": "妨害", "value": -2 }] } }]
   },
   "R3-06": {
-    "name": "オートセパレート", "category": "防御", "allowedLocations": "胴",
-    "tags": ["防御", "オート", "切断"], "maliceLevel": 1.5,
+    "name": "オートセパレート", "category": "補助", "allowedLocations": "胴",
+    "tags": ["オート", "切断無効"], "maliceLevel": 1.5,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "「切断」無効化", 
     "description_raw": "「切断」を常に無効化してよい。",

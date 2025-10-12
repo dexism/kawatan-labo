@@ -260,7 +260,7 @@
 #maneuverMenu.is-reference-mode .maneuver-item-new {
     width:  100%;
     max-height: 100%;
-    pointer-events: none;
+    /* pointer-events: none; */
 }
 /* リファレンスメニューのアコーディオンヘッダーのスタイル調整 */
 #maneuverMenu .accordion-container {
@@ -280,7 +280,7 @@
 }
 #maneuverMenu .accordion-header {
     padding: 5px; /* 上下左右の余白を調整 */
-  box-sizing: border-box;
+    box-sizing: border-box;
     font-size: 14px; /* 文字サイズを少し大きく */
     font-weight: bold;
     color: var(--color-text);
@@ -297,7 +297,7 @@
     margin: 0;
     font-size: 12px;
     color: var(--color-fore-5);
-    padding-bottom: 3px;
+    padding: 0 0 3px 3px;
 }
 .filter-buttons {
     display: flex;
@@ -317,15 +317,15 @@
 
 /* 4つの要素を格納するFlexコンテナ */
 #maneuverMenu.is-reference-mode .reference-item-container {
-  display: block;
-  row-gap: 0px; /* 折り返した際の行間の隙間 */
+    display: block;
+    row-gap: 0px; /* 折り返した際の行間の隙間 */
 }
 
 /* 各テキスト要素のスタイル */
 #maneuverMenu.is-reference-mode .reference-item-container > span {
-  white-space: nowrap; /* ★重要：自身の改行を禁止 */
-  overflow: visible;
-  text-overflow: ellipsis; /* はみ出した場合は...で省略 */
+    white-space: nowrap; /* ★重要：自身の改行を禁止 */
+    overflow: visible;
+    text-overflow: ellipsis; /* はみ出した場合は...で省略 */
 }
 .ref-container-top {
     display: flex;
@@ -348,7 +348,7 @@
     background-color: var(--color-fore-4);
     color: var(--color-background-2);
     margin-right: auto;
-    padding: 1px 10px;
+    padding: 1px 8px;
     border-radius: 10px;
     white-space: nowrap; /* 改行を防ぐ */
 }
@@ -367,9 +367,9 @@
 .item-location-prefix {
     font-size: 14px;
     font-weight: bold;
-    border: 1px solid var(--color-fore-7);
-    background-color: var(--color-background-3);
-    color: var(--color-fore-3);
+    border: 1px solid var(--color-6);
+    background-color: var(--color-accent-gold);
+    color: var(--color-3);
     border-radius: 15px;
     width:  20px;
     height: 20px;
@@ -407,43 +407,6 @@
     text-indent: 1em;
 }
 
-/* ヘッダー全体 (Flexboxコンテナ) */
-.item-reference-header {
-    display: flex;
-    justify-content: space-between; /* 両端揃え */
-    align-items: baseline;          /* テキストの下端を揃える */
-    margin: 0;
-    padding: 0;
-    border-radius: 3px;
-border: 1px dashed cyan;
-background-color: red;
-}
-
-/* 出典元カテゴリ (左側) */
-.item-source-category {
-    font-size: 12px;
-    font-weight: bold;
-    color: var(--color-text);
-    background-color: var(--color-fore-4);
-    color: var(--color-background-2);
-    padding: 1px 10px;
-    border-radius: 10px;
-    margin: 0;
-    display: inline-block; /* テキストの長さに合わせて幅を調整 */
-border: 1px dashed cyan;
-background-color: red;
-}
-/* 出典情報 (右側) */
-.item-source-info {
-    text-align: right;
-    font-size: 12px;
-    font-weight: normal;
-    color: var(--color-8);
-    white-space: nowrap; /* 改行を防ぐ */
-border: 1px dashed cyan;
-background-color: red;
-}
-
 /* =======================================
    リファレンスフィルター表示拡張スタイル
 ========================================== */
@@ -477,19 +440,35 @@ background-color: red;
   min-width: 0; /* flexアイテムのはみ出し防止 */
 }
 
-/* フィルターグループごとのスタイル */
-.filter-summary-group {
-    margin-right: 5px; /* グループ間の区切り */
-    background-color: var(--color-background-2);
-    padding: 0 7px 0 2px;
-    border-radius: 10px;
+/* ================================
+   リファレンス：悪意点表示スタイル
+================================ */
+.malice-level {
+  color: var(--color-accent);
+  margin-left: 5px;
 }
 
-/* 「カテゴリ：」などのラベル部分 */
-.filter-summary-label {
-  font-weight: normal;
-  font-size: 9px;
-  margin-right: 2px;
-  padding: 0;
-  color: var(--color-fore-6);
+/* ================================
+   リファレンス：説明文コピーボタン
+================================ */
+.has-copy-button {
+  display: flex;
+  justify-content: space-between; /* テキストとボタンを両端に配置 */
+  align-items: flex-start; /* 上端揃え */
+  gap: 0px; /* テキストとボタンの間の最小の隙間 */
+}
+
+.has-copy-button > span {
+  flex-grow: 1; /* 説明文が利用可能なスペースをすべて使う */
+}
+
+/* ================================
+   リファレンスアイテムのホバー無効化
+================================ */
+.maneuver-item-new.is-reference-item:hover {
+  /* 通常のホバーエフェクトを上書きして無効化 */
+  background-color: var(--color-background-2);
+  outline: none;
+  color: var(--color-fore-2);
+  cursor: default; /* カーソルを通常に戻す */
 }

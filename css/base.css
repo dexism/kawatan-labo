@@ -58,6 +58,7 @@ h2 {
   opacity: 0;
   pointer-events: none;
 }
+
 /* ================================
  * @description CSSカスタムプロパティ（変数）を定義します。
 ================================ */
@@ -133,13 +134,15 @@ h2 {
   --color-log-bg:       var(--color-f);
   --color-border:       var(--color-a);
   --color-shadow-1:     rgba(255, 255, 255, 0.5);
+  --color-accent:       #f77;
   --color-accent-red:   #c33;
   --color-accent-gold:  gold;
   --color-accent-cyan:  cyan;
   --color-accent-blue:  #36c;
   --color-card:         var(--color-d);
   --color-title-text:   var(--color-d);
-  --color-title-bg:     #700;
+  --color-title-bg:     #600;
+  --color-footer-bg:    #edd;
   --color-sub-text:     var(--color-6);
   --color-sub-bg:       var(--color-c);
   --color-btn-text:     var(--color-8);
@@ -197,13 +200,15 @@ html[data-theme="dark"] {
     --color-log-bg:       var(--color-0);
     --color-border:       var(--color-6);
     --color-shadow-1:     rgba(0, 0, 0, 0.5);
+    --color-accent:       #a00;
     --color-accent-red:   #ff5555;
     --color-accent-gold:  #ffd700;
     --color-accent-cyan:  #00ffff;
     --color-accent-blue:  #58a6ff;
     --color-card:         var(--color-6);
-    --color-title-text:   var(--color-a);
-    --color-title-bg:     #511;
+    --color-title-text:   var(--color-8);
+    --color-title-bg:     #300;
+    --color-footer-bg:    #100;
     --color-sub-text:     var(--color-8);
     --color-sub-bg:       #200;
     --color-btn-text:     var(--color-c);
@@ -263,13 +268,15 @@ html[data-theme="dark"] {
     --color-log-bg:       var(--color-0);
     --color-border:       var(--color-6);
     --color-shadow-1:     rgba(0, 0, 0, 0.5);
+    --color-accent:       #a00;
     --color-accent-red:   #ff5555;
     --color-accent-gold:  #ffd700;
     --color-accent-cyan:  #00ffff;
     --color-accent-blue:  #58a6ff;
     --color-card:         var(--color-6);
-    --color-title-text:   var(--color-a);
-    --color-title-bg:     #511;
+    --color-title-text:   var(--color-8);
+    --color-title-bg:     #300;
+    --color-footer-bg:    #100;
     --color-sub-text:     var(--color-8);
     --color-sub-bg:       #200;
     --color-btn-text:     var(--color-c);
