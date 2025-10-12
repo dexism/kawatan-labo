@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.16.70"; // バージョンを更新
+export const version = "1.16.71"; // バージョンを更新
 
 import * as data from './data-handler.js';
 import * as charManager from './character-manager.js';
@@ -2391,6 +2391,16 @@ function checkManeuverMatch(maneuver, groupName, filterName, masterData) {
     const prefix = id.substring(0, 2);
     const typePrefix = id.substring(0, 1);
 
+    const isEnhancementPart = (partTypePrefix) => {
+        const secondChar = id.substring(1, 2);
+        return typePrefix === partTypePrefix && ['1', '2', '3'].includes(secondChar);
+    };
+
+    const isPawnOnlyPart = () => {
+        const secondChar = id.substring(1, 2);
+        return typePrefix === 'P' && !isNaN(parseInt(secondChar, 10));
+    };
+
     switch (groupName) {
         case 'カテゴリ':
             return maneuver.category === filterName || (maneuver.tags && maneuver.tags.includes(filterName));
@@ -2401,8 +2411,8 @@ function checkManeuverMatch(maneuver, groupName, filterName, masterData) {
                 case 'クラススキル': return !!masterData.classes[prefix] && !id.endsWith('-SP');
                 case '特化スキル': return !!masterData.classes[prefix] && id.endsWith('-SP');
                 case '基本パーツ': return prefix === 'BP';
-                case '強化パーツ': return ['A', 'M', 'R'].includes(typePrefix) && !isNaN(parseInt(id.substring(1, 2), 10));
-                case '手駒専用': return prefix === 'PS' || typePrefix === 'P';
+                case '強化パーツ': return isEnhancementPart('A') || isEnhancementPart('M') || isEnhancementPart('R');
+                case '手駒専用': return prefix === 'PS' || isPawnOnlyPart();
                 default: return false;
             }
 
@@ -2418,10 +2428,10 @@ function checkManeuverMatch(maneuver, groupName, filterName, masterData) {
                 return true;
             }
             // 3. 強化パーツのチェック
-            const typeMap = { '武装': 'A', '変異': 'M', '改造': 'R' };
-            if (typePrefix === typeMap[filterName]) {
-                return true;
-            }
+            if (filterName === '武装') return isEnhancementPart('A');
+            if (filterName === '変異') return isEnhancementPart('M');
+            if (filterName === '改造') return isEnhancementPart('R');
+
             // どれにも当てはまらない場合は false
             return false;
         }

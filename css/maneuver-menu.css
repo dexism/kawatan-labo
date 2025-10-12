@@ -265,11 +265,12 @@
     margin: 0;
     padding: 5px 0;
     border-bottom: 1px solid var(--color-border);
-  box-sizing: border-box;
+    box-sizing: border-box;
 }
 .reference-filter-container {
     /* padding: 5px; */
     /* border-bottom: 1px solid var(--color-border); */
+    max-height: calc(50vh - 90px);
     display: flex;
     flex-direction: column;
     gap: 0px;
@@ -413,11 +414,11 @@
 
 /* 「カテゴリ：」などのラベル部分 */
 .filter-summary-label {
-  font-weight: normal;
-  font-size: 9px;
-  margin-right: 5px;
-  padding: 0;
-  color: var(--color-fore-6);
+    font-weight: normal;
+    font-size: 9px;
+    margin-right: 5px;
+    padding: 0;
+    color: var(--color-fore-6);
 }
 /* =======================================
    リファレンスフィルター表示拡張スタイル
@@ -425,62 +426,62 @@
 
 /* ヘッダー全体をFlexboxコンテナにする */
 #maneuverMenu .accordion-header {
-  display: flex;
-  align-items: baseline; /* テキストのベースラインを揃える */
-  gap: 0px; /* 「フィルター表示」と要約の間の隙間 */
-  width: 100%;
-  overflow: hidden; /* はみ出し防止 */
+    display: flex;
+    align-items: baseline; /* テキストのベースラインを揃える */
+    gap: 0px; /* 「フィルター表示」と要約の間の隙間 */
+    width: 100%;
+    overflow: hidden; /* はみ出し防止 */
 }
 
 /* 「フィルター表示」の固定テキスト */
 .accordion-title-static {
-  font-weight: bold;
-  font-size: 14px;
-  color: var(--color-text);
-  flex-shrink: 0; /* この要素が縮まないようにする */
+    font-weight: bold;
+    font-size: 14px;
+    color: var(--color-text);
+    flex-shrink: 0; /* この要素が縮まないようにする */
 }
 
 /* 件数とフィルター要約の動的テキスト */
 .accordion-title-dynamic {
-  font-size: 12px;
-  font-weight: bold;
-  color: var(--color-fore-5);
-  white-space: nowrap; /* ★重要: 全体として改行させない */
-  overflow: hidden; /* ★重要: はみ出した部分を隠す */
-  text-overflow: ellipsis; /* ★重要: はみ出しを「…」で表示 */
-  flex-grow: 1; /* 残りのスペースをすべて埋める */
-  min-width: 0; /* flexアイテムのはみ出し防止 */
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--color-fore-5);
+    white-space: nowrap; /* ★重要: 全体として改行させない */
+    overflow: hidden; /* ★重要: はみ出した部分を隠す */
+    text-overflow: ellipsis; /* ★重要: はみ出しを「…」で表示 */
+    flex-grow: 1; /* 残りのスペースをすべて埋める */
+    min-width: 0; /* flexアイテムのはみ出し防止 */
 }
 
 /* ================================
    リファレンス：悪意点表示スタイル
 ================================ */
 .malice-level {
-  color: var(--color-accent);
-  margin-left: 5px;
+    color: var(--color-accent);
+    margin-left: 5px;
 }
 
 /* ================================
    リファレンス：説明文コピーボタン
 ================================ */
 .has-copy-button {
-  display: flex;
-  justify-content: space-between; /* テキストとボタンを両端に配置 */
-  align-items: flex-start; /* 上端揃え */
-  gap: 0px; /* テキストとボタンの間の最小の隙間 */
+    display: flex;
+    justify-content: space-between; /* テキストとボタンを両端に配置 */
+    align-items: flex-start; /* 上端揃え */
+    gap: 0px; /* テキストとボタンの間の最小の隙間 */
 }
 
 .has-copy-button > span {
-  flex-grow: 1; /* 説明文が利用可能なスペースをすべて使う */
+    flex-grow: 1; /* 説明文が利用可能なスペースをすべて使う */
 }
 
 /* ================================
    リファレンスアイテムのホバー無効化
 ================================ */
 .maneuver-item-new.is-reference-item:hover {
-  /* 通常のホバーエフェクトを上書きして無効化 */
-  background-color: var(--color-background-2);
-  outline: none;
-  color: var(--color-fore-2);
-  cursor: default; /* カーソルを通常に戻す */
+    /* 通常のホバーエフェクトを上書きして無効化 */
+    background-color: var(--color-background-2);
+    outline: none;
+    color: var(--color-fore-2);
+    cursor: default; /* カーソルを通常に戻す */
 }

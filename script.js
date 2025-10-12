@@ -7,7 +7,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-const appVersion = "7.10.1221";
+const appVersion = "7.10.1300";
 
 // --- モジュールのインポート ---
 import * as data from './data-handler.js';
@@ -70,20 +70,30 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         await new Promise(resolve => setTimeout(resolve, 2000));
 
-        // 3. ウェルカムモーダルと更新情報を表示し、ユーザーが閉じるのを待つ
-        await showWelcomeAndUpdates();
+        // 3. バージョンチェックを実行し、関連モーダルが閉じるのを待つ
+        await checkAppVersion();
+        
+        // 4. ウェルカムモーダルを表示し、ユーザーが閉じるのを待つ
+        await showWelcomeModal();
 
-        // 4. ウェルカムモーダルが閉じた後、保存データがあれば復元モーダルを表示
+        // 5. 更新情報を表示し、ユーザーが閉じるのを待つ
+        await showUpdateNotesModal();
+        
+        // 6. 保存データがあれば復元モーダルを表示
         if (stateManager.hasSavedState()) {
             await showRestoreModal();
         }
 
-        // 5. すべての初期化モーダルが完了した後、バージョン情報を表示
+        // 7. すべての初期化モーダルが完了した後、バージョン情報を表示
         displayAppVersionInfo();
 
-        // 6. スプラッシュ消去
+        // 8. スプラッシュ消去
         const splash = document.getElementById('splash');
         splash.classList.add('fade-out');
+
+        // 9. すべての処理の最後に更新完了通知をチェック ★★★
+        handleVersionNotification();
+
         // setTimeout(() => splash.remove(), 1000);
 
     } catch (error) {
@@ -104,15 +114,44 @@ function initializeAppUI() {
 }
 
 /**
- * ウェルカムモーダルと更新情報を順番に表示し、完了を待つPromiseを返す
+ * ウェルカムモーダルを表示し、ユーザーが閉じるのを待つ
  * @returns {Promise<void>}
  */
-function showWelcomeAndUpdates() {
+function showWelcomeModal() {
+    return new Promise(resolve => {
+        const modal = document.getElementById('welcomeModal');
+        const closeBtn = document.getElementById('closeWelcomeModalBtn');
+
+        if (!modal || !closeBtn) {
+            console.warn("Welcome modal elements not found, skipping.");
+            return resolve();
+        }
+
+        modal.classList.add('is-visible');
+
+        const closeModalAndResolve = () => {
+            modal.classList.remove('is-visible');
+            resolve(); // Promiseを解決して次の処理に進める
+        };
+
+        closeBtn.onclick = closeModalAndResolve;
+        modal.onclick = (event) => {
+            if (event.target === modal) closeModalAndResolve();
+        };
+    });
+}
+
+/**
+ * 更新情報モーダルを表示し、ユーザーが閉じるのを待つ
+ * @returns {Promise<void>}
+ */
+function showUpdateNotesModal() {
     return new Promise(resolve => {
         const LATEST_UPDATE_NOTES = `
-        <div class="modal-header modal-header-sub">📢主な更新内容: Ver.${appVersion}</div>
+        <div class="modal-header modal-header-sub">📢主な更新内容 Ver.${appVersion}</div>
         <div class="modal-body welcome-modal-body">
-            <p>◆ <strong>📖全マニューバリファレンス</strong>を実装・拡張しました。</p>
+            <p>◆ 最新バージョンへの<strong>自動更新機能</strong>を実装しました。</p>
+            <p>◆ <strong>📖全マニューバリファレンス</strong>を実装しました。</p>
             <p>◆ <strong>防御・妨害・追加ダメージ・転倒・移動妨害</strong>を実装しました。</p>
             <p>◆ <strong>セッションのファイルへの保存・ファイルから読込み</strong>を実装しました。</p>
             <p>◆ <strong>【✏️画像の変更】※透過png対応</strong>：「🪪人形設計図」において<strong>画像の変更</strong>機能を追加しました。
@@ -130,35 +169,18 @@ function showWelcomeAndUpdates() {
         </div>
         `;
 
-        const modal = document.getElementById('welcomeModal');
-        const closeBtn = document.getElementById('closeWelcomeModalBtn');
-
-        if (!modal || !closeBtn) {
-            console.warn("Welcome modal elements not found, skipping.");
-            return resolve(); // モーダル要素がなければ即座に解決
-        }
-
-        modal.classList.add('is-visible');
-
-        const closeWelcomeAndShowUpdates = () => {
-            modal.classList.remove('is-visible');
-            showModal({
-                title: '更新情報',
-                bodyHtml: LATEST_UPDATE_NOTES,
-                footerHtml: '<button id="okUpdateBtn" class="welcome-modal-close-btn">OK</button>',
-                onRender: (updateModal, closeUpdateFn) => {
-                    updateModal.querySelector('#okUpdateBtn').onclick = () => {
-                        closeUpdateFn();
-                        resolve(); // ★ 更新モーダルが閉じられたらPromiseを解決
-                    };
-                }
-            });
-        };
-
-        closeBtn.onclick = closeWelcomeAndShowUpdates;
-        modal.onclick = (event) => {
-            if (event.target === modal) closeWelcomeAndShowUpdates();
-        };
+        showModal({
+            title: '更新情報',
+            bodyHtml: LATEST_UPDATE_NOTES,
+            footerHtml: '<button id="okUpdateBtn" class="welcome-modal-close-btn">OK</button>',
+            closable: false,
+            onRender: (updateModal, closeUpdateFn) => {
+                updateModal.querySelector('#okUpdateBtn').onclick = () => {
+                    closeUpdateFn();
+                    resolve(); // Promiseを解決して次の処理に進める
+                };
+            }
+        });
     });
 }
 
@@ -175,32 +197,96 @@ function showRestoreModal() {
                 <button id="restoreBtn" class="welcome-modal-close-btn">はい、復元する</button>
                 <button id="discardBtn" class="welcome-modal-close-btn">いいえ、新規に開始</button>
             `,
+            closable: false, // ★★★ この行を追加 ★★★
             onRender: (modal, closeFn) => {
-                // 「はい、復元する」ボタンの処理
                 modal.querySelector('#restoreBtn').onclick = async () => {
                     closeFn();
-                    // loadState の返り値（成功したかどうか）を受け取る
                     const success = await stateManager.loadState(data.getUndeadTemplates());
                     
-                    // ロードが成功した場合のみ、UIを更新する
                     if (success) {
                         updateAllUI();
                     }
                     resolve();
                 };
                 
-                // 「いいえ、新規に開始」ボタンの処理
                 modal.querySelector('#discardBtn').onclick = () => {
-                    // ★★★ 確認ダイアログを追加 ★★★
                     if (confirm('自動保存されたデータが削除されます。本当に新規セッションを開始しますか？')) {
                         stateManager.clearSavedState();
                         closeFn();
                         resolve();
                     }
-                    // "キャンセル"が押された場合は、モーダルを閉じずに何もしない
                 };
             }
         });
+    });
+}
+
+/**
+ * サーバー上のバージョンとローカルのバージョンを比較し、
+ * バージョンが古ければ自動でリロードする。
+ * @returns {Promise<void>}
+ */
+function checkAppVersion() {
+    return new Promise(async (resolve) => {
+        // オフラインの場合は従来通り通知して終了
+        if (!navigator.onLine) {
+            showModal({
+                title: '更新の確認',
+                bodyHtml: '<p>ネットワークに接続されていません。<br>接続が良い環境でページを再読み込みすると、最新バージョンを確認できます。</p>',
+                footerHtml: '<button id="okBtn" class="welcome-modal-close-btn">OK</button>',
+                onRender: (modal, closeFn) => {
+                    modal.querySelector('#okBtn').onclick = () => {
+                        closeFn();
+                        resolve();
+                    };
+                }
+            });
+            return;
+        }
+
+        try {
+            // タイムアウト処理
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+            // キャッシュを回避してバージョンファイルを取得
+            const response = await fetch(`/version.json?t=${new Date().getTime()}`, { signal: controller.signal });
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                throw new Error('バージョンファイルを取得できませんでした。');
+            }
+
+            const serverVersionData = await response.json();
+            const serverVersion = serverVersionData.version;
+
+            // ★★★ ここからが修正箇所です ★★★
+            if (serverVersion && serverVersion !== appVersion) {
+                // バージョンが異なる場合、即座にリロードを実行
+                console.log(`新しいバージョン (v${serverVersion}) を検出しました。自動的にリロードします。`);
+                location.reload(true); // trueを指定してハードリロード
+                // リロードが始まるため、このPromiseは解決されずに終了します。
+            } else {
+                // バージョンが同じ場合は正常に解決
+                resolve();
+            }
+            // ★★★ 修正はここまでです ★★★
+
+        } catch (error) {
+            // タイムアウトやその他のネットワークエラーの場合は従来通り通知して終了
+            console.warn("バージョンチェックに失敗しました:", error.name, error.message);
+            showModal({
+                title: '更新の確認',
+                bodyHtml: '<p>サーバーへの接続がタイムアウトしました。<br>ネットワーク環境の良い場所で再度お試しいただくと、最新バージョンを確認できます。</p>',
+                footerHtml: '<button id="okBtn" class="welcome-modal-close-btn">OK</button>',
+                onRender: (modal, closeFn) => {
+                    modal.querySelector('#okBtn').onclick = () => {
+                        closeFn();
+                        resolve();
+                    };
+                }
+            });
+        }
     });
 }
 
@@ -225,4 +311,19 @@ function displayAppVersionInfo() {
         "character-converter": characterConverterVersion
     };
     displayVersionInfo(versionInfo);
+}
+/**
+ * ローカルストレージと現在のアプリバージョンを比較し、更新された場合に通知を表示する
+ */
+function handleVersionNotification() {
+    const LOCAL_STORAGE_VERSION_KEY = 'nechronica-app-version';
+    const storedVersion = localStorage.getItem(LOCAL_STORAGE_VERSION_KEY);
+
+    if (storedVersion && storedVersion !== appVersion) {
+        // 保存されていたバージョンと現在のバージョンが異なる場合、更新通知を表示
+        ui.showToastNotification(`バージョン ${appVersion} に更新されました！`, 3000);
+    }
+
+    // 現在のバージョンをローカルストレージに保存する
+    localStorage.setItem(LOCAL_STORAGE_VERSION_KEY, appVersion);
 }

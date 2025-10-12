@@ -6,7 +6,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.14.82";
+export const version = "1.14.83";
 
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
@@ -915,41 +915,42 @@ export function showModal(options) {
 
     if (!modal || !modalTitle || !modalBody || !modalFooter || !closeBtn) return;
     
-    // --- 1. 初期化 ---
+    // ★★★ ここからが修正箇所です ★★★
+    // closableオプションのデフォルト値をtrueに設定
+    const isClosable = options.closable !== false;
+
+    // closableの状態に応じて「×」ボタンの表示を切り替える
+    closeBtn.style.display = isClosable ? 'block' : 'none';
+    
     modalTitle.textContent = options.title || '';
     modalBody.innerHTML = options.bodyHtml || '';
     modalFooter.innerHTML = options.footerHtml || '';
     modalFooter.style.display = options.footerHtml ? 'block' : 'none';
 
-    // bodyHtml の内容に応じて特別なクラスを付与する
-    modalBody.classList.remove('attack-confirm-body'); // 念のためリセット
+    modalBody.classList.remove('attack-confirm-body');
     if (options.bodyHtml && options.bodyHtml.includes('attack-confirm-summary')) {
         modalBody.classList.add('attack-confirm-body');
     }
 
-    // --- 2. メニュー項目を生成 (itemsオプションがある場合) ---
     if (options.items) {
         options.items.forEach(itemData => {
             const itemEl = document.createElement('div');
             if (itemData.isTitle) {
-                // (タイトル項目の処理は変更なし)
+                // (省略)
             } else {
                 itemEl.textContent = itemData.label;
                 itemEl.classList.add('maneuver-item');
-                
-                // itemDataに 'class' プロパティがあれば、それをクラスとして追加する
                 if (itemData.class) {
                     itemEl.classList.add(...itemData.class.split(' '));
                 }
-
                 if (itemData.isDisabled) {
                     itemEl.classList.add('is-masked');
                 }
                 itemEl.onclick = () => {
                     if (itemData.isDisabled) return;
-                    closeModal(); // 先にモーダルを閉じる
+                    closeModal();
                     if (itemData.onClick) {
-                        itemData.onClick(); // 渡された関数を実行
+                        itemData.onClick();
                     }
                 };
             }
@@ -957,19 +958,24 @@ export function showModal(options) {
         });
     }
 
-    // --- 3. 閉じるイベントを設定 ---
     const closeModal = () => modal.classList.remove('is-visible');
-    closeBtn.onclick = closeModal;
-    modal.onclick = (e) => {
-        if (e.target === modal) closeModal();
-    };
 
-    // --- 4. 描画後のコールバックを実行 (onRenderオプションがある場合) ---
+    // closableの状態に応じてイベントリスナーを設定
+    if (isClosable) {
+        closeBtn.onclick = closeModal;
+        modal.onclick = (e) => {
+            if (e.target === modal) closeModal();
+        };
+    } else {
+        closeBtn.onclick = null;
+        modal.onclick = null;
+    }
+    // ★★★ 修正はここまでです ★★★
+
     if (options.onRender) {
         options.onRender(modal, closeModal);
     }
 
-    // --- 5. モーダルを表示 ---
     modal.classList.add('is-visible');
 }
 
