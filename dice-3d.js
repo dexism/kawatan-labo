@@ -1,7 +1,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "2.1.8"; // パッチバージョンを更新
+export const version = "2.1.9"; // パッチバージョンを更新
 
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
@@ -11,13 +11,14 @@ import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 
 // ===== Settings =====
 const settings = {
-    gravity:           -1.00,   // 重力加速度 (m/s²) -9.82
+    gravity:            -1.00,   // 重力加速度 (m/s²) -9.82
     dice: {
-        radius:         0.01,   // ダイスの外接球半径 (m)
-        mass:           0.01,   // 質量 (kg)
-        angularDamping: 0.1,    // 回転の減衰 (0-1)
+        radius:          0.01,   // ダイスの外接球半径 (m)
+        collisionRadius: 0.017,  // ダイスの衝突距離 (m)
+        mass:            0.01,   // 質量 (kg)
+        angularDamping:  0.1,    // 回転の減衰 (0-1)
         initialPosition: { xPercent: 80, yPercent: 80 }, // 右下(%)
-        initialHeight:  0.05,    // 投擲する高さ (m)
+        initialHeight:   0.05,    // 投擲する高さ (m)
         throw: {
             speed:           { min: 0.3, max: 0.4 }, // 初速 [m/s]
             azimuth:         { min: 280, max: 350 }, // 水平方向 [deg]
@@ -27,7 +28,8 @@ const settings = {
     },
     physics: {
         frictionGround:    0.1, // 床の摩擦
-        frictionWall:      0.1, // 壁の摩擦
+        frictionWall:      0.0, // 壁の摩擦
+        restitutionDice:   0.8, // ダイスの反発係数
         restitutionGround: 0.5, // 床の反発係数
         restitutionWall:   0.9  // 壁の反発係数
     },
@@ -38,14 +40,23 @@ const settings = {
         scalePC_m_per_px:     0.0002  // ★ PC時のスケール (2cm / 100px)
     },
     tray: {
-        sizeRatio:     0.9,     // 画面サイズに対するトレイの比率
-        wallHeight:    0.5,     // 壁と天井の高さ（共通）
-        wallThickness: 0.1      // 壁の厚み
+        sizeRatio:      0.9,    // 画面サイズに対するトレイの比率
+        wallHeight:     0.5,    // 壁と天井の高さ（共通）
+        wallThickness:  0.1     // 壁の厚み
+    },
+    solver: {
+        iterations:    30,      // 反復回数：デフォルトは10。値を大きくすると精度が上がる
+        tolerance:      0.0     // 誤りしきい値：デフォルトは0.1。値を小さくすると精度が上がる
     },
     timeouts: {
         stopCheck:    100,      // 停止チェックの間隔 (ms)
-        forceResult: 3500,      // 強制終了までの時間 (ms)
-        hide:        2000       // 結果表示後に非表示になるまでの時間 (ms)
+        forceResult: 4000,      // 強制終了までの時間 (ms)
+        hide:        3000       // 結果表示後に非表示になるまでの時間 (ms)
+    },
+    manualStopDetection: {
+        velocityThreshold:        0.001, // この速度(m/s)未満を「静止」と見なす
+        angularVelocityThreshold: 0.01,   // この回転速度(rad/s)未満を「静止」と見なす
+        stopDuration:           300       // この時間(ms)以上「静止」が続いたら停止したと判断
     }
 };
 
@@ -105,7 +116,7 @@ export async function init(container) {
     scene = new THREE.Scene();
 
     // camera = new THREE.PerspectiveCamera(1, (width / height) || 1, 0.1, 10);
-    camera = new THREE.PerspectiveCamera(1, (width / height) || 1, 0.1, 10);
+    camera = new THREE.PerspectiveCamera(1, (width / height) || 1, 0.1, 1);
     camera.position.set(0, settings.camera.height, 0);
     camera.lookAt(0, 0, 0);
 
@@ -133,9 +144,9 @@ export async function init(container) {
     world.gravity.set(0, settings.gravity, 0);
 
     // GSソルバー(GSSolver)を使用し、計算の反復回数を増やす
-    world.solver.iterations = 30; // デフォルトは10。値を大きくすると精度が上がる。反復回数
-    world.solver.tolerance = 0.0; // デフォルトは0.1。値を小さくすると精度が上がる。誤りしきい値
-
+    world.solver.iterations = settings.solver.iterations;
+    world.solver.tolerance = settings.solver.tolerance;
+    
     diceMaterial = new CANNON.Material('dice');
     groundMaterial = new CANNON.Material('ground');
     wallMaterial = new CANNON.Material('wall'); // ★★★ 壁のマテリアルを追加 ★★★
@@ -146,16 +157,6 @@ export async function init(container) {
     world.addContactMaterial(new CANNON.ContactMaterial(diceMaterial, wallMaterial, {
         restitution: settings.physics.restitutionWall, friction: settings.physics.frictionWall
     }));
-    
-    // ▼▼▼ ここからが今回の修正箇所です ▼▼▼
-    // ★★★ ダイス同士の物理計算を無効化するため、以下の行をコメントアウトまたは削除 ★★★
-    /*
-    world.addContactMaterial(new CANNON.ContactMaterial(diceMaterial, diceMaterial, {
-        restitution: 0.5,
-        friction:    0.1
-    }));
-    */
-    // ▲▲▲ 修正はここまでです ▲▲▲
 
     // 物理床
     const groundBody = new CANNON.Body({ mass: 0, material: groundMaterial });
@@ -244,6 +245,8 @@ export function rollDice(rollConfig, callback) {
         die.inUse = true;
         die.model.visible = true;
         die.id = config.id;
+
+        die.stillTime = 0
         
         die.model.traverse((child) => {
             if (child.isMesh) {
@@ -369,7 +372,12 @@ function loadDiceModel() {
                     });
                     object.visible = false;
                     dicePool.push({ 
-                        model: object, body: body, inUse: false, color: null, id: null 
+                        model: object, 
+                        body: body, 
+                        inUse: false, 
+                        color: null, 
+                        id: null,
+                        stillTime: 0 
                     });
                     scene.add(object);
                     // world.addBody(body);
@@ -385,13 +393,36 @@ function loadDiceModel() {
 
 function checkIfStopped() {
     clearTimeout(stopCheckTimeout);
-    
-    const allDiceSleeping = activeDice.length > 0 && activeDice.every(die => die.body.sleepState === CANNON.Body.SLEEPING);
 
-    if (allDiceSleeping) {
+    let allDiceStopped = true;
+    const { velocityThreshold, angularVelocityThreshold, stopDuration } = settings.manualStopDetection;
+
+    activeDice.forEach(die => {
+        // 速度と角速度の大きさを取得
+        const velocityMagnitude = die.body.velocity.length();
+        const angularVelocityMagnitude = die.body.angularVelocity.length();
+
+        // 速度と角速度が両方とも閾値未満であるかチェック
+        if (velocityMagnitude < velocityThreshold && angularVelocityMagnitude < angularVelocityThreshold) {
+            // 静止していると見なし、静止時間を加算
+            die.stillTime += settings.timeouts.stopCheck;
+        } else {
+            // 動いていると見なし、静止時間をリセット
+            die.stillTime = 0;
+        }
+
+        // 1つでもダイスが指定時間以上静止していなければ、全体としては「停止していない」
+        if (die.stillTime < stopDuration) {
+            allDiceStopped = false;
+        }
+    });
+
+    if (allDiceStopped && activeDice.length > 0) {
+        // 全てのダイスが停止したと判断されたら、ロールを終了
         clearTimeout(forceResultTimeout);
         setTimeout(finishRoll, 200);
-    } else if (isRolling) { // isRolling中のみ次のチェックを予約
+    } else if (isRolling) {
+        // まだ動いているダイスがあれば、次のチェックを予約
         stopCheckTimeout = setTimeout(checkIfStopped, settings.timeouts.stopCheck);
     }
 }
@@ -553,10 +584,9 @@ function animate() {
     }
     lastTime = time;
 
-    // ▼▼▼ ここからが今回の修正箇所です ▼▼▼
     // --- 手動でのダイス同士の衝突判定と反発処理 ---
-    const collisionThreshold = settings.dice.radius * 2 * 0.85; // 直径の90%
-    const restitution = 0.8; // 反発係数
+    const collisionThreshold = settings.dice.collisionRadius; // ダイスの衝突距離
+    const restitution = settings.physics.restitutionDice; // ダイスの反発係数
 
     for (let i = 0; i < activeDice.length; i++) {
         for (let j = i + 1; j < activeDice.length; j++) {
@@ -609,8 +639,6 @@ function animate() {
             }
         }
     }
-    // ▲▲▲ 修正はここまでです ▲▲▲
-
 
     // アクティブなダイスすべてを更新
     activeDice.forEach(die => {

@@ -7,7 +7,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-const appVersion = "7.10.1300";
+const appVersion = "7.10.1303";
 
 // --- モジュールのインポート ---
 import * as data from './data-handler.js';
@@ -20,7 +20,8 @@ import {
     updateAllUI,
     checkBattleStartCondition, 
     displayVersionInfo, 
-    showModal 
+    showModal,
+    showToastNotification 
 } from './ui-manager.js';
 import { initialize as initializeSettings } from './settings-manager.js';
 import { initialize as initializeInteraction, setupAllEventListeners } from './interaction-manager.js';
@@ -226,7 +227,7 @@ function showRestoreModal() {
  * バージョンが古ければ自動でリロードする。
  * @returns {Promise<void>}
  */
-function checkAppVersion() {
+export async function checkAppVersion() {
     return new Promise(async (resolve) => {
         // オフラインの場合は従来通り通知して終了
         if (!navigator.onLine) {
@@ -247,7 +248,7 @@ function checkAppVersion() {
         try {
             // タイムアウト処理
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            const timeoutId = setTimeout(() => controller.abort(), 2000);
 
             // キャッシュを回避してバージョンファイルを取得
             const response = await fetch(`/version.json?t=${new Date().getTime()}`, { signal: controller.signal });
@@ -262,9 +263,26 @@ function checkAppVersion() {
 
             // ★★★ ここからが修正箇所です ★★★
             if (serverVersion && serverVersion !== appVersion) {
+                // バージョンが異なる場合
+                showModal({
+                    title: '新しいバージョンが利用可能です',
+                    bodyHtml: `
+                        <p>アプリケーションが更新されました。</p>
+                        <p>最新バージョン (v${serverVersion}) を読み込むために、ページをリロードしてください。</p>
+                    `,
+                    footerHtml: '<button id="reloadBtn" class="welcome-modal-close-btn">リロードして更新</button>',
+                    onRender: (modal, closeFn) => {
+                        modal.querySelector('#reloadBtn').onclick = () => {
+                            // trueを指定して、キャッシュを無視したハードリロードを行う
+                            location.reload(true);
+                        };
+                        // このモーダルはリロードするまで閉じさせないため、閉じるボタンの処理は設定しない
+                    }
+                });
+
                 // バージョンが異なる場合、即座にリロードを実行
-                console.log(`新しいバージョン (v${serverVersion}) を検出しました。自動的にリロードします。`);
-                location.reload(true); // trueを指定してハードリロード
+                // console.log(`新しいバージョン (v${serverVersion}) を検出しました。自動的にリロードします。`);
+                // location.reload(true); // trueを指定してハードリロード
                 // リロードが始まるため、このPromiseは解決されずに終了します。
             } else {
                 // バージョンが同じ場合は正常に解決
@@ -321,7 +339,7 @@ function handleVersionNotification() {
 
     if (storedVersion && storedVersion !== appVersion) {
         // 保存されていたバージョンと現在のバージョンが異なる場合、更新通知を表示
-        ui.showToastNotification(`バージョン ${appVersion} に更新されました！`, 3000);
+        showToastNotification(`バージョン ${appVersion} に更新されました！`, 3000);
     }
 
     // 現在のバージョンをローカルストレージに保存する

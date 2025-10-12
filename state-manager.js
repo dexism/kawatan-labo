@@ -2,13 +2,15 @@
  * @file state-manager.js
  * @description アプリケーションのセッション状態の保存と復元を担当するモジュール
  */
-export const version = "2.2.14"; // ロード処理の完全な修正版
+export const version = "2.2.15"; // ロード処理の完全な修正版
 
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
 import * as ui from './ui-manager.js';
 import { convertVampireBloodSheet } from './character-converter.js';
 import * as data from './data-handler.js';
+import { checkAppVersion } from './script.js';
+
 
 const STORAGE_KEY = 'nechronica-battle-session-v2';
 const AUTOSAVE_KEY = 'nechronica-autosave-enabled';
@@ -103,6 +105,8 @@ export function saveState(isManualSave = false) {
         } else if (isAutoSaveEnabled) {
             console.log("Session auto-saved.");
         }
+
+        checkAppVersion();
 
     } catch (error) {
         console.error("状態の保存に失敗しました:", error);
