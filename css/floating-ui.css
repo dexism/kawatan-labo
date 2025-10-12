@@ -184,28 +184,35 @@
     color: var(--color-c);
     /* filter: grayscale(80%);*/
 }
-.simple-menu-modal-body .maneuver-item.area-color-naraku {   background-color: var(--color-naraku); }
-.simple-menu-modal-body .maneuver-item.area-color-jigoku {   background-color: var(--color-jigoku); }
-.simple-menu-modal-body .maneuver-item.area-color-rengoku {  background-color: var(--color-rengoku); }
-.simple-menu-modal-body .maneuver-item.area-color-hanazono { background-color: var(--color-hanazono); }
-.simple-menu-modal-body .maneuver-item.area-color-rakuen {   background-color: var(--color-rakuen); }
+.simple-menu-modal-body 
+.maneuver-item.area-color-naraku {   background-color: var(--color-naraku); }
+.simple-menu-modal-body 
+.maneuver-item.area-color-jigoku {   background-color: var(--color-jigoku); }
+.simple-menu-modal-body 
+.maneuver-item.area-color-rengoku {  background-color: var(--color-rengoku); }
+.simple-menu-modal-body 
+.maneuver-item.area-color-hanazono { background-color: var(--color-hanazono); }
+.simple-menu-modal-body 
+.maneuver-item.area-color-rakuen {   background-color: var(--color-rakuen); }
 
 /* --- カテゴリ色分け --- */
-.category-color-move {         background-color: var(--color-move); }
-.category-color-staffing {     background-color: var(--color-staffing); }
-.category-color-attack {       background-color: var(--color-attack); }
-.category-color-defense {      background-color: var(--color-defense); }
-.category-color-support {      background-color: var(--color-support); }
-.category-color-debuff {       background-color: var(--color-debuff); }
-.category-color-action-boost { background-color: var(--color-action-boost); }
-.category-color-heal {         background-color: var(--color-heal); }
-.category-color-utility {      background-color: var(--color-utility); }
-.category-color-sacrifice {    background-color: var(--color-sacrifice); }
-.category-color-enhancement {  background-color: var(--color-enhancement); }  /* ★追加 */
-.category-color-dialogue {     background-color: var(--color-dialogue); }      /* ★追加 */
-.category-color-reinforcement {background-color: var(--color-reinforcement);} /* ★追加 */
-.category-color-madness {      background-color: var(--color-madness); }       /* ★追加 */
-.category-color-other {        background-color: var(--color-other); }
+.category-color-move {          background-color: var(--color-move); }
+.category-color-staffing {      background-color: var(--color-staffing); }
+.category-color-attack {        background-color: var(--color-attack); }
+.category-color-defense {       background-color: var(--color-defense); }
+.category-color-support {       background-color: var(--color-support); }
+.category-color-debuff {        background-color: var(--color-debuff); }
+.category-color-action-boost {  background-color: var(--color-action-boost); }
+.category-color-heal {          background-color: var(--color-heal); }
+.category-color-utility {       background-color: var(--color-utility); }
+.category-color-sacrifice {     background-color: var(--color-sacrifice); }
+.category-color-enhancement {   background-color: var(--color-enhancement); } 
+.category-color-vulnerability { background-color: var(--color-vulnerability); }
+.category-color-dialogue {      background-color: var(--color-dialogue); } 
+.category-color-reinforcement { background-color: var(--color-reinforcement);}
+.category-color-madness {       background-color: var(--color-madness); } 
+.category-color-cost {          background-color: var(--color-cost); }
+.category-color-other {         background-color: var(--color-other); }
 
 /* マニューバ項目のフレックスボックス設定 */
 .maneuver-item {

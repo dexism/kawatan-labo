@@ -152,11 +152,11 @@
     "effects": [{ "ref": "ATTACK_ON_MOVE", "params": { "attack_type": "肉弾", "damage": 3 } }]
   },
   "P3-05": {
-    "name": "楽園の蹂躙", "category": "補助", 
+    "name": "楽園の蹂躙", "category": "コスト", 
     "tags": ["コスト補正", "オート", "移動"], "maliceLevel": 1.5,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "「楽園」方向への自身の移動マニューバのコストを-1。", 
-    "description_raw": "バトルパートにおいて、現在位置から「楽園」方向への移動マニューバを自身を対象として宣言する際、そのマニューバのコストが－１（最低０）される。",
+    "description_raw": "バトルパートにおいて、現在位置から「楽園」方向への移動マニューバを自身を対象として宣言する際、そのマニューバのコストが-1(最低0)される。",
     "flavor_text": "ネクロマンサーの手に囚われた連中は、ドールたちの自由と笑顔を心底憎んでいるに違いない。",
     "source": { "book": "基本ルールブック", "page": 142, "errata": "1.6.1" }, 
     "effects": [{ "ref": "REDUCE_MOVE_COST", "params": { "direction": "楽園", "value": 1 } }]
@@ -321,8 +321,8 @@
     "effects": [{ "ref": "RANDOM_TELEPORT", "params": { "limit_per_count": 1 } }]
   },
   "P3-21": {
-    "name": "亡者の狂乱", "category": "補助",
-    "tags": ["オート", "行動値", "攻撃判定"], "maliceLevel": 1.5,
+    "name": "亡者の狂乱", "category": "支援",
+    "tags": ["オート", "行動値", "支援"], "maliceLevel": 1.5,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "サヴァントのみ所有可。あらゆ部位の全パーツが損傷した箇所1つにつき、最大行動値+1、攻撃判定+1。",
     "description_raw": "サヴァントのみ所有可。あなたはあらゆる判定において、パーツが全て損傷した箇所1つにつき修正+1を得る（元からパーツのない箇所は含まない）。",

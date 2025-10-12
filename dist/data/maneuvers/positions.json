@@ -35,7 +35,7 @@
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "dialogueCheckBonus", "value": 1, "duration": "permanent" } }]
   },
   "AL-04": {
-    "name": "お姫様", "category": "補助", 
+    "name": "お姫様", "category": "コスト", 
     "tags": ["コスト補正", "ダメージ"],
     "timing": "ダメージ", "cost": 0, "range": "0～1",
     "description": "自身がダメージを受けた際、姉妹1人の次アクションコストを-1。", 
@@ -87,11 +87,11 @@
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "attackCheckBonus", "value": 1, "duration": "while_madness_active" } }]
   },
   "HL-02": {
-    "name": "衝動", "category": "補助", 
+    "name": "衝動", "category": "コスト", 
     "tags": ["コスト補正", "狂気点操作", "オート"],
     "timing": "オート", "cost": "効果参照", "range": "自身",
     "description": "1ターンに1回、マニューバのコストを行動値の代わりに狂気点1で支払う。", 
-    "description_raw": "１ターンに１回、自身が使用するマニューバの宣言時、通常のコストを支払う代わりに、任意の未練に狂気点１点を加えることでコストとしてもよい。",
+    "description_raw": "1ターンに1回、自身が使用するマニューバの宣言時、通常のコストを支払う代わりに、任意の未練に狂気点1点を加えることでコストとしてもよい。",
     "flavor_text": "まだだ。まだ動ける。まだ終わらない。もう一撃、もう一歩。自ら体を壊しながらでも動いて見せる。",
     "source": { "book": "基本ルールブック", "page": 67, "errata": "1.6.1" }, 
     "effects": [{ "ref": "PAY_COST_WITH_MADNESS", "params": { "limit_per_turn": 1 } }]
@@ -122,11 +122,11 @@
     }]
   },
   "HL-05": {
-    "name": "奈落の引力", "category": "補助", 
+    "name": "奈落の引力", "category": "コスト", 
     "tags": ["コスト補正", "オート", "移動"],
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "「奈落」方向への自身の移動マニューバのコストを-1。", 
-    "description_raw": "バトルパートにおいて、現在位置から「奈落」方向への移動マニューバを自身を対象として宣言する際、そのマニューバのコストが－１（最低０）される。",
+    "description_raw": "バトルパートにおいて、現在位置から「奈落」方向への移動マニューバを自身を対象として宣言する際、そのマニューバのコストが-1(最低0)される。",
     "flavor_text": "暗い闇へと引き寄せられる。あなたの魂は闇を求めている。そこが、あなたの本来の居場所なのだ。",
     "source": { "book": "基本ルールブック", "page": 67, "errata": "1.6.1" }, 
     "effects": [{ "ref": "REDUCE_MOVE_COST", "params": { "direction": "奈落", "value": 1 } }]
@@ -164,7 +164,7 @@
     "effects": [{ "ref": "PAY_COST_FOR_ALLY", "params": { "cost_to_performer": 1, "target_maneuver_timing": "アクション", "limit_per_turn": 1 } }]
   },
   "AM-02": {
-    "name": "無茶", "category": "補助", 
+    "name": "無茶", "category": "コスト", 
     "tags": ["振り直し", "損傷", "オート"],
     "timing": "オート", "cost": "損傷1", "range": "自身",
     "description": "任意の基本パーツ1つを損傷することで、判定を振りなおす。", 
@@ -236,7 +236,7 @@
     "effects": [{ "ref": "MOVE_ON_ALLY_MOVE", "params": { "distance": 1 } }]
   },
   "JK-02": {
-    "name": "半壊", "category": "補助", 
+    "name": "半壊", "category": "狂気点", 
     "tags": ["狂気点操作", "オート"],
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "ターン終了時と「たからもの」破損時の狂気点増加を受けない。", 
@@ -269,7 +269,7 @@
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "rerollBonus_by_madness", "value": 1, "duration": "permanent" } }]
   },
   "JK-05": {
-    "name": "奈落への抗い", "category": "補助", 
+    "name": "奈落への抗い", "category": "コスト", 
     "tags": ["コスト補正", "オート"],
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "「奈落」にいる際、アクションマニューバのコストが-1(最低1)。", 
@@ -279,7 +279,7 @@
     "effects": [{ "ref": "REDUCE_ACTION_COST", "params": { "value": 1, "minimum": 1, "condition": "while_in_area", "area": "奈落" } }]
   },
   "JK-06": {
-    "name": "楽園の守護者", "category": "補助",
+    "name": "楽園の守護者", "category": "コスト",
     "tags": ["オート", "コスト補正", "発狂無視"],
     "timing": "オート", "cost": "なし", "range": "効果参照",
     "description": "自身が「楽園」か「花園」にいる場合、「楽園」にいる手駒が使うマニューバのコストが+1される。自身が「完全解体」でも有効。",
@@ -301,12 +301,12 @@
 
   "//": "---------- コート (CT) ----------",
   "CT-01": {
-    "name": "助言", "category": "補助",
-    "tags": ["効果無効", "ジャッジ"],
+    "name": "助言", "category": "支援",
+    "tags": ["ジャッジ", "支援" ,"妨害"],
     "timing": "ジャッジ", "cost": 0, "range": "0～2",
     "description": "射程内の判定に対し、+1の支援か-1の妨害を行う。", 
-    "flavor_text": "わずかな言葉や合図が、大きなダメージを打ち消すことはままある。それは小さくとも大きな助けとなるだろう。",
     "description_raw": "支援1か妨害1。",
+    "flavor_text": "わずかな言葉や合図が、大きなダメージを打ち消すことはままある。それは小さくとも大きな助けとなるだろう。",
     "source": { "book": "基本ルールブック", "page": 70 }, 
     "effects": [{ "ref": "CHOICE_JUDGE_MOD", "params": { "options": [{ "type": "支援", "value": 1 }, { "type": "妨害", "value": -1 }] } }]
   },
@@ -331,7 +331,7 @@
     "effects": [{ "ref": "CANCEL_MANEUVER", "params": { "target_timing": ["ラピッド", "ダメージ", "ジャッジ"] } }]
   },
   "CT-04": {
-    "name": "作戦", "category": "補助", 
+    "name": "作戦", "category": "配置", 
     "tags": ["配置変更", "オート"],
     "timing": "オート", "cost": "なし", "range": "効果参照",
     "description": "バトルパート開始時、敵配置を見てから味方ドール1体の配置を変更できる。", 
@@ -341,7 +341,7 @@
     "effects": [{ "ref": "CHANGE_ALLY_PLACEMENT", "params": { "trigger": "battle_start", "exclude_area": ["奈落"] } }]
   },
   "CT-05": {
-    "name": "先読み", "category": "補助", 
+    "name": "先読み", "category": "コスト", 
     "tags": ["コスト補正", "アクション"],
     "timing": "アクション", "cost": 1, "range": "0～1",
     "description": "対象が次に使うアクションのコストを-1(最低0)。重複可。", 

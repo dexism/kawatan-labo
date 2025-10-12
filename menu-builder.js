@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.16.69"; // バージョンを更新
+export const version = "1.16.70"; // バージョンを更新
 
 import * as data from './data-handler.js';
 import * as charManager from './character-manager.js';
@@ -2214,11 +2214,9 @@ export function buildReferenceMenu() {
     menu.classList.add('is-reference-mode');
 
     const filterGroups = {
-        'カテゴリ': ['移動', "配置", '攻撃', '防御', '支援', '妨害', '強化', '修復', '補助', '行動値', '生贄', '対話', '狂気点'],
-        '区分': ['ポジション', 'クラススキル', '特化スキル', '基本パーツ', '強化パーツ', '手駒専用'],
-        'ポジションスキル': ['アリス', 'ホリック', 'オートマトン', 'ジャンク', 'コート', 'ソロリティ'],
-        'クラススキル': ['ステーシー', 'タナトス', 'ゴシック', 'レクイエム', 'バロック', 'ロマネスク', 'サイケデリック'],
-        '強化パーツ': ['武装', '変異', '改造'],
+        'カテゴリ': ['移動', "配置", '攻撃', '防御', '支援', '妨害', '強化', '修復', '補助', 'コスト', '行動値', '生贄', '対話', '狂気点', '脆弱'],
+        '区分1': ['ポジション', 'クラススキル', '特化スキル', '基本パーツ', '強化パーツ', '手駒専用'],
+        '区分2': ['アリス', 'ホリック', 'オートマトン', 'ジャンク', 'コート', 'ソロリティ', 'ステーシー', 'タナトス', 'ゴシック', 'レクイエム', 'バロック', 'ロマネスク', 'サイケデリック', '武装', '変異', '改造'],
         '攻撃': ['肉弾攻撃', '白兵攻撃', '射撃攻撃', '砲撃攻撃', '精神攻撃'],
         '効果': ['移動', '支援', '妨害', '防御', '移動妨害', '転倒', '切断', '爆発', '全体攻撃', '連撃'],
         '悪意': ['0.5', '1', '1.5', '2', '3', '4', 'その他'],
@@ -2397,7 +2395,7 @@ function checkManeuverMatch(maneuver, groupName, filterName, masterData) {
         case 'カテゴリ':
             return maneuver.category === filterName || (maneuver.tags && maneuver.tags.includes(filterName));
 
-        case '区分':
+        case '区分1':
             switch (filterName) {
                 case 'ポジション': return !!masterData.positions[prefix];
                 case 'クラススキル': return !!masterData.classes[prefix] && !id.endsWith('-SP');
@@ -2408,17 +2406,24 @@ function checkManeuverMatch(maneuver, groupName, filterName, masterData) {
                 default: return false;
             }
 
-        case 'ポジションスキル': {
+        case '区分2': {
+            // 1. ポジションスキルのチェック
             const posKey = Object.keys(masterData.positions).find(k => masterData.positions[k].name === filterName);
-            return posKey ? prefix === posKey : false;
-        }
-        case 'クラススキル': {
+            if (posKey && prefix === posKey) {
+                return true;
+            }
+            // 2. クラススキルのチェック
             const classKey = Object.keys(masterData.classes).find(k => masterData.classes[k].name === filterName);
-            return classKey ? prefix === classKey : false;
-        }
-        case '強化パーツ': {
+            if (classKey && prefix === classKey) {
+                return true;
+            }
+            // 3. 強化パーツのチェック
             const typeMap = { '武装': 'A', '変異': 'M', '改造': 'R' };
-            return typePrefix === typeMap[filterName];
+            if (typePrefix === typeMap[filterName]) {
+                return true;
+            }
+            // どれにも当てはまらない場合は false
+            return false;
         }
         case '攻撃':
             return maneuver.category === filterName || (maneuver.tags && maneuver.tags.includes(filterName));

@@ -634,11 +634,21 @@ body.is-dragging .char.hover-highlight {
 }
 /* --- グリッドセルのエリアカラー --- */
 /* 透明度を加えて、ヘッダーより少し薄い色にする */
-.cell.cell-area-naraku { background-color: color-mix(in srgb, var(--color-naraku) 50%, transparent); }
-.cell.cell-area-jigoku { background-color: color-mix(in srgb, var(--color-jigoku) 50%, transparent); }
-.cell.cell-area-rengoku { background-color: color-mix(in srgb, var(--color-rengoku) 50%, transparent); }
-.cell.cell-area-hanazono { background-color: color-mix(in srgb, var(--color-hanazono) 50%, transparent); }
-.cell.cell-area-rakuen { background-color: color-mix(in srgb, var(--color-rakuen) 50%, transparent); }
+.cell.cell-area-naraku { 
+    background-color: color-mix(in srgb, var(--color-naraku) 50%, transparent); 
+}
+.cell.cell-area-jigoku { 
+    background-color: color-mix(in srgb, var(--color-jigoku) 50%, transparent); 
+}
+.cell.cell-area-rengoku { 
+    background-color: color-mix(in srgb, var(--color-rengoku) 50%, transparent); 
+}
+.cell.cell-area-hanazono { 
+    background-color: color-mix(in srgb, var(--color-hanazono) 50%, transparent); 
+}
+.cell.cell-area-rakuen { 
+    background-color: color-mix(in srgb, var(--color-rakuen) 50%, transparent); 
+}
 /* カウントゼロ */
 .cell.col-zero {
     background-color: #522;

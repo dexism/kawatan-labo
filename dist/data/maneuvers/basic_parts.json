@@ -85,8 +85,8 @@
     "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": 1, "direction": "performer_choice" } }]
   },
   "BP-07": {
-    "name": "せぼね", "category": "補助", "allowedLocations": "胴",
-    "tags": ["補助", "アクション", "コスト補正"], "maliceLevel": 1,
+    "name": "せぼね", "category": "コスト", "allowedLocations": "胴",
+    "tags": ["アクション", "コスト補正"], "maliceLevel": 1,
     "timing": "アクション", "cost": 1, "range": "自身",
     "description": "同ターン内の次のカウントで使うマニューバ1つのコスト-1(最低0)", 
     "description_raw": "同ターン内の次のカウントで使うマニューバ1つのコスト-1(最低0)する。",

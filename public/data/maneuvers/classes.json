@@ -305,7 +305,7 @@
     "effects": [{ "ref": "ALLOW_MANEUVER_AS_TIMING", "params": { "target": "self", "maneuver_category": "攻撃", "as_timing": "ラピッド" } }]
   },
   "RQ-03": {
-    "name": "子守唄", "category": "補助", 
+    "name": "子守唄", "category": "コスト", 
     "tags": ["妨害", "コスト補正", "オート"], "maliceLevel": 1.5,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "射撃攻撃の攻撃判定-1、コスト-1(最低1)。", 
@@ -505,7 +505,7 @@
     "effects": [{ "ref": "GAIN_EXTRA_PART", "params": { "type": "改造", "level": 3 } }]
   },
   "RM-06": {
-    "name": "数多の手管", "category": "補助",
+    "name": "数多の手管", "category": "コスト",
     "tags": ["コスト補正", "オート"], "maliceLevel": 1.5,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "コスト-1（最低0）。【うで】【あし】使用時。", 
