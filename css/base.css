@@ -149,6 +149,7 @@ h2 {
   --color-level-f:      rgba(255, 255, 255, 0.5); 
   /* カテゴリ色分け */
   --color-move:         #aed6f1;
+  --color-staffing:     #85C1E9;
   --color-attack:       #f5b7b1;
   --color-defense:      #a3e4d7;
   --color-support:      #d7bde2;
@@ -213,6 +214,7 @@ html[data-theme="dark"] {
 
     /* カテゴリ色分け */
     --color-move:         #3a6b8c;
+    --color-staffing:     #2E86C1;
     --color-attack:       #a65c58;
     --color-defense:      #3d7f73;
     --color-support:      #7a5b86;
@@ -278,6 +280,7 @@ html[data-theme="dark"] {
 
     /* カテゴリ色分け */
     --color-move:         #3a6b8c;
+    --color-staffing:     #2E86C1;
     --color-attack:       #a65c58;
     --color-defense:      #3d7f73;
     --color-support:      #7a5b86;

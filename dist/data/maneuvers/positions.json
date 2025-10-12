@@ -45,8 +45,8 @@
     "effects": [{ "ref": "REDUCE_NEXT_ACTION_COST", "params": { "target": "sister", "value": 1 } }]
   },
   "AL-05": {
-    "name": "楽園の天使", "category": "移動", 
-    "tags": ["配置変更", "ラピッド"],
+    "name": "楽園の天使", "category": "配置", 
+    "tags": ["配置変更", "ラピッド", "移動"],
     "timing": "ラピッド", "cost": 2, "range": "自身",
     "description": "自身の配置を「楽園」に変更する（「移動」ではない）。", 
     "description_raw": "現在の位置に関係なく「楽園」に配置を変更する。この効果は「移動」ではない。",
@@ -122,7 +122,7 @@
     }]
   },
   "HL-05": {
-    "name": "奈落の引力", "category": "移動", 
+    "name": "奈落の引力", "category": "補助", 
     "tags": ["コスト補正", "オート", "移動"],
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "「奈落」方向への自身の移動マニューバのコストを-1。", 
@@ -132,8 +132,8 @@
     "effects": [{ "ref": "REDUCE_MOVE_COST", "params": { "direction": "奈落", "value": 1 } }]
   },
   "HL-06": {
-    "name": "堕地獄", "category": "移動",
-    "tags": ["アクション", "狂気点操作", "配置変更"],
+    "name": "堕地獄", "category": "配置",
+    "tags": ["アクション", "狂気点操作", "移動", "配置変更"],
     "timing": "アクション", "cost": "効果参照", "range": "自身",
     "description": "コストの代わりに狂気点1点を加え、自身の配置を「地獄」に変更する。",
     "description_raw": "あなたはコストの代わりに、任意の未練へ狂気点1点を加える。あなたの配置エリアが、地獄に変更される。",
@@ -301,8 +301,8 @@
 
   "//": "---------- コート (CT) ----------",
   "CT-01": {
-    "name": "助言", "category": "補助", 
-    "tags": ["支援", "妨害", "ジャッジ"],
+    "name": "助言", "category": "補助",
+    "tags": ["効果無効", "ジャッジ"],
     "timing": "ジャッジ", "cost": 0, "range": "0～2",
     "description": "射程内の判定に対し、+1の支援か-1の妨害を行う。", 
     "flavor_text": "わずかな言葉や合図が、大きなダメージを打ち消すことはままある。それは小さくとも大きな助けとなるだろう。",
@@ -396,8 +396,8 @@
     ]
   },
   "SR-03": {
-    "name": "花園の集い", "category": "移動", 
-    "tags": ["配置変更", "ラピッド"],
+    "name": "花園の集い", "category": "配置", 
+    "tags": ["配置変更", "ラピッド", "移動"],
     "timing": "ラピッド", "cost": 2, "range": "姉妹",
     "description": "姉妹全員の配置を「花園」に変更する（「移動」ではない）。", 
     "description_raw": "あなたを含む舞台上にいる姉妹は全員、現在位置に関係なく「花園」に配置を変更する。この効果は「移動」ではない。",
@@ -426,7 +426,7 @@
     "effects": [{ "ref": "TRIGGER_ALLY_DIALOGUE_CHECK", "params": { "trigger": "reroll_by_madness" } }]
   },
   "SR-06": {
-    "name": "姉妹のくちづけ", "category": "妨害",
+    "name": "姉妹のくちづけ", "category": "補助",
     "tags": ["ラピッド", "行動値"],
     "timing": "ラピッド", "cost": 1, "range": "0",
     "description": "サヴァント専用。対象サヴァントの現在行動値を4減少させる。",

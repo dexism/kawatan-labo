@@ -2,7 +2,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.1.4";
+export const version = "1.1.5";
 
 import * as data from './data-handler.js';
 
@@ -58,6 +58,10 @@ export function getManeuverSourceText(maneuver) {
     if (coreData.enhancementTypes[enhType] && ['1', '2', '3'].includes(enhLevel)) {
         return `強化パーツ：${enhLevel}レベル${coreData.enhancementTypes[enhType].name}${getMaliceText(maneuver)}`;
     }
+    // --- 手駒専用スキルの判定 ---
+    if (coreData.pawnSkills[prefix]) {
+        return coreData.pawnSkills[prefix].name;
+    }
     // --- 手駒専用パーツの判定 ---
     if (id.startsWith('P')) {
         // P0パーツとそれ以外で表示を分ける
@@ -66,14 +70,10 @@ export function getManeuverSourceText(maneuver) {
             : '';
         return `手駒専用パーツ${maliceText}`;
     }
-    // --- 手駒専用スキルの判定 ---
-    if (coreData.pawnSkills[prefix]) {
-        return coreData.pawnSkills[prefix].name;
-    }
     // --- 一般動作の判定 ---
     if (coreData.commonAction && coreData.commonAction[prefix]) {
         return coreData.commonAction[prefix].name;
     }
     
-    return 'スキル'; // どれにも当てはまらない場合のデフォルト
+    return 'その他'; // どれにも当てはまらない場合のデフォルト
 }

@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.16.67"; // バージョンを更新
+export const version = "1.16.68"; // バージョンを更新
 
 import * as data from './data-handler.js';
 import * as charManager from './character-manager.js';
@@ -385,10 +385,17 @@ function createManeuverItem(maneuverObj, char) {
         }
         
         let maneuverNameHtml = `【${maneuver.name}】`;
-        if (sourceHeaderText.includes('パーツ') && maneuver.allowedLocations) {
+
+        let locationPrefix = '';
+        if (maneuver.allowedLocations) {
+            // allowedLocationsキーが存在すれば、その内容を表示
             const locationMap = { '頭': '頭', '腕': '腕', '胴': '胴', '脚': '脚', '任意': '任意' };
-            const locationPrefix = locationMap[maneuver.allowedLocations] || '他';
+            locationPrefix = locationMap[maneuver.allowedLocations] || '他';
+
             maneuverNameHtml = `<span class="item-location-prefix">${locationPrefix}</span>` + maneuverNameHtml;
+        // } else {
+            // allowedLocationsキーがなければ「ｽｷﾙ」を表示
+        //     locationPrefix = 'ｽｷﾙ';
         }
 
         // 4つの要素を一つのコンテナにまとめる
@@ -2180,14 +2187,16 @@ export function buildReferenceMenu() {
     menu.classList.add('is-reference-mode');
 
     const filterGroups = {
-        'カテゴリ': ['移動', '攻撃', '防御', '支援', '妨害', '強化', '修復', '補助', '行動値', '生贄', '対話', '狂気点'],
+        'カテゴリ': ['移動', "配置", '攻撃', '防御', '支援', '妨害', '強化', '修復', '補助', '行動値', '生贄', '対話', '狂気点'],
         '区分': ['ポジション', 'クラススキル', '特化スキル', '基本パーツ', '強化パーツ', '手駒専用'],
         'ポジションスキル': ['アリス', 'ホリック', 'オートマトン', 'ジャンク', 'コート', 'ソロリティ'],
         'クラススキル': ['ステーシー', 'タナトス', 'ゴシック', 'レクイエム', 'バロック', 'ロマネスク', 'サイケデリック'],
         '強化パーツ': ['武装', '変異', '改造'],
+        '攻撃': ['肉弾攻撃', '白兵攻撃', '射撃攻撃', '砲撃攻撃', '精神攻撃'],
+        '効果': ['移動', '支援', '妨害', '防御', '移動妨害', '転倒', '切断', '爆発', '全体攻撃', '連撃'],
         '悪意': ['0.5', '1', '1.5', '2', '3', '4', 'その他'],
         '箇所': ['頭', '腕', '胴', '脚', '任意'],
-        'タイミング': ['オート', 'アクション', 'ラピッド', 'ジャッジ', 'ダメージ'],
+        'タイミング': ['オート', 'アクション', 'ジャッジ', 'ダメージ', 'ラピッド'],
         'コスト': ['なし', '0', '1', '2', '3', '4', 'その他'],
         '最大射程': ['なし', '自身', '0', '1', '2', '3', 'その他']
     };
@@ -2384,6 +2393,12 @@ function checkManeuverMatch(maneuver, groupName, filterName, masterData) {
             const typeMap = { '武装': 'A', '変異': 'M', '改造': 'R' };
             return typePrefix === typeMap[filterName];
         }
+        case '攻撃':
+            return maneuver.category === filterName || (maneuver.tags && maneuver.tags.includes(filterName));
+
+        case '効果':
+            return maneuver.category === filterName || (maneuver.tags && maneuver.tags.includes(filterName));
+
         case '箇所':
             return maneuver.allowedLocations === filterName;
 

@@ -50,7 +50,7 @@
   "M1-05": {
     "name": "はりつき", "category": "移動", "allowedLocations": "脚",
     "timing": "アクション", "cost": 3, "range": "自身",
-    "tags": ["移動", "アクション", "移動妨害"], "maliceLevel": 1,
+    "tags": ["移動", "アクション", "移動妨害無効"], "maliceLevel": 1,
     "description": "移動1。「移動妨害」無効", 
     "description_raw": "移動1、この移動に対して「移動妨害」は全て無効。",
     "flavor_text": "あなたの足には鉤爪や吸盤があり、壁や天井を駆けることでトリッキーな移動が可能となる。",
@@ -206,7 +206,7 @@
     "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "target": "any_roll", "value": 2 } }]
   },
   "M2-08": {
-    "name": "しょくしゅ", "category": "妨害", "allowedLocations": "任意",
+    "name": "しょくしゅ", "category": "補助", "allowedLocations": "任意",
     "timing": "ラピッド", "cost": 1, "range": "0～1",
     "tags": ["移動妨害", "ラピッド"], "maliceLevel": 1,
     "description": "移動妨害1", 
@@ -216,7 +216,7 @@
     "effects": [{ "ref": "GENERIC_MOVE_DEBUFF", "params": { "value": -1 } }]
   },
   "M2-09": {
-    "name": "ほとけかずら", "category": "補助", "allowedLocations": "任意",
+    "name": "ほとけかずら", "category": "支援", "allowedLocations": "任意",
     "timing": "ジャッジ", "cost": 0, "range": "0",
     "tags": ["支援", "妨害", "ジャッジ"], "maliceLevel": 1,
     "description": "支援1か妨害1", 
@@ -279,7 +279,7 @@
   },
   "M3-03": {
     "name": "やせぎす", "category": "防御", "allowedLocations": "胴",
-    "tags": ["防御", "オート", "妨害"], "maliceLevel": 1.5,
+    "tags": ["防御", "オート", "妨害無効"], "maliceLevel": 1.5,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "1つの判定につき1回、「妨害」を無効化", 
     "description_raw": "バトルパートで1つの判定につき1回、「妨害」を無効化してよい。",
@@ -289,7 +289,7 @@
   },
   "M3-04": {
     "name": "くされじる", "category": "攻撃", "allowedLocations": "任意",
-    "tags": ["攻撃", "アクション", "肉弾攻撃", "爆発", "転倒"], "maliceLevel": 1.5,
+    "tags": ["攻撃", "アクション", "肉弾攻撃", "爆発", "転倒"],
     "timing": "アクション", "cost": 3, "range": "0～1",
     "description": "肉弾攻撃1+爆発+転倒", 
     "description_raw": "肉弾攻撃1+爆発+転倒。",

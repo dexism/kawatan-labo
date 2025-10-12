@@ -192,6 +192,7 @@
 
 /* --- カテゴリ色分け --- */
 .category-color-move {         background-color: var(--color-move); }
+.category-color-staffing {     background-color: var(--color-staffing); }
 .category-color-attack {       background-color: var(--color-attack); }
 .category-color-defense {      background-color: var(--color-defense); }
 .category-color-support {      background-color: var(--color-support); }

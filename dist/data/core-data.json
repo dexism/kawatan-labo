@@ -43,6 +43,7 @@
   "maneuverCategories": [
     { "name": "一般",   "slug": "utility" },
     { "name": "移動",   "slug": "move" },
+    { "name": "配置",   "slug": "staffing" },
     { "name": "攻撃",   "slug": "attack" },
     { "name": "防御",   "slug": "defense" },
     { "name": "支援",   "slug": "support" },

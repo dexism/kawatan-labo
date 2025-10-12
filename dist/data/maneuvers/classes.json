@@ -79,7 +79,7 @@
     "effects": [{ "ref": "REPAIR_ALLY_PART", "params": { "trigger": "battle_end", "part_name": "はらわた" } }]
   },
   "ST-07": {
-    "name": "死人の流儀", "category": "補助",
+    "name": "死人の流儀", "category": "支援",
     "tags": ["支援", "妨害", "ジャッジ", "損傷"], "maliceLevel": 1.5,
     "timing": "ジャッジ", "cost": "基本パーツ1", "range": "0～1",
     "description": "支援2か妨害2", 
@@ -178,8 +178,8 @@
     "effects": [{ "ref": "SET_DICE_ROLL", "params": { "target_roll": "self_melee_attack", "value": 6, "prevent_reroll": true } }]
   },
   "TN-07": {
-    "name": "冥王", "category": "妨害",
-    "tags": ["妨害", "オート", "移動妨害"], "maliceLevel": 1.5,
+    "name": "冥王", "category": "補助",
+    "tags": ["妨害", "オート", "移動妨害無効"], "maliceLevel": 1.5,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "レギオンの「移動妨害」無効化。レギオンからの攻撃は判定値7以上でなければダメージを受けない。", 
     "description_raw": "レギオンの「移動妨害」を常に無効化してよい。さらに、レギオンがあなたに対して行った攻撃判定は判定値7以上でなければダメージを与えない。",
@@ -213,8 +213,8 @@
     "effects": [{ "ref": "REPAIR_PART", "params": { "target": "self", "part_type": "基本", "count": 1 } }]
   },
   "GT-02": {
-    "name": "捕食者", "category": "妨害", 
-    "tags": ["妨害", "ダメージ", "転倒"],
+    "name": "捕食者", "category": "補助", 
+    "tags": ["ダメージ", "転倒"],
     "timing": "ダメージ", "cost": 2, "range": "0",
     "description": "自身のいるエリア内の敵全てに「転倒」を与える。", 
     "description_raw": "自身のいるエリア内の敵全てに「転倒」を与える。",
@@ -223,7 +223,7 @@
     "effects": [{ "ref": "DEAL_STATUS_EFFECT_TO_AREA", "params": { "effect": "転倒", "target_type": "enemy" } }]
   },
   "GT-03": {
-    "name": "舌なめずり", "category": "妨害", 
+    "name": "舌なめずり", "category": "補助", 
     "tags": ["移動妨害", "ラピッド"], "maliceLevel": 1.5,
     "timing": "ラピッド", "cost": 0, "range": "0～1",
     "description": "射程内の対象の移動距離を-1する。", 
@@ -254,7 +254,7 @@
   },
   "GT-06": {
     "name": "引き裂き", "category": "補助",
-    "tags": ["強化", "オート", "切断"], "maliceLevel": 1.5,
+    "tags": ["オート", "切断"], "maliceLevel": 1.5,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "肉弾攻撃1+切断。【あご】【こぶし】のみ。", 
     "description_raw": "あなたの【あご】【こぶし】の効果は「肉弾攻撃1+切断」となる。",
@@ -403,7 +403,7 @@
     "effects": [{ "ref": "GAIN_EXTRA_PART", "params": { "type": "変異", "level": 3 } }]
   },
   "BR-04": {
-    "name": "業", "category": "修復", 
+    "name": "業躯", "category": "修復", 
     "tags": ["修復", "オート"], "maliceLevel": 1.5,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "バトルパート終了時、望むパーツ2つを修復する。", 
@@ -433,8 +433,8 @@
     "effects": [{ "ref": "TRADE_DAMAGE_FOR_EFFECTS", "params": { "damage_bonus": 1, "removed_tags": ["切断", "爆発", "転倒", "全体攻撃"] } }]
   },
   "BR-07": {
-    "name": "結晶化", "category": "防御",
-    "tags": ["防御", "ダメージ", "切断", "爆発", "移動"], "maliceLevel": 1.5,
+    "name": "結晶化", "category": "補助",
+    "tags": ["防御", "ダメージ", "切断無効", "爆発無効", "移動無効"], "maliceLevel": 1.5,
     "timing": "ダメージ", "cost": 1, "range": "自身",
     "description": "「切断」「爆発」「移動」無効化。使用制限なし", 
     "description_raw": "受けたダメージに付属した「切断」「爆発」「移動」は全てを無効化される。このマニューバは1ターンに何度でも使用してよい。",
@@ -485,8 +485,8 @@
     "effects": [{ "ref": "ALLOW_DAMAGED_PART_USE", "params": { "target": "character", "count": 1, "duration": "end_of_turn" } }]
   },
   "RM-04": {
-    "name": "空蝉", "category": "妨害", 
-    "tags": ["妨害", "ラピッド", "転倒"],
+    "name": "空蝉", "category": "補助", 
+    "tags": ["ラピッド", "転倒"],
     "timing": "ラピッド", "cost": 1, "range": "0",
     "description": "射程内の対象に「転倒」を与える。", 
     "description_raw": "転倒。",

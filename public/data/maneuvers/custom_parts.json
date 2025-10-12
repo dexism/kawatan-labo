@@ -35,8 +35,8 @@
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 2 } }]
   },
   "R1-04": {
-    "name": "ジェットノズル", "category": "移動", "allowedLocations": "任意",
-    "tags": ["移動", "ダメージ", "損傷"], "maliceLevel": 1,
+    "name": "ジェットノズル", "category": "攻撃", "allowedLocations": "任意",
+    "tags": ["強化", "ダメージ", "損傷"], "maliceLevel": 1,
     "timing": "ダメージ", "cost": "基本パーツ1", "range": "自身",
     "description": "白兵・肉弾ダメージ+1(重複不可)。自身が与えたダメージのみ。任意の基本パーツ1つを損傷。使用制限なし。", 
     "description_raw": "自身がダメージを与えた際のみ使用可。コストとして、あなたは任意の基本パーツを1つ損傷する。白兵・肉弾ダメージ+1(重複不可)。1ターンに何度でも使用してよい。",
@@ -95,7 +95,7 @@
   },
   "R1-09": {
     "name": "リモートアタック", "category": "攻撃", "allowedLocations": "任意",
-    "tags": ["攻撃", "アクション", "肉弾攻撃", "転倒"], "maliceLevel": 1,
+    "tags": ["攻撃", "アクション", "肉弾攻撃", "転倒"],
     "timing": "アクション", "cost": 3, "range": "0～1",
     "description": "肉弾攻撃1+転倒", 
     "description_raw": "肉弾攻撃1+転倒。",
@@ -157,7 +157,7 @@
   },
   "R2-03": {
     "name": "エレクトリッガー", "category": "攻撃", "allowedLocations": "任意",
-    "tags": ["攻撃", "アクション", "肉弾攻撃", "転倒"], "maliceLevel": 1,
+    "tags": ["攻撃", "アクション", "肉弾攻撃", "転倒"],
     "timing": "アクション", "cost": 2, "range": "0",
     "description": "肉弾攻撃1+転倒", 
     "description_raw": "肉弾攻撃1+転倒。",
@@ -222,7 +222,7 @@
     }]
   },
   "R2-09": {
-    "name": "テンタクル", "category": "妨害", "allowedLocations": "任意",
+    "name": "テンタクル", "category": "補助", "allowedLocations": "任意",
     "tags": ["移動妨害", "ラピッド"], "maliceLevel": 1,
     "timing": "ラピッド", "cost": 1, "range": "0～1",
     "description": "移動妨害1", 
@@ -293,7 +293,7 @@
     ]
   },
   "R3-03": {
-    "name": "マニピュレーター", "category": "妨害", "allowedLocations": "任意",
+    "name": "マニピュレーター", "category": "補助", "allowedLocations": "任意",
     "tags": ["移動妨害", "転倒", "ラピッド"], "maliceLevel": 1.5,
     "timing": "ラピッド", "cost": 2, "range": "0～1",
     "description": "移動妨害1+転倒", 
@@ -316,7 +316,7 @@
     "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 2 } }]
   },
   "R3-05": {
-    "name": "アームバイス", "category": "補助", "allowedLocations": "腕",
+    "name": "アームバイス", "category": "支援", "allowedLocations": "腕",
     "tags": ["支援", "妨害", "ジャッジ"], "maliceLevel": 1.5,
     "timing": "ジャッジ", "cost": 1, "range": "0",
     "description": "支援2か妨害2", 

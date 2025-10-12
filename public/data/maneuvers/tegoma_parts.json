@@ -47,7 +47,7 @@
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 1, "on_hit_dynamic": { "type": "CHAIN_ATTACK_BY_ALLY_COUNT", "ally_name": "ゾンビ" } } }]
   },
   "P2-02": {
-    "name": "むらがる", "category": "妨害", 
+    "name": "むらがる", "category": "補助", 
     "tags": ["移動妨害", "ラピッド"], "maliceLevel": 1,
     "timing": "ラピッド", "cost": 0, "range": "0",
     "description": "射程0の対象に移動妨害1。", 
@@ -143,7 +143,7 @@
   },
   "P3-04": {
     "name": "突進", "category": "攻撃", 
-    "tags": ["攻撃", "ラピッド", "肉弾攻撃", "移動"], "maliceLevel": 1.5,
+    "tags": ["攻撃", "ラピッド", "肉弾攻撃"], "maliceLevel": 1.5,
     "timing": "ラピッド", "cost": 1, "range": "効果参照",
     "description": "自身の移動時に使用可。移動前後のエリアの対象1体に肉弾攻撃3。", 
     "description_raw": "自身の移動時に使用可。移動前か移動後のエリアの対象1体に、肉弾攻撃3",
@@ -152,7 +152,7 @@
     "effects": [{ "ref": "ATTACK_ON_MOVE", "params": { "attack_type": "肉弾", "damage": 3 } }]
   },
   "P3-05": {
-    "name": "楽園の蹂躙", "category": "移動", 
+    "name": "楽園の蹂躙", "category": "補助", 
     "tags": ["コスト補正", "オート", "移動"], "maliceLevel": 1.5,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "「楽園」方向への自身の移動マニューバのコストを-1。", 
@@ -231,8 +231,8 @@
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "精神", "damage": 1 } }]
   },
   "P3-12": {
-    "name": "不動", "category": "防御", 
-    "tags": ["防御", "オート", "転倒", "移動"], "maliceLevel": 1.5,
+    "name": "不動", "category": "補助", 
+    "tags": ["防御", "オート", "転倒無効", "移動無効"], "maliceLevel": 1.5,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "「転倒」「移動」の効果を無効化できる。", 
     "description_raw": "「転倒」「移動」を無効化できる",
@@ -291,8 +291,8 @@
     "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 1, "limit_per_damage": 1 } }]
   },
   "P3-18": {
-    "name": "騎乗調整", "category": "移動",
-    "tags": ["オート", "移動", "配置変更"], "maliceLevel": 1.5,
+    "name": "騎乗調整", "category": "補助",
+    "tags": ["オート", "移動無効", "転倒無効", "爆発無効", "配置変更"], "maliceLevel": 1.5,
     "timing": "オート", "cost": "なし", "range": "効果参照",
     "description": "戦闘開始時、特定のサヴァント1体を「乗り手」とする。自身が移動・配置変更した際、「乗り手」も同じエリアに移動する。",
     "description_raw": "戦闘開始時、自身を除く特定のサヴァント1体を“乗り手”として選ぶ（戦闘中の変更はできない）。戦闘中、あなたと“乗り手”が同じエリアにいるなら、“乗り手”は「移動」「転倒」「爆発」の効果を無効化してよい。また、あなたが「移動」「配置を変更」した際は、“乗り手”も同じエリアに配置変更する。",
@@ -301,7 +301,7 @@
     "effects": [{ "ref": "RIDER_MECHANIC", "params": {} }]
   },
   "P3-19": {
-    "name": "穢れ送り", "category": "移動",
+    "name": "穢れ送り", "category": "配置",
     "tags": ["アクション", "移動", "配置変更", "損傷"], "maliceLevel": 1.5,
     "timing": "アクション", "cost": 3, "range": "0",
     "description": "自身を除く手駒1体（レギオン不可）を選び、パーツ2つを損傷させ、「楽園」に配置変更する。",
@@ -311,8 +311,8 @@
     "effects": [{ "ref": "TELEPORT_ALLY_WITH_COST", "params": { "target": "piece", "area": "楽園", "damage_cost": 2 } }]
   },
   "P3-20": {
-    "name": "緊急転移", "category": "移動",
-    "tags": ["ラピッド", "配置変更"], "maliceLevel": 1.5,
+    "name": "緊急転移", "category": "配置",
+    "tags": ["ラピッド", "配置変更", "移動"], "maliceLevel": 1.5,
     "timing": "ラピッド", "cost": 3, "range": "自身",
     "description": "1d10を振り、出目に応じたエリアへ自身を配置変更する。同カウントに何度でも使用可（同カウント1回のみ）。",
     "description_raw": "サイコロを振る。出目が1～2なら「奈落」、3～4なら「地獄」、5～6なら「煉獄」、7～8なら「花園」、9～10なら「楽園」へあなたの配置が変更される。この効果は1ターンに何度使用してもよいが、同カウント中には1回しか使用できない。",
@@ -413,8 +413,8 @@
     "effects": [{ "ref": "ALLY_FOLLOW_MOVE", "params": { "target": "other_pieces_in_area" } }]
   },
   "P4-06": {
-    "name": "肉の拘束", "category": "防御", 
-    "tags": ["防御", "オート", "転倒", "移動"], "maliceLevel": 2,
+    "name": "肉の拘束", "category": "補助", 
+    "tags": ["防御", "オート", "転倒無効", "移動無効"], "maliceLevel": 2,
     "timing": "オート", "cost": "なし", "range": "0",
     "description": "同エリアの手駒全てが「転倒」「移動」を無効化できる。", 
     "description_raw": "バトルパートで同エリアにいる手駒は全て「転倒」「移動」を無効化してもよい",
@@ -568,7 +568,7 @@
   "//": "---------- 悪意点 4 (P8) ----------",
   "P8-01": {
     "name": "超知覚領域", "category": "支援",
-    "tags": ["オート", "支援", "妨害", "転倒", "移動"], "maliceLevel": 4,
+    "tags": ["オート", "支援", "妨害無効", "転倒無効", "移動無効"], "maliceLevel": 4,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "全ての判定に+1。「妨害」「転倒」「移動」を無効化。",
     "description_raw": "1シナリオでこのパーツを所有する手駒は1体以下でなくてはいけない。あなたは全ての攻撃判定に+1の修正を得る。また、「妨害」「転倒」「移動」を無効にしてよい。",

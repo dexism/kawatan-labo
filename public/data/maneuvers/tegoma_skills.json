@@ -22,8 +22,8 @@
     "effects": [{ "ref": "INCREASE_DAMAGE_TAKEN", "params": { "multiplier": 2, "condition_damage_type": ["切断", "爆発"] } }]
   },
   "PS-03": {
-    "name": "合流", "category": "その他", 
-    "tags": ["合流", "オート", "移動"], "maliceLevel": 0,
+    "name": "合流", "category": "補助", 
+    "tags": ["合流", "オート"], "maliceLevel": 0,
     "description": "【レギオン専用】ターン/カウント進行時、同じエリアにいる同名のレギオンと合流し、スタック数を合算する。", 
     "description_raw": "同じエリアにいる同名のレギオンは合流することができる。",
     "source": { "book": "基本ルールブック", "page": 125 }, 

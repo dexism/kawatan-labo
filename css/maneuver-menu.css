@@ -108,7 +108,7 @@
     border-radius: 10px;
     transition: all 0.2s;
     color: var(--color-fore-2);
-    box-shadow: 0 0 10px var(--color-shadow);
+    box-shadow: 0 0 5px var(--color-5);
 
     display: flex;
     padding: 0; 
@@ -121,6 +121,7 @@
 }
 /* カテゴリごとの色を左ボーダーに適用 */
 .maneuver-item-new.category-color-attack {       border-left-color: var(--color-attack); }
+.maneuver-item-new.category-color-staffing {     border-left-color: var(--color-staffing); }
 .maneuver-item-new.category-color-move {         border-left-color: var(--color-move); }
 .maneuver-item-new.category-color-defense {      border-left-color: var(--color-defense); }
 .maneuver-item-new.category-color-support {      border-left-color: var(--color-support); }
