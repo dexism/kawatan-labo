@@ -6,7 +6,7 @@
   "//": "---------- 一般動作 (Common Actions) ----------",
   "CA-01": {
     "name": "待機", "category": "一般", 
-    "tags": ["アクション"],
+    "tags": ["アクション"], "maliceLevel": 0,
     "description": "マニューバを使用せず、行動値を1点消費して手番を終了する。",
     "description_raw": "マニューバを使用せず、待機を宣言してもかまいません。待機したなら、行動値は1点減少します。",
     "source": { "book": "基本ルールブック", "page": 104 },
@@ -15,7 +15,7 @@
   },
   "CA-02": {
     "name": "任意", "category": "一般", 
-    "tags": ["アクション"],
+    "tags": ["アクション"], "maliceLevel": 0,
     "description": "NCの裁定に基づき、任意の行動値コストを支払って特殊な行動を行う。",
     "description_raw": "NCの裁定に基づき、任意の行動値コストを支払って特殊な行動を行う。",
     "source": { "book": "基本ルールブック", "page": 107 },
@@ -26,7 +26,7 @@
   "//": "---------- 基本パーツ (Basic Parts) ----------",
   "BP-01": {
     "name": "のうみそ", "category": "行動値", "allowedLocations": "頭",
-    "tags": ["行動値", "オート"],
+    "tags": ["行動値", "オート"], "maliceLevel": 1.5,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "最大行動値+2", 
     "description_raw": "最大行動値+2。",
@@ -36,7 +36,7 @@
   },
   "BP-02": {
     "name": "めだま", "category": "行動値", "allowedLocations": "頭",
-    "tags": ["行動値", "オート"],
+    "tags": ["行動値", "オート"], "maliceLevel": 1,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "最大行動値+1", 
     "description_raw": "最大行動値+1。",
@@ -46,7 +46,7 @@
   },
   "BP-03": {
     "name": "あご", "category": "攻撃", "allowedLocations": "頭",
-    "tags": ["攻撃", "アクション", "肉弾攻撃"],
+    "tags": ["攻撃", "アクション", "肉弾攻撃"], "maliceLevel": 0.5,
     "timing": "アクション", "cost": 2, "range": "0",
     "description": "肉弾攻撃1", 
     "description_raw": "肉弾攻撃1。",
@@ -56,7 +56,7 @@
   },
   "BP-04": {
     "name": "こぶし", "category": "攻撃", "allowedLocations": "腕",
-    "tags": ["攻撃", "アクション", "肉弾攻撃"],
+    "tags": ["攻撃", "アクション", "肉弾攻撃"], "maliceLevel": 0.5,
     "timing": "アクション", "cost": 2, "range": "0",
     "description": "肉弾攻撃1", 
     "description_raw": "肉弾攻撃1。",
@@ -66,7 +66,7 @@
   },
   "BP-05": {
     "name": "うで", "category": "支援", "allowedLocations": "腕",
-    "tags": ["支援", "ジャッジ"],
+    "tags": ["支援", "ジャッジ"], "maliceLevel": 1,
     "timing": "ジャッジ", "cost": 1, "range": "0",
     "description": "支援1", 
     "description_raw": "支援1。",
@@ -76,7 +76,7 @@
   },
   "BP-06": {
     "name": "かた", "category": "移動", "allowedLocations": "腕",
-    "tags": ["移動", "アクション"],
+    "tags": ["移動", "アクション"], "maliceLevel": 0.5,
     "timing": "アクション", "cost": 4, "range": "自身",
     "description": "移動1", 
     "description_raw": "移動1。",
@@ -86,7 +86,7 @@
   },
   "BP-07": {
     "name": "せぼね", "category": "補助", "allowedLocations": "胴",
-    "tags": ["補助", "アクション", "コスト補正"],
+    "tags": ["補助", "アクション", "コスト補正"], "maliceLevel": 1,
     "timing": "アクション", "cost": 1, "range": "自身",
     "description": "同ターン内の次のカウントで使うマニューバ1つのコスト-1(最低0)", 
     "description_raw": "同ターン内の次のカウントで使うマニューバ1つのコスト-1(最低0)する。",
@@ -96,7 +96,7 @@
   },
   "BP-08": {
     "name": "はらわた", "category": "生贄", "allowedLocations": "胴",
-    "tags": ["オート", "生贄"],
+    "tags": ["オート", "生贄"], "maliceLevel": 0.5,
     "timing": "オート", "cost": "なし", "range": "なし",
     "description": "効果なし", 
     "description_raw": "なし",
@@ -106,7 +106,7 @@
   },
   "BP-09": {
     "name": "ほね", "category": "移動", "allowedLocations": "脚",
-    "tags": ["移動", "アクション"],
+    "tags": ["移動", "アクション"], "maliceLevel": 1,
     "timing": "アクション", "cost": 3, "range": "自身",
     "description": "移動1", 
     "description_raw": "移動1。",
@@ -116,7 +116,7 @@
   },
   "BP-10": {
     "name": "あし", "category": "妨害", "allowedLocations": "脚",
-    "tags": ["妨害", "ジャッジ"],
+    "tags": ["妨害", "ジャッジ"], "maliceLevel": 1,
     "timing": "ジャッジ", "cost": 1, "range": "0",
     "description": "妨害1", 
     "description_raw": "妨害1。",

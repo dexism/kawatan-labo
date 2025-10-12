@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.16.66"; // バージョンを更新
+export const version = "1.16.67"; // バージョンを更新
 
 import * as data from './data-handler.js';
 import * as charManager from './character-manager.js';
@@ -2181,10 +2181,15 @@ export function buildReferenceMenu() {
 
     const filterGroups = {
         'カテゴリ': ['移動', '攻撃', '防御', '支援', '妨害', '強化', '修復', '補助', '行動値', '生贄', '対話', '狂気点'],
-        'スキル': ['アリス', 'ホリック', 'オートマトン', 'ジャンク', 'コート', 'ソロリティ', 'ステーシー', 'タナトス', 'ゴシック', 'レクイエム', 'バロック', 'ロマネスク', 'サイケデリック', '特化スキル'],
-        'パーツ': ['基本パーツ', '武装', '変異', '改造', '手駒専用', '頭', '腕', '胴', '脚', '任意'],
+        '区分': ['ポジション', 'クラススキル', '特化スキル', '基本パーツ', '強化パーツ', '手駒専用'],
+        'ポジションスキル': ['アリス', 'ホリック', 'オートマトン', 'ジャンク', 'コート', 'ソロリティ'],
+        'クラススキル': ['ステーシー', 'タナトス', 'ゴシック', 'レクイエム', 'バロック', 'ロマネスク', 'サイケデリック'],
+        '強化パーツ': ['武装', '変異', '改造'],
+        '悪意': ['0.5', '1', '1.5', '2', '3', '4', 'その他'],
+        '箇所': ['頭', '腕', '胴', '脚', '任意'],
         'タイミング': ['オート', 'アクション', 'ラピッド', 'ジャッジ', 'ダメージ'],
-        '最大射程': ['自身', '0', '1', '2', '3']
+        'コスト': ['なし', '0', '1', '2', '3', '4', 'その他'],
+        '最大射程': ['なし', '自身', '0', '1', '2', '3', 'その他']
     };
 
     const header = document.createElement('div');
@@ -2204,7 +2209,10 @@ export function buildReferenceMenu() {
     // ★変更点1: accordionHeader を renderReferenceList からアクセスできるよう、ここで宣言します。
     const accordionHeader = document.createElement('div');
     accordionHeader.className = 'accordion-header';
-    accordionHeader.innerHTML = '<span>フィルター表示</span>'; // 初期テキスト
+    accordionHeader.innerHTML = `
+        <span class="accordion-title-static">フィルタ</span>
+        <span class="accordion-title-dynamic"></span>
+    `;
     accordionContainer.appendChild(accordionHeader);
 
     const filterContainer = document.createElement('div');
@@ -2239,12 +2247,27 @@ export function buildReferenceMenu() {
         let filtered = filterManeuversForReference(allManeuvers, activeReferenceFilters);
         const itemCount = filtered.length;
         
-        const headerSpan = accordionHeader.querySelector('span');
-        if (headerSpan) {
-            headerSpan.textContent = `フィルター表示 （${itemCount}件）`;
+        const dynamicTitleSpan = accordionHeader.querySelector('.accordion-title-dynamic');
+        if (dynamicTitleSpan) {
+            let summaryText = `（${itemCount}件）`;
+            let hasActiveFilter = false;
+
+            for (const groupName in activeReferenceFilters) {
+                const activeFilters = activeReferenceFilters[groupName];
+                if (activeFilters.length > 0) {
+                    hasActiveFilter = true;
+                    summaryText += `<span class="filter-summary-group"> <span class="filter-summary-label">${groupName}</span>${activeFilters.join(' ')}</span>`;
+                }
+            }
+            
+            // アクティブなフィルターがない場合は件数のみ表示
+            if (!hasActiveFilter) {
+                dynamicTitleSpan.innerHTML = `（${itemCount}件）`;
+            } else {
+                dynamicTitleSpan.innerHTML = summaryText;
+            }
         }
 
-        // ★★★ ここを変更：新しい共通ソート関数を呼び出す ★★★
         filtered = sortManeuvers(filtered);
 
         if (filtered.length === 0) {
@@ -2335,62 +2358,73 @@ function checkManeuverMatch(maneuver, groupName, filterName, masterData) {
     const typePrefix = id.substring(0, 1);
 
     switch (groupName) {
-        case 'スキル':
-            // 特化スキルの判定
-            if (filterName === '特化スキル') {
-                return id.endsWith('-SP');
+        case 'カテゴリ':
+            return maneuver.category === filterName || (maneuver.tags && maneuver.tags.includes(filterName));
+
+        case '区分':
+            switch (filterName) {
+                case 'ポジション': return !!masterData.positions[prefix];
+                case 'クラススキル': return !!masterData.classes[prefix] && !id.endsWith('-SP');
+                case '特化スキル': return !!masterData.classes[prefix] && id.endsWith('-SP');
+                case '基本パーツ': return prefix === 'BP';
+                case '強化パーツ': return ['A', 'M', 'R'].includes(typePrefix) && !isNaN(parseInt(id.substring(1, 2), 10));
+                case '手駒専用': return prefix === 'PS' || typePrefix === 'P';
+                default: return false;
             }
-            // ポジションスキルの判定
+
+        case 'ポジションスキル': {
             const posKey = Object.keys(masterData.positions).find(k => masterData.positions[k].name === filterName);
-            if (posKey && prefix === posKey) {
-                return true;
-            }
-            // クラススキルの判定
+            return posKey ? prefix === posKey : false;
+        }
+        case 'クラススキル': {
             const classKey = Object.keys(masterData.classes).find(k => masterData.classes[k].name === filterName);
-            if (classKey && prefix === classKey) {
-                return true;
-            }
-            return false; // どのスキルにも一致しなかった
-
-        case 'パーツ':
-            // IDプレフィックスによる判定
-            if (filterName === '基本パーツ') return prefix === 'BP';
-            if (filterName === '武装') return typePrefix === 'A';
-            if (filterName === '変異') return typePrefix === 'M';
-            if (filterName === '改造') return typePrefix === 'R';
-            if (filterName === '手駒専用') return typePrefix === 'P';
-
-            // allowedLocations（装備箇所）による判定
-            if (maneuver.allowedLocations) {
-                if (filterName === '頭') return maneuver.allowedLocations === '頭';
-                if (filterName === '腕') return maneuver.allowedLocations === '腕';
-                if (filterName === '胴') return maneuver.allowedLocations === '胴';
-                if (filterName === '脚') return maneuver.allowedLocations === '脚';
-                if (filterName === '任意') return maneuver.allowedLocations === '任意';
-            }
-            return false; // どのパーツ条件にも一致しなかった
+            return classKey ? prefix === classKey : false;
+        }
+        case '強化パーツ': {
+            const typeMap = { '武装': 'A', '変異': 'M', '改造': 'R' };
+            return typePrefix === typeMap[filterName];
+        }
+        case '箇所':
+            return maneuver.allowedLocations === filterName;
 
         case 'タイミング':
             return maneuver.timing === filterName;
 
-        case 'カテゴリ':
-            // カテゴリ名またはタグのいずれかに一致すればOK
-            return maneuver.category === filterName || (maneuver.tags && maneuver.tags.includes(filterName));
-
-        case '最大射程':
-            const rangeStr = String(maneuver.range || '');
-            if (filterName === '自身') return rangeStr === '自身';
-            
-            const numFilter = parseInt(filterName, 10);
-            if (isNaN(numFilter)) return false;
-            
-            if (rangeStr.includes('～')) {
-                const max = parseInt(rangeStr.split('～')[1], 10);
-                return max === numFilter;
-            } else if (!isNaN(parseInt(rangeStr, 10))) {
-                return parseInt(rangeStr, 10) === numFilter;
+        case 'コスト': {
+            const cost = String(maneuver.cost);
+            if (filterName === 'その他') {
+                const specificCosts = ['なし', '0', '1', '2', '3', '4'];
+                return !specificCosts.includes(cost);
             }
+            return cost === filterName;
+        }
+        case '最大射程': {
+            const rangeStr = String(maneuver.range || 'なし');
+            if (filterName === 'なし') return rangeStr === 'なし';
+            if (filterName === '自身') return rangeStr === '自身';
+
+            const rangeParts = rangeStr.split('～');
+            const maxRange = parseInt(rangeParts[rangeParts.length - 1], 10);
+
+            if (filterName === 'その他') {
+                const isSpecific = ['なし', '自身'].includes(rangeStr);
+                return !isSpecific && (isNaN(maxRange) || maxRange > 3);
+            }
+
+            const numFilter = parseInt(filterName, 10);
+            return !isNaN(maxRange) && maxRange === numFilter;
+        }
+        case '悪意': {
+            const malice = maneuver.maliceLevel;
+            if (malice === null || malice === undefined) return false;
+            
+            if (filterName === 'その他') {
+                const specificMalice = [0.5, 1, 1.5, 2, 3, 4];
+                return !specificMalice.includes(malice);
+            }
+            return String(malice) === filterName;
+        }
+        default:
             return false;
     }
-    return false;
 }

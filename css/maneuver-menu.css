@@ -443,3 +443,52 @@ border: 1px dashed cyan;
 background-color: red;
 }
 
+/* =======================================
+   リファレンスフィルター表示拡張スタイル
+========================================== */
+
+/* ヘッダー全体をFlexboxコンテナにする */
+#maneuverMenu .accordion-header {
+  display: flex;
+  align-items: baseline; /* テキストのベースラインを揃える */
+  gap: 0px; /* 「フィルター表示」と要約の間の隙間 */
+  width: 100%;
+  overflow: hidden; /* はみ出し防止 */
+}
+
+/* 「フィルター表示」の固定テキスト */
+.accordion-title-static {
+  font-weight: bold;
+  font-size: 14px;
+  color: var(--color-text);
+  flex-shrink: 0; /* この要素が縮まないようにする */
+}
+
+/* 件数とフィルター要約の動的テキスト */
+.accordion-title-dynamic {
+  font-size: 12px;
+  font-weight: bold;
+  color: var(--color-fore-5);
+  white-space: nowrap; /* ★重要: 全体として改行させない */
+  overflow: hidden; /* ★重要: はみ出した部分を隠す */
+  text-overflow: ellipsis; /* ★重要: はみ出しを「…」で表示 */
+  flex-grow: 1; /* 残りのスペースをすべて埋める */
+  min-width: 0; /* flexアイテムのはみ出し防止 */
+}
+
+/* フィルターグループごとのスタイル */
+.filter-summary-group {
+    margin-right: 5px; /* グループ間の区切り */
+    background-color: var(--color-background-2);
+    padding: 0 7px 0 2px;
+    border-radius: 10px;
+}
+
+/* 「カテゴリ：」などのラベル部分 */
+.filter-summary-label {
+  font-weight: normal;
+  font-size: 9px;
+  margin-right: 2px;
+  padding: 0;
+  color: var(--color-fore-6);
+}

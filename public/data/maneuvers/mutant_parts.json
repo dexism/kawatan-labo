@@ -7,7 +7,7 @@
   "M1-01": {
     "name": "うじむし", "category": "修復", "allowedLocations": "任意",
     "timing": "オート", "cost": "なし", "range": "自身",
-    "tags": ["修復", "オート"],
+    "tags": ["修復", "オート"], "maliceLevel": 1,
     "description": "ターン/パート終了時、このパーツを修復", 
     "description_raw": "バトルパートにてターン終了時、パート終了時、このパーツが損傷していたなら、修復してよい。",
     "flavor_text": "体から湧き出す無数の蛆。ミュータント化した昆虫の幼虫であり、あなたの体組織をゆるやかに補強している。",
@@ -17,7 +17,7 @@
   "M1-02": {
     "name": "つぎはぎ", "category": "修復", "allowedLocations": "胴",
     "timing": "オート", "cost": "なし", "range": "自身",
-    "tags": ["修復", "オート"],
+    "tags": ["修復", "オート"], "maliceLevel": 1,
     "description": "バトルパート終了時、このパーツと損傷した基本パーツ1つを修復", 
     "description_raw": "バトルパート終了時、このパーツと損傷した基本パーツ1つを修復してよい。",
     "flavor_text": "体中を縦横に走る縫い目、色やサイズの違う個々のパーツ。あなたの体はつぎはぎの寄せ集めだ。",
@@ -30,7 +30,7 @@
   "M1-03": {
     "name": "しんぞう", "category": "行動値", "allowedLocations": "胴",
     "timing": "オート", "cost": "なし", "range": "自身",
-    "tags": ["行動値", "オート"],
+    "tags": ["行動値", "オート"], "maliceLevel": 1,
     "description": "最大行動値+1", 
     "description_raw": "最大行動値+1。",
     "flavor_text": "アンデッドの体内で動く半腐れの心臓。思い込みか、失われた屍術の力か、それは一呼吸早い行動を可能にする。",
@@ -40,7 +40,7 @@
   "M1-04": {
     "name": "しっぽ", "category": "行動値", "allowedLocations": "脚",
     "timing": "オート", "cost": "なし", "range": "自身",
-    "tags": ["行動値", "オート"],
+    "tags": ["行動値", "オート"], "maliceLevel": 1,
     "description": "最大行動値+1", 
     "description_raw": "最大行動値+1。",
     "flavor_text": "獣や爬虫類の尻尾が、あなたの尻にある。体のバランスを取り、機敏な行動をさせてくれるし、それなりにかわいい。",
@@ -50,7 +50,7 @@
   "M1-05": {
     "name": "はりつき", "category": "移動", "allowedLocations": "脚",
     "timing": "アクション", "cost": 3, "range": "自身",
-    "tags": ["移動", "アクション", "移動妨害"],
+    "tags": ["移動", "アクション", "移動妨害"], "maliceLevel": 1,
     "description": "移動1。「移動妨害」無効", 
     "description_raw": "移動1、この移動に対して「移動妨害」は全て無効。",
     "flavor_text": "あなたの足には鉤爪や吸盤があり、壁や天井を駆けることでトリッキーな移動が可能となる。",
@@ -59,7 +59,7 @@
   },
   "M1-06": {
     "name": "どろどろ", "category": "攻撃", "allowedLocations": "胴",
-    "tags": ["攻撃", "ダメージ", "肉弾攻撃"],
+    "tags": ["攻撃", "ダメージ", "肉弾攻撃"], "maliceLevel": 1,
     "timing": "ダメージ", "cost": 1, "range": "0～1",
     "description": "肉弾攻撃2。自身がダメージを受けた際、攻撃者に反撃", 
     "description_raw": "自身がダメージを受けた際、そのダメージを与えた対象にのみ使用可。肉弾攻撃2。",
@@ -69,7 +69,7 @@
   },
   "M1-07": {
     "name": "かぎづめ", "category": "攻撃", "allowedLocations": "腕",
-    "tags": ["攻撃", "アクション", "肉弾攻撃"],
+    "tags": ["攻撃", "アクション", "肉弾攻撃"], "maliceLevel": 1,
     "timing": "アクション", "cost": 2, "range": "0",
     "description": "肉弾攻撃2", 
     "description_raw": "肉弾攻撃2。",
@@ -80,7 +80,7 @@
   "M1-08": {
     "name": "あるびの", "category": "支援", "allowedLocations": "胴",
     "timing": "ジャッジ", "cost": 1, "range": "0～1",
-    "tags": ["支援", "ジャッジ"],
+    "tags": ["支援", "ジャッジ"], "maliceLevel": 1,
     "description": "支援1", 
     "description_raw": "支援1。",
     "flavor_text": "あなたは色素を持たぬ白子。白子は奇妙な幸運をもたらすという。それは真実か否か……。",
@@ -90,7 +90,7 @@
   "M1-09": {
     "name": "ちみどろ", "category": "妨害", "allowedLocations": "胴",
     "timing": "ジャッジ", "cost": 1, "range": "0～1",
-    "tags": ["妨害", "ジャッジ"],
+    "tags": ["妨害", "ジャッジ"], "maliceLevel": 1,
     "description": "妨害1", 
     "description_raw": "妨害1。",
     "flavor_text": "腐ったどろどろの血が、あなたの体内には未だ意味もなく流れている。血は簡単に溢れほとばしり、周囲の視界を妨げる。",
@@ -100,7 +100,7 @@
   "M1-10": {
     "name": "おおあな", "category": "妨害", "allowedLocations": "任意",
     "timing": "ジャッジ", "cost": 0, "range": "0～3",
-    "tags": ["妨害", "ジャッジ"],
+    "tags": ["妨害", "ジャッジ"], "maliceLevel": 1,
     "description": "妨害1。自身への攻撃判定のみ", 
     "description_raw": "あなたに対する攻撃判定にのみ使用可。妨害1。",
     "flavor_text": "あなたの体には大きな欠損がある。もっとも、戦闘力に支障はない。そこを狙った敵に肩透かしを与えるだけだ。",
@@ -109,7 +109,7 @@
   },
   "M1-11": {
     "name": "ぬるぬる", "category": "妨害", "allowedLocations": "胴",
-    "tags": ["ジャッジ", "妨害"],
+    "tags": ["ジャッジ", "妨害"], "maliceLevel": 1,
     "timing": "ジャッジ", "cost": 1, "range": "0",
     "description": "白兵攻撃・肉弾攻撃の判定に妨害1。1ターンに何度でも使用可(1判定1回)。",
     "description_raw": "自身を対象とした攻撃判定にのみ使用可。妨害1、1ターンに何度使用してもよい。ただし、1回の判定に対し1回のみ。",
@@ -119,7 +119,7 @@
   },
   "M1-12": {
     "name": "すすりじた", "category": "攻撃", "allowedLocations": "頭",
-    "tags": ["アクション", "攻撃", "肉弾攻撃", "損傷"],
+    "tags": ["アクション", "攻撃", "肉弾攻撃", "損傷"], "maliceLevel": 1,
     "timing": "アクション", "cost": 2, "range": "0",
     "description": "肉弾攻撃1。この攻撃で【はらわた】を損傷した場合、追加で【はらわた】1つを損傷させる。",
     "description_raw": "肉弾攻撃1。この攻撃で敵のパーツを損傷させた際、あなたの【はらわた】が損傷しているなら1つだけ損傷前の状態に戻してよい。",
@@ -132,7 +132,7 @@
   "M2-01": {
     "name": "けもみみ", "category": "行動値", "allowedLocations": "頭",
     "timing": "オート", "cost": "なし", "range": "自身",
-    "tags": ["行動値", "オート", "損傷無効"],
+    "tags": ["行動値", "オート", "損傷無効"], "maliceLevel": 1,
     "description": "最大行動値+1。行動判定で大失敗してもこのパーツは損傷しない。", 
     "description_raw": "最大行動値+1。このパーツを行動判定で使用した際、大失敗してもこのパーツは損傷しない。",
     "flavor_text": "あなたの耳はそぎ落とされ、獣の耳が頭につけられた。滅びた獣の知覚力、素早い反応を可能とする器官だ。かわいいし。",
@@ -155,7 +155,7 @@
   "M2-03": {
     "name": "よぶんなうで", "category": "補助", "allowedLocations": "腕",
     "timing": "ラピッド", "cost": 0, "range": "自身",
-    "tags": ["ラピッド使用", "ラピッド"],
+    "tags": ["ラピッド使用", "ラピッド"], "maliceLevel": 1,
     "description": "アクションマニューバ1つを「ラピッド」として使用可", 
     "description_raw": "望む「アクション」マニューバ1つを「ラピッド」として使用する。",
     "flavor_text": "あなたの腕は二本ではない。肩には追加の腕がつけられている。使いこなすことは困難だが、戦術の幅は大いに広がる。",
@@ -165,7 +165,7 @@
   "M2-04": {
     "name": "ほねやり", "category": "攻撃", "allowedLocations": "任意",
     "timing": "アクション", "cost": 2, "range": "0",
-    "tags": ["攻撃", "アクション", "肉弾攻撃", "連撃"],
+    "tags": ["攻撃", "アクション", "肉弾攻撃", "連撃"], "maliceLevel": 1,
     "description": "肉弾攻撃1+連撃1", 
     "description_raw": "肉弾攻撃1+連撃1。",
     "flavor_text": "体の一部の骨が槍状に突き出し、敵を貫く。突如、連続して繰り出されるその攻撃を避けられる敵はまずいない。",
@@ -175,7 +175,7 @@
   "M2-05": {
     "name": "どくばり", "category": "攻撃", "allowedLocations": "任意",
     "timing": "アクション", "cost": 3, "range": "0",
-    "tags": ["攻撃", "アクション", "肉弾攻撃"],
+    "tags": ["攻撃", "アクション", "肉弾攻撃"], "maliceLevel": 1,
     "description": "肉弾攻撃3", 
     "description_raw": "肉弾攻撃3。",
     "flavor_text": "打ち込むことで相手の体を内から溶かす強酸を注入する毒針が、体のどこかに備わっている。",
@@ -185,7 +185,7 @@
   "M2-06": {
     "name": "よだれじた", "category": "妨害", "allowedLocations": "頭",
     "timing": "ジャッジ", "cost": 2, "range": "0～1",
-    "tags": ["妨害", "ジャッジ", "転倒"],
+    "tags": ["妨害", "ジャッジ", "転倒"], "maliceLevel": 1,
     "description": "妨害1+転倒", 
     "description_raw": "妨害1+転倒。",
     "flavor_text": "だらだらと涎を流し続けるグロテスクな長い舌。その一撃は奇襲となり、相手の動きを鈍らせる。",
@@ -198,7 +198,7 @@
   "M2-07": {
     "name": "よぶんなめ", "category": "支援", "allowedLocations": "任意",
     "timing": "ジャッジ", "cost": 1, "range": "0～1",
-    "tags": ["支援", "ジャッジ"],
+    "tags": ["支援", "ジャッジ"], "maliceLevel": 1,
     "description": "支援2", 
     "description_raw": "支援2。",
     "flavor_text": "追加の目がいくつか付けられている。広い視野はいち早い反応を可能にしてくれるが、少し気持ち悪い。",
@@ -208,7 +208,7 @@
   "M2-08": {
     "name": "しょくしゅ", "category": "妨害", "allowedLocations": "任意",
     "timing": "ラピッド", "cost": 1, "range": "0～1",
-    "tags": ["移動妨害", "ラピッド"],
+    "tags": ["移動妨害", "ラピッド"], "maliceLevel": 1,
     "description": "移動妨害1", 
     "description_raw": "移動妨害1。",
     "flavor_text": "うねうねと蠢く触手は、敵の行動を阻害するには最適だ。体から生えているものとしては悪趣味だが、文句は言えまい。",
@@ -218,7 +218,7 @@
   "M2-09": {
     "name": "ほとけかずら", "category": "補助", "allowedLocations": "任意",
     "timing": "ジャッジ", "cost": 0, "range": "0",
-    "tags": ["支援", "妨害", "ジャッジ"],
+    "tags": ["支援", "妨害", "ジャッジ"], "maliceLevel": 1,
     "description": "支援1か妨害1", 
     "description_raw": "支援1か妨害1。",
     "flavor_text": "荒廃した世界でも花は咲く。毒々しい花と、伸びる蔓があなたの体を覆っている。それは周囲の輪郭をぼやけさせるだろう。",
@@ -228,7 +228,7 @@
   "M2-10": {
     "name": "うろこ", "category": "防御", "allowedLocations": "胴",
     "timing": "ダメージ", "cost": 1, "range": "自身",
-    "tags": ["防御", "ダメージ"],
+    "tags": ["防御", "ダメージ"], "maliceLevel": 1,
     "description": "防御2", 
     "description_raw": "防御2。",
     "flavor_text": "体を覆うのは分厚い鱗や毛皮、甲羅。有様の甲冑。かわいさも何もないのだけれど、強力な防具であることは否定できない。",
@@ -237,7 +237,7 @@
   },
   "M2-11": {
     "name": "つめたいひかり", "category": "攻撃", "allowedLocations": "任意",
-    "tags": ["アクション", "攻撃", "射撃攻撃", "ホラー", "レギオン"],
+    "tags": ["アクション", "攻撃", "射撃攻撃", "ホラー", "レギオン"], "maliceLevel": 1,
     "timing": "アクション", "cost": 1, "range": "自身",
     "description": "ターン終了時まで、パーツが損傷するまでホラー・レギオンへの攻撃判定に+1。(累積しない)",
     "description_raw": "ターンが終了するか、このパーツが損傷するまで、舞台上のホラー・レギオンはあなた以外を対象とした攻撃判定に-1の修正を受ける(この修正は累積しない)。",
@@ -247,7 +247,7 @@
   },
   "M2-12": {
     "name": "おおつの", "category": "攻撃", "allowedLocations": "任意",
-    "tags": ["オート", "攻撃", "肉弾攻撃", "白兵攻撃", "連撃", "転倒"],
+    "tags": ["オート", "攻撃", "肉弾攻撃", "白兵攻撃", "連撃", "転倒"], "maliceLevel": 1,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "射程0の肉弾・白兵攻撃で大成功時、「連撃1」か「転倒」の効果を追加。1カウント1回まで。",
     "description_raw": "あなたは射程0の対象へ、肉弾攻撃判定で大成功が出た時、攻撃に「連撃1(既にあるなら+1)」か「転倒(重複しない)」を加えてよい。この効果は1カウントに1回まで発動する。",
@@ -259,7 +259,7 @@
   "//": "--- レベル3 変異 (M3) ---",
   "M3-01": {
     "name": "よぶんなあし", "category": "防御", "allowedLocations": "脚",
-    "tags": ["損傷無効", "オート"],
+    "tags": ["損傷無効", "オート"], "maliceLevel": 1.5,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "これ以外の脚部パーツが破損しても、マニューバをそのまま使用可", 
     "description_raw": "これ以外の脚部パーツが破損しても、マニューバをそのまま使用してよい。",
@@ -269,7 +269,7 @@
   },
   "M3-02": {
     "name": "よぶんなあたま", "category": "行動値", "allowedLocations": "頭",
-    "tags": ["行動値", "オート"],
+    "tags": ["行動値", "オート"], "maliceLevel": 1.5,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "最大行動値+2", 
     "description_raw": "最大行動値+2。",
@@ -279,7 +279,7 @@
   },
   "M3-03": {
     "name": "やせぎす", "category": "防御", "allowedLocations": "胴",
-    "tags": ["防御", "オート", "妨害"],
+    "tags": ["防御", "オート", "妨害"], "maliceLevel": 1.5,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "1つの判定につき1回、「妨害」を無効化", 
     "description_raw": "バトルパートで1つの判定につき1回、「妨害」を無効化してよい。",
@@ -289,7 +289,7 @@
   },
   "M3-04": {
     "name": "くされじる", "category": "攻撃", "allowedLocations": "任意",
-    "tags": ["攻撃", "アクション", "肉弾攻撃", "爆発", "転倒"],
+    "tags": ["攻撃", "アクション", "肉弾攻撃", "爆発", "転倒"], "maliceLevel": 1.5,
     "timing": "アクション", "cost": 3, "range": "0～1",
     "description": "肉弾攻撃1+爆発+転倒", 
     "description_raw": "肉弾攻撃1+爆発+転倒。",
@@ -299,7 +299,7 @@
   },
   "M3-05": {
     "name": "にくむち", "category": "攻撃", "allowedLocations": "任意",
-    "tags": ["攻撃", "アクション", "肉弾攻撃", "連撃"],
+    "tags": ["攻撃", "アクション", "肉弾攻撃", "連撃"], "maliceLevel": 1.5,
     "timing": "アクション", "cost": 3, "range": "0～1",
     "description": "肉弾攻撃2+連撃1", 
     "description_raw": "肉弾攻撃2+連撃1。",
@@ -309,7 +309,7 @@
   },
   "M3-06": {
     "name": "やぶれひまく", "category": "防御", "allowedLocations": "任意",
-    "tags": ["防御", "ダメージ"],
+    "tags": ["防御", "ダメージ"], "maliceLevel": 1.5,
     "timing": "ダメージ", "cost": 0, "range": "自身",
     "description": "防御2", 
     "description_raw": "防御2。",
@@ -319,7 +319,7 @@
   },
   "M3-07": {
     "name": "けもあし", "category": "移動", "allowedLocations": "脚",
-    "tags": ["移動", "アクション"],
+    "tags": ["移動", "アクション"], "maliceLevel": 1.5,
     "timing": "アクション", "cost": 2, "range": "自身",
     "description": "移動1～2", 
     "description_raw": "移動1～2。",
@@ -329,7 +329,7 @@
   },
   "M3-08": {
     "name": "しびとだけ", "category": "妨害", "allowedLocations": "任意",
-    "tags": ["妨害", "ジャッジ"],
+    "tags": ["妨害", "ジャッジ"], "maliceLevel": 1.5,
     "timing": "ジャッジ", "cost": 0, "range": "0",
     "description": "妨害2", 
     "description_raw": "妨害2。",
@@ -339,7 +339,7 @@
   },
   "M3-09": {
     "name": "だるま", "category": "防御", "allowedLocations": "胴",
-    "tags": ["防御", "オート"],
+    "tags": ["防御", "オート"], "maliceLevel": 1.5,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "ダメージを任意の箇所に振り分けてよい。切断判定は、ダメージを受けた箇所１つを選ぶ", 
     "description_raw": "任意の箇所を望む数選び、ダメージを振り分けてよい。切断判定は、ダメージを受けた箇所の１つを選んで行う。",
@@ -359,7 +359,7 @@
   },
   "M3-11": {
     "name": "かめれおん", "category": "攻撃", "allowedLocations": "胴",
-    "tags": ["アクション", "攻撃", "ホラー", "レギオン"],
+    "tags": ["アクション", "攻撃", "ホラー", "レギオン"], "maliceLevel": 1.5,
     "timing": "アクション", "cost": 2, "range": "自身",
     "description": "ターン終了まで、攻撃マニューバはホラー・レギオンを対象にできなくなる。",
     "description_raw": "ターンが終了するか、攻撃マニューバの使用を宣言するまで、あなたは敵のホラー・レギオンのマニューバ対象にならない。",
@@ -369,7 +369,7 @@
   },
   "M3-12": {
     "name": "にくへび", "category": "攻撃", "allowedLocations": "任意",
-    "tags": ["アクション", "攻撃", "肉弾攻撃", "連撃", "振り直し"],
+    "tags": ["アクション", "攻撃", "肉弾攻撃", "連撃", "振り直し"], "maliceLevel": 1.5,
     "timing": "アクション", "cost": 3, "range": "0",
     "description": "肉弾攻撃2+連撃2。攻撃判定において、連撃で発生した判定も含めて1回だけダイスを振りなおしてよい。",
     "description_raw": "肉弾攻撃2+連撃2。攻撃判定において、(連撃で発生した判定も含めた中で)1回だけサイコロを振りなおしてもよい。",

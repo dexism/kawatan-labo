@@ -6,7 +6,7 @@
   "//": "--- レベル1 改造 (R1) ---",
   "R1-01": {
     "name": "リミッター", "category": "行動値", "allowedLocations": "任意",
-    "tags": ["行動値", "オート", "損傷"],
+    "tags": ["行動値", "オート", "損傷"], "maliceLevel": 1,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "バトル中に損傷した際、最大行動値+2。効果中はこのパーツを修復不可。", 
     "description_raw": "このパーツがバトルパート中に損傷した時、宣言することで最大行動値に+2してもよい。バトルパート終了までこの効果は続き、効果中はこのパーツを修復できない。",
@@ -16,7 +16,7 @@
   },
   "R1-02": {
     "name": "アドレナリン", "category": "行動値", "allowedLocations": "頭",
-    "tags": ["行動値", "オート"],
+    "tags": ["行動値", "オート"], "maliceLevel": 1,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "最大行動値+1", 
     "description_raw": "最大行動値+1。",
@@ -26,7 +26,7 @@
   },
   "R1-03": {
     "name": "セイバートゥース", "category": "攻撃", "allowedLocations": "頭",
-    "tags": ["攻撃", "アクション", "肉弾攻撃"],
+    "tags": ["攻撃", "アクション", "肉弾攻撃"], "maliceLevel": 1,
     "timing": "アクション", "cost": 2, "range": "0",
     "description": "肉弾攻撃2", 
     "description_raw": "肉弾攻撃2。",
@@ -36,7 +36,7 @@
   },
   "R1-04": {
     "name": "ジェットノズル", "category": "移動", "allowedLocations": "任意",
-    "tags": ["移動", "ダメージ", "損傷"],
+    "tags": ["移動", "ダメージ", "損傷"], "maliceLevel": 1,
     "timing": "ダメージ", "cost": "基本パーツ1", "range": "自身",
     "description": "白兵・肉弾ダメージ+1(重複不可)。自身が与えたダメージのみ。任意の基本パーツ1つを損傷。使用制限なし。", 
     "description_raw": "自身がダメージを与えた際のみ使用可。コストとして、あなたは任意の基本パーツを1つ損傷する。白兵・肉弾ダメージ+1(重複不可)。1ターンに何度でも使用してよい。",
@@ -52,7 +52,7 @@
   },
   "R1-05": {
     "name": "シザーハンズ", "category": "攻撃", "allowedLocations": "腕",
-    "tags": ["攻撃", "アクション", "肉弾攻撃", "切断"],
+    "tags": ["攻撃", "アクション", "肉弾攻撃", "切断"], "maliceLevel": 1,
     "timing": "アクション", "cost": 2, "range": "0",
     "description": "肉弾攻撃1+切断", 
     "description_raw": "肉弾攻撃1+切断。",
@@ -62,7 +62,7 @@
   },
   "R1-06": {
     "name": "アーマースキン", "category": "防御", "allowedLocations": "胴",
-    "tags": ["防御", "ダメージ"],
+    "tags": ["防御", "ダメージ"], "maliceLevel": 1,
     "timing": "ダメージ", "cost": 0, "range": "自身",
     "description": "防御1", 
     "description_raw": "防御1。",
@@ -72,7 +72,7 @@
   },
   "R1-07": {
     "name": "スチールボーン", "category": "防御", "allowedLocations": "胴",
-    "tags": ["防御", "ダメージ", "切断"],
+    "tags": ["防御", "ダメージ", "切断"], "maliceLevel": 1,
     "timing": "ダメージ", "cost": 1, "range": "自身",
     "description": "防御1、「切断」無効化", 
     "description_raw": "防御1+「切断」無効化。",
@@ -85,7 +85,7 @@
   },
   "R1-08": {
     "name": "ボルトヘッド", "category": "支援", "allowedLocations": "頭",
-    "tags": ["支援", "ジャッジ"],
+    "tags": ["支援", "ジャッジ"], "maliceLevel": 1,
     "timing": "ジャッジ", "cost": 1, "range": "自身",
     "description": "支援2", 
     "description_raw": "支援2。",
@@ -95,7 +95,7 @@
   },
   "R1-09": {
     "name": "リモートアタック", "category": "攻撃", "allowedLocations": "任意",
-    "tags": ["攻撃", "アクション", "肉弾攻撃", "転倒"],
+    "tags": ["攻撃", "アクション", "肉弾攻撃", "転倒"], "maliceLevel": 1,
     "timing": "アクション", "cost": 3, "range": "0～1",
     "description": "肉弾攻撃1+転倒", 
     "description_raw": "肉弾攻撃1+転倒。",
@@ -115,7 +115,7 @@
   },
   "R1-11": {
     "name": "ジャンクパーツ", "category": "修復", "allowedLocations": "任意",
-    "tags": ["オート", "修復", "破壊"],
+    "tags": ["オート", "修復", "破壊"], "maliceLevel": 1,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "このパーツが戦闘終了時に破壊されていなければ、このパーツが装備された箇所の基本パーツは全て修復される。",
     "description_raw": "このパーツが破壊されず戦闘終了したなら、このパーツが装備された箇所の基本パーツは全て損傷前の状態に戻る。",
@@ -137,7 +137,7 @@
   "//": "--- レベル2 改造 (R2) ---",
   "R2-01": {
     "name": "ゾンビボム", "category": "攻撃", "allowedLocations": "任意",
-    "tags": ["攻撃", "ダメージ", "砲撃攻撃", "爆発", "全体攻撃", "損傷"],
+    "tags": ["攻撃", "ダメージ", "砲撃攻撃", "爆発", "全体攻撃", "損傷"], "maliceLevel": 3,
     "timing": "ダメージ", "cost": 0, "range": "0",
     "description": "このパーツが損傷した際、砲撃攻撃2+爆発+全体攻撃", 
     "description_raw": "このパーツが損傷した際のみ使用可。判定値8(ジャッジタイミング発生)の「砲撃攻撃2+爆発+全体攻撃」を与える。",
@@ -147,7 +147,7 @@
   },
   "R2-02": {
     "name": "リフレックス", "category": "行動値", "allowedLocations": "任意",
-    "tags": ["行動値", "オート"],
+    "tags": ["行動値", "オート"], "maliceLevel": 1,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "最大行動値+1", 
     "description_raw": "最大行動値+1。",
@@ -157,7 +157,7 @@
   },
   "R2-03": {
     "name": "エレクトリッガー", "category": "攻撃", "allowedLocations": "任意",
-    "tags": ["攻撃", "アクション", "肉弾攻撃", "転倒"],
+    "tags": ["攻撃", "アクション", "肉弾攻撃", "転倒"], "maliceLevel": 1,
     "timing": "アクション", "cost": 2, "range": "0",
     "description": "肉弾攻撃1+転倒", 
     "description_raw": "肉弾攻撃1+転倒。",
@@ -167,7 +167,7 @@
   },
   "R2-04": {
     "name": "ドリル", "category": "攻撃", "allowedLocations": "任意",
-    "tags": ["攻撃", "アクション", "白兵攻撃", "防御"],
+    "tags": ["攻撃", "アクション", "白兵攻撃", "防御"], "maliceLevel": 1,
     "timing": "アクション", "cost": 3, "range": "0",
     "description": "白兵攻撃2、「防御」無効", 
     "description_raw": "白兵攻撃2、この攻撃に対して「防御」は全て無効。",
@@ -177,7 +177,7 @@
   },
   "R2-05": {
     "name": "アサシンブレード", "category": "攻撃", "allowedLocations": "任意",
-    "tags": ["攻撃", "ラピッド", "白兵攻撃", "連撃"],
+    "tags": ["攻撃", "ラピッド", "白兵攻撃", "連撃"], "maliceLevel": 1,
     "timing": "ラピッド", "cost": 2, "range": "0",
     "description": "白兵攻撃2+連撃1", 
     "description_raw": "白兵攻撃2+連撃1。",
@@ -187,7 +187,7 @@
   },
   "R2-06": {
     "name": "レーザービーム", "category": "攻撃", "allowedLocations": "任意",
-    "tags": ["攻撃", "アクション", "射撃攻撃", "切断"],
+    "tags": ["攻撃", "アクション", "射撃攻撃", "切断"], "maliceLevel": 1,
     "timing": "アクション", "cost": 3, "range": "0～3",
     "description": "射撃攻撃1+切断", 
     "description_raw": "射撃攻撃1+切断。",
@@ -197,7 +197,7 @@
   },
   "R2-07": {
     "name": "スコープ", "category": "支援", "allowedLocations": "頭",
-    "tags": ["支援", "ジャッジ"],
+    "tags": ["支援", "ジャッジ"], "maliceLevel": 1,
     "timing": "ジャッジ", "cost": 0, "range": "自身",
     "description": "支援2。射撃・砲撃攻撃のみ", 
     "description_raw": "支援2。射撃・砲撃攻撃にのみ可。",
@@ -207,7 +207,7 @@
   },
   "R2-08": {
     "name": "スパイク", "category": "強化", "allowedLocations": "任意",
-    "tags": ["強化", "ダメージ"],
+    "tags": ["強化", "ダメージ"], "maliceLevel": 1,
     "timing": "ダメージ", "cost": 1, "range": "自身",
     "description": "白兵・肉弾攻撃の与ダメージ+2", 
     "description_raw": "自身がダメージを与えた際のみ使用可。白兵・肉弾ダメージ+2。",
@@ -223,7 +223,7 @@
   },
   "R2-09": {
     "name": "テンタクル", "category": "妨害", "allowedLocations": "任意",
-    "tags": ["移動妨害", "ラピッド"],
+    "tags": ["移動妨害", "ラピッド"], "maliceLevel": 1,
     "timing": "ラピッド", "cost": 1, "range": "0～1",
     "description": "移動妨害1", 
     "description_raw": "移動妨害1。",
@@ -233,7 +233,7 @@
   },
   "R2-10": {
     "name": "ワイヤーリール", "category": "移動", "allowedLocations": "任意",
-    "tags": ["移動", "ラピッド"],
+    "tags": ["移動", "ラピッド"], "maliceLevel": 1,
     "timing": "ラピッド", "cost": 3, "range": "0～2",
     "description": "移動1", 
     "description_raw": "移動1。",
@@ -253,7 +253,7 @@
   },
   "R2-12": {
     "name": "エナジーチューブ", "category": "行動値", "allowedLocations": "任意",
-    "tags": ["オート", "行動値", "損傷"],
+    "tags": ["オート", "行動値", "損傷"], "maliceLevel": 1,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "最大行動値+2。装備箇所にダメージを受けたらパーツ1つ追加で損傷。",
     "description_raw": "最大行動値+2。装備箇所にダメージを受けた際、あなたは任意の基本パーツ1つを追加で損傷しなくてはならない。",
@@ -268,7 +268,7 @@
   "//": "--- レベル3 改造 (R3) ---",
   "R3-01": {
     "name": "ガントレット", "category": "強化", "allowedLocations": "腕",
-    "tags": ["強化", "防御", "オート"],
+    "tags": ["強化", "防御", "オート"], "maliceLevel": 1.5,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "腕へのダメージに防御1。腕パーツの白兵・肉弾攻撃の与ダメージ+1。", 
     "description_raw": "腕のみ、ダメージに対して常に「防御1」。腕部にある白兵・肉弾攻撃マニューバのダメージ+1。",
@@ -281,7 +281,7 @@
   },
   "R3-02": {
     "name": "キャンサー", "category": "防御", "allowedLocations": "脚",
-    "tags": ["防御", "ラピッド使用", "オート"],
+    "tags": ["防御", "ラピッド使用", "オート"], "maliceLevel": 1.5,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "脚へのダメージに防御1。移動時、白兵・肉弾マニューバ1つをラピッドで使用可。", 
     "description_raw": "脚のみ、ダメージに対して常に「防御1」。バトルパートで移動時、白兵・肉弾攻撃マニューバを1つ、「ラピッド」で使用可。",
@@ -294,7 +294,7 @@
   },
   "R3-03": {
     "name": "マニピュレーター", "category": "妨害", "allowedLocations": "任意",
-    "tags": ["移動妨害", "転倒", "ラピッド"],
+    "tags": ["移動妨害", "転倒", "ラピッド"], "maliceLevel": 1.5,
     "timing": "ラピッド", "cost": 2, "range": "0～1",
     "description": "移動妨害1+転倒", 
     "description_raw": "移動妨害1+転倒。",
@@ -307,7 +307,7 @@
   },
   "R3-04": {
     "name": "サイボーグ", "category": "防御", "allowedLocations": "胴",
-    "tags": ["防御", "ダメージ"],
+    "tags": ["防御", "ダメージ"], "maliceLevel": 1.5,
     "timing": "ダメージ", "cost": 0, "range": "自身",
     "description": "防御2", 
     "description_raw": "防御2。",
@@ -317,7 +317,7 @@
   },
   "R3-05": {
     "name": "アームバイス", "category": "補助", "allowedLocations": "腕",
-    "tags": ["支援", "妨害", "ジャッジ"],
+    "tags": ["支援", "妨害", "ジャッジ"], "maliceLevel": 1.5,
     "timing": "ジャッジ", "cost": 1, "range": "0",
     "description": "支援2か妨害2", 
     "description_raw": "支援2か妨害2。",
@@ -327,7 +327,7 @@
   },
   "R3-06": {
     "name": "オートセパレート", "category": "防御", "allowedLocations": "胴",
-    "tags": ["防御", "オート", "切断"],
+    "tags": ["防御", "オート", "切断"], "maliceLevel": 1.5,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "「切断」無効化", 
     "description_raw": "「切断」を常に無効化してよい。",
@@ -337,7 +337,7 @@
   },
   "R3-07": {
     "name": "エンバーミング", "category": "妨害", "allowedLocations": "頭",
-    "tags": ["妨害", "ジャッジ"],
+    "tags": ["妨害", "ジャッジ"], "maliceLevel": 1.5,
     "timing": "ジャッジ", "cost": 2, "range": "0",
     "description": "妨害2。使用制限なし（1判定1回）。", 
     "description_raw": "妨害2。1ターン何度使ってもよい。ただし、1回の判定への重複は不可。",
@@ -347,7 +347,7 @@
   },
   "R3-08": {
     "name": "パイルバンカー", "category": "攻撃", "allowedLocations": "任意",
-    "tags": ["攻撃", "アクション", "白兵攻撃", "防御", "移動"],
+    "tags": ["攻撃", "アクション", "白兵攻撃", "防御", "移動"], "maliceLevel": 1.5,
     "timing": "アクション", "cost": 2, "range": "0",
     "description": "白兵攻撃2、「防御」無効、命中時対象に移動1", 
     "description_raw": "白兵攻撃2、この攻撃に対して「防御」は全て無効。なお、攻撃が命中したなら対象を「移動1」してもよい。",
@@ -357,7 +357,7 @@
   },
   "R3-09": {
     "name": "ライトセイバー", "category": "攻撃", "allowedLocations": "任意",
-    "tags": ["攻撃", "アクション", "白兵攻撃", "切断", "連撃"],
+    "tags": ["攻撃", "アクション", "白兵攻撃", "切断", "連撃"], "maliceLevel": 1.5,
     "timing": "アクション", "cost": 2, "range": "0",
     "description": "白兵攻撃1+切断+連撃1", 
     "description_raw": "白兵攻撃1+切断+連撃1。",
@@ -367,7 +367,7 @@
   },
   "R3-10": {
     "name": "ホッパー", "category": "移動", "allowedLocations": "脚",
-    "tags": ["移動", "ラピッド", "移動妨害"],
+    "tags": ["移動", "ラピッド", "移動妨害"], "maliceLevel": 1.5,
     "timing": "ラピッド", "cost": 2, "range": "自身",
     "description": "移動1、「移動妨害」無効", 
     "description_raw": "移動1、この移動に対して「移動妨害」は全て無効。",
@@ -387,7 +387,7 @@
   },
   "R3-12": {
     "name": "ロケットパック", "category": "移動", "allowedLocations": "胴",
-    "tags": ["アクション", "移動"],
+    "tags": ["アクション", "移動"], "maliceLevel": 1.5,
     "timing": "アクション", "cost": 0, "range": "自身",
     "description": "移動1～2。1つのパートにつき1回のみ。",
     "description_raw": "移動1～2。1つのパートにつき、1回のみ使用可。",

@@ -2,7 +2,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.1.2";
+export const version = "1.1.4";
 
 import * as data from './data-handler.js';
 
@@ -31,6 +31,14 @@ export function getManeuverSourceText(maneuver) {
     const id = maneuver.id;
     const prefix = id.substring(0, 2);
     
+    // 悪意点表示用のヘルパー関数
+    const getMaliceText = (m) => {
+        if (typeof m.maliceLevel === 'number') {
+            return ` <span class="malice-level">：悪意${m.maliceLevel}</span>`;
+        }
+        return ''; // maliceLevelキーがなければ何も表示しない
+    };
+
     // --- ポジションスキルの判定 ---
     if (coreData.positions[prefix]) {
         return `ポジションスキル：${coreData.positions[prefix].name}`;
@@ -41,17 +49,22 @@ export function getManeuverSourceText(maneuver) {
         return `クラススキル：${coreData.classes[prefix].name}`;
     }
     // --- 基本パーツの判定 ---
-    if (prefix === 'BP') return '基本パーツ';
+    if (prefix === 'BP') {
+        return `基本パーツ${getMaliceText(maneuver)}`;
+    }
     // --- 強化パーツの判定 ---
     const enhType = id.substring(0, 1);
     const enhLevel = id.substring(1, 2);
     if (coreData.enhancementTypes[enhType] && ['1', '2', '3'].includes(enhLevel)) {
-        return `強化パーツ：${enhLevel}レベル${coreData.enhancementTypes[enhType].name}`;
+        return `強化パーツ：${enhLevel}レベル${coreData.enhancementTypes[enhType].name}${getMaliceText(maneuver)}`;
     }
     // --- 手駒専用パーツの判定 ---
     if (id.startsWith('P')) {
-        const maliceLevel = parseInt(id.substring(1, 2), 10) / 2;
-        return `手駒専用パーツ：悪意${maliceLevel}`;
+        // P0パーツとそれ以外で表示を分ける
+        const maliceText = typeof maneuver.maliceLevel === 'number' && maneuver.maliceLevel > 0 
+            ? `：悪意${maneuver.maliceLevel}` 
+            : '';
+        return `手駒専用パーツ${maliceText}`;
     }
     // --- 手駒専用スキルの判定 ---
     if (coreData.pawnSkills[prefix]) {
