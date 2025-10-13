@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.3.11";
+export const version = "1.3.12";
 
 import * as stateManager from './state-manager.js';
 import * as ui from './ui-manager.js';
@@ -83,9 +83,9 @@ export function initialize() {
                 const success = await stateManager.loadStateFromFile(jsonString);
                 
                 // 2. 成功した場合のみ、UI全体を更新する
-                // if (success) {
-                //     ui.updateAllUI();
-                // }
+                if (success) {
+                    ui.updateAllUI();
+                }
             };
             
             // ファイルの読み込みを開始

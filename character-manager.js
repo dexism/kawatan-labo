@@ -6,7 +6,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.8.7";
+export const version = "1.8.8";
 
 // --- モジュールのインポート ---
 import * as data from './data-handler.js';
@@ -112,24 +112,37 @@ function createCharacterInstanceFromObject(characterObject, type, initialArea) {
     return newChar;
 }
 
+/**
+ * 【新設】キャラクターが同じエリアにいる同名レギオンと合流する
+ * この関数は外部から直接呼び出されることは想定せず、内部でのみ使用する
+ */
 function mergeCharactersOnBoard() {
     const charactersToMerge = characters.filter(c => c.skills && c.skills.includes('合流'));
     if (charactersToMerge.length < 2) return;
+
     const groups = new Map();
+    // 同じ名前、同じエリア、同じタイプ(PC/Enemy)でグループ化する
     charactersToMerge.forEach(char => {
-        const key = `${char.position}-${char.area}`;
+        const key = `${char.name}-${char.area}-${char.type}`;
         if (!groups.has(key)) {
             groups.set(key, []);
         }
         groups.get(key).push(char);
     });
+
     let merged = false;
     groups.forEach(group => {
         if (group.length < 2) return;
+
+        // グループの最初のキャラクターを代表として残す
         const representative = group[0];
+        
+        // 2体目以降のキャラクターを代表に合算し、盤面から削除する
         for (let i = 1; i < group.length; i++) {
             const charToMerge = group[i];
             representative.stackCount += charToMerge.stackCount;
+            
+            // characters 配列から直接削除する
             const indexToRemove = characters.findIndex(c => c.id === charToMerge.id);
             if (indexToRemove !== -1) {
                 characters.splice(indexToRemove, 1);
@@ -137,8 +150,9 @@ function mergeCharactersOnBoard() {
         }
         merged = true;
     });
+
     if (merged) {
-        console.log("キャラクターが合流しました。");
+        console.log("レギオンが合流しました。");
     }
 }
 
@@ -229,25 +243,43 @@ export function getCharacterById(id) {
 }
 
 export function addCharacterFromTemplate(templateId, type, initialArea) {
-    const newChar = createCharacterInstance(templateId, type, initialArea);
-    if (!newChar) return null;
-
-    newChar.area = initialArea || newChar.initialArea || ((type === 'pc') ? '煉獄' : '奈落');
-
-    if (type === 'pc') {
-        initializeRegretsForPC(newChar);
+    const template = undeadTemplates[templateId];
+    if (!template) {
+        console.error(`テンプレートIDが見つかりません: ${templateId}`);
+        return; // ★ 失敗した場合はここで終了
     }
 
-    recalculateMaxActionValue(newChar);
-    newChar.actionValue = newChar.maxActionValue;
-    initializeManeuverLimits(newChar);
+    const count = (template.category === 'レギオン') ? 5 : 1;
+    let lastName = '';
 
-    characters.push(newChar);
-    
-    console.log(`${newChar.name} (${type}) を戦場に追加しました。`);
+    for (let i = 0; i < count; i++) {
+        const newChar = createCharacterInstance(templateId, type, initialArea);
+        if (!newChar) continue;
+
+        newChar.area = initialArea || newChar.initialArea || ((type === 'pc') ? '煉獄' : '奈落');
+        if (type === 'pc') {
+            initializeRegretsForPC(newChar);
+        }
+        recalculateMaxActionValue(newChar);
+        newChar.actionValue = newChar.maxActionValue;
+        initializeManeuverLimits(newChar);
+        characters.push(newChar);
+        lastName = newChar.name;
+    }
+
+    if (lastName) {
+        console.log(`${lastName} (${type}) を${count > 1 ? count + '体' : ''}戦場に追加しました。`);
+    }
+
+    // ループ完了後に合流処理を一度だけ呼び出す
     mergeCharactersOnBoard();
+    
+    // 自動保存の命令のみ行い、UI更新の命令は削除
     stateManager.autoSave();
-    return newChar;
+
+    // ★★★ 以下のUI更新命令をすべて削除 ★★★
+    // ui.renderCharacterCards();
+    // ui.checkBattleStartCondition();
 }
 
 export function addCharacterFromObject(characterObject, type) {
@@ -266,7 +298,7 @@ export function addCharacterFromObject(characterObject, type) {
     characters.push(newChar);
 
     console.log(`${newChar.name} (imported ${type}) を戦場に追加しました。`);
-    mergeCharactersOnBoard();
+    // mergeCharactersOnBoard(); // ★★★ この行を削除 ★★★
     stateManager.autoSave();
     return newChar;
 }

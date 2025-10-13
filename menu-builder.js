@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.16.71"; // バージョンを更新
+export const version = "1.16.72"; // バージョンを更新
 
 import * as data from './data-handler.js';
 import * as charManager from './character-manager.js';
@@ -1208,12 +1208,20 @@ export function showUndeadListModal(type) {
                 const item = document.createElement('div');
                 item.className = 'undead-list-item';
                 item.innerHTML = `<img src="${template.img}" alt="${template.name}"><div class="undead-list-item-name">${template.name}</div>`;
+
                 item.onclick = () => {
-                    const count = (template.category === 'レギオン') ? 5 : 1;
-                    for (let i = 0; i < count; i++) charManager.addCharacterFromTemplate(id, type);
-                    ui.renderCharacterCards();
+                    // 1. データ担当にキャラクター追加と合流を依頼する
+                    charManager.addCharacterFromTemplate(id, type);
+                    
+                    // 2. データ処理が終わった後、UI担当に画面全体の再描画を命令する
+                    ui.updateAllUI();
+
+                    // 3. 最後にモーダルを閉じる
                     modal.classList.remove('is-visible');
-                    ui.checkBattleStartCondition();
+
+                    // 以前のコードは削除
+                    // ui.renderCharacterCards();
+                    // ui.checkBattleStartCondition();
                 };
                 listContainer.appendChild(item);
             }
@@ -1366,27 +1374,38 @@ export function getCharacterManeuvers(char) {
 
     // --- 現在アクティブなタイミングを判断 ---
     const activeIndicators = new Set();
-    const { phase, activeActors, actionQueue, damageQueue } = battleState;
+    const { 
+        phase, 
+        activeActors = [], 
+        actionQueue = [], 
+        rapidQueue = [], 
+        damageQueue = [] 
+    } = battleState;
 
+    // 1. 自身の手番なら「アクション」「ラピッド」を有効化
     if (activeActors.some(a => a.id === char.id)) {
-        // このキャラクターが行動権を持つ場合、アクションタイミングに加えて
-        // ラピッドタイミングも有効化する
         activeIndicators.add('アクション');
         activeIndicators.add('ラピッド');
     }
-    
-    const isActionPhaseOver = activeActors.length === 0;
-    if (isActionPhaseOver) {
+
+    // 2. 誰かの行動ラウンドが終わったら（解決フェーズ）、常に「ラピッド」は有効
+    if (activeActors.length === 0) {
         activeIndicators.add('ラピッド');
-        if (actionQueue.some(a => !a.checked)) {
-            activeIndicators.add('ジャッジ');
-        }
     }
+
+    // 3. 【重要】未解決の宣言（アクションまたはラピッド）が1つでもあれば、常に「ジャッジ」を有効化
+    const allDeclarations = [...actionQueue, ...rapidQueue];
+    if (allDeclarations.some(a => !a.checked)) {
+        activeIndicators.add('ジャッジ');
+    }
+
+    // 4. ダメージ処理フェーズなら「ダメージ」を有効化
     if (phase === 'DAMAGE_RESOLUTION' || (actionQueue.every(a => a.checked) && damageQueue.some(d => !d.applied))) {
         activeIndicators.add('ダメージ');
     }
 
-    if (actionQueue.some(a => !a.checked && a.performer.id === char.id)) {
+    // 5. 自身が宣言済みの場合の考慮 (変更なし)
+    if (allDeclarations.some(a => !a.checked && a.performer.id === char.id)) {
         activeIndicators.add('ラピッド');
         activeIndicators.add('ジャッジ');
     }
@@ -1411,49 +1430,19 @@ export function getCharacterManeuvers(char) {
         
         // --- 3. ジャッジタイミングの厳格な判定 ---
         if (isUsable && maneuver.timing === 'ジャッジ') {
-            const isSupport = maneuver.category === '支援' || maneuver.tags.includes('支援');
-            const isHindrance = maneuver.category === '妨害' || maneuver.tags.includes('妨害');
-            let canUse = false;
-
-            if (isSupport) {
-                if (maneuver.range === '自身') {
-                    if (battleState.actionQueue.some(d => !d.checked && d.performer.id === char.id && d.sourceManeuver.tags.includes('攻撃'))) {
-                        canUse = true;
-                    }
-                } else {
-                    const isSelfAttacking = battleState.actionQueue.some(d => !d.checked && d.performer.id === char.id && d.sourceManeuver.tags.includes('攻撃'));
-                    if (isSelfAttacking) {
-                        canUse = true;
-                    } else {
-                        const attackingAllies = battleState.actionQueue
-                            .filter(d => !d.checked && d.performer.type === char.type && d.performer.id !== char.id && d.sourceManeuver.tags.includes('攻撃'))
-                            .map(d => d.performer);
-                        if (attackingAllies.length > 0) {
-                            if (checkTargetAvailability(char, maneuver, attackingAllies).hasTarget) {
-                                canUse = true;
-                            }
-                        }
-                    }
-                }
+            // ★★★ ここからが修正箇所です ★★★
+            // 宣言可能な対象が存在するかどうかを、getTargetableDeclarationsを呼び出して判定する。
+            // これにより、メニュー表示と宣言実行時のロジックが完全に一致する。
+            if (getTargetableDeclarations(char, maneuver).length === 0) {
+                isUsable = false;
             }
-            if (!canUse && isHindrance) {
-                if (maneuver.range === '自身') {
-                     if (battleState.actionQueue.some(d => !d.checked && d.target?.id === char.id && d.sourceManeuver.tags.includes('攻撃'))) {
-                        canUse = true;
-                    }
-                } else {
-                    if (battleState.actionQueue.some(d => !d.checked && d.performer.type !== char.type && d.sourceManeuver.tags.includes('攻撃') && checkTargetAvailability(char, maneuver, [d.performer]).hasTarget)) {
-                        canUse = true;
-                    }
-                }
-            }
-            if (!canUse) isUsable = false;
+            // ★★★ 修正はここまでです ★★★
         }
 
         // --- 4. ダメージタイミングの厳格な判定 ---
         if (isUsable && maneuver.timing === 'ダメージ') {
             let canUseInDamagePhase = false;
-            const isDefense = maneuver.category === '防御' || maneuver.tags.includes('防御');
+            const isDefense = maneuver.tags?.includes('防御');
             if (isDefense) {
                 if (maneuver.range === '自身') {
                     if (battleState.damageQueue.some(d => !d.applied && d.target.id === char.id)) {
@@ -1934,28 +1923,67 @@ function showImageSelectionModal(characterToUpdate, closeDetailsModalFn) {
 function getTargetableDeclarations(actor, maneuver) {
     const state = battleLogic.getBattleState();
     const actorAreaIndex = rows.indexOf(actor.area);
-    const range = maneuver.range;
-    if (typeof range !== 'string' && typeof range !== 'number') return [];
-    const rangeParts = range.toString().split('～');
-    const minRange = parseInt(rangeParts[0], 10);
-    const maxRange = parseInt(rangeParts[1] || rangeParts[0], 10);
+
+    // 以前のコード：
+    // const range = maneuver.range;
+    // if (typeof range !== 'string' && typeof range !== 'number') return [];
+    // const rangeParts = range.toString().split('～');
+    // const minRange = parseInt(rangeParts[0], 10);
+    // const maxRange = parseInt(rangeParts[1] || rangeParts[0], 10);
+
+    // 修正後のコード：
+    // calculateManeuverRange を呼び出して、ボーナスを含んだ正確な射程を計算する
+    const { minRange, maxRange } = calculateManeuverRange(actor, maneuver);
+
     if (isNaN(minRange)) return [];
 
-    return state.actionQueue.filter(decl => {
+    const allDeclarations = [...state.actionQueue, ...state.rapidQueue];
+
+    return allDeclarations.filter(decl => {
         if (decl.checked) return false;
+
+        // 支援/妨害の対象となる宣言は「攻撃」タグを持つものに限定する
+        if (!decl.sourceManeuver.tags?.includes('攻撃')) {
+            return false;
+        }
+
         const performer = decl.performer;
         const targetAreaIndex = rows.indexOf(performer.area);
         if (targetAreaIndex === -1) return false;
         
         const distance = Math.abs(actorAreaIndex - targetAreaIndex);
+        // ケース1：射程が「自身」のマニューバの場合 (例：【感覚制御マスク】)
+        // この場合、宣言者が味方か敵かは問わない。
+        // 射程チェックは、距離ベースではなく、単に有効な宣言があるかどうかで判断する。
+        if (maneuver.range === '自身') {
+            // 距離に関係なく、有効な攻撃宣言が存在すれば対象とみなす
+            return true;
+        }
+
+        // ケース2：射程が「自身」以外の場合 (通常の支援・妨害)
+        // 従来通り、距離と所属をチェックする
         if (distance < minRange || distance > maxRange) return false;
         
-        // 支援マニューバの場合、宣言者が味方である必要がある
-        if (maneuver.category === '支援' && actor.type !== performer.type) return false;
-        // 妨害マニューバの場合、宣言者が敵である必要がある
-        if (maneuver.category === '妨害' && actor.type === performer.type) return false;
+        // --- 支援/妨害の対象が味方か敵かの判定 ---
+        const isSupport = maneuver.tags?.includes('支援');
+        const isHindrance = maneuver.tags?.includes('妨害');
+
+        const isTargetAlly = actor.type === performer.type;
+
+        // ① 支援マニューバであり、対象が味方か？
+        let canSupport = false;
+        if (isSupport && isTargetAlly) {
+            canSupport = true;
+        }
+
+        // ② 妨害マニューバであり、対象が敵か？
+        let canHinder = false;
+        if (isHindrance && !isTargetAlly) {
+            canHinder = true;
+        }
         
-        return true;
+        // ③ 支援可能か、あるいは妨害可能であれば、有効な対象とする
+        return canSupport || canHinder;
     });
 }
 
@@ -2091,20 +2119,27 @@ export function showAttackConfirmationModal(performer, target, maneuver, index) 
     const targetDeclaration = state.actionQueue[index];
     if (!targetDeclaration) return;
 
+    // ★★★ ここからが今回の修正箇所です ★★★
+
     let totalBonus = 0;
+    const inherentSources = []; // 《固有修正》の表示用配列
     const supportSources = [];
     const hindranceSources = [];
 
-    const attackEffect = maneuver.effects.find(e => e.ref === 'GENERIC_ATTACK');
-    
+    // --- 1. マニューバ自身の「固有修正」を計算 ---
+    const attackEffect = maneuver.effects?.find(e => e.ref === 'GENERIC_ATTACK');
     if (attackEffect && attackEffect.params && attackEffect.params.attack_bonus) {
         const bonus = parseInt(attackEffect.params.attack_bonus, 10);
         if (!isNaN(bonus)) {
             totalBonus += bonus;
-            supportSources.push(`【${maneuver.name}】自体 (${bonus > 0 ? '+' : ''}${bonus})`);
+            // 固有修正リストに追加
+            inherentSources.push(`<div>【${maneuver.name}】自身の効果 (${bonus > 0 ? '+' : ''}${bonus})</div>`);
         }
     }
 
+    // --- 2. 外部からの「支援」「妨害」を計算 (ロジックはほぼ同じ) ---
+    
+    // a) パッシブスキル（オート）によるボーナス
     const performerManeuvers = getCharacterManeuvers(performer);
     performerManeuvers.filter(m => m.data.timing === 'オート' && !m.isDamaged).forEach(m => {
         if (m.data.effects) {
@@ -2112,41 +2147,43 @@ export function showAttackConfirmationModal(performer, target, maneuver, index) 
                 if (effect.ref === 'APPLY_BUFF' && effect.params.stat === 'attackCheckBonus') {
                     const bonus = effect.params.value || 0;
                     totalBonus += bonus;
-                    supportSources.push(`${performer.name}の【${m.data.name}】(${bonus > 0 ? '+' : ''}${bonus})`);
+                    supportSources.push(`<div>${performer.name}の【${m.data.name}】(${bonus > 0 ? '+' : ''}${bonus})</div>`);
                 }
             });
         }
     });
 
-    // c) 実行者(performer)のアクティブなバフ効果
+    // b) 一時的なバフ効果
     if (performer.activeBuffs && performer.activeBuffs.length > 0) {
         performer.activeBuffs.forEach(buff => {
             if (buff.stat === 'attackCheckBonus') {
                 const bonus = buff.value || 0;
                 totalBonus += bonus;
-                supportSources.push(`${performer.name}の【${buff.source}】 (+${bonus})`);
+                supportSources.push(`<div>${performer.name}の【${buff.source}】 (+${bonus})</div>`);
             }
         });
     }
 
-    // 3. 実際に宣言されたジャッジマニューバを計算
+    // c) 宣言されたジャッジマニューバ
     state.judgeQueue.forEach(judgeDecl => {
         const judgeManeuver = judgeDecl.sourceManeuver;
         const judgeEffect = judgeManeuver.effects.find(e => e.ref === 'GENERIC_JUDGE_MOD');
 
         if (judgeEffect) {
             let shouldApply = false;
+            const value = judgeEffect.params.value || 0; // ★★★ 最初に効果量を取得
+
             // ケースA: 他者のアクションに介入するジャッジ（支援・妨害）
             if (judgeDecl.judgeTarget && judgeDecl.judgeTarget.id === targetDeclaration.id) {
                 shouldApply = true;
             }
-            // ケースB: 自身の攻撃判定に介入するジャッジ（自己支援）
-            else if ((judgeEffect.params.target === 'self_roll' || judgeEffect.params.target === 'any_roll') && judgeDecl.performer.id === performer.id) {
+            // ケースB: 自身の攻撃判定に介入するジャッジ（自己支援のみ）
+            // ★★★ value > 0 (支援であること) を条件に追加 ★★★
+            else if (value > 0 && (judgeEffect.params.target === 'self_roll' || judgeEffect.params.target === 'any_roll') && judgeDecl.performer.id === performer.id) {
                 shouldApply = true;
             }
 
             if (shouldApply) {
-                const value = judgeEffect.params.value || 0;
                 const sourceName = `${judgeDecl.performer.name}の【${judgeManeuver.name}】`;
                 if (value > 0) {
                     totalBonus += value;
@@ -2159,6 +2196,11 @@ export function showAttackConfirmationModal(performer, target, maneuver, index) 
         }
     });
     
+    // --- 3. HTMLの構築 ---
+    const inherentHtml = inherentSources.length > 0
+        ? inherentSources.join('')
+        : `<div class="modifier-none">- なし -</div>`;
+        
     const supportHtml = supportSources.length > 0
         ? supportSources.map(s => `<div class="modifier-item">${s}</div>`).join('')
         : `<div class="modifier-none">- なし -</div>`;
@@ -2172,6 +2214,10 @@ export function showAttackConfirmationModal(performer, target, maneuver, index) 
     const bodyHtml = `
         <div class="attack-confirm-summary">
             ${performer.name}【${maneuver.name}】 → ${target.name}
+        </div>
+        <div class="attack-confirm-section">
+            <div class="section-header">《固有修正》</div>
+            <div class="modifier-list">${inherentHtml}</div>
         </div>
         <div class="attack-confirm-section">
             <div class="section-header">《支援》</div>
@@ -2218,7 +2264,7 @@ export function buildReferenceMenu() {
         '区分1': ['ポジション', 'クラススキル', '特化スキル', '基本パーツ', '強化パーツ', '手駒専用'],
         '区分2': ['アリス', 'ホリック', 'オートマトン', 'ジャンク', 'コート', 'ソロリティ', 'ステーシー', 'タナトス', 'ゴシック', 'レクイエム', 'バロック', 'ロマネスク', 'サイケデリック', '武装', '変異', '改造'],
         '攻撃': ['肉弾攻撃', '白兵攻撃', '射撃攻撃', '砲撃攻撃', '精神攻撃'],
-        '効果': ['移動', '支援', '妨害', '防御', '移動妨害', '転倒', '切断', '爆発', '全体攻撃', '連撃'],
+        '効果': ['命中補正', '支援', '妨害', '防御', '移動', '移動妨害', '転倒', '切断', '爆発', '全体攻撃', '連撃'],
         '悪意': ['0.5', '1', '1.5', '2', '3', '4', 'その他'],
         '箇所': ['頭', '腕', '胴', '脚', '任意'],
         'タイミング': ['オート', 'アクション', 'ジャッジ', 'ダメージ', 'ラピッド'],

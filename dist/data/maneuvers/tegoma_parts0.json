@@ -103,7 +103,7 @@
     "name": "はなびら", "category": "生贄", "tags": ["オート", "生贄"], "maliceLevel": 0, "description": "効果なし。", "description_raw": "効果なし", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "なし", "effects": [] 
   },
   "P0-18": { 
-    "name": "シュレッダー", "category": "攻撃", "tags": ["攻撃", "アクション", "白兵攻撃", "切断", "支援"], "maliceLevel": 0, "description": "白兵攻撃2+切断、判定+1。", "description_raw": "白兵攻撃2+切断、攻撃判定+1", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "2", "range": "0", "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 2, "attack_bonus": 1, "on_hit": ["SEVERANCE"] } }] 
+    "name": "シュレッダー", "category": "攻撃", "tags": ["攻撃", "アクション", "白兵攻撃", "切断", "命中補正"], "maliceLevel": 0, "description": "白兵攻撃2+切断、判定+1。", "description_raw": "白兵攻撃2+切断、攻撃判定+1", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "2", "range": "0", "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 2, "attack_bonus": 1, "on_hit": ["SEVERANCE"] } }] 
   },
   "P0-19": { 
     "name": "多脚戦車", "category": "移動", 
@@ -290,13 +290,25 @@
     "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 1 } }] 
   },
   "P0-65": { 
-    "name": "脚", "category": "生贄", "tags": ["オート", "生贄"], "maliceLevel": 0, "description": "効果なし。", "description_raw": "効果なし", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "なし", "effects": [] 
+    "name": "脚", "category": "生贄", 
+    "tags": ["オート", "生贄"], "maliceLevel": 0, 
+    "timing": "オート", "cost": "なし", "range": "なし", 
+    "description": "効果なし。", 
+    "description_raw": "効果なし", 
+    "source": { "book": "基本ルールブック" }, 
+    "effects": [] 
   },
   "P0-66": { 
     "name": "大鉈", "category": "攻撃", "tags": ["攻撃", "アクション", "白兵攻撃"], "maliceLevel": 0, "description": "白兵攻撃2。", "description_raw": "白兵攻撃2", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "2", "range": "0", "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 2 } }] 
   },
   "P0-67": { 
-    "name": "寄生胞子", "category": "攻撃", "tags": ["攻撃", "アクション", "射撃攻撃", "爆発", "支援"], "maliceLevel": 0, "description": "射撃攻撃1+爆発、判定+1。", "description_raw": "射撃攻撃1+爆発、攻撃判定+1", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "2", "range": "0～1", "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "射撃", "damage": 1, "attack_bonus": 1, "on_hit": ["EXPLOSION"] } }] 
+    "name": "寄生胞子", "category": "攻撃", 
+    "tags": ["攻撃", "アクション", "射撃攻撃", "爆発", "命中補正"], "maliceLevel": 0, 
+    "timing": "アクション", "cost": "2", "range": "0～1", 
+    "description": "射撃攻撃1+爆発、判定+1。", 
+    "description_raw": "射撃攻撃1+爆発、攻撃判定+1", 
+    "source": { "book": "基本ルールブック" }, 
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "射撃", "damage": 1, "attack_bonus": 1, "on_hit": ["EXPLOSION"] } }] 
   },
   "P0-68": { 
     "name": "よろめくあし", "category": "移動", "tags": ["移動", "アクション"], "maliceLevel": 0, "description": "移動1。", "description_raw": "移動1", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "3", "range": "自身", "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": 1 } }] 

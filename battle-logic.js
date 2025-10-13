@@ -2,7 +2,7 @@
  * @file battle-logic.js
  * @description 戦闘の進行、状態管理、ルール判定、アクション解決を担当するモジュール。
  */
-export const version = "1.22.85"; // UI分離リファクタリング完了版
+export const version = "1.22.86"; // UI分離リファクタリング完了版
 
 import * as charManager from './character-manager.js';
 import * as ui from './ui-manager.js';
@@ -539,7 +539,7 @@ async function resolveSingleAction(declaration, totalBonus = 0) {
     }
 
     if (allOnHitEffects.length > 0) {
-        ui.addLog(`追加効果(${allOnHitEffects.join(',')})が発動！`);
+        ui.addLog(`→ 追加効果(${allOnHitEffects.join(',')})が発動！`);
         for (const effectName of allOnHitEffects) {
             await executeEffect({ ref: effectName, params: {} }, context);
         }
@@ -656,7 +656,7 @@ async function performAttackRoll(action, context) {
                             const items = candidates.map(c => ({ label: c.name, onClick: () => res(c) }));
                             // モーダルの外側クリックでキャンセルできるように onRender を追加
                             ui.showModal({ 
-                                title: '大失敗：誤爆対象を選択', 
+                                title: '→ 大失敗：誤爆対象を選択', 
                                 items,
                                 onRender: (modal, closeFn) => {
                                     const closeModalHandler = () => { closeFn(); res(null); };
@@ -673,7 +673,7 @@ async function performAttackRoll(action, context) {
                                 location: '任意', sourceAction: declaration, applied: false, rollValue: rollValue || 0,
                                 isFumble: true
                             });
-                            ui.addLog(`${selected.name}に誤爆！ 1点のダメージ！`);
+                            ui.addLog(`→ ${selected.name}に誤爆！ 1点のダメージ！`);
                         }
                     } else {
                         ui.addLog("※ [誤射解決エラー]");
@@ -684,15 +684,15 @@ async function performAttackRoll(action, context) {
                 }
                 const hit = result.includes('成功');
                 if (hit) {
-                    ui.addLog(`${target.name}に命中！`);
+                    ui.addLog(`→ ${target.name}に命中！`);
                     battleState.damageQueue.push({
                         id: `damage_${Date.now()}_${Math.random()}`, target, amount: (action.damage || 0) + damageBonus,
                         location: hitLocation, sourceAction: declaration, applied: false, rollValue: rollValue || 0,
                         onHitEffects, damageBonusSources: performer.activeBuffs.filter(b => b.duration === 'onetime_next_action' && b.stat === 'damageBonus').map(b => ({ source: b.source, value: b.value }))
                     });
-                    ui.addLog(`${target.name}に${(action.damage || 0) + damageBonus}点のダメージ！`);
+                    ui.addLog(`→ ${target.name}に${(action.damage || 0) + damageBonus}点のダメージ！`);
                 } else {
-                    ui.addLog(`攻撃失敗`);
+                    ui.addLog(`→ 攻撃失敗`);
                 }
                 charManager.clearTemporaryBuffs(performer.id, 'onetime_next_action');
                 resolve({ hit, on_hit: onHitEffects });
@@ -807,15 +807,15 @@ function performApplyBuff(action, context) {
             break;
     }
 }
-
+//
 function performModifyActionValue(action, context) {
     const target = context.target;
     if (!target) return;
     const value = action.value || 0;
     if (value === 0) return;
     charManager.updateCharacter(target.id, { actionValue: target.actionValue + value });
-    if (value < 0) ui.addLog(`${target.name} は転倒した！ (行動値${value})`);
-    else ui.addLog(`${target.name} の行動値が ${value > 0 ? '+' : ''}${value} された。`);
+    if (value < 0) ui.addLog(`→ ${target.name} は転倒した！ (行動値${value})`);
+    else ui.addLog(`→ ${target.name} の行動値が ${value > 0 ? '+' : ''}${value} された。`);
 }
 
 async function performEscapeRoll(context) {
@@ -826,10 +826,10 @@ async function performEscapeRoll(context) {
             command: 'NC', showToast: true,
             callback: (result) => {
                 if (result.includes('成功')) {
-                    ui.addLog(`逃走成功！ ${performer.name}は戦場から離脱`);
+                    ui.addLog(`→ 逃走成功！ ${performer.name}は戦場から離脱`);
                     charManager.updateCharacter(performer.id, { hasWithdrawn: true });
                 } else {
-                    ui.addLog(`逃走失敗！ ${performer.name}は戦場に残留`);
+                    ui.addLog(`→ 逃走失敗！ ${performer.name}は戦場に残留`);
                 }
                 // 状態変更が完了したことを呼び出し元に伝えるために resolve() する
                 resolve();
