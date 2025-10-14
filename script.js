@@ -7,7 +7,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-const appVersion = "7.10.1420";
+const appVersion = "7.10.1423";
 
 // --- モジュールのインポート ---
 import * as data from './data-handler.js';
@@ -41,6 +41,7 @@ import { version as stateManagerVersion } from './state-manager.js';
 import { version as diceRollerVersion } from './dice-roller.js';
 import { version as characterConverterVersion } from './character-converter.js';
 import { version as menuBuilderVersion } from './menu-builder.js';
+import { version as referenceVersion } from './reference.js';
 import { version as Dice3dVersion } from './dice-3d.js';
 
 // ===================================================================================
@@ -151,6 +152,7 @@ function showUpdateNotesModal() {
         const LATEST_UPDATE_NOTES = `
         <div class="modal-header modal-header-sub">📢主な更新内容 Ver.${appVersion}</div>
         <div class="modal-body welcome-modal-body">
+            <p>◆ リファレンスを刷新、<strong>未練・たからもの・記憶のカケラ・暗示</strong>を追加しました。</p>
             <p>◆ 最新バージョンへの<strong>自動更新機能</strong>を実装しました。</p>
             <p>◆ <strong>📖全マニューバリファレンス</strong>を実装しました。</p>
             <p>◆ <strong>防御・妨害・追加ダメージ・転倒・移動妨害</strong>を実装しました。</p>
@@ -326,6 +328,7 @@ function displayAppVersionInfo() {
         "ui-manager": uiManagerVersion,
         "settings-manager": settingsManagerVersion,
         "state-manager": stateManagerVersion,
+        "reference": referenceVersion,
         "character-converter": characterConverterVersion
     };
     displayVersionInfo(versionInfo);

@@ -203,6 +203,7 @@
     color: var(--color-fore-5);
     font-weight: normal;
     margin-top: 2px;
+    text-indent: 1em;
 }
 /* 永続効果アイコン列 (💡) のための微調整 */
 .item-passive-icon-col {
@@ -484,4 +485,78 @@
     outline: none;
     color: var(--color-fore-2);
     cursor: default; /* カーソルを通常に戻す */
+}
+/* ================================
+   リファレンスUI専用スタイル
+================================ */
+
+.reference-tab-bar {
+    display: flex;
+    overflow-x: auto;
+    /* background-color: var(--color-background-3); */
+    padding: 5px 5px 0 5px;
+    gap: 5px;
+    flex-shrink: 0; /* タブバーが縮まないように */
+    border-bottom: 2px solid var(--color-accent-gold);
+    
+    /* スクロールバーを非表示にする (モダンブラウザ) */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+/* スクロールバーを非表示にする (Webkit系) */
+.reference-tab-bar::-webkit-scrollbar {
+    display: none;
+}
+
+.reference-tab-button {
+    padding: 5px 10px;
+    font-size: 14px;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px 10px 0 0;
+    cursor: pointer;
+    background-color: var(--color-background-4);
+    color: var(--color-text-muted);
+    transition: all 0.2s;
+    white-space: nowrap; /* タブ名が改行されないように */
+}
+
+.reference-tab-button:hover {
+    background-color: var(--color-background-2);
+}
+
+.reference-tab-button.is-active {
+    background-color: var(--color-accent-gold);
+    color: black;
+}
+
+.reference-content-area {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 5px;
+}
+
+/* ================================
+   リファレンス：未練タブ専用スタイル
+================================ */
+
+/* 1行目の右寄せ「発狂：〜」の色とサイズを調整 */
+.ref-regret-madness {
+    background-color: var(--color-fore-5);
+    color: var(--color-background-2);
+    border-radius: 20px;
+    font-size: 16px;
+    padding: 0 8px;
+}
+.ref-regret-flavor {
+    font-weight: normal;
+    font-style: italic;
+    font-size: 14px;
+    margin: 3px 0;
+    padding: 3px 0;
+    border-top   : 1px dashed var(--color-background-6);
+    border-bottom: 1px dashed var(--color-background-6);
+    text-indent: 0;
+    background-color: var(--color-background-3);
+    color: var(--color-fore-6)
 }

@@ -5,22 +5,23 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "2.9.24"; // パッチバージョンを更新
+export const version = "2.10.25"; // パッチバージョンを更新
 
 import * as data from './data-handler.js'; 
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
 import * as ui from './ui-manager.js';
 import { buildDiceMenu, performDiceRoll } from './dice-roller.js';
+import { buildReferenceUI } from './reference.js';
 import { 
     buildManeuverMenu, showCharacterSheetModal, 
     showUndeadListModal, buildMoveMenu, 
     buildPlacementMenu, closeAllMenus, 
-    showAttackConfirmationModal,
-    buildReferenceMenu
+    showAttackConfirmationModal
 } from './menu-builder.js';
 import * as stateManager from './state-manager.js';
 import { calculateFinalDamage } from './battle-helpers.js';
+
 
 // --- モジュール内変数 ---
 let isCardDragging = false;
@@ -68,8 +69,7 @@ export function setupAllEventListeners() {
     const refBtn = document.getElementById('showReferenceBtn');
     if (refBtn) {
         refBtn.onclick = () => {
-            // menu-builder.js に新しく作成する関数を呼び出す
-            buildReferenceMenu();
+            buildReferenceUI();
         };
     }
 
