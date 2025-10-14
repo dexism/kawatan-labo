@@ -1,50 +1,43 @@
-/* マニューバメニュー全体 */
+/* ================================
+   1. マニューバメニュー全体 (基本スタイル)
+================================ */
 #maneuverMenu {
     background-color: var(--color-background-3);
     color:            var(--color-text-muted);
-
-    padding:     10px;
-    margin:       0;
     font-size:   14px;
     font-weight: bold;
-    overflow-y: auto;
-    box-sizing: border-box;
     box-shadow: 0 0 8px black;
-
+    
     position: fixed;
-    visibility: hidden;
-
-    display: flex; /* Flexboxレイアウトに変更 */
-    flex-direction: column; /* 縦方向に要素を並べる */
-    max-width: 600px;
-    height: fit-content;
-    max-height: 100%; /* 高さに制限を設ける */
-    border-radius: 0 10px 10px 0;
-    /* position: fixed; */
     top: 0;
     left: 0;
-    /* display: none; */
+    z-index: 1000;
+
+    /* 通常のメニュー表示用 */
+    max-width: 600px;
+    height: fit-content;
+    max-height: 100%;
+    border-radius: 0 10px 10px 0;
+    
+    /* 表示/非表示制御 */
+    visibility: hidden;
     transform: translateX(-100%);
-    /* opacity: 0.2; */
-    transition: all 0.2s ease-out;
-    margin: 0;
-    z-index:   1000;
+    transition: transform 0.2s ease-out;
 }
 #maneuverMenu.is-visible {
     visibility: visible; 
-    /* opacity: 1; */
     transform: translate(0, 0);
-    transition: all 0.2s ease-out;
 }
 
-/* 第一ブロック：ヘッダー */
+/* ================================
+   2. メニューヘッダー & フィルターバー (共通)
+================================ */
 .maneuver-menu-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0 10px;
     border-bottom: 1px solid var(--color-border);
-    border-radius: 0;
     flex-shrink: 0; /* 縮まないようにする */
 }
 .header-icon {
@@ -68,19 +61,19 @@
     cursor: pointer; 
     color: var(--color-text-muted);
     border-radius: 50%;
+    width: 32px;
+    height: 32px;
     transition: all 0.2s;
 }
 .header-close-btn:hover {
     background-color: var(--color-level-1); 
 }
-/* 第二ブロック：フィルターバー */
+
+/* 通常のマニューバメニュー用フィルターバー */
 .maneuver-menu-filter-bar {
     display: flex;
-    flex-wrap: wrap; /* ボタンが多ければ折り返す */
-    align-content:   start;
+    flex-wrap: wrap;
     justify-content: center;
-    align-items:     center;
-    justify-items:   center;
     gap: 10px;
     padding: 10px;
     border-bottom: 1px solid var(--color-border);
@@ -88,53 +81,33 @@
 }
 .filter-btn {
     font-size: 14px; 
+    border: none;
 }
 .filter-btn.is-active {
     background-color:    gold;
-    box-shadow: 0 0 10px gold;
+    /* box-shadow: 0 0 10px gold; */
     color:               black;
 }
-/* 第三ブロック：マニューバリスト */
+
+/* ================================
+   3. メニューリスト & アイテム (共通スタイル)
+================================ */
 .maneuver-menu-list-container {
-    overflow-y: auto; /* スクロール可能にする */
+    overflow-y: auto;
     padding: 5px;
-    gap: 10ps;
-    cursor: default;
 }
 .maneuver-item-new {
-    margin-top: 10px;
-    /* border: 1px solid var(--color-border); */
+    margin: 5px 0 10px 0;
     background-color: var(--color-background-2); 
     border-radius: 10px;
     transition: all 0.2s;
     color: var(--color-fore-2);
     box-shadow: 0 0 5px var(--color-5);
-
     display: flex;
-    padding: 0; 
-    gap: 0; 
-    overflow: hidden; /* ★ 角丸表示のため */
-
-    /* 色付け用の左ボーダーを追加
-    border-left: 5px solid transparent; 
-    padding-left: 10px; */
+    overflow: hidden;
 }
-/* カテゴリごとの色を左ボーダーに適用 
-.maneuver-item-new.category-color-attack {       border-left-color: var(--color-attack); }
-.maneuver-item-new.category-color-staffing {     border-left-color: var(--color-staffing); }
-.maneuver-item-new.category-color-move {         border-left-color: var(--color-move); }
-.maneuver-item-new.category-color-defense {      border-left-color: var(--color-defense); }
-.maneuver-item-new.category-color-support {      border-left-color: var(--color-support); }
-.maneuver-item-new.category-color-debuff {       border-left-color: var(--color-debuff); }
-.maneuver-item-new.category-color-action-boost { border-left-color: var(--color-action-boost); }
-.maneuver-item-new.category-color-heal {         border-left-color: var(--color-heal); }
-.maneuver-item-new.category-color-utility {      border-left-color: var(--color-utility); }
-.maneuver-item-new.category-color-sacrifice {    border-left-color: var(--color-sacrifice); }
-.maneuver-item-new.category-color-other {        border-left-color: var(--color-other); }
-*/
-/* 新設：カテゴリ列 */
 .item-category-col {
-    writing-mode: sideways-lr; /* 文字を縦書きに */
+    writing-mode: sideways-lr;
     text-align: center;
     padding: 4px 2px;
     font-size: 14px;
@@ -142,50 +115,26 @@
     color: var(--color-fore-4);
     flex-shrink: 0;
 }
-/* アイコン列 (旧 item-left-col) */
-.item-icon-col {
-    flex-shrink: 0;
-    width: 24px; /* 幅を少し広げる */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding-left: 4px; /* 左側に少し余白 */
-    font-size: 14px;
-}
-/* テキスト情報列 */
 .item-right-col {
     flex-grow: 1;
-    padding: 8px; /* ★ パディングをこちらに移動 */
+    padding: 8px;
 }
-/* マスク時のスタイル */
+.maneuver-item-new:not(.is-masked):not(.is-reference-item):hover {
+    background-color: gold;
+    color:            black;
+    cursor: pointer;
+}
 .maneuver-item-new.is-masked { 
     color: var(--color-text-muted);
     cursor: not-allowed;
     background-color: var(--color-background-4); 
 }
-/* 損傷しているマニューバのスタイル */
 .maneuver-item-new.is-damaged .item-name,
 .maneuver-item-new.is-damaged .item-stats,
 .maneuver-item-new.is-damaged .item-row-2 {
     text-decoration: line-through;
     color: var(--color-accent-red);
 }
-
-.maneuver-item-new:not(.is-masked):hover {
-    background-color: var(--color-surface-hover);
-    outline-color:    gold;
-    background-color: gold;
-    color:            black;
-}
-/*
-.item-left-col {
-    flex-shrink: 0;
-    width: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-*/
 .item-row-1 {
     display: flex;
     justify-content: space-between;
@@ -197,106 +146,170 @@
 .item-stats {
     font-size: 14px;
     white-space: nowrap;
+    margin-left: 8px;
 }
 .item-row-2 {
     font-size: 14px;
     color: var(--color-fore-5);
     font-weight: normal;
     margin-top: 2px;
-    text-indent: 1em;
+    padding: 5px;
 }
-/* 永続効果アイコン列 (💡) のための微調整 */
-.item-passive-icon-col {
-    font-size: 16px;
-    padding: 0;
-}
-
-/* 使用済みアイコン列 (✅) のための微調整 */
-.item-status-icon-col {
-    padding: 0;
-    /* 特に調整は不要かもしれませんが、念のため定義 */
-}
-
-.maneuver-group .group-header {
-    font-weight: bold;
-    padding: 8px;
-    border-bottom: 1px solid var(--color-border);
-    color: var(--color-fore-5);
-    font-size: 20px;
-    margin-top: 5px;
-}
-
-.active-buff-icon {
-    display: flex;
-    flex-direction: column; /* アイコンを縦に積む */
-    align-items: center;
-    line-height: 0.9; /* 行間を詰める */
-    font-size: 14px;
-}
-
-/* アイコン列の共通スタイル */
 .item-icon-col {
     flex-shrink: 0;
     width: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
+    display: none;
+}
+.item-passive-icon-col {
+    font-size: 16px;
+}
+/* 中項目 */
+.maneuver-group .group-header {
+    font-weight: bold;
+    margin-top: 10px;
+    padding: 5px 10px;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-fore-5);
+    font-size: 20px;
 }
 
 /* ================================
-   リファレンスメニュー専用スタイル
+   リファレンスUI専用スタイル
 ================================ */
-#maneuverMenu.is-reference-mode {
-    width:  100%;
-    /* max-height: 100%; */
-    pointer-events: auto;
-    display: flex; /* ★ displayをflexに変更 */
-    flex-direction: column; /* ★ 子要素を縦に並べる */
 
+/* --- 4.1. 全体レイアウト --- */
+#maneuverMenu.is-reference-mode {
+    width: 100%;
     height: 100%;
-    margin: 0;
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
     padding: 0;
 }
 #maneuverMenu.is-reference-mode .maneuver-menu-header,
 #maneuverMenu.is-reference-mode .reference-tab-bar {
     margin: 0 10px;
 }
-#maneuverMenu.is-reference-mode .item-passive-icon-col,
-#maneuverMenu.is-reference-mode .item-status-icon-col {
+
+/* --- 4.2. タブバー --- */
+.reference-tab-bar {
+    display: flex;
+    overflow-x: auto;
+    padding: 5px 10px 0 10px;
+    gap: 5px;
+    flex-shrink: 0;
+    border-bottom: 2px solid var(--color-accent-gold);
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.reference-tab-bar::-webkit-scrollbar {
     display: none;
 }
-#maneuverMenu.is-reference-mode .maneuver-item-new {
-    width:  100%;
-    /* max-height: 100%; */
-    /* pointer-events: none; */
+.reference-tab-button {
+    padding: 4px 15px 2px 15px;
+    font-size: 14px;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px 10px 0 0;
+    cursor: pointer;
+    background-color: var(--color-background-4);
+    color: var(--color-text-muted);
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+.reference-tab-button:hover {
+    background-color: var(--color-background-2);
+}
+.reference-tab-button.is-active {
+    background-color: var(--color-accent-gold);
+    color: black;
 }
 
-/* =======================================
-   リファレンスフィルター表示拡張スタイル
-========================================== */
+/* --- 4.3. カルーセルUI (スワイプ機能) --- */
+.reference-content-area {
+    flex-grow: 1;
+    overflow: hidden;
+    position: relative;
+}
+.reference-swipe-wrapper {
+    display: flex;
+    height: 100%;
+    width: 500%; /* 5タブ × 100% */
+    transform: translateX(0%);
+}
+.reference-swipe-wrapper.is-swiping {
+    transition: none !important;
+    user-select: none;
+}
+.reference-swipe-wrapper:not(.is-swiping) {
+    transition: transform 0.3s ease-out;
+}
+.reference-content-page {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    padding: 5px;
+    box-sizing: border-box;
+    -webkit-overflow-scrolling: touch; 
+}
 
-/* フィルターのアコーディオンコンテナは高さを自動調整し、縮まないようにする */
-.reference-maneuver-tab-container .accordion-container {
-    flex-shrink: 0;
-    /* accordion-containerに既にあるスタイルを上書き・調整 */
-    height: auto;
+/* --- 4.4. マニューバタブ専用レイアウト --- */
+.reference-maneuver-tab-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
     margin: 0;
     padding: 0;
-    border-bottom: 1px solid var(--color-border);
+    gap: 0;
+    border: none;
+    box-sizing: border-box;
 }
-/* リファレンスメニューのアコーディオンヘッダーのスタイル調整 */
-#maneuverMenu .accordion-container {
+/* フィルタ 上半分 */
+.reference-maneuver-tab-container .accordion-container {
+    flex-shrink: 0;
     margin: 0;
     padding-bottom: 5px;
     border-bottom: 1px solid var(--color-border);
+}
+/* 下半分 */
+.reference-maneuver-tab-container .maneuver-menu-list-container {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+/* --- 4.5. フィルターUI (マニューバタブ内) --- */
+#maneuverMenu .accordion-header {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    width: 100%;
+    overflow: hidden;
+    padding: 5px 10px;
     box-sizing: border-box;
 }
-#maneuverMenu .accordion-header {
-    padding: 5px 10px; /* 上下左右の余白を調整 */
-    box-sizing: border-box;
-    font-size: 14px; /* 文字サイズを少し大きく */
+.accordion-title-static {
     font-weight: bold;
+    font-size: 14px;
     color: var(--color-text);
+    flex-shrink: 0;
+}
+.accordion-title-dynamic {
+    font-size: 12px;
+    font-weight: normal;
+    color: var(--color-fore-5);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-grow: 1;
+    min-width: 0;
+}
+.reference-filter-container {
+    max-height: calc(50vh - 90px);
+    overflow-y: auto;
 }
 .filter-group {
     background-color: var(--color-background-4);
@@ -305,100 +318,48 @@
     padding: 10px;
 }
 .filter-group-title {
-    margin: 0;
+    margin: 0 0 5px 5px;
     font-size: 13px;
     color: var(--color-fore-5);
-    padding: 0 0 5px 5px;
 }
 .filter-buttons {
     display: flex;
     flex-wrap: wrap;
-    justify-content:start;
     gap: 7px;
 }
 .filter-buttons .filter-btn {
-    padding: 4px 0;
+    border: none;
     font-size: 12px;
-    border-radius: 20px;
+    color: var(--color-fore-7);
+    border-radius: 15px;
     height: 30px;
+    box-shadow: none;
+    background-color: var(--color-background-3);
 }
 .filter-buttons .filter-btn:hover {
-    border-color: var(--color-background-1);
+    border: none;
     box-shadow: none;
-    background-color: var(--color-background-1);
+    background-color: var(--color-background-2);
 }
-.reference-filter-container {
-    /* padding: 5px; */
-    /* border-bottom: 1px solid var(--color-border); */
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 0px;
-    overflow-y: auto;
+.filter-buttons .filter-btn.is-active {
+    background-color: gold;
+    color: var(--color-fore-3);
 }
-
-/* ヘッダー全体をFlexboxコンテナにする */
-#maneuverMenu .accordion-header {
-    display: flex;
-    align-items: baseline; /* テキストのベースラインを揃える */
-    gap: 0px; /* 「フィルタ」と要約の間の隙間 */
-    width: 100%;
-    overflow: hidden; /* はみ出し防止 */
-}
-
-/* 「フィルタ」の固定テキスト */
-.accordion-title-static {
-    font-weight: bold;
-    font-size: 14px;
-    color: var(--color-text);
-    flex-shrink: 0; /* この要素が縮まないようにする */
-}
-
-/* 件数とフィルター要約の動的テキスト */
-.accordion-title-dynamic {
-    font-size: 12px;
-    font-weight: bold;
-    color: var(--color-fore-5);
-    white-space: nowrap; /* ★重要: 全体として改行させない */
-    overflow: hidden; /* ★重要: はみ出した部分を隠す */
-    text-overflow: ellipsis; /* ★重要: はみ出しを「…」で表示 */
-    flex-grow: 1; /* 残りのスペースをすべて埋める */
-    min-width: 0; /* flexアイテムのはみ出し防止 */
-}
-
-/* フィルターグループごとのスタイル */
 .filter-summary-group {
-    margin-right: 8px; /* グループ間の区切り */
+    font-weight: bold;
+    margin-left: 8px;
     background-color: var(--color-background-2);
     padding: 0 10px 0 8px;
     border-radius: 10px;
 }
-
-/* 「カテゴリ：」などのラベル部分 */
 .filter-summary-label {
     font-weight: normal;
     font-size: 9px;
     margin-right: 5px;
-    padding: 0;
     color: var(--color-fore-6);
 }
 
-/* ================================
-   リファレンスアイテムの特殊レイアウト
-================================ */
-
-/* 4つの要素を格納するFlexコンテナ */
-#maneuverMenu.is-reference-mode .reference-item-container {
-    display: block;
-    row-gap: 0px; /* 折り返した際の行間の隙間 */
-}
-
-/* 各テキスト要素のスタイル */
-#maneuverMenu.is-reference-mode .reference-item-container > span {
-    white-space: nowrap; /* ★重要：自身の改行を禁止 */
-    overflow: visible;
-    text-overflow: ellipsis; /* はみ出した場合は...で省略 */
-}
+/* --- 4.6. リファレンス用アイテム表示スタイル --- */
 .ref-container-top {
     display: flex;
     flex-direction: row-reverse;
@@ -412,17 +373,28 @@
     align-items: end;
     flex-wrap: wrap;
 }
+#maneuverMenu .item-icon-col {
+    display: none;
+}
+
+.ref-maneuver-name {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--color-text);
+
+}
 /* 1行目：出典カテゴリ */
 .ref-source-category {
-    display: flex;
     font-size: 12px;
     font-weight: bold;
     background-color: var(--color-fore-4);
     color: var(--color-background-2);
-    margin-right: auto;
     padding: 1px 8px;
     border-radius: 10px;
-    white-space: nowrap; /* 改行を防ぐ */
+    white-space: nowrap;
+
+    display: flex;
+    margin-right: auto;
 }
 /* 1行目：出典情報 (右寄せ) */
 .ref-source-info {
@@ -467,207 +439,73 @@
     text-align: right;
     white-space: nowrap; /* 改行を防ぐ */
 }
-/* フレーバーテキスト (下側) */
+
+
+
+
+
+
+
+
+
 .item-flavor-text {
     font-weight: normal;
     font-style: italic;
-    color: var(--color-8);
-    margin-top: 3px;
-    padding-top: 3px;
+    color: var(--color-text-muted);
+    margin-top: 4px;
+    padding-top: 4px;
     border-top: 1px dashed var(--color-border);
     font-size: 13px;
-    text-indent: 1em;
 }
-/* ================================
-   リファレンス：悪意点表示スタイル
-================================ */
-.malice-level {
-    color: var(--color-accent);
-    margin-left: 5px;
-}
-
-/* ================================
-   リファレンス：説明文コピーボタン
-================================ */
 .has-copy-button {
     display: flex;
-    justify-content: space-between; /* テキストとボタンを両端に配置 */
-    align-items: flex-start; /* 上端揃え */
-    gap: 0px; /* テキストとボタンの間の最小の隙間 */
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
 }
-
 .has-copy-button > span {
-    flex-grow: 1; /* 説明文が利用可能なスペースをすべて使う */
-}
-
-/* ================================
-   リファレンスアイテムのホバー無効化
-================================ */
-.maneuver-item-new.is-reference-item:hover {
-    /* 通常のホバーエフェクトを上書きして無効化 */
-    background-color: var(--color-background-2);
-    outline: none;
-    color: var(--color-fore-2);
-    cursor: default; /* カーソルを通常に戻す */
-}
-/* ================================
-   リファレンスUI専用スタイル
-================================ */
-
-.reference-tab-bar {
-    display: flex;
-    overflow-x: auto;
-    /* background-color: var(--color-background-3); */
-    padding: 5px 5px 0 5px;
-    gap: 5px;
-    flex-shrink: 0; /* タブバーが縮まないように */
-    border-bottom: 2px solid var(--color-accent-gold);
-    
-    /* スクロールバーを非表示にする (モダンブラウザ) */
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-}
-/* スクロールバーを非表示にする (Webkit系) */
-.reference-tab-bar::-webkit-scrollbar {
-    display: none;
-}
-
-.reference-tab-button {
-    padding: 5px 10px;
-    font-size: 14px;
-    font-weight: bold;
-    border: none;
-    border-radius: 10px 10px 0 0;
-    cursor: pointer;
-    background-color: var(--color-background-4);
-    color: var(--color-text-muted);
-    transition: all 0.2s;
-    white-space: nowrap; /* タブ名が改行されないように */
-}
-
-.reference-tab-button:hover {
-    background-color: var(--color-background-2);
-}
-
-.reference-tab-button.is-active {
-    background-color: var(--color-accent-gold);
-    color: black;
-}
-
-.reference-content-area {
     flex-grow: 1;
-    overflow-y: auto;
-    padding: 5px;
+}
+.copy-description-btn {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    border-radius: 5px;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    font-size: 18px;
+    padding: 0 2px;
+    line-height: 1;
+    transition: all 0.2s;
+}
+.copy-description-btn:hover {
+    background-color: var(--color-surface-1);
+    color: var(--color-text);
+}
+#maneuverMenu.is-reference-mode .maneuver-item-new:hover {
+    background-color: var(--color-background-2);
+    cursor: default;
 }
 
-/* ================================
-   リファレンス：未練タブ専用スタイル
-================================ */
-
-/* 1行目の右寄せ「発狂：〜」の色とサイズを調整 */
+/* 未練タブ専用 */
 .ref-regret-madness {
     background-color: var(--color-fore-5);
     color: var(--color-background-2);
     border-radius: 20px;
-    font-size: 16px;
-    padding: 0 8px;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 1px 8px;
 }
 .ref-regret-flavor {
     font-weight: normal;
     font-style: italic;
     font-size: 14px;
-    margin: 3px 0;
-    padding: 3px 0;
-    border-top   : 1px dashed var(--color-background-6);
-    border-bottom: 1px dashed var(--color-background-6);
-    text-indent: 0;
+    margin: 4px 0;
+    padding: 4px 8px;
+    border-radius: 0px;
     background-color: var(--color-background-3);
-    color: var(--color-fore-6)
+    color: var(--color-fore-6);
 }
-/* ================================
-   リファレンス：スワイプ機能のスタイル
-================================ */
-
-.reference-content-area {
-    /* 指を離したときに、元の位置にスナップバックするためのアニメーション */
-    transition: transform 0.2s ease;
-}
-
-.reference-content-area.is-swiping {
-    /* 指でドラッグしている間は、アニメーションを無効化して指に追従させる */
-    transition: none;
-    /* スワイプ中にテキストが選択されるのを防ぐ */
-    user-select: none;
-}
-
-/* ================================
-   リファレンス：スワイプ機能のスタイル
-================================ */
-
-.reference-content-area {
-    /* ★ スライドアニメーションのために overflow: hidden を追加 */
-    overflow: hidden;
-    position: relative; /* 子要素の絶対配置の基準にする */
-    flex-grow: 1;
-    /* padding: 5px; */
-}
-
-.reference-content-inner {
-    position: absolute; 
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    overflow-y: auto; /* ★ 各タブの中身はスクロール可能に */
-    padding: 5px;
-    box-sizing: border-box;
-    transition: transform 0.3s ease;
-}
-
-.reference-content-inner.is-swiping {
-    transition: none;
-    user-select: none;
-}
-
-/* --- スライドアニメーション定義 --- */
-
-@keyframes slideOutToLeft {
-    from { transform: translateX(0); }
-    to { transform: translateX(-100%); }
-}
-@keyframes slideOutToRight {
-    from { transform: translateX(0); }
-    to { transform: translateX(100%); }
-}
-
-.reference-content-inner.slide-out-to-left {
-    animation: slideOutToLeft 0.3s forwards;
-}
-.reference-content-inner.slide-out-to-right {
-    animation: slideOutToRight 0.3s forwards;
-}
-
-.reference-content-inner.slide-in-from-right {
-    transform: translateX(100%);
-}
-.reference-content-inner.slide-in-from-left {
-    transform: translateX(-100%);
-}
-/* ================================
-   リファレンス：マニューバタブのレイアウト
-================================ */
-
-.reference-maneuver-tab-container {
-    display: flex;
-    flex-direction: column;
-    height: 100%; /* 親(.reference-content-inner)の高さいっぱいに広がる */
-    margin: 0;
-    padding: 0;
-}
-
-/* マニューバリストは残りの高さを全て使い、スクロール可能にする */
-.reference-maneuver-tab-container .maneuver-menu-list-container {
-    flex-grow: 1;
-    overflow-y: auto;
-    padding: 0 5px 10px 5px;
+.malice-level {
+    color: var(--color-accent);
 }

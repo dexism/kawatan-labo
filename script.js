@@ -7,7 +7,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-const appVersion = "7.10.1501";
+const appVersion = "7.10.1504";
 
 // --- モジュールのインポート ---
 import * as data from './data-handler.js';
