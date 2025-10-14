@@ -761,7 +761,7 @@ function updateDamageQueueUI(queue) {
                 const { baseAmount, totalBonus } = calculateFinalDamage(item);
                 const bonusText = totalBonus > 0 ? `+${totalBonus}` : (totalBonus < 0 ? `${totalBonus}` : '');
                 
-                textSpan.innerHTML = `<b>${item.target.name}</b>: ${item.location}: <b>${baseAmount}${bonusText}</b>点`;
+                textSpan.innerHTML = `<b>${item.target.name}</b>：${item.location}：<b>${baseAmount}${bonusText}</b>点`;
                 // ▲▲▲ 修正ここまで ▲▲▲
                 
             } else if (item.type === 'declaration') {

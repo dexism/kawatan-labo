@@ -517,7 +517,6 @@ function createManeuverItem(maneuverObj, char) {
                 !maneuver.effects?.some(e => e.ref === 'TAKE_DAMAGE_FOR_ALLY');
 
             if (isDefenseManeuver) {
-                // ★★★ ここからが今回の修正箇所です ★★★
                 // damageQueueから、'instance'タイプで未適用のものだけをフィルタリングする
                 const targetableDamages = battleLogic.getBattleState().damageQueue.filter(damage => {
                     return damage.type === 'instance' && 
@@ -533,10 +532,14 @@ function createManeuverItem(maneuverObj, char) {
 
                 // モーダルを表示して防御対象を選択させる
                 const selectedDamage = await new Promise(resolve => {
-                    const menuItems = targetableDamages.map(damage => ({
-                        label: `【${damage.sourceAction.sourceManeuver.name}】→ ${damage.target.name} (${damage.amount}点)`,
-                        onClick: () => resolve(damage)
-                    }));
+                    const menuItems = targetableDamages.map(damage => {
+                        // 【庇う】の時と同じロジックでダメージ数を取得
+                        const damageValue = damage.finalAmount ?? damage.baseAmount ?? damage.amount ?? 0;
+                        return {
+                            label: `【${damage.sourceAction.sourceManeuver.name}】→ ${damage.target.name} (${damageValue}点)`,
+                            onClick: () => resolve(damage)
+                        };
+                    });
                     ui.showModal({ 
                         title: `【${maneuver.name}】防御対象を選択`, 
                         items: menuItems,
@@ -556,7 +559,6 @@ function createManeuverItem(maneuverObj, char) {
 
             const takeDamageEffect = maneuver.effects?.find(e => e.ref === 'TAKE_DAMAGE_FOR_ALLY');
             if (takeDamageEffect) {
-                // ★★★ こちらも同様に修正 ★★★
                 const targetableDamages = battleLogic.getBattleState().damageQueue.filter(damage => {
                     return damage.type === 'instance' &&
                            !damage.applied && 
@@ -571,10 +573,14 @@ function createManeuverItem(maneuverObj, char) {
                 }
 
                 const selectedDamage = await new Promise(resolve => {
-                    const menuItems = targetableDamages.map(damage => ({
-                        label: `【${damage.sourceAction.sourceManeuver.name}】→ ${damage.target.name} (${damage.amount}点)`,
-                        onClick: () => resolve(damage)
-                    }));
+                    const menuItems = targetableDamages.map(damage => {
+                        // finalAmount -> baseAmount -> amount の優先順位でダメージ数を取得
+                        const damageValue = damage.finalAmount ?? damage.baseAmount ?? damage.amount ?? 0;
+                        return {
+                            label: `【${damage.sourceAction.sourceManeuver.name}】→ ${damage.target.name} (${damageValue}点)`,
+                            onClick: () => resolve(damage)
+                        };
+                    });
                     ui.showModal({ 
                         title: `【${maneuver.name}】庇う対象を選択`, 
                         items: menuItems,
@@ -2189,33 +2195,59 @@ export function showAttackConfirmationModal(performer, target, maneuver, index, 
     // c) 宣言されたジャッジマニューバ
     state.judgeQueue.forEach(judgeDecl => {
         const judgeManeuver = judgeDecl.sourceManeuver;
-        const judgeEffect = judgeManeuver.effects.find(e => e.ref === 'GENERIC_JUDGE_MOD');
+        
+        // ▼▼▼ ここからが修正箇所です ▼▼▼
+
+        // 1. GENERIC_JUDGE_MOD または CHOICE_JUDGE_MOD の効果を探す
+        const judgeEffect = judgeManeuver.effects.find(e => e.ref === 'GENERIC_JUDGE_MOD' || e.ref === 'CHOICE_JUDGE_MOD');
 
         if (judgeEffect) {
             let shouldApply = false;
-            const value = judgeEffect.params.value || 0; // ★★★ 最初に効果量を取得
+            let value = 0;
+            let modType = '';
 
-            // ケースA: 他者のアクションに介入するジャッジ（支援・妨害）
+            // 2. 効果の種類に応じて、効果量(value)と種別(modType)を決定する
+            if (judgeEffect.ref === 'GENERIC_JUDGE_MOD') {
+                value = judgeEffect.params.value || 0;
+                if (value > 0) modType = 'support';
+                if (value < 0) modType = 'hindrance';
+            } else if (judgeEffect.ref === 'CHOICE_JUDGE_MOD') {
+                const isTargetAlly = judgeDecl.performer.type === performer.type;
+                if (isTargetAlly) {
+                    modType = 'support';
+                    const supportOption = judgeEffect.params.options.find(opt => opt.type === '支援');
+                    if (supportOption) value = supportOption.value;
+                } else {
+                    modType = 'hindrance';
+                    const hindranceOption = judgeEffect.params.options.find(opt => opt.type === '妨害');
+                    if (hindranceOption) value = hindranceOption.value;
+                }
+            }
+            
+            // 3. このジャッジが現在の攻撃に適用されるべきか判断する
+            // ケースA: 他者のアクションに介入する場合
             if (judgeDecl.judgeTarget && judgeDecl.judgeTarget.id === targetDeclaration.id) {
                 shouldApply = true;
             }
-            // ケースB: 自身の攻撃判定に介入するジャッジ（自己支援のみ）
-            // ★★★ value > 0 (支援であること) を条件に追加 ★★★
-            else if (value > 0 && (judgeEffect.params.target === 'self_roll' || judgeEffect.params.target === 'any_roll') && judgeDecl.performer.id === performer.id) {
+            // ケースB: 自身の攻撃判定に介入する場合 (自己支援のみ)
+            else if (modType === 'support' && (judgeEffect.params.target === 'self_roll' || judgeEffect.params.target === 'any_roll') && judgeDecl.performer.id === performer.id) {
                 shouldApply = true;
             }
 
+            // 4. 適用する場合、ボーナスを計上する
             if (shouldApply) {
                 const sourceName = `${judgeDecl.performer.name}の【${judgeManeuver.name}】`;
-                if (value > 0) {
-                    totalBonus += value;
-                    supportSources.push(`${sourceName} (+${value})`);
-                } else if (value < 0) {
-                    totalBonus += value;
-                    hindranceSources.push(`${sourceName} (${value})`);
+                
+                if (modType === 'support') {
+                    totalBonus += Math.abs(value);
+                    supportSources.push(`${sourceName} (+${Math.abs(value)})`);
+                } else if (modType === 'hindrance') {
+                    totalBonus -= Math.abs(value);
+                    hindranceSources.push(`${sourceName} (-${Math.abs(value)})`);
                 }
             }
         }
+        // ▲▲▲ 修正はここまでです ▲▲▲
     });
     
     // --- 3. HTMLの構築 ---

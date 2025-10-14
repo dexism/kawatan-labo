@@ -60,8 +60,12 @@ export function calculateFinalDamage(damageInstance) {
     if (!damageInstance || damageInstance.type !== 'instance') {
         return { finalAmount: 0, baseAmount: 0, totalBonus: 0, totalDefense: 0 };
     }
+    
+    // 攻撃者(performer)は元の宣言から取得
+    const { performer } = damageInstance.sourceAction;
+    // ダメージを受ける対象(target)は、ダメージインスタンスから直接取得する
+    const { target } = damageInstance;
 
-    const { performer, target } = damageInstance.sourceAction;
     const currentPerformer = charManager.getCharacterById(performer.id);
     const currentTarget = charManager.getCharacterById(target.id);
 
@@ -86,13 +90,16 @@ export function calculateFinalDamage(damageInstance) {
     });
 
     // --- ② 防御・ダメージ軽減の計算 ---
+
     // a) 宣言された防御バフ (【うろこ】など)
+    // currentTarget (実際にダメージを受けるキャラクター) のバフを見るようにする
     (currentTarget.activeBuffs || []).forEach(buff => {
         if (buff.stat === 'defense' && buff.duration === 'until_damage_applied') {
             totalDefense += buff.value || 0;
         }
     });
     // b) パッシブの防御効果 (【ガントレット】など)
+    // currentTarget (実際にダメージを受けるキャラクター) のパーツを見るようにする
     const allManeuvers = Object.values(currentTarget.partsStatus).flat()
         .map(p => !p.damaged ? data.getManeuverByName(p.name) : null)
         .filter(m => m?.timing === 'オート' && m.effects);

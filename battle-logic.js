@@ -387,11 +387,27 @@ export function checkJudgeItem(index) {
 
 export function applySupport(judgeIndex, targetDeclarationId) {
     const judgeDeclaration = battleState.judgeQueue[judgeIndex];
-    const targetDeclaration = battleState.actionQueue.find(d => d.id === targetDeclarationId);
+    // ★ ここでは actionQueue しか見ていないが、ラピッド攻撃なども対象になる可能性があるため、両方を検索する
+    const allDeclarations = [...battleState.actionQueue, ...battleState.rapidQueue];
+    const targetDeclaration = allDeclarations.find(d => d.id === targetDeclarationId);
+
     if (judgeDeclaration && targetDeclaration) {
-        judgeDeclaration.target = targetDeclaration;
+        // 1. このジャッジが「支援」なのか「妨害」なのかを判断する
+        const isTargetAlly = judgeDeclaration.performer.type === targetDeclaration.performer.type;
+        const modType = isTargetAlly ? 'support' : 'hindrance';
+
+        // 2. 判断結果を宣言オブジェクトに記録する
+        judgeDeclaration.modType = modType;
+
+        // 格納先のプロパティを .target から .judgeTarget に変更します
+        judgeDeclaration.judgeTarget = targetDeclaration;
+
         judgeDeclaration.checked = true;
-        ui.addLog(`> ${judgeDeclaration.performer.name}が【${judgeDeclaration.sourceManeuver.name}】で「${targetDeclaration.sourceManeuver.name}」を対象にしました`);
+        
+        // ログをより分かりやすくする
+        const typeText = modType === 'support' ? '支援' : '妨害';
+        ui.addLog(`> ${judgeDeclaration.performer.name}が【${judgeDeclaration.sourceManeuver.name}】で「${targetDeclaration.sourceManeuver.name}」を${typeText}しました`);
+        
         determineNextStep();
     }
 }
