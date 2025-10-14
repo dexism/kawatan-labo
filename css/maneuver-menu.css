@@ -560,3 +560,18 @@
     background-color: var(--color-background-3);
     color: var(--color-fore-6)
 }
+/* ================================
+   リファレンス：スワイプ機能のスタイル
+================================ */
+
+.reference-content-area {
+    /* 指を離したときに、元の位置にスナップバックするためのアニメーション */
+    transition: transform 0.3s ease;
+}
+
+.reference-content-area.is-swiping {
+    /* 指でドラッグしている間は、アニメーションを無効化して指に追従させる */
+    transition: none;
+    /* スワイプ中にテキストが選択されるのを防ぐ */
+    user-select: none;
+}

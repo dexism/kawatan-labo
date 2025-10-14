@@ -2,7 +2,7 @@
  * @file reference.js
  * @description ルールリファレンスUIの構築と管理を担当するモジュール
  */
-export const version = "1.0.1";
+export const version = "1.1.3";
 
 import * as data from './data-handler.js';
 import * as ui from './ui-manager.js';
@@ -11,6 +11,13 @@ import { createManeuverItem } from './menu-builder.js';
 // --- モジュール内変数 ---
 let activeTab = 'maneuver';
 let activeManeuverFilters = {};
+
+// スワイプ検出用の変数を追加
+let touchStartX = 0;
+let touchMoveX = 0;
+let touchStartY = 0;
+let touchMoveY = 0;
+const SWIPE_THRESHOLD = 50; // スワイプと判断する最小移動距離（ピクセル）
 
 // --- メイン関数 ---
 
@@ -102,6 +109,10 @@ function renderTabView(tabId, contentArea) {
             renderSimpleListTab('hint', contentArea, "暗示一覧");
             break;
     }
+    // コンテンツエリアにタッチイベントリスナーを設定
+    contentArea.addEventListener('touchstart', handleTouchStart);
+    contentArea.addEventListener('touchmove', handleTouchMove);
+    contentArea.addEventListener('touchend', handleTouchEnd);
 }
 
 // --- 各タブの描画関数 ---
@@ -290,6 +301,67 @@ function createListItem(item, dataType) {
         });
     };
     return itemElement;
+}
+
+// --- スワイプ処理関数 ---
+
+function handleTouchStart(event) {
+    const touch = event.touches[0];
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+    touchMoveX = touchStartX;
+    touchMoveY = touchStartY;
+    // スワイプ中はトランジションを一時的に無効化
+    event.currentTarget.classList.add('is-swiping');
+}
+
+function handleTouchMove(event) {
+    const touch = event.touches[0];
+    touchMoveX = touch.clientX;
+    touchMoveY = touch.clientY;
+    
+    // 視覚的なフィードバックとして、指の動きに合わせてコンテンツを動かす
+    const deltaX = touchMoveX - touchStartX;
+    event.currentTarget.style.transform = `translateX(${deltaX}px)`;
+}
+
+function handleTouchEnd(event) {
+    const contentArea = event.currentTarget;
+    const deltaX = touchMoveX - touchStartX;
+    const deltaY = touchMoveY - touchStartY;
+
+    // スワイプ後のスタイルをリセット
+    contentArea.classList.remove('is-swiping');
+    contentArea.style.transform = 'translateX(0)';
+
+    // 縦スクロールを優先するため、横の動きが縦より大きい場合のみ処理
+    if (Math.abs(deltaX) < Math.abs(deltaY)) {
+        return;
+    }
+
+    // しきい値を超えたスワイプか判定
+    if (Math.abs(deltaX) > SWIPE_THRESHOLD) {
+        const tabBar = document.querySelector('.reference-tab-bar');
+        if (!tabBar) return;
+
+        const tabButtons = Array.from(tabBar.querySelectorAll('.reference-tab-button'));
+        const currentIndex = tabButtons.findIndex(btn => btn.dataset.tabId === activeTab);
+        let nextIndex = -1;
+
+        if (deltaX < 0) {
+            // 右方向へスワイプ（指は左へ動く） -> 次のタブへ
+            nextIndex = currentIndex + 1;
+        } else {
+            // 左方向へスワイプ（指は右へ動く） -> 前のタブへ
+            nextIndex = currentIndex - 1;
+        }
+
+        // 範囲チェック
+        if (nextIndex >= 0 && nextIndex < tabButtons.length) {
+            // 次(前)のタブボタンをプログラム的にクリック
+            tabButtons[nextIndex].click();
+        }
+    }
 }
 
 // --- フィルタリング＆ソート（旧menu-builder.jsから移植）---
