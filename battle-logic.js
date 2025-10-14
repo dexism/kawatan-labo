@@ -2,7 +2,7 @@
  * @file battle-logic.js
  * @description 戦闘の進行、状態管理、ルール判定、アクション解決を担当するモジュール。
  */
-export const version = "1.24.88"; // UI分離リファクタリング完了版
+export const version = "1.24.89"; // UI分離リファクタリング完了版
 
 import * as charManager from './character-manager.js';
 import * as ui from './ui-manager.js';

@@ -2,7 +2,7 @@
  * @file battle-helpers.js
  * @description 戦闘関連の共通計算処理を担当するヘルパーモジュール。
  */
-export const version = "1.1.3";
+export const version = "1.1.4";
 
 import * as charManager from './character-manager.js';
 import * as data from './data-handler.js';
