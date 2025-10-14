@@ -28,4 +28,4 @@ if ($args.Count -eq 0) {
 git commit -m $commitMessage
 
 # 5. GitHub に push（Netlify がこれをトリガーに自動デプロイ）
-# git push
+git push

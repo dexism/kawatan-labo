@@ -102,7 +102,7 @@
     "description_raw": "砲撃攻撃1+爆発+連撃1、攻撃判定の出目-1。",
     "flavor_text": "燃料を詰め込んだ割れやすい容器。当てた敵を火達磨にするが、自身が火達磨になることも……。",
     "source": { "book": "基本ルールブック", "page": 83 }, 
-    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "砲撃", "damage": 1, "attack_bonus": -1, "on_hit": ["EXPLOSION", "CHAIN_ATTACK_1"] } }]
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "砲撃", "damage": 1, "attack_bonus": -1, "on_hit": ["EXPLOSION", "CHAIN_ATTACK"] } }]
   },
   "A1-11": {
     "name": "スコップ", "category": "攻撃", "allowedLocations": "腕",
@@ -220,7 +220,7 @@
     "description_raw": "射撃攻撃2+連撃1。",
     "flavor_text": "大型拳銃二丁を両手に、それぞれを駆使して強力な戦闘力を得る。二丁あってこその二丁拳銃だ。",
     "source": { "book": "基本ルールブック", "page": 84 }, 
-    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "射撃", "damage": 2, "on_hit": ["CHAIN_ATTACK_1"] } }]
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "射撃", "damage": 2, "on_hit": ["CHAIN_ATTACK"] } }]
   },
   "A2-10": {
     "name": "手榴弾", "category": "攻撃", "allowedLocations": "任意",
@@ -272,7 +272,7 @@
     "description_raw": "白兵攻撃3+連撃2。",
     "flavor_text": "刃のスクリューを回転させ、触れたものを粉砕解体する。小回りはきかないが、対アンデッド最強の破壊武器だ。",
     "source": { "book": "基本ルールブック", "page": 85 }, 
-    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 3, "on_hit": ["CHAIN_ATTACK_2"] } }]
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 3, "on_hit": ["CHAIN_ATTACK"] } }]
   },
   "A3-03": {
     "name": "名刀", "category": "攻撃", "allowedLocations": "腕",
@@ -292,7 +292,7 @@
     "description_raw": "白兵攻撃1+切断+連撃1。",
     "flavor_text": "この世のほとんどの物質を両断しうる強固な繊維。熟練者は指先一つで無数の敵をバラバラに解体してしまう。",
     "source": { "book": "基本ルールブック", "page": 85 }, 
-    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 1, "on_hit": ["SEVERANCE", "CHAIN_ATTACK_1"] } }]
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 1, "on_hit": ["SEVERANCE", "CHAIN_ATTACK"] } }]
   },
   "A3-05": {
     "name": "空飛ぶギロチン", "category": "攻撃", "allowedLocations": "腕",
@@ -332,7 +332,7 @@
     "description_raw": "砲撃攻撃1+爆発+連撃1。",
     "flavor_text": "強力な火炎を放出し対象を火達磨にする武器。かつて人間がアンデッドと戦う際に好んで使ったという。",
     "source": { "book": "基本ルールブック", "page": 85 }, 
-    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "砲撃", "damage": 1, "on_hit": ["EXPLOSION", "CHAIN_ATTACK_1"] } }]
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "砲撃", "damage": 1, "on_hit": ["EXPLOSION", "CHAIN_ATTACK"] } }]
   },
   "A3-09": {
     "name": "ダイナマイト", "category": "攻撃", "allowedLocations": "任意",

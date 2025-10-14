@@ -76,7 +76,7 @@
     "name": "呪い髪", "category": "支援", "tags": ["支援", "妨害", "ジャッジ"], "maliceLevel": 0, "description": "支援1か妨害1。", "description_raw": "支援1か妨害1", "source": { "book": "基本ルールブック" }, "timing": "ジャッジ", "cost": "0", "range": "0", "effects": [{ "ref": "CHOICE_JUDGE_MOD", "params": { "options": [{ "value": 1 }, { "value": -1 }] } }] 
   },
   "P0-11": { 
-    "name": "攻性触手", "category": "攻撃", "tags": ["攻撃", "アクション", "肉弾攻撃", "連撃"], "maliceLevel": 0, "description": "肉弾攻撃2+連撃1。", "description_raw": "肉弾攻撃2+連撃1", "source": { "book": "基本ルールブック", "errata": "1.6.1" }, "timing": "アクション", "cost": "3", "range": "0～1", "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 2, "on_hit": ["CHAIN_ATTACK_1"] } }] 
+    "name": "攻性触手", "category": "攻撃", "tags": ["攻撃", "アクション", "肉弾攻撃", "連撃"], "maliceLevel": 0, "description": "肉弾攻撃2+連撃1。", "description_raw": "肉弾攻撃2+連撃1", "source": { "book": "基本ルールブック", "errata": "1.6.1" }, "timing": "アクション", "cost": "3", "range": "0～1", "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 2, "on_hit": ["CHAIN_ATTACK"] } }] 
   },
   "P0-12": { 
     "name": "伸縮触手", "category": "支援", "tags": ["支援", "妨害", "ジャッジ"], "maliceLevel": 0, "description": "支援1か妨害1。", "description_raw": "支援1か妨害1", "source": { "book": "基本ルールブック" }, "timing": "ジャッジ", "cost": "0", "range": "0", "effects": [{ "ref": "CHOICE_JUDGE_MOD", "params": { "options": [{ "value": 1 }, { "value": -1 }] } }] 

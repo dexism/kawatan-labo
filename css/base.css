@@ -356,7 +356,7 @@ html[data-theme="dark"] {
     /* 初期状態では非表示にし、クリックイベントを透過させる */
     display: none;
     pointer-events: none;
-    transition: all 0.5s; 
+    transition: all 0.2s; 
 }
 
 #dice3d-container.is-visible {

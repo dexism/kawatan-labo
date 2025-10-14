@@ -136,11 +136,8 @@
     "AREA_ATTACK": { 
         "name": "全体攻撃", "description": "対象エリア内の全キャラクターに効果を適用。", "actions": [{ "action_type": "apply_to_area" }] 
     },
-    "CHAIN_ATTACK_1": { 
-        "name": "連撃1", "description": "同じ攻撃をもう一度行う。", "actions": [{ "action_type": "chain_attack", "count": 1 }] 
-    },
-    "CHAIN_ATTACK_2": { 
-        "name": "連撃2", "description": "同じ攻撃を2回まで追加で行う。", "actions": [{ "action_type": "chain_attack", "count": 2 }] 
+    "CHAIN_ATTACK": { 
+        "name": "連撃1", "description": "攻撃が命中した場合は、同じ攻撃をもう一度行う。（最大追加回数はcount回）", "actions": [{ "action_type": "chain_attack", "count": 1 }] 
     },
 
     "//": "---------- その他・特殊処理 ----------",

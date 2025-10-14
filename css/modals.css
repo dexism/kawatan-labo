@@ -23,6 +23,7 @@
   | +-----------------------------
   +-------------------------------
 ================================ */
+/* 画面外クリックを透過しないバックドロップ */
 .modal-backdrop {
     position: fixed;
     top: 0;
@@ -53,7 +54,11 @@
     opacity: 1;
     visibility: visible;
     /* 表示時はクリックイベントを有効化 */
-    /* pointer-events: auto; */
+    pointer-events: auto;
+}
+/* キャンセル可能なモーダルの場合、コンテンツ以外はクリックを透過させる */
+.modal-backdrop:not(.is-not-closable) {
+    pointer-events: none;
 }
 .modal-content {
     background-color: var(--color-background-2);
@@ -963,7 +968,7 @@
     justify-content: center;
     align-items: center;
     opacity: 0;
-    transition: opacity 1s ease;
+    transition: all 1s ease;
 }
 
 .loading-overlay-backdrop.is-visible {

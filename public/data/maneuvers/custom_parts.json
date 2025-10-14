@@ -183,7 +183,7 @@
     "description_raw": "白兵攻撃2+連撃1。",
     "flavor_text": "体内に仕込まれた刃。瞬時に飛び出し、相手を切り裂く。予期できないその斬撃は、敵を黙らせるに十分だ。",
     "source": { "book": "基本ルールブック", "page": 90 }, 
-    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 2, "on_hit": ["CHAIN_ATTACK_1"] } }]
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 2, "on_hit": ["CHAIN_ATTACK"] } }]
   },
   "R2-06": {
     "name": "レーザービーム", "category": "攻撃", "allowedLocations": "任意",
@@ -363,7 +363,7 @@
     "description_raw": "白兵攻撃1+切断+連撃1。",
     "flavor_text": "必要時、任意に発生させることのできる光の刃。焼けつく光が、電子音と共に敵の体を切り刻むのだ。",
     "source": { "book": "基本ルールブック", "page": 91 }, 
-    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 1, "on_hit": ["SEVERANCE", "CHAIN_ATTACK_1"] } }]
+    "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 1, "on_hit": ["SEVERANCE", "CHAIN_ATTACK"] } }]
   },
   "R3-10": {
     "name": "ホッパー", "category": "移動", "allowedLocations": "脚",

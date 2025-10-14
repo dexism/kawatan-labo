@@ -138,6 +138,7 @@
 .simple-menu-modal-backdrop {
     justify-content: center;
     align-items: center;
+    pointer-events: auto;
 }
 .simple-menu-modal-content {
     width: 90%;
@@ -170,8 +171,9 @@
     background-color: var(--color-6);
     color:            var(--color-f);
     outline: 2px solid gold;
-    transition: all 0.2s;
-  }
+    transition: all 0.2s ease;
+    
+}
 /* ホバー時の色を少し明るくする */
 .simple-menu-modal-body .maneuver-item:not(.is-masked):hover {
     background-color:  gold;

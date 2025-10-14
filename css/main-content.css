@@ -439,7 +439,7 @@ body.is-dragging .char.hover-highlight {
     align-items: center;
     gap: 8px;
     opacity: 0;
-    transition: opacity 0.2s;
+    transition: all 0.2s;
     pointer-events: none;
     z-index: 200;
 }
@@ -516,7 +516,7 @@ body.is-dragging .char.hover-highlight {
     font-weight: bold;
     cursor: pointer;
     pointer-events: auto;
-    transition: transform 0.2s;
+    transition: all 0.2s;
 }
 .damage-prompt-button:hover {
     transform: scale(1.1);
@@ -718,7 +718,7 @@ body.is-dragging .char.hover-highlight {
     white-space: pre;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.2s;
+    transition: all 0.2s;
     margin-bottom: 4px;
     z-index: 10;
 }

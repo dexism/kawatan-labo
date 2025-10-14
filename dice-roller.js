@@ -6,7 +6,7 @@
 /**
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.3.24";
+export const version = "1.3.26";
 
 // import { showModal } from './ui-manager.js';
 import { showModal, showToastNotification } from './ui-manager.js';
@@ -174,7 +174,8 @@ export function performDiceRoll(rollData) {
     const cleanedInput = input.toLowerCase().replace(/\s/g, '');
 
     const d10Pattern = /^(nm|nme|nmn|nt|nh|1?d10)$/;
-    const systemCommandPattern = /^(\d*)?(nc|na)([+-]\d+)?$/;
+    // 修正前: /^(\d*)?(nc|na)([+-]\d+)?$/
+    const systemCommandPattern = /^(\d*)?(nc|na)([+-]\d+|0)?$/;
     // ★★★ 1. D100用の正規表現を追加 ★★★
     const d100Match = /^(1?d100)$/;
 
@@ -207,6 +208,8 @@ export function performDiceRoll(rollData) {
                 console.error("3Dダイスロールの結果が不足しています。");
                 return;
             }
+
+// let modifier = -9;
 
             // 1. 各ダイスの出目(1-10)と、それに修正値を加えた「判定値」の配列を計算
             const rawValues = results.map(r => r.value === 0 ? 10 : r.value);

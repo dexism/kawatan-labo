@@ -2,8 +2,9 @@
  * @file battle-helpers.js
  * @description 戦闘関連の共通計算処理を担当するヘルパーモジュール。
  */
-export const version = "1.0.1";
+export const version = "1.1.3";
 
+import * as charManager from './character-manager.js';
 import * as data from './data-handler.js';
 
 /**
@@ -49,4 +50,65 @@ export function calculateManeuverRange(character, maneuver) {
     const maxRange = parseInt(rangeParts[1] || rangeParts[0], 10) + rangeBonus;
     
     return { minRange, maxRange };
+}
+/**
+ * ダメージインスタンスと現在の戦闘状態から、最終的なダメージ量を計算する
+ * @param {object} damageInstance - battleState.damageQueue 内のダメージ情報オブジェクト
+ * @returns {{finalAmount: number, baseAmount: number, totalBonus: number, totalDefense: number}}
+ */
+export function calculateFinalDamage(damageInstance) {
+    if (!damageInstance || damageInstance.type !== 'instance') {
+        return { finalAmount: 0, baseAmount: 0, totalBonus: 0, totalDefense: 0 };
+    }
+
+    const { performer, target } = damageInstance.sourceAction;
+    const currentPerformer = charManager.getCharacterById(performer.id);
+    const currentTarget = charManager.getCharacterById(target.id);
+
+    if (!currentPerformer || !currentTarget) {
+        return { finalAmount: 0, baseAmount: 0, totalBonus: 0, totalDefense: 0 };
+    }
+
+    const baseAmount = damageInstance.baseAmount || 0;
+    let totalBonus = 0;
+    let totalDefense = 0;
+
+    // --- ① ボーナスダメージの計算 ---
+    // a) 大成功によるボーナス
+    if (damageInstance.rollValue >= 11) {
+        totalBonus += (damageInstance.rollValue - 10);
+    }
+    // b) パッシブスキルや宣言されたバフによるボーナス (【スパイク】など)
+    (currentPerformer.activeBuffs || []).forEach(buff => {
+        if (buff.stat === 'damageBonus' && (buff.duration === 'onetime_next_action' || buff.duration === 'until_damage_applied')) {
+            totalBonus += buff.value || 0;
+        }
+    });
+
+    // --- ② 防御・ダメージ軽減の計算 ---
+    // a) 宣言された防御バフ (【うろこ】など)
+    (currentTarget.activeBuffs || []).forEach(buff => {
+        if (buff.stat === 'defense' && buff.duration === 'until_damage_applied') {
+            totalDefense += buff.value || 0;
+        }
+    });
+    // b) パッシブの防御効果 (【ガントレット】など)
+    const allManeuvers = Object.values(currentTarget.partsStatus).flat()
+        .map(p => !p.damaged ? data.getManeuverByName(p.name) : null)
+        .filter(m => m?.timing === 'オート' && m.effects);
+
+    allManeuvers.forEach(maneuver => {
+        maneuver.effects.forEach(effect => {
+            if (effect.ref === 'APPLY_PASSIVE_DEFENSE' && effect.params?.value) {
+                const location = effect.params.condition?.replace('hit_location_is_', '');
+                if (damageInstance.location.toLowerCase().includes(location)) {
+                    totalDefense += effect.params.value;
+                }
+            }
+        });
+    });
+
+    const finalAmount = Math.max(0, baseAmount + totalBonus - totalDefense);
+
+    return { finalAmount, baseAmount, totalBonus, totalDefense };
 }

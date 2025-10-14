@@ -6,7 +6,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.14.83";
+export const version = "1.15.85";
 
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
@@ -14,6 +14,7 @@ import * as interactionManager from './interaction-manager.js';
 import * as data from './data-handler.js';
 import { getCategoryClass, getManeuverSourceText } from './ui-helpers.js';
 import { getCharacterManeuvers } from './menu-builder.js';
+import { calculateFinalDamage } from './battle-helpers.js';
 
 let toastTimer = null;
 const rows = ["奈落", "地獄", "煉獄", "花園", "楽園"];
@@ -31,11 +32,28 @@ export function updateAllUI() {
     // 1. キャラクターカードの再描画
     renderCharacterCards();
     
-    // 2. バトルグリッド上のマーカーを再描画
+    // 2. ダメージマーカーの更新処理
+    document.querySelectorAll('.damage-prompt-button').forEach(btn => btn.remove());
+    
+    const damageSummary = {};
+    battleState.damageQueue.forEach(damage => {
+        if (damage.type === 'instance' && !damage.applied && damage.target) {
+            const targetId = damage.target.id;
+            if (!damageSummary[targetId]) damageSummary[targetId] = 0;
+            
+            // ヘルパー関数を呼び出して最新のダメージ量を取得する
+            const { finalAmount } = calculateFinalDamage(damage);
+            damageSummary[targetId] += finalAmount;
+        }
+    });
+    for (const targetId in damageSummary) {
+        if (damageSummary[targetId] > 0) createDamagePrompt(targetId, damageSummary[targetId]);
+    }
+
+    // 3. バトルグリッド上のマーカーを再描画
     updateMarkers();
 
-    // 3. 右側パネルの全要素（インジケータ、キュー、マーカー）を更新
-    //    updateBattleStatusUI の責務を、右側パネルの更新に限定する
+    // 4. 右側パネルの全要素を更新
     updateStatusPanel(battleState, characters);
 }
 
@@ -474,7 +492,7 @@ function updateStatusPanel(state, characters) {
         countIndicator.textContent = '-';
         cavEl.textContent = `カウント -`;
     } else {
-        if (String(turn) !== turnIndicator.textContent) addLog(`【ターン ${turn} 開始】`);
+        // if (String(turn) !== turnIndicator.textContent) addLog(`【ターン ${turn} 開始】`);
         turnIndicator.textContent = turn;
         countIndicator.textContent = count;
         cavEl.textContent = `カウント ${count}`;
@@ -615,18 +633,7 @@ export function updateAllQueuesUI() {
     updateQueueUI('rapidDeclarationList', rapidQueue, "ラピッド宣言");
     updateQueueUI('judgeDeclarationList', judgeQueue, "ジャッジ宣言");
     updateDamageQueueUI(damageQueue);
-    document.querySelectorAll('.damage-prompt-button').forEach(btn => btn.remove());
-    const damageSummary = {};
-    damageQueue.forEach(damage => {
-        if (!damage.applied) {
-            const targetId = damage.target.id;
-            if (!damageSummary[targetId]) damageSummary[targetId] = 0;
-            damageSummary[targetId] += damage.amount;
-        }
-    });
-    for (const targetId in damageSummary) {
-        if (damageSummary[targetId] > 0) createDamagePrompt(targetId, damageSummary[targetId]);
-    }
+    
     document.getElementById('actionDeclarationArea').classList.toggle('is-closed', actionQueue.length === 0);
     document.getElementById('rapidDeclarationArea').classList.toggle('is-closed', rapidQueue.length === 0);
     document.getElementById('judgeDeclarationArea').classList.toggle('is-closed', judgeQueue.length === 0);
@@ -707,11 +714,11 @@ function updateQueueUI(elementId, queue, headerText) {
                     
                     // 【ワイヤーリール】のように、移動の実行者と対象が異なる場合
                     if (moveDecl.target && moveDecl.target.id !== moveDecl.performer.id) {
-                        text += ` → <b>${moveDecl.target.name}</b>（${moveDecl.performer.name}の【${moveDecl.sourceManeuver.name}】）`;
+                        text += ` → <b>${moveDecl.target.name}</b>（${moveDecl.performer.name}【${moveDecl.sourceManeuver.name}】）`;
                     } 
                     // 【ほね】のように、自身を移動させる場合
                     else {
-                        text += ` → <b>${moveDecl.performer.name}の【${moveDecl.sourceManeuver.name}】</b>`;
+                        text += ` → <b>${moveDecl.performer.name}【${moveDecl.sourceManeuver.name}】</b>`;
                     }
                 }
             }
@@ -729,27 +736,57 @@ function updateDamageQueueUI(queue) {
     const container = listEl.closest('.accordion-container');
     const header = container ? container.querySelector('.accordion-header') : null;
     const isDamageActive = battleLogic.getBattleState().phase === 'DAMAGE_RESOLUTION';
+    
     if (queue.length === 0) {
         listEl.innerHTML = '';
-        if (header) header.textContent = "ダメージ処理はありません";
+        if (header) header.textContent = "ダメージ宣言はありません";
     } else {
-        if (header) header.textContent = "ダメージ処理";
+        if (header) header.textContent = "ダメージ宣言";
         listEl.innerHTML = '';
-        queue.forEach((damage, index) => {
+        queue.forEach((item, index) => {
             const labelEl = document.createElement('label');
             labelEl.className = 'action-queue-item damage-item';
-            const isDisabled = !isDamageActive || damage.applied;
+            
+            let isDisabled = true; // デフォルトは無効
+            let isChecked = false;
+            const textSpan = document.createElement('span');
+
+            // ★★★ type に応じて表示内容と状態を切り替える ★★★
+            if (item.type === 'instance') {
+                isChecked = item.applied;
+                isDisabled = !isDamageActive || isChecked;
+
+                // ▼▼▼ ここを修正 ▼▼▼
+                // ヘルパー関数を呼び出して最新のダメージ情報を取得する
+                const { baseAmount, totalBonus } = calculateFinalDamage(item);
+                const bonusText = totalBonus > 0 ? `+${totalBonus}` : (totalBonus < 0 ? `${totalBonus}` : '');
+                
+                textSpan.innerHTML = `<b>${item.target.name}</b>: ${item.location}: <b>${baseAmount}${bonusText}</b>点`;
+                // ▲▲▲ 修正ここまで ▲▲▲
+                
+            } else if (item.type === 'declaration') {
+                isChecked = item.checked;
+                isDisabled = isChecked; // 宣言は一度クリックされたら無効
+                let text = `<b>${item.performer.name}</b> 【${item.sourceManeuver.name}】`;
+                if (item.target) {
+                    text += ` → <b>${item.target.name}</b>`;
+                }
+                textSpan.innerHTML = text;
+            }
+
             if (isDisabled) labelEl.classList.add('is-disabled');
-            if (damage.applied) labelEl.classList.add('is-checked');
+            if (isChecked) labelEl.classList.add('is-checked');
+            
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
-            checkbox.checked = damage.applied;
+            checkbox.checked = isChecked;
             checkbox.disabled = true;
-            const textSpan = document.createElement('span');
-            textSpan.innerHTML = `<b>${damage.target.name}</b>: ${damage.location}: <b>${damage.amount}</b>点`;
-            if (!damage.applied && !isDisabled) {
+
+            if (!isDisabled) {
+                // クリックハンドラは index を渡すだけでOK
                 labelEl.onclick = () => interactionManager.handleDamageItemClick(index);
             }
+
             labelEl.appendChild(checkbox);
             labelEl.appendChild(textSpan);
             listEl.appendChild(labelEl);
@@ -919,7 +956,9 @@ export function showModal(options) {
     // closableオプションのデフォルト値をtrueに設定
     const isClosable = options.closable !== false;
 
-    // closableの状態に応じて「×」ボタンの表示を切り替える
+    // isClosable の状態に応じて、is-not-closable クラスを付け外しする
+    modal.classList.toggle('is-not-closable', !isClosable);
+
     closeBtn.style.display = isClosable ? 'block' : 'none';
     
     modalTitle.textContent = options.title || '';
@@ -960,17 +999,16 @@ export function showModal(options) {
 
     const closeModal = () => modal.classList.remove('is-visible');
 
-    // closableの状態に応じてイベントリスナーを設定
     if (isClosable) {
         closeBtn.onclick = closeModal;
         modal.onclick = (e) => {
             if (e.target === modal) closeModal();
         };
     } else {
+        // closable: false の場合、クリックイベントを無効化
         closeBtn.onclick = null;
         modal.onclick = null;
     }
-    // ★★★ 修正はここまでです ★★★
 
     if (options.onRender) {
         options.onRender(modal, closeModal);

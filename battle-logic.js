@@ -2,7 +2,7 @@
  * @file battle-logic.js
  * @description 戦闘の進行、状態管理、ルール判定、アクション解決を担当するモジュール。
  */
-export const version = "1.22.86"; // UI分離リファクタリング完了版
+export const version = "1.24.88"; // UI分離リファクタリング完了版
 
 import * as charManager from './character-manager.js';
 import * as ui from './ui-manager.js';
@@ -38,6 +38,11 @@ let battleState = {
 // ===================================================================================
 
 function startCount(newCount) {
+    // ターン開始時 (newCountが最初のカウント) またはカウントが進んだ場合にログを出力
+    if (battleState.count !== newCount) {
+        ui.addLog(`【カウント ${newCount}（ターン ${battleState.turn}） 開始】`);
+    }
+
     battleState.count = newCount;
     battleState.shouldScrollToCount = true;
     resetAndStartNewCount();
@@ -157,67 +162,76 @@ export function clearScrollFlag() {
 }
 
 export function declareManeuver(char, maneuver, target = null, judgeTargetDeclaration = null) {
+    const performerId = char.id;
+
+    // コスト支払い処理（updateCharacterによる参照破壊の可能性に対処）
+    const cost = isNaN(Number(maneuver.cost)) ? 0 : Number(maneuver.cost);
+    if (cost > 0) {
+        charManager.updateCharacter(performerId, { actionValue: char.actionValue - cost });
+    }
+    // 使用済み回数の記録
+    const currentCharacter = charManager.getCharacterById(performerId);
+    let finalTarget = target;
+    // targetが設定されておらず、かつマニューバの射程が「自身」の場合
+    if (!finalTarget && maneuver.range === '自身') {
+        // 宣言者自身をターゲットとして設定する
+        finalTarget = currentCharacter;
+    }
+    if (currentCharacter.turnLimitedManeuvers.has(maneuver.name)) {
+        currentCharacter.usedManeuvers.add(maneuver.name);
+    }
+    
+    // ★★★ ここからが今回の修正の核心です ★★★
+
+    // キューに追加する直前に、常に最新のキャラクターオブジェクトを再取得する
+    const currentPerformer = charManager.getCharacterById(performerId);
+    if (!currentPerformer) {
+        console.error(`宣言の解決中にパフォーマー(ID: ${performerId})が見つかりませんでした。`);
+        return;
+    }
+
+    // 全ての宣言オブジェクトが持つべき必須プロパティをここで完全に定義する
     const declaration = {
         id: `decl_${Date.now()}_${Math.random()}`,
-        performer: char,
+        performer: currentPerformer, // 最新のオブジェクトを必ず設定
         target: target,
         sourceManeuver: maneuver,
         timing: maneuver.timing,
-        summary: { name: maneuver.name }
+        summary: { name: maneuver.name },
+        checked: false, // ★ checked プロパティを必ず初期化
+        type: 'declaration' // デフォルトのタイプ
     };
 
-    const cost = isNaN(Number(maneuver.cost)) ? 0 : Number(maneuver.cost);
-    if (cost > 0) charManager.updateCharacter(char.id, { actionValue: char.actionValue - cost });
-    if (char.turnLimitedManeuvers.has(maneuver.name)) char.usedManeuvers.add(maneuver.name);
+    // ★★★ 修正はここまでです ★★★
 
     switch (maneuver.timing) {
         case 'ラピッド':
             battleState.rapidQueue.push(declaration);
-            ui.addLog(`◆[ラピッド] ${char.name}が【${maneuver.name}】を宣言`);
+            ui.addLog(`◆ [ラピッド] ${currentPerformer.name}が【${maneuver.name}】を宣言`);
             break;
         case 'ジャッジ':
             declaration.judgeTarget = judgeTargetDeclaration;
             battleState.judgeQueue.push(declaration);
-            ui.addLog(`◆[ジャッジ] ${char.name}が【${maneuver.name}】を宣言`);
+            ui.addLog(`◆ [ジャッジ] ${currentPerformer.name}が【${maneuver.name}】を宣言`);
             break;
         case 'ダメージ':
-            // ログに防御対象がいれば表示するように修正
-            let logMessage = `◆[ダメージ] ${char.name}が【${maneuver.name}】を宣言`;
-            if (target && target.id !== char.id) {
-                logMessage += ` (対象: ${target.name})`;
+            battleState.damageQueue.push(declaration);
+            let logMessage = `◆ [ダメージ] ${currentCharacter.name}が【${maneuver.name}】を宣言`;
+            // ログ表示もfinalTargetを参照するように修正
+            if (finalTarget && finalTarget.id !== currentCharacter.id) {
+                logMessage += ` (対象: ${finalTarget.name})`;
             }
             ui.addLog(logMessage);
-
-            const defenseEffect = maneuver.effects?.find(e => e.ref === 'GENERIC_DEFENSE');
-            if (defenseEffect) {
-                // targetが指定されていればそのキャラ、なければ使用者自身にバフをかける
-                const defenseTarget = target || char;
-                charManager.addBuff(defenseTarget.id, { 
-                    source: maneuver.name, 
-                    stat: 'defense', 
-                    value: defenseEffect.params.value || 0, 
-                    duration: 'until_damage_applied' 
-                });
-            }
-            
-            const damageIncreaseEffect = maneuver.effects?.find(e => e.ref === 'INCREASE_DAMAGE_DEALT');
-            if (damageIncreaseEffect) {
-                const pendingDamage = battleState.damageQueue.find(d => d.sourceAction.performer.id === char.id && !d.applied);
-                if (pendingDamage) {
-                    charManager.addBuff(char.id, { 
-                        source: maneuver.name, 
-                        stat: 'damageBonus', 
-                        value: damageIncreaseEffect.params.value || 0, 
-                        duration: 'until_damage_applied' 
-                    });
-                }
-            }
-            break;
+            break; 
         case 'アクション':
         default:
-            charManager.updateCharacter(char.id, { hasActedThisCount: true });
-            battleState.actionQueue.push(declaration);
-            ui.addLog(`◆[アクション] ${char.name}が【${maneuver.name}】を宣言`);
+            if (maneuver.timing === 'アクション') {
+                // アクション宣言の場合のみ、hasActedThisCountを更新し、typeを上書き
+                charManager.updateCharacter(performerId, { hasActedThisCount: true });
+                declaration.type = 'action';
+                battleState.actionQueue.push(declaration);
+                ui.addLog(`◆ [アクション] ${currentPerformer.name}が【${maneuver.name}】を宣言`);
+            }
             break;
     }
     
@@ -246,8 +260,17 @@ export function determineNextStep() {
     const prevPhase = battleState.phase;
     const hasUnresolvedRapids = battleState.rapidQueue.some(r => !r.checked);
     const hasUnresolvedActions = battleState.actionQueue.some(a => !a.checked);
-    const hasPendingDamage = battleState.damageQueue.some(d => !d.applied);
-    
+
+    // ダメージキューに「未解決のダメージインスタンス」または「未解決のダメージ宣言」が残っているかを確認
+    const hasPendingDamage = battleState.damageQueue.some(item => {
+        if (item.type === 'instance') {
+            return !item.applied; // ダメージインスタンスはappliedプロパティで判断
+        } else if (item.type === 'declaration') {
+            return !item.checked; // ダメージ宣言はcheckedプロパティで判断
+        }
+        return false; // それ以外のタイプは無視
+    });
+
     if (battleState.activeActors.length > 0) {
         battleState.phase = 'ACTION_DECLARATION';
     } else if (hasUnresolvedRapids) {
@@ -338,11 +361,12 @@ export async function resolveRapidByIndex(index) {
     determineNextStep();
 }
 
-export async function resolveActionByIndex(index, totalBonus = 0) {
+export async function resolveActionByIndex(index, diceResult = null) {
     const declaration = battleState.actionQueue[index];
     if (!declaration || declaration.checked) return;
     
-    await resolveSingleAction(declaration, totalBonus);
+    // totalBonusは不要になり、diceResultを直接渡す
+    await resolveSingleAction(declaration, diceResult); 
     declaration.checked = true;
 
     if (battleState.actionQueue.every(d => d.checked)) {
@@ -356,7 +380,7 @@ export function checkJudgeItem(index) {
     const declaration = battleState.judgeQueue[index];
     if (declaration && !declaration.checked) {
         declaration.checked = true;
-        ui.addLog(`> 解決: [ジャッジ] ${declaration.performer.name}の【${declaration.sourceManeuver.name}】`);
+        ui.addLog(`> 解決：[ジャッジ] ${declaration.performer.name}【${declaration.sourceManeuver.name}】`);
     }
     determineNextStep();
 }
@@ -367,28 +391,34 @@ export function applySupport(judgeIndex, targetDeclarationId) {
     if (judgeDeclaration && targetDeclaration) {
         judgeDeclaration.target = targetDeclaration;
         judgeDeclaration.checked = true;
-        ui.addLog(`> ${judgeDeclaration.performer.name}が【${judgeDeclaration.sourceManeuver.name}】で「${targetDeclaration.sourceManeuver.name}」を対象にしました。`);
+        ui.addLog(`> ${judgeDeclaration.performer.name}が【${judgeDeclaration.sourceManeuver.name}】で「${targetDeclaration.sourceManeuver.name}」を対象にしました`);
         determineNextStep();
     }
 }
 
 export function applyDamage(index) {
     const damageInfo = battleState.damageQueue[index];
-    if (damageInfo && !damageInfo.applied) {
+    if (damageInfo && damageInfo.type === 'instance' && !damageInfo.applied) {
         damageInfo.applied = true;
         const targetId = damageInfo.target.id;
-        charManager.clearTemporaryBuffs(targetId, 'until_damage_applied');
         
-        // 1ターンに1回のダメージマニューバの使用状況をリセットする
-        const allCharacters = charManager.getCharacters();
-        allCharacters.forEach(char => {
-            const usedDamageManeuvers = [...char.usedManeuvers].filter(name => {
-                const maneuver = data.getManeuverByName(name);
-                // 使用制限があり(usageLimit:falseではない)、かつダメージタイミングのマニューバをリセット対象とする
-                return maneuver && maneuver.timing === 'ダメージ' && maneuver.usageLimit !== false;
-            });
-            usedDamageManeuvers.forEach(name => char.usedManeuvers.delete(name));
+        // ★★★ 関連するダメージ宣言も "解決済み" としてマークする ★★★
+        battleState.damageQueue.forEach(item => {
+            if (item.type === 'declaration') {
+                // 【庇う】のように、このダメージインスタンスの対象者をターゲットにしていた宣言
+                if (item.target?.id === targetId) {
+                    item.checked = true;
+                }
+                // 【ジェットノズル】のように、このダメージインスタンスの実行者をパフォーマーとする宣言
+                if (damageInfo.sourceAction?.performer.id === item.performer.id) {
+                    item.checked = true;
+                }
+            }
         });
+
+        // バフ解除などのクリーンアップ
+        charManager.clearTemporaryBuffs(targetId, 'until_damage_applied');
+        charManager.clearTemporaryBuffs(damageInfo.sourceAction.performer.id, 'until_damage_applied');
     }
     determineNextStep();
 }
@@ -416,11 +446,11 @@ function resolveQueuedMoves() {
             const finalDistance = Math.max(0, originalDistance + totalDebuff);
 
             if (finalDistance < originalDistance) {
-                ui.addLog(`${char.name}の移動は妨害され、移動距離が${originalDistance - finalDistance}減少！`);
+                ui.addLog(`→ ${char.name}の移動は妨害され、移動距離が${originalDistance - finalDistance}減少！`);
             }
 
             if (finalDistance === 0) {
-                 if (originalDistance > 0) ui.addLog(`${char.name}の移動は完全に妨害された！`);
+                 if (originalDistance > 0) ui.addLog(`→ ${char.name}の移動は完全に妨害された！`);
                 return null;
             }
             
@@ -433,7 +463,7 @@ function resolveQueuedMoves() {
             
             const newTargetArea = rows[finalIndex];
             if (char.area !== newTargetArea) {
-                ui.addLog(`${char.name}は ${newTargetArea} へ移動`);
+                ui.addLog(`→ ${char.name}は「${newTargetArea}」へ移動`);
             }
             
             return {
@@ -455,7 +485,7 @@ function checkAllDamageApplied() {
         ui.addLog("--- ダメージ解決フェーズ開始 ---");
     } else {
         battleState.phase = 'COUNT_END';
-        ui.addLog("--- カウント終了 ---");
+        // ui.addLog("--- カウント終了 ---");
     }
     determineNextStep();
 }
@@ -463,10 +493,11 @@ function checkAllDamageApplied() {
 export function redirectDamage(damageId, newTarget) {
     const damageInfo = battleState.damageQueue.find(d => d.id === damageId);
     if (damageInfo && newTarget) {
-        ui.addLog(`${newTarget.name} が ${damageInfo.target.name} へのダメージを肩代わりしました。`);
+        ui.addLog(`＞ ${newTarget.name} が ${damageInfo.target.name} へのダメージを肩代わりしました。`);
         damageInfo.target = newTarget;
     }
-    determineNextStep();
+    // ★ ここで determineNextStep() を呼び出す必要はありません。
+    //   呼び出し元の handleDamageItemClick で宣言をチェック済みにした後に呼び出されるためです。
 }
 
 export function restoreBattleState(turn, characters) {
@@ -489,7 +520,7 @@ export function resetToSetupPhase() {
 //  効果解決エンジン (Effect Resolution Engine)
 // ===================================================================================
 
-async function resolveSingleAction(declaration, totalBonus = 0) {
+async function resolveSingleAction(declaration, diceResult = null) {
     const { performer, sourceManeuver, target, timing } = declaration;
 
     // --- 解決直前の前提条件（特に射程）を再チェック ---
@@ -515,11 +546,11 @@ async function resolveSingleAction(declaration, totalBonus = 0) {
     
     // 前提条件を満たさなくなった場合は、マニューバを失敗させて終了
     if (!isStillValid) {
-        ui.addLog(`[${timing}] ${performer.name}の【${sourceManeuver.name}】は、対象が射程外になったため失敗`);
+        ui.addLog(`→ [${timing}] ${performer.name}の【${sourceManeuver.name}】は 対象が射程外になったため失敗`);
         return; // この後の処理をすべて中断
     }
 
-    ui.addLog(`> 解決: ${performer.name} の【${sourceManeuver.name}】`);
+    // ui.addLog(`> 解決：${performer.name}【${sourceManeuver.name}】`);
 
     if (sourceManeuver.isEscapeAttempt) {
         await performEscapeRoll({ performer, declaration });
@@ -530,8 +561,11 @@ async function resolveSingleAction(declaration, totalBonus = 0) {
         else ui.addLog(`※ 効果の定義がありません`);
         return;
     }
+    // ★★★ ここからが今回の修正箇所です ★★★
+    // context オブジェクトを構築する際に、performer を正しく含めます
+    const context = { performer, target: declaration.target, declaration, diceResult };
+    // ★★★ 修正はここまでです ★★★
 
-    const context = { performer, target: declaration.target, declaration, totalAttackBonus: totalBonus };
     let allOnHitEffects = [];
     for (const effectRef of sourceManeuver.effects) {
         const onHitEffects = await executeEffect(effectRef, context);
@@ -607,98 +641,144 @@ async function executeEffect(effectRef, context) {
 }
 
 async function performAttackRoll(action, context) {
-    const { performer, target, declaration } = context;
+    const { performer, target, declaration, diceResult } = context; 
+    // damageQueueに追加するオブジェクトのperformerは、必ず元の宣言(declaration)から取得する
+    const originalPerformer = declaration.performer;
+
     if (!target) {
         ui.addLog(`攻撃対象がいません`);
         return { hit: false, on_hit: [] };
     }
-    let bonus = context.totalAttackBonus || 0;
+
+    // ダイスロールの結果がなければ、処理を中断
+    if (!diceResult) {
+        console.error("performAttackRollにdiceResultが渡されていません。攻撃が解決されませんでした。");
+        // 本来ここに来ることはないが、安全のために失敗として扱う
+        return { hit: false, on_hit: [] };
+    }
+
+    const { result, hitLocation, rollValue } = diceResult;
+    const onHitEffects = action.on_hit_effects || action.on_hit || [];
+
     let damageBonus = 0;
     if (performer.activeBuffs) {
         performer.activeBuffs.forEach(buff => {
-            if (buff.duration === 'onetime_next_action') {
-                if (buff.stat === 'attackCheckBonus') bonus += buff.value;
-                if (buff.stat === 'damageBonus') damageBonus += buff.value;
+            if (buff.duration === 'onetime_next_action' && buff.stat === 'damageBonus') {
+                damageBonus += buff.value;
             }
         });
     }
-    const diceCommand = `NA${bonus >= 0 ? `+${bonus}` : bonus}`;
-    const onHitEffects = action.on_hit_effects || action.on_hit || [];
     
-    return new Promise(resolve => {
-        performDiceRoll({
-            command: diceCommand, showToast: true, performer,
-            callback: async (result, hitLocation, resultText, rollValue) => {
-                if (result === '大失敗') {
-                    const maneuver = declaration.sourceManeuver;
-                    const { minRange, maxRange } = calculateManeuverRange(performer, maneuver);
-                    let candidates = [];
+    if (result === '大失敗') {
+        // ▼▼▼ ここからが修正箇所です ▼▼▼
 
-                    if (!isNaN(minRange)) {
-                        const allAreas = ["奈落", "地獄", "煉獄", "花園", "楽園"];
-                        const performerAreaIndex = allAreas.indexOf(performer.area);
-                        
-                        // 射程内の味方（自身を含む）を候補として抽出
-                        candidates = charManager.getCharacters().filter(c => {
-                            if (c.type !== performer.type || c.isDestroyed || c.isWithdrawn) {
-                                return false;
-                            }
-                            const targetAreaIndex = allAreas.indexOf(c.area);
-                            if (targetAreaIndex === -1) return false;
-                            
-                            const distance = Math.abs(performerAreaIndex - targetAreaIndex);
-                            return distance >= minRange && distance <= maxRange;
-                        });
-                    }
-                    
-                    if (candidates.length > 0) {
-                        const selected = await new Promise(res => {
-                            const items = candidates.map(c => ({ label: c.name, onClick: () => res(c) }));
-                            // モーダルの外側クリックでキャンセルできるように onRender を追加
-                            ui.showModal({ 
-                                title: '→ 大失敗：誤爆対象を選択', 
-                                items,
-                                onRender: (modal, closeFn) => {
-                                    const closeModalHandler = () => { closeFn(); res(null); };
-                                    modal.querySelector('#closeSimpleMenuModalBtn').onclick = closeModalHandler;
-                                    modal.onclick = (e) => { if (e.target === modal) closeModalHandler(); };
-                                }
-                            });
-                        });
+        const maneuver = declaration.sourceManeuver;
+        let candidates = [];
+        
+        // 1. 「攻撃対象エリア」にいる味方を候補に追加
+        const targetArea = target.area;
+        const alliesInTargetArea = charManager.getCharacters().filter(c => 
+            c.type === performer.type && // 味方である
+            c.area === targetArea &&      // 攻撃対象と同じエリアにいる
+            !c.isDestroyed && 
+            !c.isWithdrawn
+        );
+        candidates.push(...alliesInTargetArea);
 
-                        if (selected) {
-                            // ダメージ処理のロジックは元のコードを尊重
-                            battleState.damageQueue.push({
-                                id: `damage_${Date.now()}_${Math.random()}`, target: selected, amount: 1, // 大失敗のダメージは1点
-                                location: '任意', sourceAction: declaration, applied: false, rollValue: rollValue || 0,
-                                isFumble: true
-                            });
-                            ui.addLog(`→ ${selected.name}に誤爆！ 1点のダメージ！`);
-                        }
-                    } else {
-                        ui.addLog("※ [誤射解決エラー]");
-                    }
+        // 2. 「攻撃者自身」を候補に追加（重複しないように確認）
+        if (!candidates.some(c => c.id === performer.id)) {
+            candidates.push(performer);
+        }
 
-                    resolve({ hit: false, on_hit: [] });
-                    return;
-                }
-                const hit = result.includes('成功');
-                if (hit) {
-                    ui.addLog(`→ ${target.name}に命中！`);
-                    battleState.damageQueue.push({
-                        id: `damage_${Date.now()}_${Math.random()}`, target, amount: (action.damage || 0) + damageBonus,
-                        location: hitLocation, sourceAction: declaration, applied: false, rollValue: rollValue || 0,
-                        onHitEffects, damageBonusSources: performer.activeBuffs.filter(b => b.duration === 'onetime_next_action' && b.stat === 'damageBonus').map(b => ({ source: b.source, value: b.value }))
-                    });
-                    ui.addLog(`→ ${target.name}に${(action.damage || 0) + damageBonus}点のダメージ！`);
-                } else {
-                    ui.addLog(`→ 攻撃失敗`);
-                }
-                charManager.clearTemporaryBuffs(performer.id, 'onetime_next_action');
-                resolve({ hit, on_hit: onHitEffects });
-            }
+        let selected = null;
+        
+        if (candidates.length > 0) {
+            selected = await new Promise(res => {
+                const items = candidates.map(c => ({ label: c.name, onClick: () => res(c) }));
+                ui.showModal({ 
+                    title: '大失敗：誤爆対象を選択', 
+                    items,
+                    closable: false
+                    // onRenderは不要
+                });
+            });
+        }
+        
+        if (selected) {
+            // 3. ダメージと効果を元のマニューバから引き継ぐ
+            const baseDamage = action.damage || 0;
+            const onHitEffects = action.on_hit_effects || action.on_hit || [];
+
+            battleState.damageQueue.push({
+                id: `damage_${Date.now()}_${Math.random()}`,
+                type: 'instance',
+                performer: originalPerformer,
+                target: selected,
+                amount: baseDamage, // ★ 元のマニューバのダメージ量を適用
+                finalAmount: baseDamage, // 最終ダメージ量（この時点では増減なし）
+                baseAmount: baseDamage,  // 基本ダメージ量を記録
+                bonusAmount: 0,          // ボーナスダメージ量を記録
+                location: '防御側任意',   // ★「防御側任意」に修正
+                sourceAction: declaration,
+                applied: false,
+                checked: false,
+                rollValue: rollValue || 0,
+                isFumble: true,
+                onHitEffects: onHitEffects // ★ 元のマニューバの効果を引き継ぐ
+            });
+            ui.addLog(`→ ${selected.name}に誤爆！ ${baseDamage}点のダメージ！`);
+        } else {
+            // 候補者がいなかった場合（通常は発生しないが安全のため）
+            ui.addLog("→ 攻撃は大失敗したが、誤爆対象がいなかった。");
+        }
+        
+        // ▲▲▲ 修正はここまでです ▲▲▲
+
+        return { hit: false, on_hit: [] };
+    }
+
+    const hit = result.includes('成功');
+    if (hit) {
+        let locationText = hitLocation;
+        if (rollValue >= 11) {
+            locationText = '攻撃側任意';
+        } else if (rollValue === 6) {
+            locationText = '防御側任意';
+        }
+        
+        const baseDamage = action.damage || 0;
+        // ログ出力用に、防御を考慮しない「初期合計ダメージ」を計算する
+        let initialTotalDamage = baseDamage + damageBonus; // damageBonusはスキル/バフのボーナス
+        if (rollValue >= 11) {
+            initialTotalDamage += (rollValue - 10); // 大成功ボーナスを加算
+        }
+
+        ui.addLog(`→ ${target.name}に命中！`);
+        battleState.damageQueue.push({
+            id: `damage_${Date.now()}_${Math.random()}`,
+            type: 'instance',
+            performer: originalPerformer,
+            target,
+            // ▼▼▼ ここを修正 ▼▼▼
+            baseAmount: baseDamage, // 基本ダメージのみを記録
+            location: locationText,
+            // finalAmount, bonusAmount は削除
+            // ▲▲▲ 修正ここまで ▲▲▲
+            sourceAction: declaration,
+            applied: false,
+            checked: false,
+            rollValue: rollValue || 0,
+            onHitEffects: action.on_hit_effects || action.on_hit || [],
+            damageBonusSources: originalPerformer.activeBuffs?.filter(b => b.duration === 'onetime_next_action' && b.stat === 'damageBonus').map(b => ({ source: b.source, value: b.value })) || []
         });
-    });
+        // ログ出力には、計算した initialTotalDamage を使用する
+        ui.addLog(`→ ${target.name}に${initialTotalDamage}点のダメージ！`);    
+    } else {
+        ui.addLog(`→ 攻撃失敗`);
+    }
+    
+    charManager.clearTemporaryBuffs(originalPerformer.id, 'onetime_next_action');
+    return { hit, on_hit: onHitEffects };
 }
 
 function performMoveCharacter(action, context) {
@@ -775,13 +855,13 @@ function performMoveCharacter(action, context) {
     // ラピッドタイミングの移動は即時解決する
     if (declaration.timing === 'ラピッド') {
         if (moveTarget.area !== newArea) {
-             ui.addLog(`[ラピッド] ${moveTarget.name}は ${newArea} へ移動`);
+            ui.addLog(`→ [ラピッド] ${moveTarget.name}は「${newArea}」へ移動`);
         }
         charManager.updateCharacter(moveTarget.id, { area: newArea });
     } else {
         // アクションタイミングの移動は従来通りmoveQueueに予約する
         if (moveTarget.area !== newArea) {
-             ui.addLog(`移動予約：${moveTarget.name} は ${newArea} へ移動`);
+            ui.addLog(`→ ${moveTarget.name}は「${newArea}」へ移動を企図`);
         }
         battleState.moveQueue.push({ characterId: moveTarget.id, targetArea: newArea, declarationId: declaration.id });
     }
