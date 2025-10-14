@@ -2,7 +2,7 @@
  * @file reference.js
  * @description ルールリファレンスUIの構築と管理を担当するモジュール
  */
-export const version = "1.2.4";
+export const version = "1.2.5";
 
 import * as data from './data-handler.js';
 import * as ui from './ui-manager.js';
@@ -155,8 +155,9 @@ function renderTabViewContent(tabId, container) {
         case 'memory': renderSimpleListTab('memory', container); break;
         case 'hint': renderSimpleListTab('hint', container); break;
     }
+    // イベントリスナーは、描画先のコンテナ（.reference-content-inner）に直接設定する
     container.addEventListener('touchstart', handleTouchStart);
-    container.addEventListener('touchmove', handleTouchMove);
+    container.addEventListener('touchmove', handleTouchMove, { passive: false }); // preventDefaultを呼ぶためにpassive: falseを指定
     container.addEventListener('touchend', handleTouchEnd);
 }
 
@@ -172,7 +173,12 @@ function renderTabView(tabId, contentArea) {
 // --- 各タブの描画関数 ---
 
 function renderManeuverTab(container) {
-    // (旧menu-builder.jsのbuildReferenceMenuから移植・改修)
+    // 1. 新しいFlexコンテナラッパーを作成
+    const tabContainer = document.createElement('div');
+    tabContainer.className = 'reference-maneuver-tab-container';
+    container.appendChild(tabContainer);
+
+    // 2. フィルター部分を作成
     const accordionContainer = document.createElement('div');
     accordionContainer.className = 'accordion-container';
     
@@ -184,13 +190,18 @@ function renderManeuverTab(container) {
     const filterContainer = document.createElement('div');
     filterContainer.className = 'reference-filter-container accordion-content';
 
+    accordionContainer.appendChild(accordionHeader);
+    accordionContainer.appendChild(filterContainer);
+
+    // 3. マニューバリストのコンテナを作成
     const listContainer = document.createElement('div');
     listContainer.className = 'maneuver-menu-list-container';
 
-    accordionContainer.appendChild(accordionHeader);
-    accordionContainer.appendChild(filterContainer);
-    container.appendChild(accordionContainer);
-    container.appendChild(listContainer);
+    // 4. 新しいラッパーにフィルターとリストを追加
+    tabContainer.appendChild(accordionContainer);
+    tabContainer.appendChild(listContainer);
+    
+    // ▲▲▲ 修正はここまでです ▲▲▲
 
     const renderList = () => {
         const allManeuversSource = data.getAllManeuvers();

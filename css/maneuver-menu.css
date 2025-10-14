@@ -248,8 +248,18 @@
 ================================ */
 #maneuverMenu.is-reference-mode {
     width:  100%;
-    max-height: 100%;
+    /* max-height: 100%; */
     pointer-events: auto;
+    display: flex; /* ★ displayをflexに変更 */
+    flex-direction: column; /* ★ 子要素を縦に並べる */
+
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+#maneuverMenu.is-reference-mode .maneuver-menu-header,
+#maneuverMenu.is-reference-mode .reference-tab-bar {
+    margin: 0 10px;
 }
 #maneuverMenu.is-reference-mode .item-passive-icon-col,
 #maneuverMenu.is-reference-mode .item-status-icon-col {
@@ -257,57 +267,120 @@
 }
 #maneuverMenu.is-reference-mode .maneuver-item-new {
     width:  100%;
-    max-height: 100%;
+    /* max-height: 100%; */
     /* pointer-events: none; */
+}
+
+/* =======================================
+   リファレンスフィルター表示拡張スタイル
+========================================== */
+
+/* フィルターのアコーディオンコンテナは高さを自動調整し、縮まないようにする */
+.reference-maneuver-tab-container .accordion-container {
+    flex-shrink: 0;
+    /* accordion-containerに既にあるスタイルを上書き・調整 */
+    height: auto;
+    margin: 0;
+    padding: 0;
+    border-bottom: 1px solid var(--color-border);
 }
 /* リファレンスメニューのアコーディオンヘッダーのスタイル調整 */
 #maneuverMenu .accordion-container {
-    height: 100%;
     margin: 0;
-    padding: 5px 0;
+    padding-bottom: 5px;
     border-bottom: 1px solid var(--color-border);
     box-sizing: border-box;
 }
-.reference-filter-container {
-    /* padding: 5px; */
-    /* border-bottom: 1px solid var(--color-border); */
-    max-height: calc(50vh - 90px);
-    display: flex;
-    flex-direction: column;
-    gap: 0px;
-    overflow-y: auto;
-}
 #maneuverMenu .accordion-header {
-    padding: 5px; /* 上下左右の余白を調整 */
+    padding: 5px 10px; /* 上下左右の余白を調整 */
     box-sizing: border-box;
     font-size: 14px; /* 文字サイズを少し大きく */
     font-weight: bold;
     color: var(--color-text);
 }
-/* ▲▲▲ ここまで追加 ▲▲▲ */
-
 .filter-group {
     background-color: var(--color-background-4);
     border-radius: 10px;
-    margin: 3px;
-    padding: 5px;
+    margin: 5px;
+    padding: 10px;
 }
 .filter-group-title {
     margin: 0;
-    font-size: 12px;
+    font-size: 13px;
     color: var(--color-fore-5);
-    padding: 0 0 3px 3px;
+    padding: 0 0 5px 5px;
 }
 .filter-buttons {
     display: flex;
     flex-wrap: wrap;
     justify-content:start;
-    gap: 5px 10px;
+    gap: 7px;
 }
 .filter-buttons .filter-btn {
     padding: 4px 0;
     font-size: 12px;
     border-radius: 20px;
+    height: 30px;
+}
+.filter-buttons .filter-btn:hover {
+    border-color: var(--color-background-1);
+    box-shadow: none;
+    background-color: var(--color-background-1);
+}
+.reference-filter-container {
+    /* padding: 5px; */
+    /* border-bottom: 1px solid var(--color-border); */
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+    overflow-y: auto;
+}
+
+/* ヘッダー全体をFlexboxコンテナにする */
+#maneuverMenu .accordion-header {
+    display: flex;
+    align-items: baseline; /* テキストのベースラインを揃える */
+    gap: 0px; /* 「フィルタ」と要約の間の隙間 */
+    width: 100%;
+    overflow: hidden; /* はみ出し防止 */
+}
+
+/* 「フィルタ」の固定テキスト */
+.accordion-title-static {
+    font-weight: bold;
+    font-size: 14px;
+    color: var(--color-text);
+    flex-shrink: 0; /* この要素が縮まないようにする */
+}
+
+/* 件数とフィルター要約の動的テキスト */
+.accordion-title-dynamic {
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--color-fore-5);
+    white-space: nowrap; /* ★重要: 全体として改行させない */
+    overflow: hidden; /* ★重要: はみ出した部分を隠す */
+    text-overflow: ellipsis; /* ★重要: はみ出しを「…」で表示 */
+    flex-grow: 1; /* 残りのスペースをすべて埋める */
+    min-width: 0; /* flexアイテムのはみ出し防止 */
+}
+
+/* フィルターグループごとのスタイル */
+.filter-summary-group {
+    margin-right: 8px; /* グループ間の区切り */
+    background-color: var(--color-background-2);
+    padding: 0 10px 0 8px;
+    border-radius: 10px;
+}
+
+/* 「カテゴリ：」などのラベル部分 */
+.filter-summary-label {
+    font-weight: normal;
+    font-size: 9px;
+    margin-right: 5px;
+    padding: 0;
+    color: var(--color-fore-6);
 }
 
 /* ================================
@@ -405,55 +478,6 @@
     font-size: 13px;
     text-indent: 1em;
 }
-/* フィルターグループごとのスタイル */
-.filter-summary-group {
-    margin-right: 5px; /* グループ間の区切り */
-    background-color: var(--color-background-2);
-    padding: 0 7px 0 2px;
-    border-radius: 10px;
-}
-
-/* 「カテゴリ：」などのラベル部分 */
-.filter-summary-label {
-    font-weight: normal;
-    font-size: 9px;
-    margin-right: 5px;
-    padding: 0;
-    color: var(--color-fore-6);
-}
-/* =======================================
-   リファレンスフィルター表示拡張スタイル
-========================================== */
-
-/* ヘッダー全体をFlexboxコンテナにする */
-#maneuverMenu .accordion-header {
-    display: flex;
-    align-items: baseline; /* テキストのベースラインを揃える */
-    gap: 0px; /* 「フィルター表示」と要約の間の隙間 */
-    width: 100%;
-    overflow: hidden; /* はみ出し防止 */
-}
-
-/* 「フィルター表示」の固定テキスト */
-.accordion-title-static {
-    font-weight: bold;
-    font-size: 14px;
-    color: var(--color-text);
-    flex-shrink: 0; /* この要素が縮まないようにする */
-}
-
-/* 件数とフィルター要約の動的テキスト */
-.accordion-title-dynamic {
-    font-size: 12px;
-    font-weight: bold;
-    color: var(--color-fore-5);
-    white-space: nowrap; /* ★重要: 全体として改行させない */
-    overflow: hidden; /* ★重要: はみ出した部分を隠す */
-    text-overflow: ellipsis; /* ★重要: はみ出しを「…」で表示 */
-    flex-grow: 1; /* 残りのスペースをすべて埋める */
-    min-width: 0; /* flexアイテムのはみ出し防止 */
-}
-
 /* ================================
    リファレンス：悪意点表示スタイル
 ================================ */
@@ -566,7 +590,7 @@
 
 .reference-content-area {
     /* 指を離したときに、元の位置にスナップバックするためのアニメーション */
-    transition: transform 0.3s ease;
+    transition: transform 0.2s ease;
 }
 
 .reference-content-area.is-swiping {
@@ -585,16 +609,18 @@
     overflow: hidden;
     position: relative; /* 子要素の絶対配置の基準にする */
     flex-grow: 1;
-    padding: 5px;
+    /* padding: 5px; */
 }
 
 .reference-content-inner {
-    position: absolute;
+    position: absolute; 
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     overflow-y: auto; /* ★ 各タブの中身はスクロール可能に */
+    padding: 5px;
+    box-sizing: border-box;
     transition: transform 0.3s ease;
 }
 
@@ -626,4 +652,22 @@
 }
 .reference-content-inner.slide-in-from-left {
     transform: translateX(-100%);
+}
+/* ================================
+   リファレンス：マニューバタブのレイアウト
+================================ */
+
+.reference-maneuver-tab-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* 親(.reference-content-inner)の高さいっぱいに広がる */
+    margin: 0;
+    padding: 0;
+}
+
+/* マニューバリストは残りの高さを全て使い、スクロール可能にする */
+.reference-maneuver-tab-container .maneuver-menu-list-container {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 0 5px 10px 5px;
 }
