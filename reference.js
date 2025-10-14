@@ -2,7 +2,7 @@
  * @file reference.js
  * @description ルールリファレンスUIの構築と管理を担当するモジュール
  */
-export const version = "1.1.3";
+export const version = "1.2.4";
 
 import * as data from './data-handler.js';
 import * as ui from './ui-manager.js';
@@ -18,6 +18,7 @@ let touchMoveX = 0;
 let touchStartY = 0;
 let touchMoveY = 0;
 const SWIPE_THRESHOLD = 50; // スワイプと判断する最小移動距離（ピクセル）
+let isVerticalScroll = false; // ★ 垂直スクロール中か判定するフラグを追加
 
 // --- メイン関数 ---
 
@@ -78,41 +79,94 @@ function createTabBar() {
         if (tab.id === activeTab) {
             tabButton.classList.add('is-active');
         }
-        tabButton.onclick = () => {
+        tabButton.onclick = (event) => {
+            const oldTabId = activeTab;
             activeTab = tab.id;
+
             tabBar.querySelectorAll('.reference-tab-button').forEach(btn => btn.classList.remove('is-active'));
             tabButton.classList.add('is-active');
+
+            // アクティブなタブが画面内に収まるように自動スクロール
+            tabButton.scrollIntoView({
+                behavior: 'smooth',
+                inline: 'center',
+                block: 'nearest'
+            });
+            
             const contentArea = document.querySelector('.reference-content-area');
-            if(contentArea) renderTabView(activeTab, contentArea);
+            if(contentArea) {
+                // タブのインデックスを比較してアニメーション方向を決定
+                const oldIndex = tabs.findIndex(t => t.id === oldTabId);
+                const newIndex = tabs.findIndex(t => t.id === activeTab);
+                const direction = newIndex > oldIndex ? 'left' : 'right';
+
+                // アニメーション付きでタブを切り替え
+                switchTabViewAnimated(activeTab, contentArea, direction);
+            }
         };
         tabBar.appendChild(tabButton);
     });
     return tabBar;
 }
 
-function renderTabView(tabId, contentArea) {
-    contentArea.innerHTML = ''; // コンテンツをクリア
-    switch (tabId) {
-        case 'maneuver':
-            renderManeuverTab(contentArea);
-            break;
-        case 'regret':
-            renderSimpleListTab('regret', contentArea, "未練一覧");
-            break;
-        case 'treasure':
-            renderSimpleListTab('treasure', contentArea, "たからもの一覧");
-            break;
-        case 'memory':
-            renderSimpleListTab('memory', contentArea, "記憶のカケラ一覧");
-            break;
-        case 'hint':
-            renderSimpleListTab('hint', contentArea, "暗示一覧");
-            break;
+/**
+ * スライドアニメーション付きでタブビューを切り替える関数
+ * @param {string} tabId - 表示するタブのID
+ * @param {HTMLElement} contentArea - コンテンツエリアの要素
+ * @param {string} direction - 'left' または 'right'
+ */
+function switchTabViewAnimated(tabId, contentArea, direction) {
+    // 1. 新しいコンテンツを画面外に準備
+    const newContent = document.createElement('div');
+    newContent.className = 'reference-content-inner';
+    renderTabViewContent(tabId, newContent); // 描画処理を分離
+    
+    // アニメーションの方向を設定
+    newContent.classList.add(direction === 'left' ? 'slide-in-from-right' : 'slide-in-from-left');
+    
+    // 2. 現在のコンテンツを画面外にスライドアウトさせる
+    const oldContent = contentArea.querySelector('.reference-content-inner');
+    if (oldContent) {
+        oldContent.classList.add(direction === 'left' ? 'slide-out-to-left' : 'slide-out-to-right');
+        // アニメーション完了後に古い要素を削除
+        oldContent.addEventListener('animationend', () => {
+            oldContent.remove();
+        });
     }
-    // コンテンツエリアにタッチイベントリスナーを設定
-    contentArea.addEventListener('touchstart', handleTouchStart);
-    contentArea.addEventListener('touchmove', handleTouchMove);
-    contentArea.addEventListener('touchend', handleTouchEnd);
+
+    // 3. 新しいコンテンツを挿入してスライドインさせる
+    contentArea.appendChild(newContent);
+    // requestAnimationFrame を挟むことで、CSSアニメーションが確実に適用される
+    requestAnimationFrame(() => {
+        newContent.classList.remove('slide-in-from-right', 'slide-in-from-left');
+    });
+}
+
+/**
+ * タブの内容を描画する（UI構築のみ、アニメーションは含めない）
+ * @param {string} tabId 
+ * @param {HTMLElement} container - 描画先の要素
+ */
+function renderTabViewContent(tabId, container) {
+    switch (tabId) {
+        case 'maneuver': renderManeuverTab(container); break;
+        case 'regret': renderSimpleListTab('regret', container); break;
+        case 'treasure': renderSimpleListTab('treasure', container); break;
+        case 'memory': renderSimpleListTab('memory', container); break;
+        case 'hint': renderSimpleListTab('hint', container); break;
+    }
+    container.addEventListener('touchstart', handleTouchStart);
+    container.addEventListener('touchmove', handleTouchMove);
+    container.addEventListener('touchend', handleTouchEnd);
+}
+
+// renderTabViewを初期表示用に修正
+function renderTabView(tabId, contentArea) {
+    contentArea.innerHTML = ''; // コンテンツエリアをクリア
+    const initialContent = document.createElement('div');
+    initialContent.className = 'reference-content-inner';
+    contentArea.appendChild(initialContent);
+    renderTabViewContent(tabId, initialContent); // 分離した描画関数を呼び出す
 }
 
 // --- 各タブの描画関数 ---
@@ -311,7 +365,7 @@ function handleTouchStart(event) {
     touchStartY = touch.clientY;
     touchMoveX = touchStartX;
     touchMoveY = touchStartY;
-    // スワイプ中はトランジションを一時的に無効化
+    isVerticalScroll = false; // フラグをリセット
     event.currentTarget.classList.add('is-swiping');
 }
 
@@ -319,25 +373,37 @@ function handleTouchMove(event) {
     const touch = event.touches[0];
     touchMoveX = touch.clientX;
     touchMoveY = touch.clientY;
-    
-    // 視覚的なフィードバックとして、指の動きに合わせてコンテンツを動かす
     const deltaX = touchMoveX - touchStartX;
+    const deltaY = touchMoveY - touchStartY;
+
+    // 最初のmoveイベントでスクロール方向を判定
+    if (touchMoveX === touchStartX && touchMoveY === touchStartY) {
+        isVerticalScroll = Math.abs(deltaY) > Math.abs(deltaX);
+    }
+    
+    // 垂直スクロール中は水平移動の追従を行わない
+    if (isVerticalScroll) {
+        return;
+    }
+
+    // 水平スワイプの場合、デフォルトのスクロール動作をキャンセル
+    event.preventDefault();
+    
     event.currentTarget.style.transform = `translateX(${deltaX}px)`;
 }
 
 function handleTouchEnd(event) {
     const contentArea = event.currentTarget;
     const deltaX = touchMoveX - touchStartX;
-    const deltaY = touchMoveY - touchStartY;
-
-    // スワイプ後のスタイルをリセット
-    contentArea.classList.remove('is-swiping');
-    contentArea.style.transform = 'translateX(0)';
-
-    // 縦スクロールを優先するため、横の動きが縦より大きい場合のみ処理
-    if (Math.abs(deltaX) < Math.abs(deltaY)) {
+    
+    // 垂直スクロール中はスワイプ処理を中断
+    if (isVerticalScroll) {
+        contentArea.classList.remove('is-swiping');
         return;
     }
+
+    contentArea.classList.remove('is-swiping');
+    contentArea.style.transform = 'translateX(0)';
 
     // しきい値を超えたスワイプか判定
     if (Math.abs(deltaX) > SWIPE_THRESHOLD) {
@@ -551,6 +617,7 @@ function checkManeuverMatch(maneuver, groupName, filterName, masterData) {
             return false;
     }
 }
+
 /**
  * マニューバのIDや情報から、ソート用の優先度を数値で返す
  * @param {object} maneuver - マニューバのマスターデータ
@@ -610,6 +677,7 @@ function getSortPriority(maneuver) {
     // 8. どの分類にも属さない場合
     return 9999;
 }
+
 /**
  * マニューバの配列を、指定された共通ルールに従ってソートする
  * @param {Array<object>} maneuvers - ソート対象のマニューバオブジェクトの配列
