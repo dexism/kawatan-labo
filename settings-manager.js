@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.3.12";
+export const version = "1.3.13";
 
 import * as stateManager from './state-manager.js';
 import * as ui from './ui-manager.js';
@@ -42,21 +42,22 @@ export function initialize() {
         }
     });
 
-    const autosaveRadios = document.querySelectorAll('input[name="autosave-switcher"]');
+    const autosaveSwitch = document.querySelector('input[name="autosave-switcher"]');
 
     // 1. stateManagerを初期化し、保存された設定を取得
     const isAutoSaveOn = stateManager.initialize();
 
-    // 2. UIのラジオボタンに反映
-    document.querySelector(`input[name="autosave-switcher"][value="${isAutoSaveOn}"]`).checked = true;
+    if (autosaveSwitch) {
+        // 2. UIのトグルスイッチに初期状態を反映
+        autosaveSwitch.checked = isAutoSaveOn;
 
-    // 3. ラジオボタンの変更を監視
-    autosaveRadios.forEach(radio => {
-        radio.addEventListener('change', (event) => {
-            const shouldEnable = event.target.value === 'true';
+        // 3. トグルスイッチの変更を監視
+        autosaveSwitch.addEventListener('change', (event) => {
+            // event.target.valueではなく、event.target.checkedでON/OFFを判断
+            const shouldEnable = event.target.checked;
             stateManager.setAutoSave(shouldEnable);
         });
-    });
+    }
 
     const loadFromFileBtn = document.getElementById('loadStateFromFileBtn');
     const fileInput = document.getElementById('fileInput');

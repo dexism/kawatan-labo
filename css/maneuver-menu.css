@@ -118,9 +118,8 @@
     display: flex;
     overflow: hidden;
 }
-#maneuverMenu.is-reference-mode .maneuver-item-new:hover {
-    background-color: var(--color-background-1);
-    cursor: default;
+#maneuverMenu.is-reference-mode .maneuver-item-new {
+    pointer-events: none;
 }
 .maneuver-item-new:not(.is-masked):not(.is-reference-item):hover {
     background-color: gold;
@@ -220,14 +219,12 @@
 
 /* --- 4.1. 全体レイアウト --- */
 #maneuverMenu.is-reference-mode {
-    width: 100%;
     height: 100%;
     box-sizing: border-box;
     pointer-events: auto;
     display: flex;
     flex-direction: column;
 
-    max-width: none;
     max-height: none;
 
     overflow-y: hidden;
@@ -396,7 +393,7 @@
 }
 .filter-buttons .filter-btn.is-active {
     background-color: gold;
-    color: var(--color-fore-3);
+    color: var(--color-3);
 }
 /* 下半分 */
 .reference-maneuver-tab-container .maneuver-menu-list-container {
@@ -497,6 +494,7 @@
     justify-content: space-between;
     align-items: flex-start;
     gap: 8px;
+    pointer-events: auto;
 }
 .has-copy-button > span {
     flex-grow: 1;
