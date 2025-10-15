@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "2.10.25"; // パッチバージョンを更新
+export const version = "2.11.26"; // パッチバージョンを更新
 
 import * as data from './data-handler.js'; 
 import * as charManager from './character-manager.js';
@@ -520,11 +520,11 @@ function showDamageModal(target, damageAmount, hitLocation, onConfirmCallback) {
                 partDiv.textContent = part.name;
                 partDiv.dataset.partId = part.id;
 
-                const maneuverData = data.getManeuverByName(part.name);
-                if (maneuverData) {
-                    partDiv.addEventListener('mouseenter', () => ui.showManeuverCard(modal.getBoundingClientRect(), partDiv.getBoundingClientRect(), target, { data: maneuverData, isDamaged: part.damaged }));
-                    partDiv.addEventListener('mouseleave', () => ui.hideManeuverCard());
-                }
+                // const maneuverData = data.getManeuverByName(part.name);
+                // if (maneuverData) {
+                //     partDiv.addEventListener('mouseenter', () => ui.showManeuverCard(modal.getBoundingClientRect(), partDiv.getBoundingClientRect(), target, { data: maneuverData, isDamaged: part.damaged }));
+                //     partDiv.addEventListener('mouseleave', () => ui.hideManeuverCard());
+                // }
 
                 if (part.damaged) {
                     partDiv.classList.add('is-damaged');
@@ -583,7 +583,7 @@ function showDamageModal(target, damageAmount, hitLocation, onConfirmCallback) {
     
     document.getElementById('closeDamageModalBtn').onclick = () => {
         modal.classList.remove('is-visible');
-        ui.hideManeuverCard();
+        // ui.hideManeuverCard();
     };
     modal.classList.add('is-visible');
 }

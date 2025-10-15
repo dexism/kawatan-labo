@@ -6,7 +6,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.15.87";
+export const version = "1.16.88";
 
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
@@ -838,59 +838,6 @@ export function checkBattleStartCondition() {
     startButton.disabled = !(hasPcs && hasEnemies);
 }
 
-export function showManeuverCard(baseElementRect, itemRect, character, maneuverObj) {
-    const cardEl = document.getElementById('maneuverCard');
-    const maneuver = maneuverObj.data;
-
-    const categoryName = maneuver.category === '行動値増加' ? '行動値' : maneuver.category || 'その他';
-    const categoryClass = `category-color-${getCategoryClass(categoryName)}`;
-    
-    // 1. 出典元と箇所のテキストを取得（以前のヘルパー関数をここに統合）
-    const sourceText = getManeuverSourceText(maneuver);
-    const locationText = getPartLocationText(maneuver, character);
-
-    // 2. ルールブック情報の整形
-    let rulebookInfo = '';
-    if (maneuver.source) {
-        rulebookInfo = maneuver.source.book || '';
-        if (maneuver.source.page) {
-            rulebookInfo += ` (p${maneuver.source.page})`;
-        }
-        if (maneuver.source.errata) {
-            rulebookInfo += `, エラッタ ${maneuver.source.errata}`;
-        }
-    }
-
-    // 3. HTMLの組み立て
-    cardEl.innerHTML = `
-        <div class="card-category-bar ${categoryClass}">${categoryName}</div>
-        <div class="card-content">
-            <div class="card-source-header">${sourceText}</div>
-            <div class="card-header">
-                <span class="card-location-text">${locationText}</span>
-                <span class="card-maneuver-name">【${maneuver.name}】</span>
-            </div>
-            <div class="card-stats">
-                <div><span>T</span>${maneuver.timing}</div>
-                <div><span>C</span>${maneuver.cost}</div>
-                <div><span>R</span>${maneuver.range}</div>
-            </div>
-            <div class="card-row"><strong>効果</strong> ${maneuver.description_raw || '---'}</div>
-            ${maneuver.flavor_text ? `<div class="card-row" style="font-style: italic;">${maneuver.flavor_text}</div>` : ''}
-            <div class="card-row"><strong>出典</strong> ${rulebookInfo || '---'}</div>
-        </div>
-    `;
-            // <div class="card-row"><strong>効果</strong> ${maneuver.description || '---'}</div>
-    cardEl.style.display = 'flex';
-    const cardRect = cardEl.getBoundingClientRect();
-    let left = 40;
-    let top = itemRect.top + 100;
-    if (top + cardRect.height > window.innerHeight) { top = itemRect.top - cardRect.height - 40; }
-    if (top < 10) top = 20;
-    cardEl.style.left = `${left}px`;
-    cardEl.style.top = `${top}px`;
-}
-
 function getPartLocationText(maneuver, character) {
     if (!maneuver.id || !character.partsStatus) return '';
     const locationMap = { head: '頭', arms: '腕', torso: '胴', legs: '脚', body: '体' };
@@ -900,10 +847,6 @@ function getPartLocationText(maneuver, character) {
         }
     }
     return 'スキル：';
-}
-
-export function hideManeuverCard() {
-    document.getElementById('maneuverCard').style.display = 'none';
 }
 
 export function displayVersionInfo(versionInfo) {

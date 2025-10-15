@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.18.77"; // バージョンを更新
+export const version = "1.19.78"; // バージョンを更新
 
 import * as data from './data-handler.js';
 import * as charManager from './character-manager.js';
@@ -206,76 +206,56 @@ export function createManeuverItem(maneuverObj, char) {
     const item = document.createElement('div');
     item.className = 'maneuver-item-new';
 
-    if (!char.id) {
+    // リファレンスモードかどうかを char.id の有無で判定
+    const isReferenceMode = !char.id;
+    if (isReferenceMode) {
         item.classList.add('is-reference-item');
     }
 
+    // --- 1. 左の縦書きカテゴリ列 (共通) ---
     const categoryCol = document.createElement('div');
     categoryCol.className = 'item-category-col';
     const categoryName = maneuver.category || 'その他';
     const categoryClass = `category-color-${getCategoryClass(categoryName)}`;
-    item.classList.add(categoryClass.replace('bg-', ''));
+    item.classList.add(categoryClass.replace('bg-', '')); // 背景色クラスをアイテム自体にも付与
     categoryCol.classList.add(categoryClass);
     categoryCol.innerHTML = `<span>${categoryName}</span>`;
 
+    // --- 2. アイコン列 (通常メニューのみ) ---
+    // 2a. 縦積みするための親コンテナを作成
+    const iconContainer = document.createElement('div');
+    iconContainer.className = 'item-icon-col';
+
+    // 2b. 💡アイコンのコンテナを作成
     const passiveIconCol = document.createElement('div');
-    passiveIconCol.className = 'item-icon-col item-passive-icon-col';
-    
-    if (maneuverObj.isActiveBuff || maneuver.timing === 'オート') {
+    passiveIconCol.className = 'item-passive-icon-col';
+    if (!isReferenceMode && (maneuverObj.isActiveBuff || maneuver.timing === 'オート')) {
         let isEffectActive = false;
         if (maneuverObj.isActiveBuff) {
             isEffectActive = true; 
-        } else { // 'オート' タイミングの判定ロジックを強化
+        } else {
             const isDamaged = maneuverObj.isDamaged;
-            
-            // ハードコードされた例外（レギオンなど）はそのまま
-            const alwaysOnSkills = ['レギオン', 'ホラー', '合流'];
-            if (alwaysOnSkills.includes(maneuver.name)) {
+            const conditionalRefs = ['MODIFY_MAX_ACTION_VALUE_ON_DAMAGE', 'ATTACK_ON_DAMAGE'];
+            const unconditionalRefs = [
+                'APPLY_BUFF', 'REDUCE_MOVE_COST', 'NEGATE_STATUS_EFFECT', 
+                'APPLY_PASSIVE_DEFENSE', 'PREVENT_INTERRUPTION', 'MODIFY_ATTACK_RESULT', 
+                'IMMUNITY', 'NEGATE_DAMAGE_EFFECT'
+            ];
+
+            if (maneuver.effects?.some(e => conditionalRefs.includes(e.ref)) && isDamaged) {
                 isEffectActive = true;
-            } else if (maneuver.effects && maneuver.effects.length > 0) {
-                
-                // --- 2種類のオート効果を定義 ---
+            }
 
-                // タイプ1: パーツが「損傷している時」にのみアクティブになる効果
-                const conditionalRefs = [
-                    'MODIFY_MAX_ACTION_VALUE_ON_DAMAGE', // 例:【リミッター】
-                    'ATTACK_ON_DAMAGE'                   // 例:【ゾンビボム】
-                ];
-
-                // タイプ2: パーツが「損傷していない時」に常にアクティブな効果
-                const unconditionalRefs = [
-                    'APPLY_BUFF',
-                    'REDUCE_MOVE_COST',
-                    'NEGATE_STATUS_EFFECT',
-                    'APPLY_PASSIVE_DEFENSE',
-                    'PREVENT_INTERRUPTION',
-                    'MODIFY_ATTACK_RESULT',
-                    // 'APPLY_CONDITIONAL_BUFF',
-                    'IMMUNITY',
-                    'NEGATE_DAMAGE_EFFECT'
-                ];
-
-                // --- 判定 ---
-                const hasConditionalEffect = maneuver.effects.some(e => conditionalRefs.includes(e.ref));
-                if (hasConditionalEffect && isDamaged) {
-                    isEffectActive = true;
-                }
-
-                // isEffectActiveがまだfalseで、パーツが損傷していない場合のみ、無条件効果をチェック
-                if (!isEffectActive && !isDamaged) {
-                    for (const effect of maneuver.effects) {
-                        // ケースA: 特定エリアでのみ有効なバフ (例: 【地獄の住人】)
-                        if (effect.ref === 'APPLY_BUFF' && effect.params?.duration === 'while_in_area') {
-                            if (char.area === effect.params.area) {
-                                isEffectActive = true;
-                                break; // 条件を満たしたのでループを抜ける
-                            }
-                        } 
-                        // ケースB: 上記以外の常に有効な効果 (例: 【カンフー】)
-                        else if (unconditionalRefs.includes(effect.ref)) {
-                            isEffectActive = true;
-                            break; // 条件を満たしたのでループを抜ける
+            if (!isEffectActive && !isDamaged) {
+                for (const effect of (maneuver.effects || [])) {
+                    if (effect.ref === 'APPLY_BUFF' && effect.params?.duration === 'while_in_area') {
+                        if (char.area === effect.params.area) { 
+                            isEffectActive = true; 
+                            break; 
                         }
+                    } else if (unconditionalRefs.includes(effect.ref)) {
+                        isEffectActive = true; 
+                        break;
                     }
                 }
             }
@@ -285,99 +265,79 @@ export function createManeuverItem(maneuverObj, char) {
         }
     }
 
+    // 2c. ✅アイコンのコンテナを作成
     const statusIconCol = document.createElement('div');
-    statusIconCol.className = 'item-icon-col item-status-icon-col';
-
-    if (maneuverObj.isActiveBuff) {
-        statusIconCol.innerHTML = `<input type="checkbox" class="maneuver-checkbox" checked disabled>`;
-    } else if (char && char.turnLimitedManeuvers && char.turnLimitedManeuvers.has(maneuver.name)) {
-        const isChecked = char.usedManeuvers.has(maneuver.name);
-        statusIconCol.innerHTML = `<input type="checkbox" class="maneuver-checkbox" ${isChecked ? 'checked' : ''} disabled>`;
-    }
-
-    const rightCol = document.createElement('div');
-    rightCol.className = 'item-right-col';
-
-    let maneuverNameHtml = `【${maneuver.name}】`;
-    // リファレンスモード（char.idが存在しない）の場合の特殊なHTML構造
-    if (!char.id) {
-        const sourceHeaderText = getManeuverSourceText(maneuver);
-        let sourceInfoText = getManeuverRulebookText(maneuver);
-        
-        // let maneuverNameHtml = `【${maneuver.name}】`;
-
-        let locationPrefix = '';
-        if (maneuver.allowedLocations) {
-            // allowedLocationsキーが存在すれば、その内容を表示
-            const locationMap = { '頭': '頭', '腕': '腕', '胴': '胴', '脚': '脚', '任意': '任意' };
-            locationPrefix = locationMap[maneuver.allowedLocations] || '他';
-
-            maneuverNameHtml = `<span class="item-location-prefix">${locationPrefix}</span>` + maneuverNameHtml;
-        // } else {
-            // allowedLocationsキーがなければ「ｽｷﾙ」を表示
-        //     locationPrefix = 'ｽｷﾙ';
+    statusIconCol.className = 'item-status-icon-col';
+    if (!isReferenceMode && char.turnLimitedManeuvers) {
+        if (char.turnLimitedManeuvers.has(maneuver.name)) {
+            const isChecked = char.usedManeuvers.has(maneuver.name);
+            statusIconCol.innerHTML = `<input type="checkbox" class="maneuver-checkbox" ${isChecked ? 'checked' : ''} disabled>`;
         }
-        // ★★★ ここからが今回の修正箇所です ★★★
-        const descriptionText = maneuver.description_raw || '';
-        const encodedDescription = encodeURIComponent(descriptionText);
-
-        rightCol.innerHTML = `
-            <div class="reference-item-container">
-                <div class="ref-container-top">
-                    <div class="ref-source-info">${sourceInfoText}</div>
-                    <div class="ref-source-category">${sourceHeaderText}</div>
-                </div>
-                <div class="ref-container">
-                    <div class="ref-maneuver-name">${maneuverNameHtml}</div>
-                    <div class="ref-stats">《${maneuver.timing}/${maneuver.cost}/${maneuver.range}》</div>
-                </div>
-            </div>
-            <div class="item-row-2 has-copy-button">
-                <span>${descriptionText}</span>
-                <button class="copy-description-btn" data-copy-text="${encodedDescription}" title="効果テキストをコピー">📋</button>
-            </div>
-            ${maneuver.flavor_text ? `<div class="item-row-3 item-flavor-text">${maneuver.flavor_text}</div>` : ''}
-        `;
-    } 
-    // 通常のマニューバメニューの場合（従来通りの構造）
-    else {
-        rightCol.innerHTML = `
-            <div class="item-row-1">
-                <span class="item-name">【${maneuver.name}】</span>
-                <span class="item-stats">《${maneuver.timing}/${maneuver.cost}/${maneuver.range}》</span>
-            </div>
-            <div class="item-row-2">${maneuver.description_raw || ''}</div>
-        `;
-    }
-    item.appendChild(categoryCol);
-    item.appendChild(passiveIconCol);
-    item.appendChild(statusIconCol);
-    item.appendChild(rightCol);
-
-    // リファレンスモードでない（char.idが存在する）場合にのみ、カード表示のイベントリスナーを設定
-    if (char.id) {
-        item.addEventListener('mouseenter', () => ui.showManeuverCard(document.getElementById('maneuverMenu').getBoundingClientRect(), item.getBoundingClientRect(), char, maneuverObj));
-        item.addEventListener('mouseleave', () => ui.hideManeuverCard());
     }
     
-    // ★★★ コピーボタンにイベントリスナーを追加します ★★★
+    // 2d. 親コンテナに💡と✅を追加
+    iconContainer.appendChild(passiveIconCol);
+    iconContainer.appendChild(statusIconCol);
+
+    // --- 3. 右のテキスト情報列 (共通レイアウト) ---
+    const rightCol = document.createElement('div');
+    rightCol.className = 'item-right-col';
+    
+    const classificationText = getManeuverSourceText(maneuver);
+    const sourceInfoText = getManeuverRulebookText(maneuver);
+
+    // 1. 箇所テキストを取得する
+    let locationPrefix = '';
+    // getPartLocationTextはui-manager.jsにある想定だが、menu-builder.jsに移植しても良い
+    // ここでは、グローバルにアクセスできる前提とする
+    const locationText = getPartLocationText(maneuver, char); 
+    if (locationText) {
+        locationPrefix = `<span class="item-location-prefix">${locationText}</span>`;
+    }
+
+    // 2. 箇所プレフィックスとマニューバ名を結合する
+    const maneuverNameHtml = `${locationPrefix}【${maneuver.name}】`;
+
+    const descriptionText = maneuver.description_raw || '';
+    const encodedDescription = encodeURIComponent(descriptionText);
+
+    rightCol.innerHTML = `
+        <div class="ref-container-top">
+            <div class="ref-source-info">${sourceInfoText}</div>
+            <div class="ref-source-category">${classificationText}</div>
+        </div>
+        <div class="ref-container">
+            <div class="ref-maneuver-name">${maneuverNameHtml}</div>
+            <div class="ref-stats">《${maneuver.timing}/${maneuver.cost}/${maneuver.range}》</div>
+        </div>
+        <div class="item-row-2 has-copy-button">
+            <span>${descriptionText}</span>
+            <button class="copy-description-btn" data-copy-text="${encodedDescription}" title="効果テキストをコピー">📋</button>
+        </div>
+        ${maneuver.flavor_text ? `<div class="item-row-3 item-flavor-text">${maneuver.flavor_text}</div>` : ''}
+    `;
+
+    // --- 4. 要素の組み立て ---
+    item.appendChild(categoryCol);
+    item.appendChild(iconContainer);
+    item.appendChild(rightCol);
+
+    // --- 5. イベントリスナーとクラスの付与 (共通) ---
     const copyBtn = item.querySelector('.copy-description-btn');
     if (copyBtn) {
         copyBtn.onclick = (e) => {
-            e.stopPropagation(); // アイテム全体のクリックイベントを発火させない
-            const textToCopy = decodeURIComponent(e.currentTarget.dataset.copyText);
-            navigator.clipboard.writeText(textToCopy).then(() => {
+            e.stopPropagation();
+            navigator.clipboard.writeText(decodeURIComponent(e.currentTarget.dataset.copyText)).then(() => {
                 ui.showToastNotification('コピーしました！', 1500);
-            }).catch(err => {
-                console.error('コピーに失敗しました', err);
-                ui.showToastNotification('コピーに失敗しました', 1500);
             });
         };
     }
 
     if (!maneuverObj.isUsable) {
         item.classList.add('is-masked');
-        if (maneuverObj.isDamaged) item.classList.add('is-damaged');
+        if (!isReferenceMode && maneuverObj.isDamaged) {
+            item.classList.add('is-damaged');
+        }
     } else {
         item.onclick = async (e) => {
             e.stopPropagation();
@@ -414,7 +374,6 @@ export function createManeuverItem(maneuverObj, char) {
                 !maneuver.effects?.some(e => e.ref === 'TAKE_DAMAGE_FOR_ALLY');
 
             if (isDefenseManeuver) {
-                // damageQueueから、'instance'タイプで未適用のものだけをフィルタリングする
                 const targetableDamages = battleLogic.getBattleState().damageQueue.filter(damage => {
                     return damage.type === 'instance' && 
                            !damage.applied && 
@@ -427,10 +386,8 @@ export function createManeuverItem(maneuverObj, char) {
                     return;
                 }
 
-                // モーダルを表示して防御対象を選択させる
                 const selectedDamage = await new Promise(resolve => {
                     const menuItems = targetableDamages.map(damage => {
-                        // 【庇う】の時と同じロジックでダメージ数を取得
                         const damageValue = damage.finalAmount ?? damage.baseAmount ?? damage.amount ?? 0;
                         return {
                             label: `【${damage.sourceAction.sourceManeuver.name}】→ ${damage.target.name} (${damageValue}点)`,
@@ -441,17 +398,15 @@ export function createManeuverItem(maneuverObj, char) {
                         title: `【${maneuver.name}】防御対象を選択`, 
                         items: menuItems,
                         onRender: (modal, closeFn) => {
-                            // モーダル外のクリックでキャンセルできるようにする
                             modal.onclick = (event) => { if(event.target === modal) { closeFn(); resolve(null); } };
                         }
                     });
                 });
 
                 if (selectedDamage) {
-                    // battleLogic.declareManeuver の第3引数に「防御されるキャラクター」を渡す
                     battleLogic.declareManeuver(char, maneuver, selectedDamage.target);
                 }
-                return; // この後の処理に進まないようにここで終了
+                return;
             }
 
             const takeDamageEffect = maneuver.effects?.find(e => e.ref === 'TAKE_DAMAGE_FOR_ALLY');
@@ -471,7 +426,6 @@ export function createManeuverItem(maneuverObj, char) {
 
                 const selectedDamage = await new Promise(resolve => {
                     const menuItems = targetableDamages.map(damage => {
-                        // finalAmount -> baseAmount -> amount の優先順位でダメージ数を取得
                         const damageValue = damage.finalAmount ?? damage.baseAmount ?? damage.amount ?? 0;
                         return {
                             label: `【${damage.sourceAction.sourceManeuver.name}】→ ${damage.target.name} (${damageValue}点)`,
@@ -488,7 +442,6 @@ export function createManeuverItem(maneuverObj, char) {
                 });
 
                 if (selectedDamage) {
-                    // battleLogicに、庇う対象の「キャラクター」を渡して宣言する
                     battleLogic.declareManeuver(char, maneuver, selectedDamage.target);
                 }
                 return;
@@ -513,8 +466,6 @@ export function createManeuverItem(maneuverObj, char) {
 
             const isMoveDebuff = maneuver.tags && maneuver.tags.includes('移動妨害');
             if (isMoveDebuff) {
-                // 妨害可能な移動宣言（未解決、敵、移動マニューバ、射程内）をリストアップ
-                // ★ actionQueueとrapidQueueの両方を検索対象にする
                 const allMoveCandidates = [
                     ...battleLogic.getBattleState().actionQueue,
                     ...battleLogic.getBattleState().rapidQueue
@@ -531,18 +482,15 @@ export function createManeuverItem(maneuverObj, char) {
                     return;
                 }
 
-                // モーダルの選択肢を作成
                 const menuItems = targetableMoveDeclarations.map(targetDecl => {
                     let labelText = '';
                     const movePerformer = targetDecl.performer;
                     const moveManeuver = targetDecl.sourceManeuver;
                     const moveTarget = targetDecl.target;
 
-                    // 他者を移動させるマニューバの場合 (例: ワイヤーリール)
                     if (moveTarget && moveTarget.id !== movePerformer.id) {
                         labelText = `${moveTarget.name}（${movePerformer.name}の【${moveManeuver.name}】）`;
                     } 
-                    // 自身を移動させるマニューバの場合 (例: ほね)
                     else {
                         labelText = `${movePerformer.name}: 【${moveManeuver.name}】`;
                     }
@@ -550,7 +498,6 @@ export function createManeuverItem(maneuverObj, char) {
                     return {
                         label: labelText,
                         onClick: () => {
-                            // battleLogicに、妨害対象の「移動宣言オブジェクト」を渡して宣言する
                             battleLogic.declareManeuver(char, maneuver, targetDecl);
                         }
                     };
@@ -1265,7 +1212,7 @@ export function buildMoveMenu(char, maneuver, event) {
 export function closeAllMenus() {
     const menu = document.getElementById('maneuverMenu');
     if (menu) menu.classList.remove('is-visible');
-    ui.hideManeuverCard();
+    // ui.hideManeuverCard();
     menuOpener = null;
 }
 
@@ -1372,11 +1319,9 @@ export function getCharacterManeuvers(char) {
             }
             const isDamageIncrease = maneuver.tags.includes('強化');
             if (!canUseInDamagePhase && isDamageIncrease && maneuver.range === '自身') {
-                // ▼▼▼ ここが修正箇所です ▼▼▼
                 if (battleState.damageQueue.some(d => d.type === 'instance' && !d.applied && d.sourceAction?.performer?.id === char.id)) {
                     canUseInDamagePhase = true;
                 }
-                // ▲▲▲ 修正はここまでです ▲▲▲
             }
             const isTakeDamage = maneuver.effects?.some(e => e.ref === 'TAKE_DAMAGE_FOR_ALLY');
             if (!canUseInDamagePhase && isTakeDamage) {
@@ -1433,21 +1378,27 @@ export function getCharacterManeuvers(char) {
 }
 
 /**
- * マニューバカードに表示する箇所のテキストを取得する
- * @param {object} maneuver - マニューバのマスターデータ
- * @param {object} character - 対象キャラクター
- * @returns {string} - 表示用のテキスト (例: "頭")
+ * マニューバがどの箇所に属するかを示す短いテキストを返す
+ * @param {object} maneuver 
+ * @param {object} character 
+ * @returns {string} '頭', '腕', '胴', '脚', '任意', または ''
  */
-
 function getPartLocationText(maneuver, character) {
-    if (!character || !character.partsStatus) return '';
-    for (const location in character.partsStatus) {
-        if (character.partsStatus[location].some(part => part.name === maneuver.name)) {
-            const locationMap = { head: '頭', arms: '腕', torso: '胴', legs: '脚', body: '他' };
-            return locationMap[location] || '';
+    // リファレンスモードで、マスターデータにallowedLocationsが設定されている場合
+    if (!character?.id && maneuver.allowedLocations) {
+        return maneuver.allowedLocations;
+    }
+    
+    // 戦闘中メニューの場合、キャラクターの実際のパーツ配置を確認
+    if (character?.partsStatus) {
+        const locationMap = { head: '頭', arms: '腕', torso: '胴', legs: '脚' };
+        for (const loc in character.partsStatus) {
+            if (character.partsStatus[loc].some(part => part.name === maneuver.name)) {
+                return locationMap[loc] || ''; // 'body'などは空文字を返す
+            }
         }
     }
-    return '';
+    return ''; // スキルなどの場合は空文字
 }
 
 function showImportCharacterModal(type, charManagerInstance) {

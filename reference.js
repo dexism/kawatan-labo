@@ -2,7 +2,7 @@
  * @file reference.js
  * @description ルールリファレンスUIの構築と管理を担当するモジュール
  */
-export const version = "2.1.7"; // カルーセルUI完全移行版
+export const version = "2.2.8"; // カルーセルUI完全移行版
 
 import * as data from './data-handler.js';
 import * as ui from './ui-manager.js';
@@ -227,18 +227,22 @@ function renderSimpleListTab(dataType, container) {
             }
         }
         
-        // 2. グループごとにヘッダーとアイテムリストを描画する
+        // グループごとにヘッダーとアイテムリストを直接 container に描画する
         for (const groupKey in regretGroups) {
             const group = regretGroups[groupKey];
             if (group.items.length > 0) {
+                // <div class="maneuver-group"> はここでは不要
+                
+                // ヘッダーを生成
                 const groupHeader = document.createElement('div');
-                groupHeader.className = 'maneuver-group'; // 既存のスタイルを流用
-                groupHeader.innerHTML = `<div class="group-header">${group.title}</div>`;
-                listContainer.appendChild(groupHeader);
+                groupHeader.className = 'group-header';
+                groupHeader.textContent = group.title;
+                container.appendChild(groupHeader);
 
+                // アイテムを生成
                 group.items.forEach(item => {
                     const itemElement = createListItem(item, dataType);
-                    listContainer.appendChild(itemElement);
+                    container.appendChild(itemElement);
                 });
             }
         }
@@ -291,7 +295,7 @@ function createListItem(item, dataType) {
             <div class="item-right-col" style="width: 100%;">
                 <div class="ref-container">
                     <div class="ref-maneuver-name">${idNum}${title}</div>
-                    <div class="ref-regret-madness">発狂：<span class="malice-level">${madnessName}</span></div>
+                    <div class="ref-regret-madness">発狂<span class="malice-level">${madnessName}</span></div>
                 </div>
                 <div class="item-row-2">${description}</div>
                 <div class="item-row-3 ref-regret-flavor">「${madnessQuote}」</div>

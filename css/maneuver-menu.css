@@ -6,26 +6,29 @@
     color:            var(--color-text-muted);
     font-size:   14px;
     font-weight: bold;
-    box-shadow: 0 0 8px black;
+    box-shadow: 0 0 10px black;
+
+    margin: 0;
+    padding-bottom: 10px;
+    box-sizing: border-box;
     
     position: fixed;
     top: 0;
     left: 0;
     z-index: 1000;
+    border-radius: 0 10px 10px 0;
 
     /* 通常のメニュー表示用 */
     display: flex; 
     flex-direction: column;
     max-width: 600px;
-    height: 100%;
     height: fit-content;
-    max-height: 100%;
-    border-radius: 0 10px 10px 0;
-    
+    max-height: 100%;    
+
     /* 表示/非表示制御 */
     visibility: hidden;
     transform: translateX(-100%);
-    transition: transform 0.2s ease-out;
+    transition: all 0.2s ease-out;
 }
 #maneuverMenu.is-visible {
     visibility: visible; 
@@ -39,7 +42,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 10px;
+    margin: 0 10px; 
+    padding-top: 5px;
     border-bottom: 1px solid var(--color-border);
     flex-shrink: 0; /* 縮まないようにする */
 }
@@ -76,7 +80,7 @@
 .maneuver-menu-filter-bar {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: start;
     gap: 10px;
     padding: 10px;
     border-bottom: 1px solid var(--color-border);
@@ -88,7 +92,6 @@
 }
 .filter-btn.is-active {
     background-color:    gold;
-    /* box-shadow: 0 0 10px gold; */
     color:               black;
 }
 
@@ -98,10 +101,15 @@
 .maneuver-menu-list-container {
     flex-grow: 1; /* ★重要：残りの高さを全て埋める */
     overflow-y: auto; /* ★重要：自身がスクロールを担当する */
-    padding: 5px;
+    margin: 0;
+    padding: 0;
+    display: block;
 }
+/* ================================
+   3.1 マニューバアイテム 本体
+================================ */
 .maneuver-item-new {
-    margin: 5px 0 10px 0;
+    margin: 10px;
     background-color: var(--color-background-2); 
     border-radius: 10px;
     transition: all 0.2s;
@@ -110,18 +118,9 @@
     display: flex;
     overflow: hidden;
 }
-.item-category-col {
-    writing-mode: sideways-lr;
-    text-align: center;
-    padding: 4px 2px;
-    font-size: 14px;
-    font-weight: bold;
-    color: var(--color-fore-4);
-    flex-shrink: 0;
-}
-.item-right-col {
-    flex-grow: 1;
-    padding: 8px;
+#maneuverMenu.is-reference-mode .maneuver-item-new:hover {
+    background-color: var(--color-background-1);
+    cursor: default;
 }
 .maneuver-item-new:not(.is-masked):not(.is-reference-item):hover {
     background-color: gold;
@@ -133,24 +132,57 @@
     cursor: not-allowed;
     background-color: var(--color-background-4); 
 }
-.maneuver-item-new.is-damaged .item-name,
-.maneuver-item-new.is-damaged .item-stats,
-.maneuver-item-new.is-damaged .item-row-2 {
-    text-decoration: line-through;
-    color: var(--color-accent-red);
+/* ================================
+   3.1 マニューバアイテム 内容
+================================ */
+.item-category-col {
+    writing-mode: sideways-lr;
+    text-align: center;
+    padding: 4px 2px;
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--color-fore-4);
+    flex-shrink: 0;
+}
+/* アイコン列 (旧 item-left-col) */
+.item-icon-col {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column; /* ★ 子要素を縦に積む */
+    justify-content: center; /* ★ 垂直方向の中央揃え */
+    align-items: center;     /* ★ 水平方向の中央揃え */
+    gap: 10px; /* アイコン間の隙間 */
+}
+/* リファレンスモード(.is-reference-mode)の時だけ、アイコン列を非表示にする */
+#maneuverMenu.is-reference-mode .item-icon-col {
+    display: none;
+}
+/* 永続効果アイコン列 (💡) のための微調整 */
+.item-passive-icon-col {
+    display: flex;
+    width: 30px;
+    height: 30px;
+    font-size: 20px;
+    justify-content: center; /* ★ 垂直方向の中央揃え */
+    align-items: center;     /* 垂直方向中央 */
+}
+/* 使用済みアイコン列 (✅) のための微調整 */
+.item-status-icon-col {
+    display: flex;
+    width: 30px;
+    height: 30px;
+    font-size: 20px;
+    justify-content: center; /* ★ 垂直方向の中央揃え */
+    align-items: center;     /* 垂直方向中央 */
+}
+.item-right-col {
+    flex-grow: 1;
+    padding: 8px;
 }
 .item-row-1 {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-}
-.item-name {
-    font-size: 18px;
-}
-.item-stats {
-    font-size: 14px;
-    white-space: nowrap;
-    margin-left: 8px;
 }
 .item-row-2 {
     font-size: 14px;
@@ -159,28 +191,27 @@
     margin-top: 2px;
     padding: 5px;
 }
-.item-icon-col {
-    flex-shrink: 0;
-    width: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.is-reference-item .item-icon-col {
-    display: none;
-}
 
-.item-passive-icon-col {
-    font-size: 16px;
-}
 /* 中項目 */
-.maneuver-group .group-header {
+.maneuver-group {
     font-weight: bold;
-    margin-top: 10px;
-    padding: 5px 10px;
-    border-bottom: 1px solid var(--color-border);
+    margin: 0;
+    padding: 0;
     color: var(--color-fore-5);
     font-size: 20px;
+    overflow: visible;
+}
+.group-header {
+    position: sticky;
+    top: 0;
+    margin: 0;
+    padding: 5px 20px;
+    border-bottom: 1px solid var(--color-border);
+    background-color: var(--color-background-3);
+    color: var(--color-fore-5);
+    font-size: 20px;
+    font-weight: bold;
+    z-index: 1000;
 }
 
 /* ================================
@@ -191,29 +222,22 @@
 #maneuverMenu.is-reference-mode {
     width: 100%;
     height: 100%;
+    box-sizing: border-box;
     pointer-events: auto;
     display: flex;
     flex-direction: column;
-    margin: 0;
-    padding: 0;
 
     max-width: none;
     max-height: none;
-    border-radius: 0;
 
     overflow-y: hidden;
-}
-#maneuverMenu.is-reference-mode .maneuver-menu-header {
-    margin: 0 10px;
-}
-#maneuverMenu.is-reference-mode .reference-tab-bar {
-    margin: 0;
 }
 
 /* --- 4.2. タブバー --- */
 .reference-tab-bar {
     display: flex;
     overflow-x: auto;
+    margin: 0;
     padding: 5px 10px 0 10px;
     gap: 5px;
     flex-shrink: 0;
@@ -270,7 +294,8 @@
     width: 100%;
     height: 100%;
     overflow-y: auto;
-    padding: 5px;
+    margin-top: 0px;
+    padding: 0;
     box-sizing: border-box;
     -webkit-overflow-scrolling: touch; 
 }
@@ -291,13 +316,9 @@
 .reference-maneuver-tab-container .accordion-container {
     flex-shrink: 0;
     margin: 0;
-    padding-bottom: 5px;
+    padding: 5px 0;
+    box-sizing: border-box;
     border-bottom: 1px solid var(--color-border);
-}
-/* 下半分 */
-.reference-maneuver-tab-container .maneuver-menu-list-container {
-    flex-grow: 1;
-    overflow-y: auto;
 }
 /* --- 4.5. フィルターUI (マニューバタブ内) --- */
 #maneuverMenu .accordion-header {
@@ -306,7 +327,7 @@
     gap: 5px;
     width: 100%;
     overflow: hidden;
-    padding: 5px 10px;
+    padding: 5px 15px;
     box-sizing: border-box;
 }
 .accordion-title-static {
@@ -325,14 +346,28 @@
     flex-grow: 1;
     min-width: 0;
 }
+.filter-summary-group {
+    font-weight: bold;
+    margin-left: 8px;
+    background-color: var(--color-background-2);
+    padding: 0 10px 0 8px;
+    border-radius: 10px;
+}
+.filter-summary-label {
+    font-weight: normal;
+    font-size: 9px;
+    margin-right: 5px;
+    color: var(--color-fore-6);
+}
 .reference-filter-container {
     max-height: calc(50vh - 90px);
     overflow-y: auto;
+    padding: 0 10px 0 10px;
 }
 .filter-group {
     background-color: var(--color-background-4);
     border-radius: 10px;
-    margin: 5px;
+    margin-bottom: 5px;
     padding: 10px;
 }
 .filter-group-title {
@@ -363,40 +398,20 @@
     background-color: gold;
     color: var(--color-fore-3);
 }
-.filter-summary-group {
-    font-weight: bold;
-    margin-left: 8px;
-    background-color: var(--color-background-2);
-    padding: 0 10px 0 8px;
-    border-radius: 10px;
-}
-.filter-summary-label {
-    font-weight: normal;
-    font-size: 9px;
-    margin-right: 5px;
-    color: var(--color-fore-6);
+/* 下半分 */
+.reference-maneuver-tab-container .maneuver-menu-list-container {
+    flex-grow: 1;
+    overflow-y: auto;
 }
 
 /* --- 4.6. リファレンス用アイテム表示スタイル --- */
+/* 1行目：ブロック */
 .ref-container-top {
     display: flex;
     flex-direction: row-reverse;
     justify-content: space-between;
     align-items: start;
     flex-wrap: wrap;
-}
-.ref-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: end;
-    flex-wrap: wrap;
-}
-
-.ref-maneuver-name {
-    font-size: 18px;
-    font-weight: bold;
-    color: var(--color-text);
-
 }
 /* 1行目：出典カテゴリ */
 .ref-source-category {
@@ -421,8 +436,14 @@
     color: var(--color-8);
     white-space: nowrap; /* 改行を防ぐ */
 }
-
-/* 箇所プレフィックスのスタイル */
+/* 2行目：ブロック */
+.ref-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    flex-wrap: wrap;
+}
+/* 2行目：箇所プレフィックス */
 .item-location-prefix {
     font-size: 14px;
     font-weight: bold;
@@ -434,6 +455,12 @@
     height: 20px;
     margin: 0;
     padding: 1px 4px;
+}
+/* 2行目：左 */
+.ref-maneuver-name {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--color-text);
 }
 /* 2行目：マニューバ名 */
 .ref-maneuver-name {
@@ -454,15 +481,7 @@
     text-align: right;
     white-space: nowrap; /* 改行を防ぐ */
 }
-
-
-
-
-
-
-
-
-
+/* フレーバーテキスト */
 .item-flavor-text {
     font-weight: normal;
     font-style: italic;
@@ -472,6 +491,7 @@
     border-top: 1px dashed var(--color-border);
     font-size: 13px;
 }
+/* コピーボタン */
 .has-copy-button {
     display: flex;
     justify-content: space-between;
@@ -485,7 +505,7 @@
     flex-shrink: 0;
     background: none;
     border: none;
-    border-radius: 5px;
+    border-radius: 50%;
     color: var(--color-text-muted);
     cursor: pointer;
     font-size: 18px;
@@ -496,10 +516,6 @@
 .copy-description-btn:hover {
     background-color: var(--color-surface-1);
     color: var(--color-text);
-}
-#maneuverMenu.is-reference-mode .maneuver-item-new:hover {
-    background-color: var(--color-background-2);
-    cursor: default;
 }
 
 /* 未練タブ専用 */
@@ -521,6 +537,25 @@
     background-color: var(--color-background-3);
     color: var(--color-fore-6);
 }
+/* 悪意 */
 .malice-level {
+    padding-left: 0.5em;
     color: var(--color-accent);
+}
+/* 損傷しているマニューバのスタイル */
+.maneuver-item-new.is-damaged .ref-maneuver-name,
+.maneuver-item-new.is-damaged .ref-stats,
+.maneuver-item-new.is-damaged .item-row-2 {
+    text-decoration: line-through;
+    color: var(--color-accent-red);
+}
+
+/* ？ */
+.item-name {
+    font-size: 18px;
+}
+.item-stats {
+    font-size: 14px;
+    white-space: nowrap;
+    margin-left: 8px;
 }
