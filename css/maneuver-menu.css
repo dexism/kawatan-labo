@@ -14,7 +14,10 @@
     z-index: 1000;
 
     /* 通常のメニュー表示用 */
+    display: flex; 
+    flex-direction: column;
     max-width: 600px;
+    height: 100%;
     height: fit-content;
     max-height: 100%;
     border-radius: 0 10px 10px 0;
@@ -93,7 +96,8 @@
    3. メニューリスト & アイテム (共通スタイル)
 ================================ */
 .maneuver-menu-list-container {
-    overflow-y: auto;
+    flex-grow: 1; /* ★重要：残りの高さを全て埋める */
+    overflow-y: auto; /* ★重要：自身がスクロールを担当する */
     padding: 5px;
 }
 .maneuver-item-new {
@@ -161,8 +165,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+.is-reference-item .item-icon-col {
     display: none;
 }
+
 .item-passive-icon-col {
     font-size: 16px;
 }
@@ -187,11 +194,20 @@
     pointer-events: auto;
     display: flex;
     flex-direction: column;
+    margin: 0;
     padding: 0;
+
+    max-width: none;
+    max-height: none;
+    border-radius: 0;
+
+    overflow-y: hidden;
 }
-#maneuverMenu.is-reference-mode .maneuver-menu-header,
-#maneuverMenu.is-reference-mode .reference-tab-bar {
+#maneuverMenu.is-reference-mode .maneuver-menu-header {
     margin: 0 10px;
+}
+#maneuverMenu.is-reference-mode .reference-tab-bar {
+    margin: 0;
 }
 
 /* --- 4.2. タブバー --- */
@@ -209,7 +225,8 @@
     display: none;
 }
 .reference-tab-button {
-    padding: 4px 15px 2px 15px;
+    padding: 0 15px;
+    margin-top: 10px;
     font-size: 14px;
     font-weight: bold;
     border: none;
@@ -224,7 +241,9 @@
     background-color: var(--color-background-2);
 }
 .reference-tab-button.is-active {
+    margin-top: 0;
     background-color: var(--color-accent-gold);
+    font-size: 18px;
     color: black;
 }
 
@@ -280,7 +299,6 @@
     flex-grow: 1;
     overflow-y: auto;
 }
-
 /* --- 4.5. フィルターUI (マニューバタブ内) --- */
 #maneuverMenu .accordion-header {
     display: flex;
@@ -372,9 +390,6 @@
     justify-content: space-between;
     align-items: end;
     flex-wrap: wrap;
-}
-#maneuverMenu .item-icon-col {
-    display: none;
 }
 
 .ref-maneuver-name {
