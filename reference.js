@@ -2,7 +2,7 @@
  * @file reference.js
  * @description ルールリファレンスUIの構築と管理を担当するモジュール
  */
-export const version = "2.1.5"; // カルーセルUI完全移行版
+export const version = "2.1.7"; // カルーセルUI完全移行版
 
 import * as data from './data-handler.js';
 import * as ui from './ui-manager.js';
@@ -378,17 +378,27 @@ function handleTouchEnd(event) {
     if (!isHorizontalSwipe) return;
 
     const deltaX = touchMoveX - touchStartX;
+    const swipeThreshold = 30; // 誤操作防止のしきい値を少し短くする
+
     let nextIndex = currentIndex;
 
-    if (Math.abs(deltaX) > SWIPE_THRESHOLD) {
-        if (deltaX < 0 && currentIndex < tabs.length - 1) {
-            nextIndex++;
-        } else if (deltaX > 0 && currentIndex > 0) {
-            nextIndex--;
+    // しきい値を超えるスワイプがあった場合のみ、ページを切り替える
+    if (Math.abs(deltaX) > swipeThreshold) {
+        if (deltaX < 0) {
+            // 左スワイプ -> 次のページへ (ただし端でない場合)
+            if (currentIndex < tabs.length - 1) {
+                nextIndex++;
+            }
+        } else {
+            // 右スワイプ -> 前のページへ (ただし端でない場合)
+            if (currentIndex > 0) {
+                nextIndex--;
+            }
         }
     }
     
-    switchToTab(nextIndex); // 最終的な位置にスナップさせる
+    // 最終的に決定したインデックスのページにスナップさせる
+    switchToTab(nextIndex); 
 }
 
 // --- フィルタリング＆ソート ---
@@ -403,7 +413,8 @@ const filterGroups = {
     '箇所': ['頭', '腕', '胴', '脚', '任意'],
     'タイミング': ['オート', 'アクション', 'ジャッジ', 'ダメージ', 'ラピッド'],
     'コスト': ['なし', '0', '1', '2', '3', '4', 'その他'],
-    '最大射程': ['なし', '自身', '0', '1', '2', '3', 'その他']
+    '最大射程': ['なし', '自身', '0', '1', '2', '3', 'その他'],
+    'ルールブック': ['基本ルール', 'ESP']
 };
 
 function createManeuverFilters(container, onFilterChange) {
@@ -545,6 +556,16 @@ function checkManeuverMatch(maneuver, groupName, filterName, masterData) {
             }
             return String(malice) === filterName;
         }
+        case 'ルールブック': {
+            const bookName = maneuver.source?.book || '';
+            if (filterName === '基本ルール') {
+                return bookName === '基本ルールブック';
+            }
+            if (filterName === 'ESP') {
+                return bookName === 'ESP';
+            }
+            return false;
+        }
         default:
             return false;
     }
@@ -582,7 +603,7 @@ function getSortPriority(maneuver) {
     return 9999;
 }
 
-function sortManeuvers(maneuvers) {
+export function sortManeuvers(maneuvers) {
     const categoryOrder = data.getCoreData().maneuverCategories.map(c => c.name);
     maneuvers.sort((a, b) => {
         const maneuverA = a.data;

@@ -2,7 +2,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.1.6";
+export const version = "1.2.8";
 
 import * as data from './data-handler.js';
 
@@ -62,4 +62,33 @@ export function getManeuverSourceText(maneuver) {
     }
     
     return baseText + maliceText;
+}
+
+/**
+マニューバデータから、そのマニューバの出典元（ポジション、クラスなど）を示すテキストを生成する
+@param {object} maneuver - マニューバのマスターデータ
+@returns {string} - 表示用の出典元テキスト (例: "ポジションスキル：アリス")
+*/
+export function getManeuverRulebookText(maneuver) {
+    // 1. ルールブック情報の整形
+    let rulebookInfo = 'その他';
+    if (maneuver.source) {
+        // ① 表記を「基本ルール」に変更
+        let bookName = maneuver.source.book || '';
+        if (bookName === '基本ルールブック') {
+            bookName = '基本ルール';
+        }
+
+        rulebookInfo = bookName;
+
+        if (maneuver.source.page) {
+            rulebookInfo += ` p${maneuver.source.page}`;
+        }
+        // ② エラッタ情報があれば追記
+        if (maneuver.source.errata) {
+            rulebookInfo += `（エラッタ適用済）`;
+        }
+    }
+    // ▲▲▲ 修正はここまでです ▲▲▲
+    return rulebookInfo; // ★返り値を rulebookInfo に変更
 }

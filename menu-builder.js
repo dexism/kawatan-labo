@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.18.76"; // バージョンを更新
+export const version = "1.18.77"; // バージョンを更新
 
 import * as data from './data-handler.js';
 import * as charManager from './character-manager.js';
@@ -13,10 +13,11 @@ import * as battleLogic from './battle-logic.js';
 import * as ui from './ui-manager.js';
 import { performDiceRoll } from './dice-roller.js'; 
 import { convertVampireBloodSheet } from './character-converter.js';
-import { getCategoryClass, getManeuverSourceText } from './ui-helpers.js';
+import { getCategoryClass, getManeuverSourceText, getManeuverRulebookText } from './ui-helpers.js';
 import { getLocalStorageUsage, clearLocalImageCache } from './settings-manager.js';
 import * as stateManager from './state-manager.js';
 import { calculateManeuverRange } from './battle-helpers.js';
+import { sortManeuvers } from './reference.js';
 
 // --- モジュール内変数 ---
 let menuOpener = null;
@@ -297,20 +298,13 @@ export function createManeuverItem(maneuverObj, char) {
     const rightCol = document.createElement('div');
     rightCol.className = 'item-right-col';
 
-    // ★★★ ここからが修正箇所です ★★★
     let maneuverNameHtml = `【${maneuver.name}】`;
     // リファレンスモード（char.idが存在しない）の場合の特殊なHTML構造
     if (!char.id) {
         const sourceHeaderText = getManeuverSourceText(maneuver);
-        let sourceInfoText = '';
-        if (maneuver.source) {
-            sourceInfoText = maneuver.source.book || '不明';
-            if (maneuver.source.page) {
-                sourceInfoText += ` p${maneuver.source.page}`;
-            }
-        }
+        let sourceInfoText = getManeuverRulebookText(maneuver);
         
-        let maneuverNameHtml = `【${maneuver.name}】`;
+        // let maneuverNameHtml = `【${maneuver.name}】`;
 
         let locationPrefix = '';
         if (maneuver.allowedLocations) {
