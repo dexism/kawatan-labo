@@ -131,9 +131,12 @@ h2 {
   --color-surface-1:    var(--color-d); /* パネルやカードの背景 */
   --color-surface-2:    var(--color-e); /* メニューやモーダルの背景 */
   --color-surface-dark: var(--color-a); /* 宣言リストの背景 */
+  --color-dice-bg:      var(--color-z);
+  --color-dice-bd:      var(--color-e);
   --color-log-bg:       var(--color-f);
   --color-border:       var(--color-a);
   --color-shadow-1:     rgba(255, 255, 255, 0.5);
+  --color-shadow-2:     rgba(127, 127, 127, 0.5);
   --color-accent:       #f77;
   --color-accent-red:   #c33;
   --color-accent-gold:  gold;
@@ -199,6 +202,8 @@ html[data-theme="dark"] {
     --color-surface-1:    var(--color-5);
     --color-surface-2:    var(--color-4);
     --color-surface-dark: var(--color-2);
+    --color-dice-bg:      var(--color-1);
+    --color-dice-bd:      var(--color-5);
     --color-log-bg:       var(--color-0);
     --color-border:       var(--color-6);
     --color-shadow-1:     rgba(0, 0, 0, 0.5);
@@ -269,6 +274,8 @@ html[data-theme="dark"] {
     --color-surface-1:    var(--color-5);
     --color-surface-2:    var(--color-4);
     --color-surface-dark: var(--color-2);
+    --color-dice-bg:      var(--color-1);
+    --color-dice-bd:      var(--color-5);
     --color-log-bg:       var(--color-0);
     --color-border:       var(--color-6);
     --color-shadow-1:     rgba(0, 0, 0, 0.5);

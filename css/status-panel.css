@@ -231,17 +231,20 @@ label.action-queue-item.is-checked span {
 }
 /* ★ リファレンスボタンのスタイルを追加 */
 .ref-btn {
-    padding: 8px 12px;
-    font-size: 1.2rem;
+    padding: 0;
+    font-size: 30px;
     border: none;
-    box-shadow: none;
     background: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: all 0.2s;
 }
 .ref-btn:hover {
-    background-color: var(--color-shadow);
+    background-color:        #dff;
+    outline:       2px solid cyan;
+    box-shadow: 0px 0px 10px cyan;
 }
 
-/* ★★★ 以下のスタイルを末尾に追加 ★★★ */
 #resetBattleBtn {
     /* ボタンを2列全体に広げる */
     display: grid;

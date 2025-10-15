@@ -21,6 +21,7 @@
     /* 通常のメニュー表示用 */
     display: flex; 
     flex-direction: column;
+    width: 100%;
     max-width: 600px;
     height: fit-content;
     max-height: 100%;    
@@ -221,7 +222,6 @@
 #maneuverMenu.is-reference-mode {
     height: 100%;
     box-sizing: border-box;
-    pointer-events: auto;
     display: flex;
     flex-direction: column;
 

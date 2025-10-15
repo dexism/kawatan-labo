@@ -2,11 +2,12 @@
  * @file reference.js
  * @description ルールリファレンスUIの構築と管理を担当するモジュール
  */
-export const version = "2.2.8"; // カルーセルUI完全移行版
+export const version = "2.2.9"; // カルーセルUI完全移行版
 
 import * as data from './data-handler.js';
 import * as ui from './ui-manager.js';
 import { createManeuverItem } from './menu-builder.js';
+import { closeAllMenus } from './menu-builder.js';
 
 // --- モジュール内変数 ---
 const tabs = [
@@ -80,7 +81,7 @@ function createHeader() {
         <button class="header-close-btn">&times;</button>
     `;
     header.querySelector('.header-close-btn').onclick = () => {
-        document.getElementById('maneuverMenu').classList.remove('is-visible');
+        closeAllMenus();
     };
     return header;
 }

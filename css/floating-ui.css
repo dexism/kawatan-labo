@@ -7,7 +7,8 @@
   left:   20px;
   width:  50px;
   height: 50px;
-  background-color: var(--color-surface-1);
+  background-color: var(--color-shadow-2);
+  border:        3px solid var(--color-dice-bd);
   border-radius: 50%;
   display: flex;
   align-items: flex-start;
@@ -17,14 +18,18 @@
   cursor: grab;
   user-select: none;
   z-index: 900;
-  box-shadow: 2px 2px 8px black;
+  box-shadow:
+    0 0 10px inset      var(--color-shadow),
+    0 0 10px            var(--color-shadow);
+  text-shadow: 0 0 10px var(--color-shadow);
   transition: all 0.2s ease-out;
 }
 .dice-roller:hover {
-  background-color:        #dff;
-  border:        2px solid cyan;
-  box-shadow: 0px 0px 10px cyan;
-  transform: scale(1.1);
+  background-color:    #dff;
+  border-color:        cyan;
+  box-shadow: 0 0 10px cyan;
+  text-shadow: none;
+  transform: scale(1.2);
 }
 .dice-roller:active {
   cursor: grabbing;
