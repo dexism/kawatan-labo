@@ -2,7 +2,7 @@
  * @file reference.js
  * @description ルールリファレンスUIの構築と管理を担当するモジュール
  */
-export const version = "2.2.9"; // カルーセルUI完全移行版
+export const version = "2.2.10"; // カルーセルUI完全移行版
 
 import * as data from './data-handler.js';
 import * as ui from './ui-manager.js';
@@ -413,7 +413,8 @@ const filterGroups = {
     '区分1': ['ポジション', 'クラススキル', '特化スキル', '基本パーツ', '強化パーツ', '手駒専用'],
     '区分2': ['アリス', 'ホリック', 'オートマトン', 'ジャンク', 'コート', 'ソロリティ', 'ステーシー', 'タナトス', 'ゴシック', 'レクイエム', 'バロック', 'ロマネスク', 'サイケデリック', '武装', '変異', '改造'],
     '攻撃': ['肉弾攻撃', '白兵攻撃', '射撃攻撃', '砲撃攻撃', '精神攻撃'],
-    '効果': ['命中補正', '支援', '妨害', '防御', '移動', '移動妨害', '転倒', '切断', '爆発', '全体攻撃', '連撃'],
+    '効果': ['攻撃判定修正', '支援', '妨害', '防御', '移動', '移動妨害', '転倒', '切断', '爆発', '全体攻撃', '連撃'],
+    '無効化': ['妨害無効', '防御無効', '移動無効', '移動妨害無効', '転倒無効', '切断無効', '爆発無効', '全体攻撃無効', '連撃無効', "損傷無効"],
     '悪意': ['0.5', '1', '1.5', '2', '3', '4', 'その他'],
     '箇所': ['頭', '腕', '胴', '脚', '任意'],
     'タイミング': ['オート', 'アクション', 'ジャッジ', 'ダメージ', 'ラピッド'],
@@ -530,6 +531,8 @@ function checkManeuverMatch(maneuver, groupName, filterName, masterData) {
             return maneuver.category === filterName || (maneuver.tags && maneuver.tags.includes(filterName));
         case '効果':
             return maneuver.category === filterName || (maneuver.tags && maneuver.tags.includes(filterName));
+        case '無効化':
+            return maneuver.tags && maneuver.tags.includes(filterName);
         case '箇所':
             return maneuver.allowedLocations === filterName;
         case 'タイミング':

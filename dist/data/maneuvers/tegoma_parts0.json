@@ -41,7 +41,7 @@
   },
   "P0-05": { 
     "name": "ゆがんだうで", "category": "支援", 
-    "tags": ["支援", "オート"], "maliceLevel": 0,
+    "tags": ["オート", "攻撃判定修正"], "maliceLevel": 0,
     "description": "肉弾攻撃の判定+1。", 
     "description_raw": "肉弾攻撃マニューバの攻撃判定+1", 
     "source": { "book": "基本ルールブック" }, 
@@ -103,7 +103,7 @@
     "name": "はなびら", "category": "生贄", "tags": ["オート", "生贄"], "maliceLevel": 0, "description": "効果なし。", "description_raw": "効果なし", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "なし", "effects": [] 
   },
   "P0-18": { 
-    "name": "シュレッダー", "category": "攻撃", "tags": ["攻撃", "アクション", "白兵攻撃", "切断", "命中補正"], "maliceLevel": 0, "description": "白兵攻撃2+切断、判定+1。", "description_raw": "白兵攻撃2+切断、攻撃判定+1", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "2", "range": "0", "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 2, "attack_bonus": 1, "on_hit": ["SEVERANCE"] } }] 
+    "name": "シュレッダー", "category": "攻撃", "tags": ["攻撃", "アクション", "白兵攻撃", "切断", "攻撃判定修正"], "maliceLevel": 0, "description": "白兵攻撃2+切断、判定+1。", "description_raw": "白兵攻撃2+切断、攻撃判定+1", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "2", "range": "0", "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 2, "attack_bonus": 1, "on_hit": ["SEVERANCE"] } }] 
   },
   "P0-19": { 
     "name": "多脚戦車", "category": "移動", 
@@ -148,7 +148,13 @@
     "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 1 } }] 
   },
   "P0-28": { 
-    "name": "戦闘感覚", "category": "支援", "tags": ["支援", "オート"], "maliceLevel": 0, "description": "白兵攻撃の判定+1。", "description_raw": "白兵攻撃マニューバの攻撃判定+1", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "attackCheckBonus", "value": 1, "condition": "白兵攻撃" } }] },
+    "name": "戦闘感覚", "category": "支援", 
+    "tags": ["支援", "オート", "攻撃判定修正"], "maliceLevel": 0, 
+    "description": "白兵攻撃の判定+1。", 
+    "description_raw": "白兵攻撃マニューバの攻撃判定+1", 
+    "source": { "book": "基本ルールブック" }, 
+    "timing": "オート", "cost": "なし", "range": "自身", 
+    "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "attackCheckBonus", "value": 1, "condition": "白兵攻撃" } }] },
   "P0-29": { 
     "name": "怪物の顎", "category": "攻撃", 
     "tags": ["攻撃", "アクション", "肉弾攻撃"], "maliceLevel": 0, 
@@ -178,7 +184,7 @@
     "name": "怪物の腕", "category": "攻撃", "tags": ["攻撃", "アクション", "肉弾攻撃"], "maliceLevel": 0, "description": "肉弾攻撃3。", "description_raw": "肉弾攻撃3", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "3", "range": "0", "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 3 } }] },
   "P0-37": { 
     "name": "強化筋肉", "category": "防御", 
-    "tags": ["防御", "ダメージ", "爆発"], "maliceLevel": 0,
+    "tags": ["防御", "ダメージ", "爆発無効"], "maliceLevel": 0,
     "timing": "ダメージ", "cost": "0", "range": "自身", 
     "description": "防御1+「爆発」無効。", 
     "description_raw": "防御1+「爆発」無効", 
@@ -303,7 +309,7 @@
   },
   "P0-67": { 
     "name": "寄生胞子", "category": "攻撃", 
-    "tags": ["攻撃", "アクション", "射撃攻撃", "爆発", "命中補正"], "maliceLevel": 0, 
+    "tags": ["攻撃", "アクション", "射撃攻撃", "爆発", "攻撃判定修正"], "maliceLevel": 0, 
     "timing": "アクション", "cost": "2", "range": "0～1", 
     "description": "射撃攻撃1+爆発、判定+1。", 
     "description_raw": "射撃攻撃1+爆発、攻撃判定+1", 
@@ -406,7 +412,7 @@
   },
   "P0-81": {
     "name": "自動再接続", "category": "防御",
-    "tags": ["オート", "防御", "切断"], "maliceLevel": 0,
+    "tags": ["オート", "切断無効"], "maliceLevel": 0,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "「切断」を無効化（【オートセパレート】相当）",
     "description_raw": "「切断」を無効化（【オートセパレート】相当）",

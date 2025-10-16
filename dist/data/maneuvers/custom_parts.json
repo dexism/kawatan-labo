@@ -72,7 +72,7 @@
   },
   "R1-07": {
     "name": "スチールボーン", "category": "防御", "allowedLocations": "胴",
-    "tags": ["防御", "ダメージ", "切断"], "maliceLevel": 1,
+    "tags": ["防御", "ダメージ", "切断無効"], "maliceLevel": 1,
     "timing": "ダメージ", "cost": 1, "range": "自身",
     "description": "防御1、「切断」無効化", 
     "description_raw": "防御1+「切断」無効化。",
@@ -125,7 +125,7 @@
   },
   "R1-12": {
     "name": "カルマプロセッサ", "category": "狂気点", "allowedLocations": "頭",
-    "tags": ["オート", "狂気点操作"],
+    "tags": ["オート", "狂気点操作", "損傷"],
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "狂気点を1点無効化する代わりに、このパーツを損傷させてもよい。",
     "description_raw": "あなたは受けた狂気点1点を無効化する代わり、このパーツを損傷させてもよい。",
@@ -167,7 +167,7 @@
   },
   "R2-04": {
     "name": "ドリル", "category": "攻撃", "allowedLocations": "任意",
-    "tags": ["攻撃", "アクション", "白兵攻撃", "防御"], "maliceLevel": 1,
+    "tags": ["攻撃", "アクション", "白兵攻撃", "防御無効"], "maliceLevel": 1,
     "timing": "アクション", "cost": 3, "range": "0",
     "description": "白兵攻撃2、「防御」無効", 
     "description_raw": "白兵攻撃2、この攻撃に対して「防御」は全て無効。",
@@ -347,7 +347,7 @@
   },
   "R3-08": {
     "name": "パイルバンカー", "category": "攻撃", "allowedLocations": "任意",
-    "tags": ["攻撃", "アクション", "白兵攻撃", "防御", "移動"], "maliceLevel": 1.5,
+    "tags": ["攻撃", "アクション", "白兵攻撃", "防御無効", "移動"], "maliceLevel": 1.5,
     "timing": "アクション", "cost": 2, "range": "0",
     "description": "白兵攻撃2、「防御」無効、命中時対象に移動1", 
     "description_raw": "白兵攻撃2、この攻撃に対して「防御」は全て無効。なお、攻撃が命中したなら対象を「移動1」してもよい。",
@@ -367,7 +367,7 @@
   },
   "R3-10": {
     "name": "ホッパー", "category": "移動", "allowedLocations": "脚",
-    "tags": ["移動", "ラピッド", "移動妨害"], "maliceLevel": 1.5,
+    "tags": ["移動", "ラピッド", "移動妨害無効"], "maliceLevel": 1.5,
     "timing": "ラピッド", "cost": 2, "range": "自身",
     "description": "移動1、「移動妨害」無効", 
     "description_raw": "移動1、この移動に対して「移動妨害」は全て無効。",

@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "2.12.30"; // パッチバージョンを更新
+export const version = "2.13.31"; // パッチバージョンを更新
 
 import * as data from './data-handler.js'; 
 import * as charManager from './character-manager.js';
@@ -91,7 +91,56 @@ export function setupAllEventListeners() {
                         // 攻撃以外のアクションは、そのままbattle-logicに処理を依頼
                         battleLogic.handleUserInteraction({ type: 'resolve-action', index: index });
                     }
-                } else if (action && !isNaN(index)) {
+                } 
+                else if (action === 'resolve-damage') {
+                    const state = battleLogic.getBattleState();
+                    const item = state.damageQueue[index];
+                    if (!item) return;
+
+                    // 1. interaction-managerがアイテムの種類を判断
+                    if (item.type === 'instance') {
+                        // 2. インスタンスなら、UI表示（モーダル）の責任を持つ
+                        if (item.applied) return;
+                        const character = charManager.getCharacterById(item.target.id);
+                        if (!character) return;
+                        
+                        showDamageCalculationModal(item, (finalDamageAfterDefense) => {
+                            const onConfirmCallback = () => { 
+                                // 3. ユーザーの確定後、ロジック実行を依頼
+                                battleLogic.applyDamage(index); 
+                            };
+
+                            if (finalDamageAfterDefense <= 0) {
+                                ui.addLog(`＞ ${character.name}への攻撃は完全に防がれ、ダメージはありませんでした。`);
+                                ui.removeDamagePrompt(character.id);
+                                onConfirmCallback();
+                                return;
+                            }
+                    
+                            if (character.category === 'レギオン' || Object.values(character.partsStatus).flat().filter(p => !p.damaged).length <= finalDamageAfterDefense) {
+                                if (character.category === 'レギオン') {
+                                    ui.addLog(`レギオンへのダメージ！ ${finalDamageAfterDefense}体が失われます。`);
+                                    const wasDestroyed = charManager.damagePart(character.id, null, finalDamageAfterDefense);
+                                    if (wasDestroyed) { ui.showToastNotification(`${character.name}は完全破壊されました`); }
+                                } else {
+                                    ui.addLog(`＞ ${character.name}は残りパーツ数以上のダメージを受け、完全に破壊されました！`);
+                                    charManager.updateCharacter(character.id, { isDestroyed: true });
+                                    ui.showToastNotification(`${character.name}は完全破壊されました`);
+                                }
+                                ui.removeDamagePrompt(character.id);
+                                onConfirmCallback();
+                            } else {
+                                showDamageModal(character, finalDamageAfterDefense, item.location, onConfirmCallback);
+                            }
+                        });
+
+                    } else if (item.type === 'declaration') {
+                        // 4. 宣言なら、従来通りbattle-logicに依頼するだけ
+                        battleLogic.handleUserInteraction({ type: 'resolve-damage', index: index });
+                    }
+
+                } 
+                else if (action && !isNaN(index)) {
                     // battle-logic の新しい窓口関数に処理を依頼
                     battleLogic.handleUserInteraction({
                         type: action,
@@ -387,7 +436,7 @@ export function handleQueueCheck(queueType, index, isChecked) {
     // ui.updateAllUI(); // ★ UI更新を追加
 }
 
-export function showDamageModal(target, damageAmount, hitLocation, onConfirmCallback) {
+function showDamageModal(target, damageAmount, hitLocation, onConfirmCallback) {
     const modal = document.getElementById('damageModal');
     const title = modal.querySelector('#damageModalTitle');
     const info = modal.querySelector('#damageModalInfo');
@@ -530,7 +579,7 @@ export function handleDamageMarkerClick(characterId) {
  * @param {object} damageInfo - battleState.damageQueue から取得したダメージ情報
  * @param {function(number)} onConfirmCallback - 確定ボタンが押されたときに、最終ダメージ量を引数にして呼び出されるコールバック
  */
-export function showDamageCalculationModal(damageInfo, onConfirmCallback) {
+function showDamageCalculationModal(damageInfo, onConfirmCallback) {
     const { sourceAction, target } = damageInfo;
     const { performer, sourceManeuver } = sourceAction;
 

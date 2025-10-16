@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.19.81"; // バージョンを更新
+export const version = "1.19.82"; // バージョンを更新
 
 import * as data from './data-handler.js';
 import * as charManager from './character-manager.js';
@@ -2003,17 +2003,8 @@ async function selectTargetForAction(actor, maneuver, handleGlobalClick) {
  */
 export function showAttackConfirmationModal(performer, target, maneuver, index, onConfirmCallback) {
     const state = battleLogic.getBattleState();
-
-    // index を使って宣言を取得するのではなく、ターゲット情報から宣言を検索する
-    const targetDeclaration = state.actionQueue.find(d => 
-        d.performer.id === performer.id && 
-        d.sourceManeuver.name === maneuver.name && 
-        d.target?.id === target?.id && 
-        !d.checked
-    );
-
-    // const targetDeclaration = state.actionQueue[index]; // これで正しく宣言を取得できる
-    // if (!targetDeclaration) return;
+    const targetDeclaration = state.actionQueue[index]; 
+    if (!targetDeclaration) return;
 
     // ... (ボーナス計算のロジックは変更なし) ...
     let totalBonus = 0;
