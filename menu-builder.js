@@ -5,13 +5,13 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.19.79"; // バージョンを更新
+export const version = "1.19.81"; // バージョンを更新
 
 import * as data from './data-handler.js';
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
 import * as ui from './ui-manager.js';
-import { performDiceRoll } from './dice-roller.js'; 
+// import { performDiceRoll } from './dice-roller.js'; 
 import { convertVampireBloodSheet } from './character-converter.js';
 import { getCategoryClass, getManeuverSourceText, getManeuverRulebookText } from './ui-helpers.js';
 import { getLocalStorageUsage, clearLocalImageCache } from './settings-manager.js';
@@ -296,7 +296,7 @@ export function createManeuverItem(maneuverObj, char) {
     }
 
     // 2. 箇所プレフィックスとマニューバ名を結合する
-    const maneuverNameHtml = `${locationPrefix}【${maneuver.name}】`;
+    const maneuverNameHtml = `${locationPrefix}<span class="item-maneuver-name">【${maneuver.name}】</span>`;
 
     const descriptionText = maneuver.description_raw || '';
     const encodedDescription = encodeURIComponent(descriptionText);
@@ -311,7 +311,7 @@ export function createManeuverItem(maneuverObj, char) {
             <div class="ref-stats">《${maneuver.timing}/${maneuver.cost}/${maneuver.range}》</div>
         </div>
         <div class="item-row-2 has-copy-button">
-            <span>${descriptionText}</span>
+            <span class="item-description">${descriptionText}</span>
             <button class="copy-description-btn" data-copy-text="${encodedDescription}" title="効果テキストをコピー">📋</button>
         </div>
         ${maneuver.flavor_text ? `<div class="item-row-3 item-flavor-text">${maneuver.flavor_text}</div>` : ''}
@@ -339,213 +339,223 @@ export function createManeuverItem(maneuverObj, char) {
             item.classList.add('is-damaged');
         }
     } else if (!isReferenceMode) {
-        item.onclick = async (e) => {
-            e.stopPropagation();
-            
-            if (maneuver.tags.includes('攻撃')) {
-                closeAllMenus();
-            } else {
-                 setTimeout(() => closeAllMenus(), 0);
-            }
-
-            if (maneuver.name === '任意') {
-                const bodyHtml = `<div class="action-cost-form"><div class="action-cost-selector">${[1,2,3,4,5].map(v => `<label><input type="radio" name="action-cost" value="${v}" ${v===1?'checked':''}> <span>${v}</span></label>`).join('')}</div></div>`;
-                const footerHtml = `<button id="applyActionCostBtn" class="welcome-modal-close-btn">適用</button>`;
-                
-                ui.showModal({
-                    title: '消費する行動値を選択',
-                    bodyHtml,
-                    footerHtml,
-                    onRender: (modal, closeFn) => {
-                        modal.querySelector('#applyActionCostBtn').onclick = () => {
-                            const selectedCost = modal.querySelector('input[name="action-cost"]:checked').value;
-                            const customManeuver = { ...maneuver, cost: String(parseInt(selectedCost, 10)) };
-                            battleLogic.declareManeuver(char, customManeuver);
-                            closeFn();
-                        };
-                    }
-                });
-                return;
-            }
-
-            const isDefenseManeuver = 
-                maneuver.timing === 'ダメージ' && 
-                maneuver.tags.includes('防御') &&
-                !maneuver.effects?.some(e => e.ref === 'TAKE_DAMAGE_FOR_ALLY');
-
-            if (isDefenseManeuver) {
-                const targetableDamages = battleLogic.getBattleState().damageQueue.filter(damage => {
-                    return damage.type === 'instance' && 
-                           !damage.applied && 
-                           damage.target.type === char.type &&
-                           checkTargetAvailability(char, maneuver, [damage.target]).hasTarget;
-                });
-
-                if (targetableDamages.length === 0) {
-                    ui.addLog("防御対象となるダメージがありません。");
-                    return;
-                }
-
-                const selectedDamage = await new Promise(resolve => {
-                    const menuItems = targetableDamages.map(damage => {
-                        const damageValue = damage.finalAmount ?? damage.baseAmount ?? damage.amount ?? 0;
-                        return {
-                            label: `【${damage.sourceAction.sourceManeuver.name}】→ ${damage.target.name} (${damageValue}点)`,
-                            onClick: () => resolve(damage)
-                        };
-                    });
-                    ui.showModal({ 
-                        title: `【${maneuver.name}】防御対象を選択`, 
-                        items: menuItems,
-                        onRender: (modal, closeFn) => {
-                            modal.onclick = (event) => { if(event.target === modal) { closeFn(); resolve(null); } };
-                        }
-                    });
-                });
-
-                if (selectedDamage) {
-                    battleLogic.declareManeuver(char, maneuver, selectedDamage.target);
-                }
-                return;
-            }
-
-            const takeDamageEffect = maneuver.effects?.find(e => e.ref === 'TAKE_DAMAGE_FOR_ALLY');
-            if (takeDamageEffect) {
-                const targetableDamages = battleLogic.getBattleState().damageQueue.filter(damage => {
-                    return damage.type === 'instance' &&
-                           !damage.applied && 
-                           damage.target.type === char.type && 
-                           damage.target.id !== char.id &&
-                           checkTargetAvailability(char, maneuver, [damage.target]).hasTarget;
-                });
-
-                if (targetableDamages.length === 0) {
-                    ui.addLog("庇う対象がいません。");
-                    return;
-                }
-
-                const selectedDamage = await new Promise(resolve => {
-                    const menuItems = targetableDamages.map(damage => {
-                        const damageValue = damage.finalAmount ?? damage.baseAmount ?? damage.amount ?? 0;
-                        return {
-                            label: `【${damage.sourceAction.sourceManeuver.name}】→ ${damage.target.name} (${damageValue}点)`,
-                            onClick: () => resolve(damage)
-                        };
-                    });
-                    ui.showModal({ 
-                        title: `【${maneuver.name}】庇う対象を選択`, 
-                        items: menuItems,
-                        onRender: (modal, closeFn) => {
-                            modal.onclick = (event) => { if(event.target === modal) { closeFn(); resolve(null); } };
-                        }
-                    });
-                });
-
-                if (selectedDamage) {
-                    battleLogic.declareManeuver(char, maneuver, selectedDamage.target);
-                }
-                return;
-            }
-
-            const isInterruptJudge = maneuver.timing === 'ジャッジ' && maneuver.range !== '自身';
-            if (isInterruptJudge) {
-                const targetableDeclarations = getTargetableDeclarations(char, maneuver);
-                if (targetableDeclarations.length === 0) {
-                    ui.addLog("妨害/支援の対象となるアクションがありません。");
-                    return;
-                }
-                const menuItems = targetableDeclarations.map(targetDecl => ({
-                    label: `${targetDecl.performer.name}: 【${targetDecl.sourceManeuver.name}】${targetDecl.target ? ` → ${targetDecl.target.name}` : ''}`,
-                    onClick: () => {
-                        battleLogic.declareManeuver(char, maneuver, null, targetDecl);
-                    }
-                }));
-                ui.showModal({ title: `【${maneuver.name}】の対象を選択`, items: menuItems });
-                return;
-            }
-
-            const isMoveDebuff = maneuver.tags && maneuver.tags.includes('移動妨害');
-            if (isMoveDebuff) {
-                const allMoveCandidates = [
-                    ...battleLogic.getBattleState().actionQueue,
-                    ...battleLogic.getBattleState().rapidQueue
-                ];
-                const targetableMoveDeclarations = allMoveCandidates.filter(decl => {
-                    return !decl.checked &&
-                           decl.performer.type !== char.type &&
-                           decl.sourceManeuver.tags.includes('移動') &&
-                           checkTargetAvailability(char, maneuver, [decl.performer]).hasTarget;
-                });
-
-                if (targetableMoveDeclarations.length === 0) {
-                    ui.addLog("妨害の対象となる移動がありません。");
-                    return;
-                }
-
-                const menuItems = targetableMoveDeclarations.map(targetDecl => {
-                    let labelText = '';
-                    const movePerformer = targetDecl.performer;
-                    const moveManeuver = targetDecl.sourceManeuver;
-                    const moveTarget = targetDecl.target;
-
-                    if (moveTarget && moveTarget.id !== movePerformer.id) {
-                        labelText = `${moveTarget.name}（${movePerformer.name}の【${moveManeuver.name}】）`;
-                    } 
-                    else {
-                        labelText = `${movePerformer.name}: 【${moveManeuver.name}】`;
-                    }
-
-                    return {
-                        label: labelText,
-                        onClick: () => {
-                            battleLogic.declareManeuver(char, maneuver, targetDecl);
-                        }
-                    };
-                });
-                
-                ui.showModal({ title: `【${maneuver.name}】の妨害対象を選択`, items: menuItems });
-                return;
-            }
-            
-            if (maneuver.tags.includes('移動')) {
-                if (maneuver.range === '自身') {
-                    buildMoveMenu(char, maneuver, e);
-                } else {
-                    const target = await selectTargetForAction(char, maneuver, handleOutsideClick);
-                    if (target) {
-                        const direction = await new Promise(resolve => {
-                            ui.showModal({
-                                title: `【${maneuver.name}】移動方向を選択`,
-                                items: [
-                                    { label: '奈落方向へ', onClick: () => resolve('奈落方向') },
-                                    { label: '楽園方向へ', onClick: () => resolve('楽園方向') }
-                                ],
-                                onRender: (modal) => {
-                                    modal.onclick = (event) => { if (event.target === modal) resolve(null); };
-                                }
-                            });
-                        });
-                        if (direction) {
-                            const modifiedManeuver = { ...maneuver, targetArea: direction };
-                            battleLogic.declareManeuver(char, modifiedManeuver, target);
-                        }
-                    }
-                }
-                return;
-            }
-
-            if (maneuver.tags.includes('攻撃')) {
-                const target = await selectTargetForAction(char, maneuver, handleOutsideClick);
-                if (target) {
-                    battleLogic.declareManeuver(char, maneuver, target);
-                }
-                return;
-            }
-
-            battleLogic.declareManeuver(char, maneuver);
-        };
+        item.onclick = (e) => handleManeuverItemClick(e, char, maneuverObj);
     }
     return item;
+}
+
+/**
+ * 【新設】マニューバアイテムがクリックされた際のメイン処理ハンドラ
+ * @param {Event} event - クリックイベント
+ * @param {object} char - 行動するキャラクター
+ * @param {object} maneuverObj - isUsableなどを含むマニューバーオブジェクト
+ */
+async function handleManeuverItemClick(event, char, maneuverObj) {
+    event.stopPropagation();
+    const maneuver = maneuverObj.data;
+    
+    // 元のonclick処理をここにペースト
+    if (maneuver.tags.includes('攻撃')) {
+        closeAllMenus();
+    } else {
+         setTimeout(() => closeAllMenus(), 0);
+    }
+
+    if (maneuver.name === '任意') {
+        const bodyHtml = `<div class="action-cost-form"><div class="action-cost-selector">${[1,2,3,4,5].map(v => `<label><input type="radio" name="action-cost" value="${v}" ${v===1?'checked':''}> <span>${v}</span></label>`).join('')}</div></div>`;
+        const footerHtml = `<button id="applyActionCostBtn" class="welcome-modal-close-btn">適用</button>`;
+        
+        ui.showModal({
+            title: '消費する行動値を選択',
+            bodyHtml,
+            footerHtml,
+            onRender: (modal, closeFn) => {
+                modal.querySelector('#applyActionCostBtn').onclick = () => {
+                    const selectedCost = modal.querySelector('input[name="action-cost"]:checked').value;
+                    const customManeuver = { ...maneuver, cost: String(parseInt(selectedCost, 10)) };
+                    battleLogic.declareManeuver(char, customManeuver);
+                    closeFn();
+                };
+            }
+        });
+        return;
+    }
+
+    const isDefenseManeuver = 
+        maneuver.timing === 'ダメージ' && 
+        maneuver.tags.includes('防御') &&
+        !maneuver.effects?.some(e => e.ref === 'TAKE_DAMAGE_FOR_ALLY');
+
+    if (isDefenseManeuver) {
+        const targetableDamages = battleLogic.getBattleState().damageQueue.filter(damage => {
+            return damage.type === 'instance' && 
+                   !damage.applied && 
+                   damage.target.type === char.type &&
+                   checkTargetAvailability(char, maneuver, [damage.target]).hasTarget;
+        });
+
+        if (targetableDamages.length === 0) {
+            ui.addLog("防御対象となるダメージがありません。");
+            return;
+        }
+
+        const selectedDamage = await new Promise(resolve => {
+            const menuItems = targetableDamages.map(damage => {
+                const damageValue = damage.finalAmount ?? damage.baseAmount ?? damage.amount ?? 0;
+                return {
+                    label: `【${damage.sourceAction.sourceManeuver.name}】→ ${damage.target.name} (${damageValue}点)`,
+                    onClick: () => resolve(damage)
+                };
+            });
+            ui.showModal({ 
+                title: `【${maneuver.name}】防御対象を選択`, 
+                items: menuItems,
+                onRender: (modal, closeFn) => {
+                    modal.onclick = (event) => { if(event.target === modal) { closeFn(); resolve(null); } };
+                }
+            });
+        });
+
+        if (selectedDamage) {
+            battleLogic.declareManeuver(char, maneuver, selectedDamage.target);
+        }
+        return;
+    }
+
+    const takeDamageEffect = maneuver.effects?.find(e => e.ref === 'TAKE_DAMAGE_FOR_ALLY');
+    if (takeDamageEffect) {
+        const targetableDamages = battleLogic.getBattleState().damageQueue.filter(damage => {
+            return damage.type === 'instance' &&
+                   !damage.applied && 
+                   damage.target.type === char.type && 
+                   damage.target.id !== char.id &&
+                   checkTargetAvailability(char, maneuver, [damage.target]).hasTarget;
+        });
+
+        if (targetableDamages.length === 0) {
+            ui.addLog("庇う対象がいません。");
+            return;
+        }
+
+        const selectedDamage = await new Promise(resolve => {
+            const menuItems = targetableDamages.map(damage => {
+                const damageValue = damage.finalAmount ?? damage.baseAmount ?? damage.amount ?? 0;
+                return {
+                    label: `【${damage.sourceAction.sourceManeuver.name}】→ ${damage.target.name} (${damageValue}点)`,
+                    onClick: () => resolve(damage)
+                };
+            });
+            ui.showModal({ 
+                title: `【${maneuver.name}】庇う対象を選択`, 
+                items: menuItems,
+                onRender: (modal, closeFn) => {
+                    modal.onclick = (event) => { if(event.target === modal) { closeFn(); resolve(null); } };
+                }
+            });
+        });
+
+        if (selectedDamage) {
+            battleLogic.declareManeuver(char, maneuver, selectedDamage.target);
+        }
+        return;
+    }
+
+    const isInterruptJudge = maneuver.timing === 'ジャッジ' && maneuver.range !== '自身';
+    if (isInterruptJudge) {
+        const targetableDeclarations = getTargetableDeclarations(char, maneuver);
+        if (targetableDeclarations.length === 0) {
+            ui.addLog("妨害/支援の対象となるアクションがありません。");
+            return;
+        }
+        const menuItems = targetableDeclarations.map(targetDecl => ({
+            label: `${targetDecl.performer.name}: 【${targetDecl.sourceManeuver.name}】${targetDecl.target ? ` → ${targetDecl.target.name}` : ''}`,
+            onClick: () => {
+                battleLogic.declareManeuver(char, maneuver, null, targetDecl);
+            }
+        }));
+        ui.showModal({ title: `【${maneuver.name}】の対象を選択`, items: menuItems });
+        return;
+    }
+
+    const isMoveDebuff = maneuver.tags && maneuver.tags.includes('移動妨害');
+    if (isMoveDebuff) {
+        const allMoveCandidates = [
+            ...battleLogic.getBattleState().actionQueue,
+            ...battleLogic.getBattleState().rapidQueue
+        ];
+        const targetableMoveDeclarations = allMoveCandidates.filter(decl => {
+            return !decl.checked &&
+                   decl.performer.type !== char.type &&
+                   decl.sourceManeuver.tags.includes('移動') &&
+                   checkTargetAvailability(char, maneuver, [decl.performer]).hasTarget;
+        });
+
+        if (targetableMoveDeclarations.length === 0) {
+            ui.addLog("妨害の対象となる移動がありません。");
+            return;
+        }
+
+        const menuItems = targetableMoveDeclarations.map(targetDecl => {
+            let labelText = '';
+            const movePerformer = targetDecl.performer;
+            const moveManeuver = targetDecl.sourceManeuver;
+            const moveTarget = targetDecl.target;
+
+            if (moveTarget && moveTarget.id !== movePerformer.id) {
+                labelText = `${moveTarget.name}（${movePerformer.name}の【${moveManeuver.name}】）`;
+            } 
+            else {
+                labelText = `${movePerformer.name}: 【${moveManeuver.name}】`;
+            }
+
+            return {
+                label: labelText,
+                onClick: () => {
+                    battleLogic.declareManeuver(char, maneuver, targetDecl);
+                }
+            };
+        });
+        
+        ui.showModal({ title: `【${maneuver.name}】の妨害対象を選択`, items: menuItems });
+        return;
+    }
+    
+    if (maneuver.tags.includes('移動')) {
+        if (maneuver.range === '自身') {
+            buildMoveMenu(char, maneuver, event);
+        } else {
+            const target = await selectTargetForAction(char, maneuver, handleOutsideClick);
+            if (target) {
+                const direction = await new Promise(resolve => {
+                    ui.showModal({
+                        title: `【${maneuver.name}】移動方向を選択`,
+                        items: [
+                            { label: '奈落方向へ', onClick: () => resolve('奈落方向') },
+                            { label: '楽園方向へ', onClick: () => resolve('楽園方向') }
+                        ],
+                        onRender: (modal) => {
+                            modal.onclick = (event) => { if (event.target === modal) resolve(null); };
+                        }
+                    });
+                });
+                if (direction) {
+                    const modifiedManeuver = { ...maneuver, targetArea: direction };
+                    battleLogic.declareManeuver(char, modifiedManeuver, target);
+                }
+            }
+        }
+        return;
+    }
+
+    if (maneuver.tags.includes('攻撃')) {
+        const target = await selectTargetForAction(char, maneuver, handleOutsideClick);
+        if (target) {
+            battleLogic.declareManeuver(char, maneuver, target);
+        }
+        return;
+    }
+
+    battleLogic.declareManeuver(char, maneuver);
 }
 
 function filterManeuvers(maneuvers, filterId, char) {
@@ -1993,8 +2003,17 @@ async function selectTargetForAction(actor, maneuver, handleGlobalClick) {
  */
 export function showAttackConfirmationModal(performer, target, maneuver, index, onConfirmCallback) {
     const state = battleLogic.getBattleState();
-    const targetDeclaration = state.actionQueue[index]; // これで正しく宣言を取得できる
-    if (!targetDeclaration) return;
+
+    // index を使って宣言を取得するのではなく、ターゲット情報から宣言を検索する
+    const targetDeclaration = state.actionQueue.find(d => 
+        d.performer.id === performer.id && 
+        d.sourceManeuver.name === maneuver.name && 
+        d.target?.id === target?.id && 
+        !d.checked
+    );
+
+    // const targetDeclaration = state.actionQueue[index]; // これで正しく宣言を取得できる
+    // if (!targetDeclaration) return;
 
     // ... (ボーナス計算のロジックは変更なし) ...
     let totalBonus = 0;
@@ -2044,8 +2063,6 @@ export function showAttackConfirmationModal(performer, target, maneuver, index, 
     state.judgeQueue.forEach(judgeDecl => {
         const judgeManeuver = judgeDecl.sourceManeuver;
         
-        // ▼▼▼ ここからが修正箇所です ▼▼▼
-
         // 1. GENERIC_JUDGE_MOD または CHOICE_JUDGE_MOD の効果を探す
         const judgeEffect = judgeManeuver.effects.find(e => e.ref === 'GENERIC_JUDGE_MOD' || e.ref === 'CHOICE_JUDGE_MOD');
 
@@ -2095,7 +2112,6 @@ export function showAttackConfirmationModal(performer, target, maneuver, index, 
                 }
             }
         }
-        // ▲▲▲ 修正はここまでです ▲▲▲
     });
     
     // --- 3. HTMLの構築 ---

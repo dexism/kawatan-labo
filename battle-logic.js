@@ -2,15 +2,15 @@
  * @file battle-logic.js
  * @description 戦闘の進行、状態管理、ルール判定、アクション解決を担当するモジュール。
  */
-export const version = "1.24.89"; // UI分離リファクタリング完了版
+export const version = "1.25.93"; // UI分離リファクタリング完了版
 
 import * as charManager from './character-manager.js';
 import * as ui from './ui-manager.js';
 import { performDiceRoll } from './dice-roller.js';
-import * as interactionManager from './interaction-manager.js';
+import { showDamageCalculationModal, showDamageModal } from './interaction-manager.js';
 import * as data from './data-handler.js';
 import * as stateManager from './state-manager.js';
-import { calculateManeuverRange } from './battle-helpers.js';
+// import { calculateManeuverRange } from './battle-helpers.js';
 import { checkTargetAvailability } from './menu-builder.js';
 
 // ===================================================================================
@@ -141,6 +141,132 @@ function expandParams(template, params) {
 // ===================================================================================
 //  公開 API (Public API)
 // ===================================================================================
+
+/**
+ * 【新設】UIからのインタラクションを一元的に受け付ける窓口
+ * @param {object} interaction - ユーザー操作の情報 (例: { type: 'resolve-action', index: 0 })
+ */
+export function handleUserInteraction(interaction) {
+    if (!interaction || !interaction.type) return;
+
+    switch (interaction.type) {
+        case 'resolve-action':
+            resolveActionByIndex(interaction.index, interaction.diceResult || null);
+            break;
+
+        case 'resolve-rapid':
+            resolveRapidByIndex(interaction.index);
+            break;
+        
+        case 'resolve-judge':
+            checkJudgeItem(interaction.index);
+            break;
+
+        case 'resolve-damage':
+            // 元の handleDamageItemClick のロジックをここに統合
+            const item = battleState.damageQueue[interaction.index];
+            if (!item) return;
+
+            if (item.type === 'instance') {
+                if (item.applied) return;
+                const character = charManager.getCharacterById(item.target.id);
+                if (!character) return;
+
+                showDamageCalculationModal(item, (finalDamageAfterDefense) => {
+                    const onConfirmCallback = () => { applyDamage(interaction.index); };
+
+                    // ダメージが0以下になった場合の処理
+                    if (finalDamageAfterDefense <= 0) {
+                        ui.addLog(`＞ ${character.name}への攻撃は完全に防がれ、ダメージはありませんでした。`);
+                        ui.removeDamagePrompt(character.id);
+                        onConfirmCallback();
+                        return;
+                    }
+            
+                    // レギオンまたは残りパーツ数以上のダメージの場合の処理
+                    if (character.category === 'レギオン' || Object.values(character.partsStatus).flat().filter(p => !p.damaged).length <= finalDamageAfterDefense) {
+                        if (character.category === 'レギオン') {
+                            ui.addLog(`レギオンへのダメージ！ ${finalDamageAfterDefense}体が失われます。`);
+                            const wasDestroyed = charManager.damagePart(character.id, null, finalDamageAfterDefense);
+                            if (wasDestroyed) {
+                                ui.showToastNotification(`${character.name}は完全破壊されました`);
+                            }
+                        } else {
+                            ui.addLog(`＞ ${character.name}は残りパーツ数以上のダメージを受け、完全に破壊されました！`);
+                            charManager.updateCharacter(character.id, { isDestroyed: true });
+                            ui.showToastNotification(`${character.name}は完全破壊されました`);
+                        }
+                        ui.removeDamagePrompt(character.id);
+                        onConfirmCallback();
+                    } else {
+                        // パーツ損傷モーダルを呼び出す
+                        showDamageModal(character, finalDamageAfterDefense, item.location, onConfirmCallback);
+                    }
+                });
+
+            } else if (item.type === 'declaration') {
+                if (item.checked) return;
+                const declaration = item;
+                const maneuver = declaration.sourceManeuver;
+
+                // 【庇う】の解決
+                const takeDamageEffect = maneuver.effects?.some(e => e.ref === 'TAKE_DAMAGE_FOR_ALLY');
+                if (takeDamageEffect) {
+                    // 庇う対象(declaration.target)が受けるはずだった未解決のダメージインスタンスを探す
+                    const targetDamage = battleState.damageQueue.find(d => 
+                        d.type === 'instance' && 
+                        !d.applied && 
+                        d.target.id === declaration.target.id
+                    );
+                    
+                    if (targetDamage) {
+                        // battleLogicの新しい関数を呼び出してダメージ対象を変更
+                        redirectDamage(targetDamage.id, declaration.performer);
+                        // 【庇う】宣言を解決済みにする
+                        declaration.checked = true; 
+                        // UIを更新するためにdetermineNextStepを呼び出す
+                        determineNextStep(); 
+                    } else {
+                        ui.showToastNotification("庇う対象のダメージが見つかりません。", 2000);
+                        declaration.checked = true; // 対象が見つからない場合も解決済みにしておく
+                        determineNextStep();
+                    }
+                    return; // これで処理を終了
+                }
+
+                // 【うろこ】など、自身への防御マニューバの解決
+                const defenseEffect = maneuver.effects?.some(e => e.ref === 'GENERIC_DEFENSE');
+                if (defenseEffect) {
+                    declaration.checked = true;
+                    charManager.addBuff(declaration.performer.id, { 
+                        source: maneuver.name, 
+                        stat: 'defense', 
+                        value: maneuver.effects.find(e => e.ref === 'GENERIC_DEFENSE').params.value || 0, 
+                        duration: 'until_damage_applied' 
+                    });
+                    ui.addLog(`> ${declaration.performer.name}の【${maneuver.name}】の効果が適用されます。`);
+                    determineNextStep();
+                    return;
+                }
+                
+                // 【ジェットノズル】など、与ダメージ増加マニューバの解決
+                const damageIncreaseEffect = maneuver.effects?.some(e => e.ref === 'INCREASE_DAMAGE_DEALT');
+                if (damageIncreaseEffect) {
+                    declaration.checked = true;
+                    charManager.addBuff(declaration.performer.id, { 
+                        source: maneuver.name, 
+                        stat: 'damageBonus', 
+                        value: maneuver.effects.find(e => e.ref === 'INCREASE_DAMAGE_DEALT').params.value || 0, 
+                        duration: 'until_damage_applied' 
+                    });
+                    ui.addLog(`> ${declaration.performer.name}の【${maneuver.name}】の効果が適用されます。`);
+                    determineNextStep();
+                    return;
+                }
+            }
+            break;
+    }
+}
 
 export function getBattleState() {
     return {
@@ -350,7 +476,7 @@ export function advancePhase() {
     }
 }
 
-export async function resolveRapidByIndex(index) {
+async function resolveRapidByIndex(index) {
     const declaration = battleState.rapidQueue[index];
     if (!declaration || declaration.checked) return;
 
@@ -361,7 +487,7 @@ export async function resolveRapidByIndex(index) {
     determineNextStep();
 }
 
-export async function resolveActionByIndex(index, diceResult = null) {
+async function resolveActionByIndex(index, diceResult = null) {
     const declaration = battleState.actionQueue[index];
     if (!declaration || declaration.checked) return;
     
@@ -376,7 +502,7 @@ export async function resolveActionByIndex(index, diceResult = null) {
     }
 }
 
-export function checkJudgeItem(index) {
+function checkJudgeItem(index) {
     const declaration = battleState.judgeQueue[index];
     if (declaration && !declaration.checked) {
         declaration.checked = true;
@@ -412,7 +538,7 @@ export function applySupport(judgeIndex, targetDeclarationId) {
     }
 }
 
-export function applyDamage(index) {
+function applyDamage(index) {
     const damageInfo = battleState.damageQueue[index];
     if (damageInfo && damageInfo.type === 'instance' && !damageInfo.applied) {
         damageInfo.applied = true;

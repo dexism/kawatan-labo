@@ -440,34 +440,30 @@
     align-items: end;
     flex-wrap: wrap;
 }
+.ref-maneuver-name {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    font-size: 18px;
+    color: var(--color-text);
+    font-weight: bold;
+    display: inline-block; /* テキストの長さに合わせて幅を調整 */
+    margin-right: auto; /* ★重要：右に押しやる */
+}
 /* 2行目：箇所プレフィックス */
 .item-location-prefix {
     font-size: 14px;
-    font-weight: bold;
     border: 1px solid var(--color-6);
     background-color: var(--color-accent-gold);
     color: var(--color-3);
     border-radius: 15px;
-    width:  20px;
     height: 20px;
-    margin: 0;
     padding: 1px 4px;
 }
-/* 2行目：左 */
-.ref-maneuver-name {
-    font-size: 18px;
-    font-weight: bold;
-    color: var(--color-text);
-}
 /* 2行目：マニューバ名 */
-.ref-maneuver-name {
+.item-maneuver-name {
     display: flex;
     font-size: 18px;
-    font-weight: bold;
-    color: var(--color-text);
-    text-align: left;
-    display: inline-block; /* テキストの長さに合わせて幅を調整 */
-    margin-right: auto; /* ★重要：右に押しやる */
 }
 /* 2行目：TCR (右寄せ) */
 .ref-stats {
@@ -541,13 +537,23 @@
     color: var(--color-accent);
 }
 /* 損傷しているマニューバのスタイル */
-.maneuver-item-new.is-damaged .ref-maneuver-name,
+.maneuver-item-new.is-damaged .item-maneuver-name,
 .maneuver-item-new.is-damaged .ref-stats,
-.maneuver-item-new.is-damaged .item-row-2 {
+.maneuver-item-new.is-damaged .item-description {
     text-decoration: line-through;
     color: var(--color-accent-red);
 }
-
+/* 対象のマニューバはありません */
+.is-empty {
+    margin: 10px auto;
+    padding: 10px 20px;
+    width: fit-content;
+    font-weight: normal;
+    font-style: italic;
+    background-color: var(--color-background-2);
+    box-shadow: 0 0 5px var(--color-shadow);
+    border-radius: 10px;
+}
 /* ？ */
 .item-name {
     font-size: 18px;

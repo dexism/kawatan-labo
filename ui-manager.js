@@ -6,13 +6,13 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.16.88";
+export const version = "1.17.91";
 
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
 import * as interactionManager from './interaction-manager.js';
 import * as data from './data-handler.js';
-import { getCategoryClass, getManeuverSourceText } from './ui-helpers.js';
+// import { getCategoryClass, getManeuverSourceText } from './ui-helpers.js';
 import { getCharacterManeuvers } from './menu-builder.js';
 import { calculateFinalDamage } from './battle-helpers.js';
 
@@ -669,7 +669,18 @@ function updateQueueUI(elementId, queue, headerText) {
         queue.forEach((declaration, index) => {
             const labelEl = document.createElement('label');
             labelEl.className = 'action-queue-item';
-            
+
+            // アクション種別を data-action 属性として設定
+            if (elementId === 'rapidDeclarationList') {
+                labelEl.dataset.action = 'resolve-rapid';
+            } else if (elementId === 'judgeDeclarationList') {
+                labelEl.dataset.action = 'resolve-judge';
+            } else if (elementId === 'actionDeclarationList') {
+                labelEl.dataset.action = 'resolve-action';
+            }
+            // インデックスを data-index 属性として設定
+            labelEl.dataset.index = index;
+            // ▲▲▲ 変更ここまで ▲▲▲
             let isDisabled = false;
             // 新しい有効化条件を適用
             if (elementId === 'rapidDeclarationList') {
@@ -688,16 +699,6 @@ function updateQueueUI(elementId, queue, headerText) {
             checkbox.type = 'checkbox';
             checkbox.checked = declaration.checked;
             checkbox.disabled = true;
-
-            if (!isDisabled) {
-                if (elementId === 'rapidDeclarationList') {
-                    labelEl.onclick = () => interactionManager.handleRapidItemClick(index);
-                } else if (elementId === 'judgeDeclarationList') {
-                    labelEl.onclick = () => interactionManager.handleJudgeItemClick(index);
-                } else if (elementId === 'actionDeclarationList') {
-                    labelEl.onclick = () => interactionManager.handleActionItemClick(index);
-                }
-            }
 
             labelEl.appendChild(checkbox);
             const textContentSpan = document.createElement('span');
@@ -747,6 +748,11 @@ function updateDamageQueueUI(queue) {
             const labelEl = document.createElement('label');
             labelEl.className = 'action-queue-item damage-item';
             
+            // ▼▼▼ 変更箇所 ▼▼▼
+            labelEl.dataset.action = 'resolve-damage';
+            labelEl.dataset.index = index;
+            // ▲▲▲ 変更ここまで ▲▲▲
+
             let isDisabled = true; // デフォルトは無効
             let isChecked = false;
             const textSpan = document.createElement('span');
@@ -781,11 +787,6 @@ function updateDamageQueueUI(queue) {
             checkbox.type = 'checkbox';
             checkbox.checked = isChecked;
             checkbox.disabled = true;
-
-            if (!isDisabled) {
-                // クリックハンドラは index を渡すだけでOK
-                labelEl.onclick = () => interactionManager.handleDamageItemClick(index);
-            }
 
             labelEl.appendChild(checkbox);
             labelEl.appendChild(textSpan);

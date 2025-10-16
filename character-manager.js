@@ -6,13 +6,13 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.8.8";
+export const version = "1.8.10";
 
 // --- モジュールのインポート ---
 import * as data from './data-handler.js';
 import * as stateManager from './state-manager.js';
-import { convertVampireBloodSheet } from './character-converter.js';
-import * as battleLogic from './battle-logic.js';
+// import { convertVampireBloodSheet } from './character-converter.js';
+// import * as battleLogic from './battle-logic.js';
 
 // ===================================================================================
 //  モジュール内 プライベート変数

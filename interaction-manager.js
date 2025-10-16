@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "2.11.26"; // パッチバージョンを更新
+export const version = "2.12.30"; // パッチバージョンを更新
 
 import * as data from './data-handler.js'; 
 import * as charManager from './character-manager.js';
@@ -14,11 +14,13 @@ import * as ui from './ui-manager.js';
 import { buildDiceMenu, performDiceRoll } from './dice-roller.js';
 import { buildReferenceUI } from './reference.js';
 import { 
-    buildManeuverMenu, showCharacterSheetModal, 
-    showUndeadListModal, buildMoveMenu, 
-    buildPlacementMenu, closeAllMenus, 
+    buildManeuverMenu, 
+    showCharacterSheetModal, 
+    showUndeadListModal, 
+    buildPlacementMenu,  
     showAttackConfirmationModal
 } from './menu-builder.js';
+// import { buildManeuverMenu, showCharacterSheetModal, showUndeadListModal, buildMoveMenu, buildPlacementMenu, closeAllMenus, showAttackConfirmationModal } from './menu-builder.js';
 import * as stateManager from './state-manager.js';
 import { calculateFinalDamage } from './battle-helpers.js';
 
@@ -40,6 +42,66 @@ export function setupAllEventListeners() {
             selectedCardElement = null;
         }
     });
+
+    // 右側パネル全体でクリックイベントを監視するリスナーを追加
+    const rightColumn = document.querySelector('.right-column');
+    if (rightColumn) {
+        rightColumn.addEventListener('click', (e) => {
+            // クリックされた要素、またはその親要素を遡って .action-queue-item を探す
+            const itemElement = e.target.closest('.action-queue-item');
+
+            // 対象の要素が見つかり、かつ disabled 状態でない場合のみ処理を実行
+            if (itemElement && !itemElement.classList.contains('is-disabled')) {
+                const action = itemElement.dataset.action;
+                const index = parseInt(itemElement.dataset.index, 10);
+
+                if (action === 'resolve-action') {
+                    // 攻撃アクションの場合の分岐処理をここに追加
+                    const state = battleLogic.getBattleState();
+                    const declaration = state.actionQueue[index];
+                    if (!declaration) return;
+
+                    const { performer, target, sourceManeuver } = declaration;
+
+                    if (sourceManeuver.tags.includes('攻撃')) {
+                        // 攻撃確認モーダルを表示
+                        showAttackConfirmationModal(
+                            performer, 
+                            target, 
+                            sourceManeuver, 
+                            index,
+                            (totalBonus) => {
+                                // ダイスロールを実行
+                                performDiceRoll({
+                                    command: `NA${totalBonus > 0 ? `+${totalBonus}` : totalBonus}`,
+                                    showToast: true,
+                                    performer,
+                                    callback: (result, hitLocation, resultText, rollValue) => {
+                                        // ダイス結果を添えて、battle-logicに処理を依頼
+                                        battleLogic.handleUserInteraction({
+                                            type: 'resolve-action',
+                                            index: index,
+                                            diceResult: { result, hitLocation, resultText, rollValue }
+                                        });
+                                    }
+                                });
+                            }
+                        );
+                    } else {
+                        // 攻撃以外のアクションは、そのままbattle-logicに処理を依頼
+                        battleLogic.handleUserInteraction({ type: 'resolve-action', index: index });
+                    }
+                } else if (action && !isNaN(index)) {
+                    // battle-logic の新しい窓口関数に処理を依頼
+                    battleLogic.handleUserInteraction({
+                        type: action,
+                        index: index
+                    });
+                }
+            }
+        });
+    }
+    // ▲▲▲ 変更ここまで ▲▲▲
 
     setupCharacterEventListeners();
     setupDiceRollerEventListeners();
@@ -325,161 +387,7 @@ export function handleQueueCheck(queueType, index, isChecked) {
     // ui.updateAllUI(); // ★ UI更新を追加
 }
 
-export function handleRapidItemClick(index) {
-    battleLogic.resolveRapidByIndex(index); //.then(() => {
-        // ui.updateAllUI(); // ★ UI更新を追加
-    // });
-}
-
-export function handleActionItemClick(index) {
-    const state = battleLogic.getBattleState();
-    const declaration = state.actionQueue[index];
-    if (!declaration) return;
-
-    const { performer, target, sourceManeuver } = declaration;
-
-    if (sourceManeuver.tags.includes('攻撃')) {
-        showAttackConfirmationModal(
-            performer, 
-            target, 
-            sourceManeuver, 
-            index, // ★★★ 修正点: indexを引数として渡す ★★★
-            (totalBonus) => {
-                performDiceRoll({
-                    command: `NA${totalBonus > 0 ? `+${totalBonus}` : totalBonus}`,
-                    showToast: true,
-                    performer,
-                    callback: (result, hitLocation, resultText, rollValue) => {
-                        battleLogic.resolveActionByIndex(index, {
-                            result, hitLocation, resultText, rollValue
-                        });
-                    }
-                });
-            }
-        );
-    } else {
-        battleLogic.resolveActionByIndex(index);
-    }
-}
-
-export function handleJudgeItemClick(index) {
-    battleLogic.checkJudgeItem(index);
-    // ui.updateAllUI(); // ★ UI更新を追加
-}
-
-export function handleDamageItemClick(index) {
-    const { damageQueue } = battleLogic.getBattleState();
-    const item = damageQueue[index];
-    if (!item) return;
-
-    // type に応じて処理を分岐
-    if (item.type === 'instance') {
-        // --- 従来通りのダメージ適用処理 ---
-        if (item.applied) return;
-        const character = charManager.getCharacterById(item.target.id);
-        if (!character) return;
-        
-        // ▼▼▼ ここからが修正箇所です ▼▼▼
-        // ダメージ計算モーダルを呼び出す
-        showDamageCalculationModal(item, (finalDamageAfterDefense) => {
-            const onConfirmCallback = () => {
-                battleLogic.applyDamage(index);
-            };
-
-            // ダメージが0以下になった場合の処理
-            if (finalDamageAfterDefense <= 0) {
-                ui.addLog(`＞ ${character.name}への攻撃は完全に防がれ、ダメージはありませんでした。`);
-                ui.removeDamagePrompt(character.id);
-                onConfirmCallback();
-                return;
-            }
-    
-            // レギオンまたは残りパーツ数以上のダメージの場合の処理
-            if (character.category === 'レギオン' || Object.values(character.partsStatus).flat().filter(p => !p.damaged).length <= finalDamageAfterDefense) {
-                if (character.category === 'レギオン') {
-                    ui.addLog(`レギオンへのダメージ！ ${finalDamageAfterDefense}体が失われます。`);
-                    const wasDestroyed = charManager.damagePart(character.id, null, finalDamageAfterDefense);
-                    if (wasDestroyed) {
-                        ui.showToastNotification(`${character.name}は完全破壊されました`);
-                    }
-                } else {
-                    ui.addLog(`＞ ${character.name}は残りパーツ数以上のダメージを受け、完全に破壊されました！`);
-                    charManager.updateCharacter(character.id, { isDestroyed: true });
-                    ui.showToastNotification(`${character.name}は完全破壊されました`);
-                }
-                ui.removeDamagePrompt(character.id);
-                onConfirmCallback();
-            } else {
-                // パーツ損傷モーダルを呼び出す
-                showDamageModal(character, finalDamageAfterDefense, item.location, onConfirmCallback);
-            }
-        });
-
-    } else if (item.type === 'declaration') {
-        // --- 新しい宣言解決処理 ---
-        if (item.checked) return;
-
-        const declaration = item;
-        const maneuver = declaration.sourceManeuver;
-
-        // 【庇う】の解決
-        const takeDamageEffect = maneuver.effects?.some(e => e.ref === 'TAKE_DAMAGE_FOR_ALLY');
-        if (takeDamageEffect) {
-            // 庇う対象(declaration.target)が受けるはずだった未解決のダメージインスタンスを探す
-            const targetDamage = damageQueue.find(d => 
-                d.type === 'instance' && 
-                !d.applied && 
-                d.target.id === declaration.target.id
-            );
-            
-            if (targetDamage) {
-                // battleLogicの新しい関数を呼び出してダメージ対象を変更
-                battleLogic.redirectDamage(targetDamage.id, declaration.performer);
-                // 【庇う】宣言を解決済みにする
-                declaration.checked = true; 
-                // UIを更新するためにdetermineNextStepを呼び出す
-                battleLogic.determineNextStep(); 
-            } else {
-                ui.showToastNotification("庇う対象のダメージが見つかりません。", 2000);
-                declaration.checked = true; // 対象が見つからない場合も解決済みにしておく
-                battleLogic.determineNextStep();
-            }
-            return; // これで処理を終了
-        }
-
-        // 【うろこ】など、自身への防御マニューバの解決
-        const defenseEffect = maneuver.effects?.some(e => e.ref === 'GENERIC_DEFENSE');
-        if (defenseEffect) {
-            declaration.checked = true;
-            charManager.addBuff(declaration.performer.id, { 
-                source: maneuver.name, 
-                stat: 'defense', 
-                value: maneuver.effects.find(e => e.ref === 'GENERIC_DEFENSE').params.value || 0, 
-                duration: 'until_damage_applied' 
-            });
-            ui.addLog(`> ${declaration.performer.name}の【${maneuver.name}】の効果が適用されます。`);
-            battleLogic.determineNextStep();
-            return;
-        }
-        
-        // 【ジェットノズル】など、与ダメージ増加マニューバの解決
-        const damageIncreaseEffect = maneuver.effects?.some(e => e.ref === 'INCREASE_DAMAGE_DEALT');
-        if (damageIncreaseEffect) {
-            declaration.checked = true;
-            charManager.addBuff(declaration.performer.id, { 
-                source: maneuver.name, 
-                stat: 'damageBonus', 
-                value: maneuver.effects.find(e => e.ref === 'INCREASE_DAMAGE_DEALT').params.value || 0, 
-                duration: 'until_damage_applied' 
-            });
-            ui.addLog(`> ${declaration.performer.name}の【${maneuver.name}】の効果が適用されます。`);
-            battleLogic.determineNextStep();
-            return;
-        }
-    }
-}
-
-function showDamageModal(target, damageAmount, hitLocation, onConfirmCallback) {
+export function showDamageModal(target, damageAmount, hitLocation, onConfirmCallback) {
     const modal = document.getElementById('damageModal');
     const title = modal.querySelector('#damageModalTitle');
     const info = modal.querySelector('#damageModalInfo');
@@ -622,7 +530,7 @@ export function handleDamageMarkerClick(characterId) {
  * @param {object} damageInfo - battleState.damageQueue から取得したダメージ情報
  * @param {function(number)} onConfirmCallback - 確定ボタンが押されたときに、最終ダメージ量を引数にして呼び出されるコールバック
  */
-function showDamageCalculationModal(damageInfo, onConfirmCallback) {
+export function showDamageCalculationModal(damageInfo, onConfirmCallback) {
     const { sourceAction, target } = damageInfo;
     const { performer, sourceManeuver } = sourceAction;
 
