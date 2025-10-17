@@ -25,6 +25,8 @@
     -webkit-overflow-scrolling: touch; /* iOSでスムーズなスクロールを有効にする */
     /*  scrollbar-width: none; */
     /* -ms-overflow-style: none; */
+    /* scroll-behavior: smooth;　*/
+
     cursor: grab;
     gap: 15px;
     margin: 0;
@@ -189,16 +191,16 @@
     white-space: nowrap;
     text-align: left;
     text-shadow:
-      -1px -1px 2px red,
-       1px -1px 2px red,
-      -1px  1px 2px red,
-       1px  1px 2px red;
-    color:          #300;
+        -1px -1px 2px red,
+         1px -1px 2px red,
+        -1px  1px 2px red,
+         1px  1px 2px red;
+    color:            #300;
 }
 .char-madness div.is-madness {
     text-shadow:
-      0 0 4px black, 
-      0 0 4px black;
+        0 0 4px black, 
+        0 0 4px black;
     color:    red;
 }
 
@@ -546,8 +548,8 @@ body.is-dragging .char.hover-highlight {
     grid-template-rows: var(--cell-height) repeat(var(--row-count), minmax(var(--cell-height), auto));
     text-align: center;
     text-shadow:
-      0 0 5px black,
-      0 0 5px black;
+        0 0 5px black,
+        0 0 5px black;
     font-size: 16px;
     font-weight: bold;
     position: relative;

@@ -43,41 +43,36 @@ export function setupAllEventListeners() {
         }
     });
 
-    // 右側パネル全体でクリックイベントを監視するリスナーを追加
     const rightColumn = document.querySelector('.right-column');
     if (rightColumn) {
         rightColumn.addEventListener('click', (e) => {
-            // クリックされた要素、またはその親要素を遡って .action-queue-item を探す
             const itemElement = e.target.closest('.action-queue-item');
 
-            // 対象の要素が見つかり、かつ disabled 状態でない場合のみ処理を実行
             if (itemElement && !itemElement.classList.contains('is-disabled')) {
                 const action = itemElement.dataset.action;
                 const index = parseInt(itemElement.dataset.index, 10);
 
                 if (action === 'resolve-action') {
-                    // 攻撃アクションの場合の分岐処理をここに追加
                     const state = battleLogic.getBattleState();
                     const declaration = state.actionQueue[index];
                     if (!declaration) return;
 
+                    ui.addLog(`> 解決：[${declaration.timing}] ${declaration.performer.name}【${declaration.sourceManeuver.name}】`);
+
                     const { performer, target, sourceManeuver } = declaration;
 
                     if (sourceManeuver.tags.includes('攻撃')) {
-                        // 攻撃確認モーダルを表示
                         showAttackConfirmationModal(
                             performer, 
                             target, 
                             sourceManeuver, 
                             index,
                             (totalBonus) => {
-                                // ダイスロールを実行
                                 performDiceRoll({
                                     command: `NA${totalBonus > 0 ? `+${totalBonus}` : totalBonus}`,
                                     showToast: true,
                                     performer,
                                     callback: (result, hitLocation, resultText, rollValue) => {
-                                        // ダイス結果を添えて、battle-logicに処理を依頼
                                         battleLogic.handleUserInteraction({
                                             type: 'resolve-action',
                                             index: index,
@@ -88,30 +83,38 @@ export function setupAllEventListeners() {
                             }
                         );
                     } else {
-                        // 攻撃以外のアクションは、そのままbattle-logicに処理を依頼
                         battleLogic.handleUserInteraction({ type: 'resolve-action', index: index });
                     }
                 } 
+                // ▼▼▼ 復元箇所 ▼▼▼
                 else if (action === 'resolve-damage') {
                     const state = battleLogic.getBattleState();
                     const item = state.damageQueue[index];
                     if (!item) return;
-
-                    // 1. interaction-managerがアイテムの種類を判断
+                    
+                    // 最初に解決ログを出力
                     if (item.type === 'instance') {
-                        // 2. インスタンスなら、UI表示（モーダル）の責任を持つ
+                         ui.addLog(`> 解決：[ダメージ] ${item.target.name}`);
+                         // ui.addLog(`> 解決：[ダメージ] ${item.target.name}（${item.sourceAction.performer.name}【${item.sourceAction.sourceManeuver.name}】）`);
+                    } else if (item.type === 'declaration') {
+                        ui.addLog(`> 解決：[ダメージ] ${item.performer.name}【${item.sourceManeuver.name}】`);
+                    }
+
+                    // interaction-managerがアイテムの種類を判断
+                    if (item.type === 'instance') {
+                        // インスタンスなら、UI表示（モーダル）の責任を持つ
                         if (item.applied) return;
                         const character = charManager.getCharacterById(item.target.id);
                         if (!character) return;
                         
                         showDamageCalculationModal(item, (finalDamageAfterDefense) => {
                             const onConfirmCallback = () => { 
-                                // 3. ユーザーの確定後、ロジック実行を依頼
+                                // ユーザーの確定後、ロジック実行を依頼
                                 battleLogic.applyDamage(index); 
                             };
 
                             if (finalDamageAfterDefense <= 0) {
-                                ui.addLog(`＞ ${character.name}への攻撃は完全に防がれ、ダメージはありませんでした。`);
+                                ui.addLog(`→ ${character.name}への攻撃は完全に防がれ、ダメージはありませんでした。`);
                                 ui.removeDamagePrompt(character.id);
                                 onConfirmCallback();
                                 return;
@@ -119,11 +122,11 @@ export function setupAllEventListeners() {
                     
                             if (character.category === 'レギオン' || Object.values(character.partsStatus).flat().filter(p => !p.damaged).length <= finalDamageAfterDefense) {
                                 if (character.category === 'レギオン') {
-                                    ui.addLog(`レギオンへのダメージ！ ${finalDamageAfterDefense}体が失われます。`);
+                                    ui.addLog(`→ ${finalDamageAfterDefense}体が失われます（レギオン）`);
                                     const wasDestroyed = charManager.damagePart(character.id, null, finalDamageAfterDefense);
                                     if (wasDestroyed) { ui.showToastNotification(`${character.name}は完全破壊されました`); }
                                 } else {
-                                    ui.addLog(`＞ ${character.name}は残りパーツ数以上のダメージを受け、完全に破壊されました！`);
+                                    ui.addLog(`→ ${character.name}は残りパーツ数以上のダメージを受け、完全に破壊されました！`);
                                     charManager.updateCharacter(character.id, { isDestroyed: true });
                                     ui.showToastNotification(`${character.name}は完全破壊されました`);
                                 }
@@ -135,13 +138,24 @@ export function setupAllEventListeners() {
                         });
 
                     } else if (item.type === 'declaration') {
-                        // 4. 宣言なら、従来通りbattle-logicに依頼するだけ
+                        // 宣言なら、従来通りbattle-logicに依頼するだけ
                         battleLogic.handleUserInteraction({ type: 'resolve-damage', index: index });
                     }
-
-                } 
+                }
+                // ▲▲▲ 復元ここまで ▲▲▲
                 else if (action && !isNaN(index)) {
-                    // battle-logic の新しい窓口関数に処理を依頼
+                    const state = battleLogic.getBattleState();
+                    let declarationToLog;
+                    if (action === 'resolve-rapid') {
+                        declarationToLog = state.rapidQueue[index];
+                    } else if (action === 'resolve-judge') {
+                        declarationToLog = state.judgeQueue[index];
+                    }
+                    
+                    if(declarationToLog) {
+                        ui.addLog(`> 解決：[${declarationToLog.timing}] ${declarationToLog.performer.name}【${declarationToLog.sourceManeuver.name}】`);
+                    }
+
                     battleLogic.handleUserInteraction({
                         type: action,
                         index: index
@@ -150,7 +164,6 @@ export function setupAllEventListeners() {
             }
         });
     }
-    // ▲▲▲ 変更ここまで ▲▲▲
 
     setupCharacterEventListeners();
     setupDiceRollerEventListeners();
@@ -376,6 +389,17 @@ export function setupDragToScroll(container) {
         const x = e.pageX - container.offsetLeft;
         walk = x - startX;
         container.scrollLeft = scrollLeft - walk;
+    });
+
+    container.addEventListener('wheel', (e) => {
+        // Shiftキーが押されている場合は、ブラウザのネイティブな水平スクロールに任せる
+        if (e.shiftKey) {
+            return;
+        }
+        // 縦スクロールをキャンセル
+        e.preventDefault();
+        // ホイールの上下移動量を、コンテナの水平スクロールに適用
+        container.scrollLeft += e.deltaY;
     });
 }
 

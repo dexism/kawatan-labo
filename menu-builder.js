@@ -111,7 +111,7 @@ export function buildManeuverMenu(char, element) {
     const header = document.createElement('div');
     header.className = 'maneuver-menu-header';
     header.innerHTML = `
-        <span class="header-icon" id="menuHeaderIcon">🪪</span>
+        <span class="header-icon" id="menuHeaderIcon">人形設計図 🪪</span>
         <span class="header-title">${char.name}</span>
         <button class="header-close-btn">&times;</button>
     `;
@@ -206,66 +206,78 @@ export function createManeuverItem(maneuverObj, char) {
     const item = document.createElement('div');
     item.className = 'maneuver-item-new';
 
-    // リファレンスモードかどうかを char.id の有無で判定
     const isReferenceMode = !char.id;
     if (isReferenceMode) {
         item.classList.add('is-reference-item');
     }
 
-    // --- 1. 左の縦書きカテゴリ列 (共通) ---
     const categoryCol = document.createElement('div');
     categoryCol.className = 'item-category-col';
     const categoryName = maneuver.category || 'その他';
     const categoryClass = `category-color-${getCategoryClass(categoryName)}`;
-    item.classList.add(categoryClass.replace('bg-', '')); // 背景色クラスをアイテム自体にも付与
+    item.classList.add(categoryClass.replace('bg-', ''));
     categoryCol.classList.add(categoryClass);
     categoryCol.innerHTML = `<span>${categoryName}</span>`;
+    
+    // ▼▼▼ 変更箇所 (iconContainerの定義位置を下に移動) ▼▼▼
 
-    // --- 2. アイコン列 (通常メニューのみ) ---
-    // 2a. 縦積みするための親コンテナを作成
-    const iconContainer = document.createElement('div');
-    iconContainer.className = 'item-icon-col';
-
-    // 2b. 💡アイコンのコンテナを作成
     const passiveIconCol = document.createElement('div');
     passiveIconCol.className = 'item-passive-icon-col';
-    if (!isReferenceMode && (maneuverObj.isActiveBuff || maneuver.timing === 'オート')) {
+    
+    if (!isReferenceMode) {
         let isEffectActive = false;
-        if (maneuverObj.isActiveBuff) {
-            isEffectActive = true; 
-        } else {
-            const isDamaged = maneuverObj.isDamaged;
-            const conditionalRefs = ['MODIFY_MAX_ACTION_VALUE_ON_DAMAGE', 'ATTACK_ON_DAMAGE'];
-            const unconditionalRefs = [
-                'APPLY_BUFF', 'REDUCE_MOVE_COST', 'NEGATE_STATUS_EFFECT', 
-                'APPLY_PASSIVE_DEFENSE', 'PREVENT_INTERRUPTION', 'MODIFY_ATTACK_RESULT', 
-                'IMMUNITY', 'NEGATE_DAMAGE_EFFECT'
-            ];
 
-            if (maneuver.effects?.some(e => conditionalRefs.includes(e.ref)) && isDamaged) {
+        // --- 条件A: 「せぼね」のようなコスト蓄積効果がアクティブか？ ---
+        const isSpineLike = maneuver.effects?.some(e => e.ref === 'REDUCE_NEXT_MANEUVER_COST');
+        if (isSpineLike && char.spineBonus > 0) {
+            isEffectActive = true;
+        }
+
+        // --- 条件B: 永続バフが適用中か？ ---
+        if (maneuverObj.isActiveBuff) {
+            isEffectActive = true;
+        }
+
+        // --- 条件C: オートタイミングのスキル効果がアクティブか？ ---
+        if (maneuver.timing === 'オート') {
+            const isDamaged = maneuverObj.isDamaged;
+            
+            // C-1: 損傷時に発動する効果
+            const damageConditionRefs = ['MODIFY_MAX_ACTION_VALUE_ON_DAMAGE', 'ATTACK_ON_DAMAGE'];
+            if (maneuver.effects?.some(e => damageConditionRefs.includes(e.ref)) && isDamaged) {
                 isEffectActive = true;
             }
 
+            // C-2: 損傷していない場合に発動する効果
             if (!isEffectActive && !isDamaged) {
-                for (const effect of (maneuver.effects || [])) {
-                    if (effect.ref === 'APPLY_BUFF' && effect.params?.duration === 'while_in_area') {
-                        if (char.area === effect.params.area) { 
-                            isEffectActive = true; 
-                            break; 
-                        }
-                    } else if (unconditionalRefs.includes(effect.ref)) {
-                        isEffectActive = true; 
-                        break;
+                // ▼▼▼ 変更箇所 (判定ロジックを正しいデータ構造に合わせる) ▼▼▼
+                const areaEffect = maneuver.effects?.find(e => e.params?.duration === 'while_in_area');
+                
+                if (areaEffect) {
+                    // エリア指定効果がある場合は、その成否のみでisEffectActiveを決定する
+                    if (char.area === areaEffect.params.area) {
+                        isEffectActive = true;
+                    }
+                } else {
+                    // エリア指定効果がない場合にのみ、他の無条件効果を判定する
+                    const unconditionalRefs = [
+                        'REDUCE_MOVE_COST', 'NEGATE_STATUS_EFFECT',
+                        'APPLY_PASSIVE_DEFENSE', 'PREVENT_INTERRUPTION', 'MODIFY_ATTACK_RESULT',
+                        'IMMUNITY', 'NEGATE_DAMAGE_EFFECT', 'APPLY_BUFF'
+                    ];
+                    // 上記いずれかのrefを持ち、かつdurationがwhile_in_areaでないeffectがあるかチェック
+                    if (maneuver.effects?.some(e => unconditionalRefs.includes(e.ref) && e.params?.duration !== 'while_in_area')) {
+                        isEffectActive = true;
                     }
                 }
             }
         }
+        
         if (isEffectActive) {
             passiveIconCol.innerHTML = '<span class="maneuver-icon">💡</span>';
         }
     }
 
-    // 2c. ✅アイコンのコンテナを作成
     const statusIconCol = document.createElement('div');
     statusIconCol.className = 'item-status-icon-col';
     if (!isReferenceMode && char.turnLimitedManeuvers) {
@@ -275,27 +287,26 @@ export function createManeuverItem(maneuverObj, char) {
         }
     }
     
-    // 2d. 親コンテナに💡と✅を追加
+    // ▼▼▼ 変更箇所 (iconContainerの定義をここに移動) ▼▼▼
+    const iconContainer = document.createElement('div');
+    iconContainer.className = 'item-icon-col';
+    // ▲▲▲ 変更ここまで ▲▲▲
+
     iconContainer.appendChild(passiveIconCol);
     iconContainer.appendChild(statusIconCol);
-
-    // --- 3. 右のテキスト情報列 (共通レイアウト) ---
+    
     const rightCol = document.createElement('div');
     rightCol.className = 'item-right-col';
     
     const classificationText = getManeuverSourceText(maneuver);
     const sourceInfoText = getManeuverRulebookText(maneuver);
 
-    // 1. 箇所テキストを取得する
     let locationPrefix = '';
-    // getPartLocationTextはui-manager.jsにある想定だが、menu-builder.jsに移植しても良い
-    // ここでは、グローバルにアクセスできる前提とする
     const locationText = getPartLocationText(maneuver, char); 
     if (locationText) {
         locationPrefix = `<span class="item-location-prefix">${locationText}</span>`;
     }
 
-    // 2. 箇所プレフィックスとマニューバ名を結合する
     const maneuverNameHtml = `${locationPrefix}<span class="item-maneuver-name">【${maneuver.name}】</span>`;
 
     const descriptionText = maneuver.description_raw || '';
@@ -317,12 +328,10 @@ export function createManeuverItem(maneuverObj, char) {
         ${maneuver.flavor_text ? `<div class="item-row-3 item-flavor-text">${maneuver.flavor_text}</div>` : ''}
     `;
 
-    // --- 4. 要素の組み立て ---
     item.appendChild(categoryCol);
     item.appendChild(iconContainer);
     item.appendChild(rightCol);
 
-    // --- 5. イベントリスナーとクラスの付与 (共通) ---
     const copyBtn = item.querySelector('.copy-description-btn');
     if (copyBtn) {
         copyBtn.onclick = (e) => {

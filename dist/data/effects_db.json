@@ -102,6 +102,12 @@
         "description": "特定の条件下でアクションマニューバのコストを減少させる。",
         "actions": [{ "action_type": "modify_maneuver_cost", "value": "$params.value", "minimum": "$params.minimum", "condition": "$params.condition" }]
     },
+
+    "REDUCE_NEXT_MANEUVER_COST": {
+        "name": "次アクションコスト減少",
+        "description": "次のカウントで使用するマニューバのコストを減少させる。",
+        "actions": []
+    },
     
     "//": "---------- 回復・修復関連 ----------",
 

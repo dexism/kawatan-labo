@@ -77,7 +77,7 @@ function createHeader() {
     header.className = 'maneuver-menu-header';
     header.innerHTML = `
         <span class="header-icon">📖</span>
-        <span class="header-title">リファレンス</span>
+        <span class="header-title">Nechronica - リファレンス</span>
         <button class="header-close-btn">&times;</button>
     `;
     header.querySelector('.header-close-btn').onclick = () => {
@@ -184,7 +184,7 @@ function renderManeuverTab(container) {
             Object.keys(activeManeuverFilters).forEach(groupName => {
                 const active = activeManeuverFilters[groupName];
                 if (active.length > 0) {
-                    summaryText += `<span class="filter-summary-group"><span class="filter-summary-label">${groupName}</span>${active.join(' ')}</span>`;
+                    summaryText += `<span class="filter-summary-group"><span class="filter-summary-label">${groupName}</span>${active.join(', ')}</span>`;
                 }
             });
             dynamicTitleSpan.innerHTML = summaryText;

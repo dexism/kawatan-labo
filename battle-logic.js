@@ -40,7 +40,7 @@ let battleState = {
 function startCount(newCount) {
     // ターン開始時 (newCountが最初のカウント) またはカウントが進んだ場合にログを出力
     if (battleState.count !== newCount) {
-        ui.addLog(`【カウント ${newCount}（ターン ${battleState.turn}） 開始】`);
+        ui.addLog(`■■■■ ターン ${battleState.turn} カウント ${newCount} 開始 ■■■■`);
     }
 
     battleState.count = newCount;
@@ -80,7 +80,14 @@ function applyAutoBuffsAtActionEnd() {
             if (!maneuver || maneuver.timing !== 'オート' || !maneuver.effects) return;
 
             maneuver.effects.forEach(effect => {
+                // ▼▼▼ 変更箇所 (以前の正常なロジックに戻す) ▼▼▼
+                // エリア条件をチェック
+                if (effect.params?.condition === 'while_in_area' && performer.area !== effect.params.area) {
+                    return; // 条件を満たさないのでこのeffectは無視
+                }
+
                 if (effect.ref !== 'APPLY_CONDITIONAL_BUFF') return;
+                // ▲▲▲ 変更ここまで ▲▲▲
 
                 const params = effect.params;
                 let conditionMet = false;
@@ -199,7 +206,7 @@ export function handleUserInteraction(interaction) {
                         value: maneuver.effects.find(e => e.ref === 'GENERIC_DEFENSE').params.value || 0, 
                         duration: 'until_damage_applied' 
                     });
-                    ui.addLog(`> ${declaration.performer.name}の【${maneuver.name}】の効果が適用されます。`);
+                    ui.addLog(`→ ${declaration.performer.name}【${maneuver.name}】：ダメージ軽減`);
                     determineNextStep();
                     return;
                 }
@@ -213,7 +220,7 @@ export function handleUserInteraction(interaction) {
                         value: maneuver.effects.find(e => e.ref === 'INCREASE_DAMAGE_DEALT').params.value || 0, 
                         duration: 'until_damage_applied' 
                     });
-                    ui.addLog(`> ${declaration.performer.name}の【${maneuver.name}】の効果が適用されます。`);
+                    ui.addLog(`→ ${declaration.performer.name}【${maneuver.name}】：ダメージ増加`);
                     determineNextStep();
                     return;
                 }
@@ -243,47 +250,65 @@ export function clearScrollFlag() {
 
 export function declareManeuver(char, maneuver, target = null, judgeTargetDeclaration = null) {
     const performerId = char.id;
+    const originalPerformer = charManager.getCharacterById(performerId);
 
-    // コスト支払い処理（updateCharacterによる参照破壊の可能性に対処）
-    const cost = isNaN(Number(maneuver.cost)) ? 0 : Number(maneuver.cost);
-    if (cost > 0) {
-        charManager.updateCharacter(performerId, { actionValue: char.actionValue - cost });
+    // ▼▼▼ 変更箇所 ▼▼▼
+    // 1. 効果(ref)によるコスト蓄積処理
+    const isSpineLike = maneuver.effects?.some(e => e.ref === 'REDUCE_NEXT_MANEUVER_COST');
+    if (isSpineLike) {
+        const newBonus = (originalPerformer.spineBonus || 0) + 1;
+        charManager.updateCharacter(performerId, { 
+            spineBonus: newBonus,
+            lastUsedSpineCount: battleState.count 
+        });
     }
-    // 使用済み回数の記録
+    // ▲▲▲ 変更ここまで ▲▲▲
+
+    const costToPayBeforeBonus = isNaN(Number(maneuver.cost)) ? 0 : Number(maneuver.cost);
+    let costToPay = costToPayBeforeBonus;
+    let bonusConsumed = false;
+
+    // ▼▼▼ 変更箇所 ▼▼▼
+    // isSpineLikeがfalseの場合にのみコスト軽減を適用
+    if (!isSpineLike && originalPerformer.spineBonus > 0) {
+    // ▲▲▲ 変更ここまで ▲▲▲
+        costToPay = Math.max(0, costToPayBeforeBonus - originalPerformer.spineBonus);
+        bonusConsumed = true;
+    }
+    
+    // コスト支払い
+    if (costToPay > 0) {
+        charManager.updateCharacter(performerId, { actionValue: originalPerformer.actionValue - costToPay });
+    }
+
+    // 5. 宣言オブジェクト生成とキューへの追加
     const currentCharacter = charManager.getCharacterById(performerId);
-    let finalTarget = target;
-    // targetが設定されておらず、かつマニューバの射程が「自身」の場合
-    if (!finalTarget && maneuver.range === '自身') {
-        // 宣言者自身をターゲットとして設定する
-        finalTarget = currentCharacter;
-    }
     if (currentCharacter.turnLimitedManeuvers.has(maneuver.name)) {
         currentCharacter.usedManeuvers.add(maneuver.name);
     }
-    
-    // ★★★ ここからが今回の修正の核心です ★★★
-
-    // キューに追加する直前に、常に最新のキャラクターオブジェクトを再取得する
+    let finalTarget = target;
+    if (!finalTarget && maneuver.range === '自身') {
+        finalTarget = currentCharacter;
+    }
     const currentPerformer = charManager.getCharacterById(performerId);
     if (!currentPerformer) {
         console.error(`宣言の解決中にパフォーマー(ID: ${performerId})が見つかりませんでした。`);
         return;
     }
-
-    // 全ての宣言オブジェクトが持つべき必須プロパティをここで完全に定義する
     const declaration = {
         id: `decl_${Date.now()}_${Math.random()}`,
-        performer: currentPerformer, // 最新のオブジェクトを必ず設定
+        performer: currentPerformer,
         target: target,
         sourceManeuver: maneuver,
         timing: maneuver.timing,
         summary: { name: maneuver.name },
-        checked: false, // ★ checked プロパティを必ず初期化
-        type: 'declaration' // デフォルトのタイプ
+        checked: false,
+        type: 'declaration'
     };
+    
+    // ▼▼▼ 変更箇所 (ログ出力の順序変更) ▼▼▼
 
-    // ★★★ 修正はここまでです ★★★
-
+    // 先に宣言ログを出力
     switch (maneuver.timing) {
         case 'ラピッド':
             battleState.rapidQueue.push(declaration);
@@ -296,8 +321,7 @@ export function declareManeuver(char, maneuver, target = null, judgeTargetDeclar
             break;
         case 'ダメージ':
             battleState.damageQueue.push(declaration);
-            let logMessage = `◆ [ダメージ] ${currentCharacter.name}が【${maneuver.name}】を宣言`;
-            // ログ表示もfinalTargetを参照するように修正
+            let logMessage = `◆ [ダメージ] ${currentPerformer.name}が【${maneuver.name}】を宣言`;
             if (finalTarget && finalTarget.id !== currentCharacter.id) {
                 logMessage += ` (対象: ${finalTarget.name})`;
             }
@@ -306,7 +330,6 @@ export function declareManeuver(char, maneuver, target = null, judgeTargetDeclar
         case 'アクション':
         default:
             if (maneuver.timing === 'アクション') {
-                // アクション宣言の場合のみ、hasActedThisCountを更新し、typeを上書き
                 charManager.updateCharacter(performerId, { hasActedThisCount: true });
                 declaration.type = 'action';
                 battleState.actionQueue.push(declaration);
@@ -314,11 +337,30 @@ export function declareManeuver(char, maneuver, target = null, judgeTargetDeclar
             }
             break;
     }
+
+    // その後、コスト軽減が発生した場合に追加のログを出力
+    if (bonusConsumed) {
+        ui.addLog(`> 【${maneuver.name}】のコストが${costToPayBeforeBonus}から${costToPay}になります。（コスト軽減 ${originalPerformer.spineBonus}）`);
+        // コスト軽減が適用された場合、即座にボーナスをリセットする
+        charManager.updateCharacter(performerId, { spineBonus: 0, lastUsedSpineCount: -1 });
+    }
     
     determineNextStep();
 }
 
 export function determineNextStep() {
+    // --- 【せぼね】ボーナスの失効判定 ---
+    charManager.getCharacters().forEach(char => {
+        // ボーナスがあり、最後に使用したカウントが記録されている場合
+        if (char.spineBonus > 0 && char.lastUsedSpineCount !== -1) {
+            // 最後に使用したカウントと現在カウントの差が1より大きいかチェック
+            if (char.lastUsedSpineCount - battleState.count > 1) {
+                charManager.updateCharacter(char.id, { spineBonus: 0, lastUsedSpineCount: -1 });
+                ui.addLog(`> ${char.name}の【せぼね】の効果は使用されなかったため失われました。`);
+            }
+        }
+    });
+
     if (!battleState.isStarted) {
         battleState.phase = 'SETUP';
         battleState.activeActors = [];
@@ -460,7 +502,7 @@ function checkJudgeItem(index) {
     const declaration = battleState.judgeQueue[index];
     if (declaration && !declaration.checked) {
         declaration.checked = true;
-        ui.addLog(`> 解決：[ジャッジ] ${declaration.performer.name}【${declaration.sourceManeuver.name}】`);
+        // ui.addLog(`> 解決：[ジャッジ] ${declaration.performer.name}【${declaration.sourceManeuver.name}】`);
     }
     determineNextStep();
 }
@@ -578,7 +620,7 @@ function checkAllDamageApplied() {
     const pendingDamage = battleState.damageQueue.some(d => !d.applied);
     if (pendingDamage) {
         battleState.phase = 'DAMAGE_RESOLUTION';
-        ui.addLog("--- ダメージ解決フェーズ開始 ---");
+        ui.addLog("--- ダメージタイミング開始 ---");
     } else {
         battleState.phase = 'COUNT_END';
         // ui.addLog("--- カウント終了 ---");
@@ -589,7 +631,7 @@ function checkAllDamageApplied() {
 export function redirectDamage(damageId, newTarget) {
     const damageInfo = battleState.damageQueue.find(d => d.id === damageId);
     if (damageInfo && newTarget) {
-        ui.addLog(`＞ ${newTarget.name} が ${damageInfo.target.name} へのダメージを肩代わりしました。`);
+        ui.addLog(`→ ${newTarget.name} が ${damageInfo.target.name} へのダメージを肩代わりしました。`);
         damageInfo.target = newTarget;
     }
     // ★ ここで determineNextStep() を呼び出す必要はありません。
@@ -619,6 +661,16 @@ export function resetToSetupPhase() {
 async function resolveSingleAction(declaration, diceResult = null) {
     const { performer, sourceManeuver, target, timing } = declaration;
 
+    // ui.addLog(`> 解決：[${timing}] ${performer.name}【${sourceManeuver.name}】`);
+
+    const isSpineLike = sourceManeuver.effects?.some(e => e.ref === 'REDUCE_NEXT_MANEUVER_COST');
+
+    if (isSpineLike) {
+        // 解決時には、現在の累積値を汎用的なログとして出力する
+        // ui.addLog(`→ ${performer.name}【${sourceManeuver.name}】：次カウントのコスト軽減 ${performer.spineBonus}`);
+        ui.addLog(`→ 次カウントのコスト軽減 ${performer.spineBonus}`);
+    }
+
     // --- 解決直前の前提条件（特に射程）を再チェック ---
     let isStillValid = true;
     let characterToTestRange = null; // 射程チェックの対象となるキャラクター
@@ -646,8 +698,6 @@ async function resolveSingleAction(declaration, diceResult = null) {
         return; // この後の処理をすべて中断
     }
 
-    // ui.addLog(`> 解決：${performer.name}【${sourceManeuver.name}】`);
-
     if (sourceManeuver.isEscapeAttempt) {
         await performEscapeRoll({ performer, declaration });
         return; 
@@ -657,10 +707,8 @@ async function resolveSingleAction(declaration, diceResult = null) {
         else ui.addLog(`※ 効果の定義がありません`);
         return;
     }
-    // ★★★ ここからが今回の修正箇所です ★★★
     // context オブジェクトを構築する際に、performer を正しく含めます
     const context = { performer, target: declaration.target, declaration, diceResult };
-    // ★★★ 修正はここまでです ★★★
 
     let allOnHitEffects = [];
     for (const effectRef of sourceManeuver.effects) {
@@ -849,7 +897,7 @@ async function performAttackRoll(action, context) {
             initialTotalDamage += (rollValue - 10); // 大成功ボーナスを加算
         }
 
-        ui.addLog(`→ ${target.name}に命中！`);
+        // ui.addLog(`→ ${target.name}に命中！`);
         battleState.damageQueue.push({
             id: `damage_${Date.now()}_${Math.random()}`,
             type: 'instance',

@@ -36,7 +36,7 @@
   content: '▲';
   transition: all 1.0s ease;
   flex-shrink: 0;
-  padding: 0;
+  padding: 0 0 0 10px;
   margin: 0;
   font-size: 0.8em;
 }

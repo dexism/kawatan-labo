@@ -2,37 +2,37 @@
    1. ダイスローラー
 ================================ */
 .dice-roller {
-  position: fixed;
-  top:    30px;
-  left:   20px;
-  width:  50px;
-  height: 50px;
-  background-color: var(--color-shadow-2);
-  border:        3px solid var(--color-dice-bd);
-  border-radius: 50%;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  align-content:   center;
-  font-size: 30px;
-  cursor: grab;
-  user-select: none;
-  z-index: 900;
-  box-shadow:
-    0 0 10px inset      var(--color-shadow),
-    0 0 10px            var(--color-shadow);
-  text-shadow: 0 0 10px var(--color-shadow);
-  transition: all 0.2s ease-out;
+    position: fixed;
+    top:    30px;
+    left:   20px;
+    width:  50px;
+    height: 50px;
+    background-color: var(--color-shadow-2);
+    border:        3px solid var(--color-dice-bd);
+    border-radius: 50%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    align-content:   center;
+    font-size: 30px;
+    cursor: grab;
+    user-select: none;
+    z-index: 900;
+    box-shadow:
+        0 0 10px inset      var(--color-shadow),
+        0 0 10px            var(--color-shadow);
+    text-shadow: 0 0 10px var(--color-shadow);
+    transition: all 0.2s ease-out;
 }
 .dice-roller:hover {
-  background-color:    #dff;
-  border-color:        cyan;
-  box-shadow: 0 0 10px cyan;
-  text-shadow: none;
-  transform: scale(1.2);
+    background-color:    #dff;
+    border-color:        cyan;
+    box-shadow: 0 0 10px cyan;
+    text-shadow: none;
+    transform: scale(1.2);
 }
 .dice-roller:active {
-  cursor: grabbing;
+    cursor: grabbing;
 }
 
 /* ================================
@@ -102,25 +102,6 @@
 .maneuver-item.area-color-hanazono { background-color: var(--color-hanazono); }
 .simple-menu-modal-body 
 .maneuver-item.area-color-rakuen {   background-color: var(--color-rakuen); }
-
-/* --- カテゴリ色分け --- */
-.category-color-move {          background-color: var(--color-move); }
-.category-color-staffing {      background-color: var(--color-staffing); }
-.category-color-attack {        background-color: var(--color-attack); }
-.category-color-defense {       background-color: var(--color-defense); }
-.category-color-support {       background-color: var(--color-support); }
-.category-color-debuff {        background-color: var(--color-debuff); }
-.category-color-action-boost {  background-color: var(--color-action-boost); }
-.category-color-heal {          background-color: var(--color-heal); }
-.category-color-utility {       background-color: var(--color-utility); }
-.category-color-sacrifice {     background-color: var(--color-sacrifice); }
-.category-color-enhancement {   background-color: var(--color-enhancement); } 
-.category-color-vulnerability { background-color: var(--color-vulnerability); }
-.category-color-dialogue {      background-color: var(--color-dialogue); } 
-.category-color-reinforcement { background-color: var(--color-reinforcement);}
-.category-color-madness {       background-color: var(--color-madness); } 
-.category-color-cost {          background-color: var(--color-cost); }
-.category-color-other {         background-color: var(--color-other); }
 
 /* マニューバ項目のフレックスボックス設定 */
 .maneuver-item {

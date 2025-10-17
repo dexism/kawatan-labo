@@ -2,182 +2,182 @@
    1. 基本スタイル (全体共通)
 ================================ */
 html, body {
-  width:  100dvw;
-  height: 100dvh; /* htmlとbody要素自体に高さを与える */
-  margin:  0;
-  padding: 0;
-  box-sizing: border-box;
-  overflow: hidden;
+    width:  100dvw;
+    height: 100dvh; /* htmlとbody要素自体に高さを与える */
+    margin:  0;
+    padding: 0;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 @supports not (height: 100dvh) {
-  body { 
-    width: 100vw;
-    height: 100vh; 
-  }
+    body { 
+        width: 100vw;
+        height: 100vh; 
+    }
 }
 
 body {
-  font-family: sans-serif;
-  font-size: 1.0rem;
-  background-color: var(--color-background-2);
-  color:            var(--color-text);
+    font-family: sans-serif;
+    font-size: 1.0rem;
+    background-color: var(--color-background-2);
+    color:            var(--color-text);
 }
 body.is-dragging {
-  cursor: grabbing;
-  user-select: none;
+    cursor: grabbing;
+    user-select: none;
 }
 h2 {
-  margin-bottom: 4px;
-  font-size: 1.0rem;
+    margin-bottom: 4px;
+    font-size: 1.0rem;
 }
 #splash {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  padding-top: 30vh;
-  background-color: var(--color-background-1);
-  color: var(--color-fore-1);
-  display: flex;
-  justify-content: start;
-  align-items: center;
-  font-weight: bold;
-  text-align: center;
-  flex-direction: column;
-  z-index: 1000;
-  /* opacity: 1;
-  transition: opacity 1s ease; */
-  transition: all 1.0s;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    padding-top: 30vh;
+    background-color: var(--color-background-1);
+    color: var(--color-fore-1);
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    font-weight: bold;
+    text-align: center;
+    flex-direction: column;
+    z-index: 1000;
+    /* opacity: 1;
+    transition: opacity 1s ease; */
+    transition: all 1.0s;
 }
 #splash h1 {
-  display: block;
-  font-size: 2.0rem;
-  margin: 0;
-  padding: 0;
+    display: block;
+    font-size: 2.0rem;
+    margin: 0;
+    padding: 0;
 }
 #splash h2 {
-  display: block;
-  font-size: 1.4rem;
-  margin: 0;
-  padding: 0;
+    display: block;
+    font-size: 1.4rem;
+    margin: 0;
+    padding: 0;
 }
 
 #splash.fade-out {
-  opacity: 0;
-  pointer-events: none;
+    opacity: 0;
+    pointer-events: none;
 }
 
 /* ================================
  * @description CSSカスタムプロパティ（変数）を定義します。
 ================================ */
 :root {
-  accent-color: auto; /* ブラウザ/OSのアクセントカラーを自動で採用 */
+    accent-color: auto; /* ブラウザ/OSのアクセントカラーを自動で採用 */
 
-  --header-width: 100px;
-  --cell-width:    40px;
-  --cell-height:   40px;
-  --right-width:  340px;
-  --card-size:    160px;
-  /* Sizing & Spacing */
-  --spacing-small:         5px;
-  --spacing-medium:       10px;
-  --border-radius-small:   5px;
-  --border-radius-medium: 10px;
+    --header-width: 100px;
+    --cell-width:    40px;
+    --cell-height:   40px;
+    --right-width:  340px;
+    --card-size:    160px;
+    /* Sizing & Spacing */
+    --spacing-small:         5px;
+    --spacing-medium:       10px;
+    --border-radius-small:   5px;
+    --border-radius-medium: 10px;
 
-  --list-item-size: 100px;
-  /* Font Sizes */
-  --font-size-small:      12px;
-  --font-size-medium:     14px;
-  --font-size-large:      16px;
-  /* Colors */
-  --color-0:            #000;
-  --color-1:            #111;
-  --color-2:            #222;
-  --color-3:            #333;
-  --color-4:            #444;
-  --color-5:            #555;
-  --color-6:            #666;
-  --color-7:            #777;
-  --color-8:            #888;
-  --color-9:            #999;
-  --color-a:            #aaa;
-  --color-b:            #bbb;
-  --color-c:            #ccc;
-  --color-d:            #ddd;
-  --color-e:            #eee;
-  --color-f:            #fff;
-  --color-shadow:       rgba(0, 0, 0, 0.5);
-  /* エリアカラー */
-  --color-naraku:   #500;
-  --color-jigoku:   #300;
-  --color-rengoku:  #111;
-  --color-hanazono: #222;
-  --color-rakuen:   #444;
+    --list-item-size: 100px;
+    /* Font Sizes */
+    --font-size-small:      12px;
+    --font-size-medium:     14px;
+    --font-size-large:      16px;
+    /* Colors */
+    --color-0:            #000;
+    --color-1:            #111;
+    --color-2:            #222;
+    --color-3:            #333;
+    --color-4:            #444;
+    --color-5:            #555;
+    --color-6:            #666;
+    --color-7:            #777;
+    --color-8:            #888;
+    --color-9:            #999;
+    --color-a:            #aaa;
+    --color-b:            #bbb;
+    --color-c:            #ccc;
+    --color-d:            #ddd;
+    --color-e:            #eee;
+    --color-f:            #fff;
+    --color-shadow:       rgba(0, 0, 0, 0.5);
+    /* エリアカラー */
+    --color-naraku:   #500;
+    --color-jigoku:   #300;
+    --color-rengoku:  #111;
+    --color-hanazono: #222;
+    --color-rakuen:   #444;
 /* ================================
   　ライトモード
 ================================ */
-  --color-text:         var(--color-3);
-  --color-text-2:       var(--color-5);
-  --color-text-3:       var(--color-1);
-  --color-text-light:   var(--color-e);
-  --color-text-muted:   var(--color-7);
-  --color-fore-1:       var(--color-0);
-  --color-fore-2:       var(--color-1);
-  --color-fore-3:       var(--color-2);
-  --color-fore-4:       var(--color-3);
-  --color-fore-5:       var(--color-4);
-  --color-fore-6:       var(--color-5);
-  --color-fore-7:       var(--color-6);
-  --color-background-1: var(--color-f);
-  --color-background-2: var(--color-e);
-  --color-background-3: var(--color-d);
-  --color-background-4: var(--color-c);
-  --color-background-5: var(--color-b);
-  --color-background-6: var(--color-a);
-  --color-background-7: var(--color-9);
-  --color-panel:        var(--color-c); /* パネルの背景 */
-  --color-surface-1:    var(--color-d); /* パネルやカードの背景 */
-  --color-surface-2:    var(--color-e); /* メニューやモーダルの背景 */
-  --color-surface-dark: var(--color-a); /* 宣言リストの背景 */
-  --color-dice-bg:      var(--color-z);
-  --color-dice-bd:      var(--color-e);
-  --color-log-bg:       var(--color-f);
-  --color-border:       var(--color-a);
-  --color-shadow-1:     rgba(255, 255, 255, 0.5);
-  --color-shadow-2:     rgba(127, 127, 127, 0.5);
-  --color-accent:       #f77;
-  --color-accent-red:   #c33;
-  --color-accent-gold:  gold;
-  --color-accent-cyan:  cyan;
-  --color-accent-blue:  #36c;
-  --color-card:         var(--color-d);
-  --color-title-text:   var(--color-d);
-  --color-title-bg:     #600;
-  --color-footer-bg:    #edd;
-  --color-sub-text:     var(--color-6);
-  --color-sub-bg:       var(--color-c);
-  --color-btn-text:     var(--color-8);
-  --color-btn-bg:       var(--color-f);
-  --color-level-1:      rgba(0, 0, 0, 0.1); 
-  --color-level-3:      rgba(0, 0, 0, 0.3); 
-  --color-level-f:      rgba(255, 255, 255, 0.5); 
-  /* カテゴリ色分け */
-  --color-move:         #aed6f1;
-  --color-staffing:     #85C1E9;
-  --color-attack:       #f5b7b1;
-  --color-defense:      #a3e4d7;
-  --color-support:      #d7bde2;
-  --color-debuff:       #f9e79f;
-  --color-action-boost: #a2d9ce;
-  --color-heal:         #f5cba7;
-  --color-utility:      #d5d8dc;
-  --color-sacrifice:    #e6b0aa;
-  --color-enhancement:  #FAD7A0; /* ★追加 */
-  --color-vulnerability:#D98880;
-  --color-dialogue:     #E6D7B8; /* ★追加 */
-  --color-reinforcement:#A9DFBF; /* ★追加 */
-  --color-cost:         #F5B041;
-  --color-madness:      #EC7063; /* ★追加 */
-  --color-other:        #abb2b9;
+    --color-text:         var(--color-3);
+    --color-text-2:       var(--color-5);
+    --color-text-3:       var(--color-1);
+    --color-text-light:   var(--color-e);
+    --color-text-muted:   var(--color-7);
+    --color-fore-1:       var(--color-0);
+    --color-fore-2:       var(--color-1);
+    --color-fore-3:       var(--color-2);
+    --color-fore-4:       var(--color-3);
+    --color-fore-5:       var(--color-4);
+    --color-fore-6:       var(--color-5);
+    --color-fore-7:       var(--color-6);
+    --color-background-1: var(--color-f);
+    --color-background-2: var(--color-e);
+    --color-background-3: var(--color-d);
+    --color-background-4: var(--color-c);
+    --color-background-5: var(--color-b);
+    --color-background-6: var(--color-a);
+    --color-background-7: var(--color-9);
+    --color-panel:        var(--color-c); /* パネルの背景 */
+    --color-surface-1:    var(--color-d); /* パネルやカードの背景 */
+    --color-surface-2:    var(--color-e); /* メニューやモーダルの背景 */
+    --color-surface-dark: var(--color-a); /* 宣言リストの背景 */
+    --color-dice-bg:      var(--color-z);
+    --color-dice-bd:      var(--color-e);
+    --color-log-bg:       var(--color-f);
+    --color-border:       var(--color-a);
+    --color-shadow-1:     rgba(255, 255, 255, 0.5);
+    --color-shadow-2:     rgba(127, 127, 127, 0.5);
+    --color-accent:       #f77;
+    --color-accent-red:   #c33;
+    --color-accent-gold:  gold;
+    --color-accent-cyan:  cyan;
+    --color-accent-blue:  #36c;
+    --color-card:         var(--color-d);
+    --color-title-text:   var(--color-d);
+    --color-title-bg:     #600;
+    --color-footer-bg:    #edd;
+    --color-sub-text:     var(--color-6);
+    --color-sub-bg:       var(--color-c);
+    --color-btn-text:     var(--color-8);
+    --color-btn-bg:       var(--color-f);
+    --color-level-1:      rgba(0, 0, 0, 0.1); 
+    --color-level-3:      rgba(0, 0, 0, 0.3); 
+    --color-level-f:      rgba(255, 255, 255, 0.5); 
+    /* カテゴリ色分け */
+    --color-move:         #aed6f1;
+    --color-staffing:     #85C1E9;
+    --color-attack:       #f5b7b1;
+    --color-defense:      #a3e4d7;
+    --color-support:      #d7bde2;
+    --color-debuff:       #f9e79f;
+    --color-action-boost: #a2d9ce;
+    --color-heal:         #f5cba7;
+    --color-utility:      #d5d8dc;
+    --color-sacrifice:    #e6b0aa;
+    --color-enhancement:  #FAD7A0; /* ★追加 */
+    --color-vulnerability:#D98880;
+    --color-dialogue:     #E6D7B8; /* ★追加 */
+    --color-reinforcement:#A9DFBF; /* ★追加 */
+    --color-cost:         #F5B041;
+    --color-madness:      #EC7063; /* ★追加 */
+    --color-other:        #abb2b9;
 }
 
 /* ================================
@@ -185,70 +185,70 @@ h2 {
    <html> タグに data-theme="dark" が付いたときに適用される
 ================================ */
 html[data-theme="dark"] {
-    /* Dark Mode Variables */
-    --color-text:         var(--color-d);
-    --color-text-2:       var(--color-b);
-    --color-text-3:       var(--color-e);
-    --color-text-light:   var(--color-1);
-    --color-text-muted:   var(--color-8);
-    --color-fore-1:       var(--color-f);
-    --color-fore-2:       var(--color-e);
-    --color-fore-3:       var(--color-d);
-    --color-fore-4:       var(--color-c);
-    --color-fore-5:       var(--color-b);
-    --color-fore-6:       var(--color-a);
-    --color-fore-7:       var(--color-9);
-    --color-background-1: var(--color-0);
-    --color-background-2: var(--color-1);
-    --color-background-3: var(--color-2);
-    --color-background-4: var(--color-3);
-    --color-background-5: var(--color-4);
-    --color-background-6: var(--color-5);
-    --color-background-7: var(--color-6);
-    --color-panel:        var(--color-3);
-    --color-surface-1:    var(--color-5);
-    --color-surface-2:    var(--color-4);
-    --color-surface-dark: var(--color-2);
-    --color-dice-bg:      var(--color-1);
-    --color-dice-bd:      var(--color-5);
-    --color-log-bg:       var(--color-0);
-    --color-border:       var(--color-6);
-    --color-shadow-1:     rgba(0, 0, 0, 0.5);
-    --color-accent:       #a00;
-    --color-accent-red:   #ff5555;
-    --color-accent-gold:  #ffd700;
-    --color-accent-cyan:  #00ffff;
-    --color-accent-blue:  #58a6ff;
-    --color-card:         var(--color-6);
-    --color-title-text:   var(--color-8);
-    --color-title-bg:     #300;
-    --color-footer-bg:    #100;
-    --color-sub-text:     var(--color-8);
-    --color-sub-bg:       #200;
-    --color-btn-text:     var(--color-c);
-    --color-btn-bg:       var(--color-0);
-    --color-level-1:      rgba(255, 255, 255, 0.1); 
-    --color-level-3:      rgba(255, 255, 255, 0.3); 
-    --color-level-f:      rgba(0, 0, 0, 0.8); 
+      /* Dark Mode Variables */
+      --color-text:         var(--color-d);
+      --color-text-2:       var(--color-b);
+      --color-text-3:       var(--color-e);
+      --color-text-light:   var(--color-1);
+      --color-text-muted:   var(--color-8);
+      --color-fore-1:       var(--color-f);
+      --color-fore-2:       var(--color-e);
+      --color-fore-3:       var(--color-d);
+      --color-fore-4:       var(--color-c);
+      --color-fore-5:       var(--color-b);
+      --color-fore-6:       var(--color-a);
+      --color-fore-7:       var(--color-9);
+      --color-background-1: var(--color-0);
+      --color-background-2: var(--color-1);
+      --color-background-3: var(--color-2);
+      --color-background-4: var(--color-3);
+      --color-background-5: var(--color-4);
+      --color-background-6: var(--color-5);
+      --color-background-7: var(--color-6);
+      --color-panel:        var(--color-3);
+      --color-surface-1:    var(--color-5);
+      --color-surface-2:    var(--color-4);
+      --color-surface-dark: var(--color-2);
+      --color-dice-bg:      var(--color-1);
+      --color-dice-bd:      var(--color-5);
+      --color-log-bg:       var(--color-0);
+      --color-border:       var(--color-6);
+      --color-shadow-1:     rgba(0, 0, 0, 0.5);
+      --color-accent:       #a00;
+      --color-accent-red:   #ff5555;
+      --color-accent-gold:  #ffd700;
+      --color-accent-cyan:  #00ffff;
+      --color-accent-blue:  #58a6ff;
+      --color-card:         var(--color-6);
+      --color-title-text:   var(--color-8);
+      --color-title-bg:     #300;
+      --color-footer-bg:    #100;
+      --color-sub-text:     var(--color-8);
+      --color-sub-bg:       #200;
+      --color-btn-text:     var(--color-c);
+      --color-btn-bg:       var(--color-0);
+      --color-level-1:      rgba(255, 255, 255, 0.1); 
+      --color-level-3:      rgba(255, 255, 255, 0.3); 
+      --color-level-f:      rgba(0, 0, 0, 0.8); 
 
-    /* カテゴリ色分け */
-    --color-move:         #3a6b8c;
-    --color-staffing:     #2E86C1;
-    --color-attack:       #a65c58;
-    --color-defense:      #3d7f73;
-    --color-support:      #7a5b86;
-    --color-debuff:       #a68f3a;
-    --color-action-boost: #3d7c70;
-    --color-heal:         #a6784a;
-    --color-utility:      #6b6e72;
-    --color-sacrifice:    #8c5c58;
-    --color-enhancement:  #a6823a;       /* ★追加 */
-    --color-vulnerability:#a15149;
-    --color-dialogue:     #7c7059;       /* ★追加 */
-    --color-reinforcement:#4e815d;       /* ★追加 */
-    --color-madness:      #9c4942;       /* ★追加 */
-    --color-cost:         #B9770E;
-    --color-other:        #5a6066;
+      /* カテゴリ色分け */
+      --color-move:         #3a6b8c;
+      --color-staffing:     #2E86C1;
+      --color-attack:       #a65c58;
+      --color-defense:      #3d7f73;
+      --color-support:      #7a5b86;
+      --color-debuff:       #a68f3a;
+      --color-action-boost: #3d7c70;
+      --color-heal:         #a6784a;
+      --color-utility:      #6b6e72;
+      --color-sacrifice:    #8c5c58;
+      --color-enhancement:  #a6823a;       /* ★追加 */
+      --color-vulnerability:#a15149;
+      --color-dialogue:     #7c7059;       /* ★追加 */
+      --color-reinforcement:#4e815d;       /* ★追加 */
+      --color-madness:      #9c4942;       /* ★追加 */
+      --color-cost:         #B9770E;
+      --color-other:        #5a6066;
 }
 
 /* ================================
@@ -256,72 +256,72 @@ html[data-theme="dark"] {
    OSがダークモードで、かつ<html>タグにdata-theme属性が「ない」場合に適用される
 ================================ */
 @media (prefers-color-scheme: dark) { 
-  html:not([data-theme]) {
-    /* Dark Mode Variables (上記と全く同じ内容をコピー) */
-    --color-text:         var(--color-d);
-    --color-text-2:       var(--color-b);
-    --color-text-3:       var(--color-e);
-    --color-text-light:   var(--color-1);
-    --color-text-muted:   var(--color-8);
-    --color-fore-1:       var(--color-f);
-    --color-fore-2:       var(--color-e);
-    --color-fore-3:       var(--color-d);
-    --color-fore-4:       var(--color-c);
-    --color-fore-5:       var(--color-b);
-    --color-fore-6:       var(--color-a);
-    --color-fore-7:       var(--color-9);
-    --color-background-1: var(--color-0);
-    --color-background-2: var(--color-1);
-    --color-background-3: var(--color-2);
-    --color-background-4: var(--color-3);
-    --color-background-5: var(--color-4);
-    --color-background-6: var(--color-5);
-    --color-background-7: var(--color-6);
-    --color-panel:        var(--color-3);
-    --color-surface-1:    var(--color-5);
-    --color-surface-2:    var(--color-4);
-    --color-surface-dark: var(--color-2);
-    --color-dice-bg:      var(--color-1);
-    --color-dice-bd:      var(--color-5);
-    --color-log-bg:       var(--color-0);
-    --color-border:       var(--color-6);
-    --color-shadow-1:     rgba(0, 0, 0, 0.5);
-    --color-accent:       #a00;
-    --color-accent-red:   #ff5555;
-    --color-accent-gold:  #ffd700;
-    --color-accent-cyan:  #00ffff;
-    --color-accent-blue:  #58a6ff;
-    --color-card:         var(--color-6);
-    --color-title-text:   var(--color-8);
-    --color-title-bg:     #300;
-    --color-footer-bg:    #100;
-    --color-sub-text:     var(--color-8);
-    --color-sub-bg:       #200;
-    --color-btn-text:     var(--color-c);
-    --color-btn-bg:       var(--color-0);
-    --color-level-1:      rgba(255, 255, 255, 0.1); 
-    --color-level-3:      rgba(255, 255, 255, 0.3); 
-    --color-level-f:      rgba(0, 0, 0, 0.8); 
+    html:not([data-theme]) {
+        /* Dark Mode Variables (上記と全く同じ内容をコピー) */
+        --color-text:         var(--color-d);
+        --color-text-2:       var(--color-b);
+        --color-text-3:       var(--color-e);
+        --color-text-light:   var(--color-1);
+        --color-text-muted:   var(--color-8);
+        --color-fore-1:       var(--color-f);
+        --color-fore-2:       var(--color-e);
+        --color-fore-3:       var(--color-d);
+        --color-fore-4:       var(--color-c);
+        --color-fore-5:       var(--color-b);
+        --color-fore-6:       var(--color-a);
+        --color-fore-7:       var(--color-9);
+        --color-background-1: var(--color-0);
+        --color-background-2: var(--color-1);
+        --color-background-3: var(--color-2);
+        --color-background-4: var(--color-3);
+        --color-background-5: var(--color-4);
+        --color-background-6: var(--color-5);
+        --color-background-7: var(--color-6);
+        --color-panel:        var(--color-3);
+        --color-surface-1:    var(--color-5);
+        --color-surface-2:    var(--color-4);
+        --color-surface-dark: var(--color-2);
+        --color-dice-bg:      var(--color-1);
+        --color-dice-bd:      var(--color-5);
+        --color-log-bg:       var(--color-0);
+        --color-border:       var(--color-6);
+        --color-shadow-1:     rgba(0, 0, 0, 0.5);
+        --color-accent:       #a00;
+        --color-accent-red:   #ff5555;
+        --color-accent-gold:  #ffd700;
+        --color-accent-cyan:  #00ffff;
+        --color-accent-blue:  #58a6ff;
+        --color-card:         var(--color-6);
+        --color-title-text:   var(--color-8);
+        --color-title-bg:     #300;
+        --color-footer-bg:    #100;
+        --color-sub-text:     var(--color-8);
+        --color-sub-bg:       #200;
+        --color-btn-text:     var(--color-c);
+        --color-btn-bg:       var(--color-0);
+        --color-level-1:      rgba(255, 255, 255, 0.1); 
+        --color-level-3:      rgba(255, 255, 255, 0.3); 
+        --color-level-f:      rgba(0, 0, 0, 0.8); 
 
-    /* カテゴリ色分け */
-    --color-move:         #3a6b8c;
-    --color-staffing:     #2E86C1;
-    --color-attack:       #a65c58;
-    --color-defense:      #3d7f73;
-    --color-support:      #7a5b86;
-    --color-debuff:       #a68f3a;
-    --color-action-boost: #3d7c70;
-    --color-heal:         #a6784a;
-    --color-utility:      #6b6e72;
-    --color-sacrifice:    #8c5c58;
-    --color-enhancement:  #a6823a;       /* ★追加 */
-    --color-vulnerability:#a15149;
-    --color-dialogue:     #7c7059;       /* ★追加 */
-    --color-reinforcement:#4e815d;       /* ★追加 */
-    --color-madness:      #9c4942;       /* ★追加 */
-    --color-cost:         #B9770E;
-    --color-other:        #5a6066;
-  }
+        /* カテゴリ色分け */
+        --color-move:         #3a6b8c;
+        --color-staffing:     #2E86C1;
+        --color-attack:       #a65c58;
+        --color-defense:      #3d7f73;
+        --color-support:      #7a5b86;
+        --color-debuff:       #a68f3a;
+        --color-action-boost: #3d7c70;
+        --color-heal:         #a6784a;
+        --color-utility:      #6b6e72;
+        --color-sacrifice:    #8c5c58;
+        --color-enhancement:  #a6823a;       /* ★追加 */
+        --color-vulnerability:#a15149;
+        --color-dialogue:     #7c7059;       /* ★追加 */
+        --color-reinforcement:#4e815d;       /* ★追加 */
+        --color-madness:      #9c4942;       /* ★追加 */
+        --color-cost:         #B9770E;
+        --color-other:        #5a6066;
+    }
 }
 /* base.css の末尾に追加 */
 
@@ -331,29 +331,29 @@ html[data-theme="dark"] {
 
 /* モダンブラウザ向け (Firefoxなど) */
 * {
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-text-muted) var(--color-surface-dark);
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-text-muted) var(--color-surface-dark);
 }
 
 /* Webkit系ブラウザ向け (Chrome, Safari, Edgeなど) */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+    width: 8px;
+    height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background-color: var(--color-surface-dark);
-  border-radius: 4px;
+    background-color: var(--color-surface-dark);
+    border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: var(--color-text-muted);
-  border-radius: 4px;
-  border: 2px solid var(--color-surface-dark);
+    background-color: var(--color-text-muted);
+    border-radius: 4px;
+    border: 2px solid var(--color-surface-dark);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: var(--color-text-2);
+    background-color: var(--color-text-2);
 }
 
 /* dice3d.css または base.css に追加 */

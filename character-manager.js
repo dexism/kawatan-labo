@@ -108,6 +108,8 @@ function createCharacterInstanceFromObject(characterObject, type, initialArea) {
     newChar.regrets = characterObject.regrets || [];
     newChar.stackCount = characterObject.stackCount || 1;
     newChar.hasActedThisCount = false;
+    newChar.spineBonus = 0;
+    newChar.lastUsedSpineCount = -1;
     
     return newChar;
 }
@@ -414,6 +416,8 @@ export function startNewTurn() {
         char.actionValue += char.maxActionValue;
         char.hasActedThisCount = false;
         char.usedManeuvers.clear();
+        char.spineBonus = 0;
+        char.lastUsedSpineCount = -1;
     });
     mergeCharactersOnBoard();
     console.log("新しいターンが開始され、全キャラクターの行動値が更新されました。");

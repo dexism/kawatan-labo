@@ -4,6 +4,7 @@
 #maneuverMenu {
     background-color: var(--color-background-3);
     color:            var(--color-text-muted);
+    border: 1px solid var(--color-background-6);
     font-size:   14px;
     font-weight: bold;
     box-shadow: 0 0 10px black;
@@ -34,6 +35,7 @@
 #maneuverMenu.is-visible {
     visibility: visible; 
     transform: translate(0, 0);
+    overflow: hidden;
 }
 
 /* ================================
@@ -43,14 +45,18 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: 0 10px; 
-    padding-top: 5px;
-    border-bottom: 1px solid var(--color-border);
+    margin: 0; 
+    padding: 0;
     flex-shrink: 0; /* 縮まないようにする */
+    background-color: var(--color-background-2);
+    color: var(--color-fore-7);
+    font-size: 14px;
+    font-weight: normal;
 }
 .header-icon {
-    font-size: 24px;
-    border-radius: 10px;
+    margin: 0 0.5em;
+    padding: 0 0.5em;
+    border-radius: 5px;
     transition: all 0.2s;
     cursor: pointer;
 }
@@ -58,23 +64,22 @@
     background-color: var(--color-level-1); 
 }
 .header-title {
-    font-weight: bold;
-    font-size: 16px;
-    color: var(--color-fore-5);
+    margin: 0 auto 0 0;
+    color: var(--color-fore-7);
 }
 .header-close-btn {
     background: none; 
     border: none; 
-    font-size: 20px; 
+    font-size: 22px; 
+    padding: 5px 15px;
     cursor: pointer; 
     color: var(--color-text-muted);
-    border-radius: 50%;
-    width: 32px;
-    height: 32px;
+    border-radius: none;
     transition: all 0.2s;
 }
 .header-close-btn:hover {
-    background-color: var(--color-level-1); 
+    background-color: #d11; 
+    color: var(--color-fore-2)
 }
 
 /* 通常のマニューバメニュー用フィルターバー */
@@ -105,7 +110,40 @@
     margin: 0;
     padding: 0;
     display: block;
+    background-color: var(--color-background-2);
 }
+/* ================================
+   3.1 マニューバアイテム 内容
+================================ */
+/* カテゴリ列 */
+.item-category-col {
+    writing-mode: sideways-lr;
+    text-align: center;
+    padding: 0 2px;
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--color-fore-6);
+    flex-shrink: 0;
+}
+/* --- カテゴリ色分け --- */
+.category-color-move {          border-right: 10px solid var(--color-move); }
+.category-color-staffing {      border-right: 10px solid var(--color-staffing); }
+.category-color-attack {        border-right: 10px solid var(--color-attack); }
+.category-color-defense {       border-right: 10px solid var(--color-defense); }
+.category-color-support {       border-right: 10px solid var(--color-support); }
+.category-color-debuff {        border-right: 10px solid var(--color-debuff); }
+.category-color-action-boost {  border-right: 10px solid var(--color-action-boost); }
+.category-color-heal {          border-right: 10px solid var(--color-heal); }
+.category-color-utility {       border-right: 10px solid var(--color-utility); }
+.category-color-sacrifice {     border-right: 10px solid var(--color-sacrifice); }
+.category-color-enhancement {   border-right: 10px solid var(--color-enhancement); } 
+.category-color-vulnerability { border-right: 10px solid var(--color-vulnerability); }
+.category-color-dialogue {      border-right: 10px solid var(--color-dialogue); } 
+.category-color-reinforcement { border-right: 10px solid var(--color-reinforcement);}
+.category-color-madness {       border-right: 10px solid var(--color-madness); } 
+.category-color-cost {          border-right: 10px solid var(--color-cost); }
+.category-color-other {         border-right: 10px solid var(--color-other); }
+
 /* ================================
    3.1 マニューバアイテム 本体
 ================================ */
@@ -115,7 +153,8 @@
     border-radius: 10px;
     transition: all 0.2s;
     color: var(--color-fore-2);
-    box-shadow: 0 0 5px var(--color-5);
+    box-shadow: 0 0 10px var(--color-background-7);
+    border: 1px solid var(--color-background-7);
     display: flex;
     overflow: hidden;
 }
@@ -123,8 +162,8 @@
     pointer-events: none;
 }
 .maneuver-item-new:not(.is-masked):not(.is-reference-item):hover {
-    background-color: gold;
-    color:            black;
+    background-color: var(--color-background-1);
+    border-color: gold;
     cursor: pointer;
 }
 .maneuver-item-new.is-masked { 
@@ -132,18 +171,7 @@
     cursor: not-allowed;
     background-color: var(--color-background-4); 
 }
-/* ================================
-   3.1 マニューバアイテム 内容
-================================ */
-.item-category-col {
-    writing-mode: sideways-lr;
-    text-align: center;
-    padding: 4px 2px;
-    font-size: 14px;
-    font-weight: bold;
-    color: var(--color-fore-4);
-    flex-shrink: 0;
-}
+
 /* アイコン列 (旧 item-left-col) */
 .item-icon-col {
     flex-shrink: 0;
@@ -207,7 +235,7 @@
     margin: 0;
     padding: 5px 20px;
     border-bottom: 1px solid var(--color-border);
-    background-color: var(--color-background-3);
+    background-color: var(--color-background-4);
     color: var(--color-fore-5);
     font-size: 20px;
     font-weight: bold;
@@ -228,6 +256,8 @@
     max-height: none;
 
     overflow-y: hidden;
+
+    background-color: var(--color-background-4);
 }
 
 /* --- 4.2. タブバー --- */
@@ -236,36 +266,41 @@
     overflow-x: auto;
     margin: 0;
     padding: 5px 10px 0 10px;
+    height: 30px;
     gap: 5px;
     flex-shrink: 0;
-    border-bottom: 2px solid var(--color-accent-gold);
+    /* border-bottom: 2px solid var(--color-accent-gold); */
     scrollbar-width: none;
     -ms-overflow-style: none;
+    background-color: var(--color-background-3);
+    font-weight: normal;
 }
 .reference-tab-bar::-webkit-scrollbar {
     display: none;
 }
 .reference-tab-button {
-    padding: 0 15px;
-    margin-top: 10px;
+    margin-top: auto;
+    padding: 0 10px;
     font-size: 14px;
-    font-weight: bold;
-    border: none;
+    border-style: none;
+    border-bottom: 2px solid var(--color-background-3);
     border-radius: 10px 10px 0 0;
     cursor: pointer;
-    background-color: var(--color-background-4);
-    color: var(--color-text-muted);
+    color: var(--color-fore-7);
     transition: all 0.2s;
     white-space: nowrap;
+    background-color: var(--color-background-3);
 }
 .reference-tab-button:hover {
-    background-color: var(--color-background-2);
+    background-color: var(--color-background-4);
 }
 .reference-tab-button.is-active {
     margin-top: 0;
-    background-color: var(--color-accent-gold);
-    font-size: 18px;
-    color: black;
+    border-bottom: 3px solid var(--color-accent-gold);
+    background-color: var(--color-background-4);
+    font-size: 16px;
+    color: var(--color-fore-3);
+    font-weight: bold;
 }
 
 /* --- 4.3. カルーセルUI (スワイプ機能) --- */
@@ -295,6 +330,7 @@
     padding: 0;
     box-sizing: border-box;
     -webkit-overflow-scrolling: touch; 
+    background-color: var(--color-background-2);
 }
 
 /* --- 4.4. マニューバタブ専用レイアウト --- */
@@ -316,21 +352,20 @@
     padding: 5px 0;
     box-sizing: border-box;
     border-bottom: 1px solid var(--color-border);
+    background-color: var(--color-background-4);
 }
 /* --- 4.5. フィルターUI (マニューバタブ内) --- */
 #maneuverMenu .accordion-header {
     display: flex;
     align-items: baseline;
-    gap: 5px;
-    width: 100%;
+    color: var(--color-fore-4);
+    width: auto;
     overflow: hidden;
     padding: 5px 15px;
     box-sizing: border-box;
 }
 .accordion-title-static {
-    font-weight: bold;
-    font-size: 14px;
-    color: var(--color-text);
+    color: var(--color-fore-4);
     flex-shrink: 0;
 }
 .accordion-title-dynamic {
@@ -345,24 +380,28 @@
 }
 .filter-summary-group {
     font-weight: bold;
-    margin-left: 8px;
-    background-color: var(--color-background-2);
-    padding: 0 10px 0 8px;
+    margin-right: 0.5em;
+    background-color: var(--color-background-3);
+    padding: 0 0.5em;
     border-radius: 10px;
+    gap: 0.8em;
 }
 .filter-summary-label {
     font-weight: normal;
-    font-size: 9px;
-    margin-right: 5px;
+    font-size: 10px;
+    margin-right: 0.5em;
+
     color: var(--color-fore-6);
 }
+
 .reference-filter-container {
     max-height: calc(50vh - 90px);
     overflow-y: auto;
     padding: 0 10px 0 10px;
+    gap: 5px;
 }
 .filter-group {
-    background-color: var(--color-background-4);
+    background-color: var(--color-background-3);
     border-radius: 10px;
     margin-bottom: 5px;
     padding: 10px;
@@ -371,37 +410,42 @@
     margin: 0 0 5px 5px;
     font-size: 13px;
     color: var(--color-fore-5);
+    gap: 5px;
 }
 .filter-buttons {
     display: flex;
     flex-wrap: wrap;
-    gap: 7px;
+    gap: 5px;
 }
 .filter-buttons .filter-btn {
     border: none;
     font-size: 12px;
-    color: var(--color-fore-7);
+    color: var(--color-fore-6);
     border-radius: 15px;
     height: 30px;
     box-shadow: none;
+    border: 2px solid var(--color-background-4);
     background-color: var(--color-background-3);
 }
 .filter-buttons .filter-btn:hover {
-    border: none;
     box-shadow: none;
+    border: 2px solid var(--color-background-7);
     background-color: var(--color-background-2);
 }
 .filter-buttons .filter-btn.is-active {
-    background-color: gold;
-    color: var(--color-3);
+    /* background-color: gold; */
+    color: var(--color-fore-2);
+    border: 2px solid gold;
+    background-color: var(--color-background-2);
 }
 /* 下半分 */
 .reference-maneuver-tab-container .maneuver-menu-list-container {
     flex-grow: 1;
     overflow-y: auto;
+    background-color: var(--color-background-2);
 }
 
-/* --- 4.6. リファレンス用アイテム表示スタイル --- */
+/* --- 4.6. アイテム表示スタイル --- */
 /* 1行目：ブロック */
 .ref-container-top {
     display: flex;
