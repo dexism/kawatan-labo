@@ -2,7 +2,7 @@
  * @file reference.js
  * @description ルールリファレンスUIの構築と管理を担当するモジュール
  */
-export const version = "2.2.10"; // カルーセルUI完全移行版
+export const version = "2.2.13"; // カルーセルUI完全移行版
 
 import * as data from './data-handler.js';
 import * as ui from './ui-manager.js';

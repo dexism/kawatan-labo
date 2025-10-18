@@ -2,7 +2,7 @@
  * @file battle-helpers.js
  * @description 戦闘関連の共通計算処理を担当するヘルパーモジュール。
  */
-export const version = "1.1.4";
+export const version = "1.1.5";
 
 import * as charManager from './character-manager.js';
 import * as data from './data-handler.js';
@@ -82,6 +82,12 @@ export function calculateFinalDamage(damageInstance) {
     if (damageInstance.rollValue >= 11) {
         totalBonus += (damageInstance.rollValue - 10);
     }
+    /*
+    // b) 【殺劇】など、ダメージインスタンスに記録されたボーナス
+    if (damageInstance.bonusAmount) {
+        totalBonus += damageInstance.bonusAmount;
+    }
+    */
     // b) パッシブスキルや宣言されたバフによるボーナス (【スパイク】など)
     (currentPerformer.activeBuffs || []).forEach(buff => {
         if (buff.stat === 'damageBonus' && (buff.duration === 'onetime_next_action' || buff.duration === 'until_damage_applied')) {

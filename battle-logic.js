@@ -2,16 +2,14 @@
  * @file battle-logic.js
  * @description 戦闘の進行、状態管理、ルール判定、アクション解決を担当するモジュール。
  */
-export const version = "1.26.94"; // UI分離リファクタリング完了版
+export const version = "1.26.97"; // UI分離リファクタリング完了版
 
 import * as charManager from './character-manager.js';
 import * as ui from './ui-manager.js';
 import { performDiceRoll } from './dice-roller.js';
-// import { showDamageCalculationModal, showDamageModal } from './interaction-manager.js';
 import * as data from './data-handler.js';
 import * as stateManager from './state-manager.js';
-// import { calculateManeuverRange } from './battle-helpers.js';
-import { checkTargetAvailability } from './menu-builder.js';
+import { checkTargetAvailability, isIconActive, getCharacterManeuvers } from './menu-builder.js';
 
 // ===================================================================================
 //  戦闘状態 (State)
@@ -80,14 +78,11 @@ function applyAutoBuffsAtActionEnd() {
             if (!maneuver || maneuver.timing !== 'オート' || !maneuver.effects) return;
 
             maneuver.effects.forEach(effect => {
-                // ▼▼▼ 変更箇所 (以前の正常なロジックに戻す) ▼▼▼
-                // エリア条件をチェック
-                if (effect.params?.condition === 'while_in_area' && performer.area !== effect.params.area) {
+                if (effect.params?.duration === 'while_in_area' && performer.area !== effect.params.area) {
                     return; // 条件を満たさないのでこのeffectは無視
                 }
 
                 if (effect.ref !== 'APPLY_CONDITIONAL_BUFF') return;
-                // ▲▲▲ 変更ここまで ▲▲▲
 
                 const params = effect.params;
                 let conditionMet = false;
@@ -252,31 +247,29 @@ export function declareManeuver(char, maneuver, target = null, judgeTargetDeclar
     const performerId = char.id;
     const originalPerformer = charManager.getCharacterById(performerId);
 
-    // ▼▼▼ 変更箇所 ▼▼▼
-    // 1. 効果(ref)によるコスト蓄積処理
+    // 1. 基本コストを決定
+    let costToPay = isNaN(Number(maneuver.cost)) ? 0 : Number(maneuver.cost);
+    const costToPayBeforeBonus = costToPay;
+    let bonusConsumed = false;
+
+    // 2. 【せぼね】のようなコスト蓄積効果かを判定
     const isSpineLike = maneuver.effects?.some(e => e.ref === 'REDUCE_NEXT_MANEUVER_COST');
+
+    // 3. コスト蓄積マニューバ自身のコストは軽減しない
     if (isSpineLike) {
         const newBonus = (originalPerformer.spineBonus || 0) + 1;
         charManager.updateCharacter(performerId, { 
             spineBonus: newBonus,
             lastUsedSpineCount: battleState.count 
         });
-    }
-    // ▲▲▲ 変更ここまで ▲▲▲
-
-    const costToPayBeforeBonus = isNaN(Number(maneuver.cost)) ? 0 : Number(maneuver.cost);
-    let costToPay = costToPayBeforeBonus;
-    let bonusConsumed = false;
-
-    // ▼▼▼ 変更箇所 ▼▼▼
-    // isSpineLikeがfalseの場合にのみコスト軽減を適用
-    if (!isSpineLike && originalPerformer.spineBonus > 0) {
-    // ▲▲▲ 変更ここまで ▲▲▲
+    } 
+    // 4. それ以外のマニューバでボーナスがあれば軽減を適用
+    else if (originalPerformer.spineBonus > 0) {
         costToPay = Math.max(0, costToPayBeforeBonus - originalPerformer.spineBonus);
         bonusConsumed = true;
     }
     
-    // コスト支払い
+    // 5. 最終コストを支払い
     if (costToPay > 0) {
         charManager.updateCharacter(performerId, { actionValue: originalPerformer.actionValue - costToPay });
     }
@@ -539,6 +532,10 @@ export function applyDamage(index) {
     if (damageInfo && damageInfo.type === 'instance' && !damageInfo.applied) {
         damageInfo.applied = true;
         const targetId = damageInfo.target.id;
+
+        const performerId = damageInfo.sourceAction.performer.id;
+        // ダメージを与えた攻撃者の、次のアクションにのみ適用されるバフをクリアする
+        charManager.clearTemporaryBuffs(performerId, 'onetime_next_action');
         
         // ★★★ 関連するダメージ宣言も "解決済み" としてマークする ★★★
         battleState.damageQueue.forEach(item => {
@@ -556,14 +553,14 @@ export function applyDamage(index) {
 
         // バフ解除などのクリーンアップ
         charManager.clearTemporaryBuffs(targetId, 'until_damage_applied');
-        charManager.clearTemporaryBuffs(damageInfo.sourceAction.performer.id, 'until_damage_applied');
+        // charManager.clearTemporaryBuffs(damageInfo.sourceAction.performer.id, 'until_damage_applied');
     }
     determineNextStep();
 }
 
 function resolveQueuedMoves() {
     if (battleState.moveQueue.length > 0) {
-        ui.addLog("--- 移動解決フェーズ ---");
+        ui.addLog("--- アクション移動解決フェーズ ---");
 
         const finalMoveQueue = battleState.moveQueue.map(move => {
             const originalDeclaration = battleState.actionQueue.find(decl => decl.id === move.declarationId);
@@ -903,11 +900,10 @@ async function performAttackRoll(action, context) {
             type: 'instance',
             performer: originalPerformer,
             target,
-            // ▼▼▼ ここを修正 ▼▼▼
             baseAmount: baseDamage, // 基本ダメージのみを記録
+            // bonusAmount: damageBonus, // ★ 【殺劇】などのボーナスをここに格納
             location: locationText,
             // finalAmount, bonusAmount は削除
-            // ▲▲▲ 修正ここまで ▲▲▲
             sourceAction: declaration,
             applied: false,
             checked: false,
@@ -921,7 +917,7 @@ async function performAttackRoll(action, context) {
         ui.addLog(`→ 攻撃失敗`);
     }
     
-    charManager.clearTemporaryBuffs(originalPerformer.id, 'onetime_next_action');
+    // charManager.clearTemporaryBuffs(originalPerformer.id, 'onetime_next_action');
     return { hit, on_hit: onHitEffects };
 }
 

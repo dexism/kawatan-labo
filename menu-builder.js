@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.19.82"; // バージョンを更新
+export const version = "1.19.85"; // バージョンを更新
 
 import * as data from './data-handler.js';
 import * as charManager from './character-manager.js';
@@ -196,6 +196,57 @@ export function buildManeuverMenu(char, element) {
 }
 
 /**
+ * 【新設】指定されたマニューバの💡アイコンがアクティブであるべきかを判定する
+ * @param {object} maneuverObj - isUsableなどを含むマニューバオブジェクト
+ * @param {object} char - 対象キャラクター
+ * @returns {boolean} - アイコンがアクティブであればtrue
+ */
+export function isIconActive(maneuverObj, char) {
+    const maneuver = maneuverObj.data;
+    let isActive = false;
+
+    // isReferenceMode でないことを確認
+    if (!char || !char.id) return false;
+
+    if (maneuverObj.isActiveBuff) {
+        isActive = true;
+    }
+
+    const isSpineLike = maneuver.effects?.some(e => e.ref === 'REDUCE_NEXT_MANEUVER_COST');
+    if (isSpineLike && char.spineBonus > 0) {
+        isActive = true;
+    }
+    
+    if (maneuver.timing === 'オート') {
+        const isDamaged = maneuverObj.isDamaged;
+        const damageConditionRefs = ['MODIFY_MAX_ACTION_VALUE_ON_DAMAGE', 'ATTACK_ON_DAMAGE'];
+        if (maneuver.effects?.some(e => damageConditionRefs.includes(e.ref)) && isDamaged) {
+            isActive = true;
+        }
+
+        if (!isActive && !isDamaged) {
+            const areaEffect = maneuver.effects?.find(e => e.params?.duration === 'while_in_area');
+            if (areaEffect) {
+                if (char.area === areaEffect.params.area) {
+                    isActive = true;
+                }
+            } else {
+                const unconditionalRefs = [
+                    'REDUCE_MOVE_COST', 'NEGATE_STATUS_EFFECT',
+                    'APPLY_PASSIVE_DEFENSE', 'PREVENT_INTERRUPTION', 'MODIFY_ATTACK_RESULT',
+                    'IMMUNITY', 'NEGATE_DAMAGE_EFFECT', 'APPLY_BUFF'
+                ];
+                // !e.params?.condition の条件を削除し、APPLY_BUFF も含めて無条件で判定
+                if (maneuver.effects?.some(e => unconditionalRefs.includes(e.ref) && e.ref !== 'APPLY_CONDITIONAL_BUFF')) {
+                    isActive = true;
+                }
+            }
+        }
+    }
+    return isActive;
+}
+
+/**
  * 新しいマニューバ項目DOM要素を作成する
  * @param {object} maneuverObj - isUsableなどを含むマニューバオブジェクト
  * @param {object} char - 対象キャラクター
@@ -219,61 +270,11 @@ export function createManeuverItem(maneuverObj, char) {
     categoryCol.classList.add(categoryClass);
     categoryCol.innerHTML = `<span>${categoryName}</span>`;
     
-    // ▼▼▼ 変更箇所 (iconContainerの定義位置を下に移動) ▼▼▼
-
     const passiveIconCol = document.createElement('div');
     passiveIconCol.className = 'item-passive-icon-col';
     
     if (!isReferenceMode) {
-        let isEffectActive = false;
-
-        // --- 条件A: 「せぼね」のようなコスト蓄積効果がアクティブか？ ---
-        const isSpineLike = maneuver.effects?.some(e => e.ref === 'REDUCE_NEXT_MANEUVER_COST');
-        if (isSpineLike && char.spineBonus > 0) {
-            isEffectActive = true;
-        }
-
-        // --- 条件B: 永続バフが適用中か？ ---
-        if (maneuverObj.isActiveBuff) {
-            isEffectActive = true;
-        }
-
-        // --- 条件C: オートタイミングのスキル効果がアクティブか？ ---
-        if (maneuver.timing === 'オート') {
-            const isDamaged = maneuverObj.isDamaged;
-            
-            // C-1: 損傷時に発動する効果
-            const damageConditionRefs = ['MODIFY_MAX_ACTION_VALUE_ON_DAMAGE', 'ATTACK_ON_DAMAGE'];
-            if (maneuver.effects?.some(e => damageConditionRefs.includes(e.ref)) && isDamaged) {
-                isEffectActive = true;
-            }
-
-            // C-2: 損傷していない場合に発動する効果
-            if (!isEffectActive && !isDamaged) {
-                // ▼▼▼ 変更箇所 (判定ロジックを正しいデータ構造に合わせる) ▼▼▼
-                const areaEffect = maneuver.effects?.find(e => e.params?.duration === 'while_in_area');
-                
-                if (areaEffect) {
-                    // エリア指定効果がある場合は、その成否のみでisEffectActiveを決定する
-                    if (char.area === areaEffect.params.area) {
-                        isEffectActive = true;
-                    }
-                } else {
-                    // エリア指定効果がない場合にのみ、他の無条件効果を判定する
-                    const unconditionalRefs = [
-                        'REDUCE_MOVE_COST', 'NEGATE_STATUS_EFFECT',
-                        'APPLY_PASSIVE_DEFENSE', 'PREVENT_INTERRUPTION', 'MODIFY_ATTACK_RESULT',
-                        'IMMUNITY', 'NEGATE_DAMAGE_EFFECT', 'APPLY_BUFF'
-                    ];
-                    // 上記いずれかのrefを持ち、かつdurationがwhile_in_areaでないeffectがあるかチェック
-                    if (maneuver.effects?.some(e => unconditionalRefs.includes(e.ref) && e.params?.duration !== 'while_in_area')) {
-                        isEffectActive = true;
-                    }
-                }
-            }
-        }
-        
-        if (isEffectActive) {
+        if (isIconActive(maneuverObj, char)) {
             passiveIconCol.innerHTML = '<span class="maneuver-icon">💡</span>';
         }
     }
@@ -287,10 +288,8 @@ export function createManeuverItem(maneuverObj, char) {
         }
     }
     
-    // ▼▼▼ 変更箇所 (iconContainerの定義をここに移動) ▼▼▼
     const iconContainer = document.createElement('div');
     iconContainer.className = 'item-icon-col';
-    // ▲▲▲ 変更ここまで ▲▲▲
 
     iconContainer.appendChild(passiveIconCol);
     iconContainer.appendChild(statusIconCol);
@@ -396,12 +395,28 @@ async function handleManeuverItemClick(event, char, maneuverObj) {
         !maneuver.effects?.some(e => e.ref === 'TAKE_DAMAGE_FOR_ALLY');
 
     if (isDefenseManeuver) {
+        // ▼▼▼ 変更箇所 ▼▼▼
+        // 射程が「自身」の場合、対象選択をスキップして即座に宣言する
+        if (maneuver.range === '自身') {
+            const selfDamage = battleLogic.getBattleState().damageQueue.find(damage => 
+                damage.type === 'instance' && !damage.applied && damage.target.id === char.id
+            );
+            if (selfDamage) {
+                battleLogic.declareManeuver(char, maneuver, char);
+            } else {
+                ui.addLog("防御対象となる自身へのダメージがありません。");
+            }
+            return;
+        }
+
+        /*
         const targetableDamages = battleLogic.getBattleState().damageQueue.filter(damage => {
             return damage.type === 'instance' && 
                    !damage.applied && 
                    damage.target.type === char.type &&
                    checkTargetAvailability(char, maneuver, [damage.target]).hasTarget;
         });
+        */
 
         if (targetableDamages.length === 0) {
             ui.addLog("防御対象となるダメージがありません。");
@@ -426,6 +441,7 @@ async function handleManeuverItemClick(event, char, maneuverObj) {
         });
 
         if (selectedDamage) {
+            // battleLogic.addBuff ではなく、declareManeuver を呼び出す
             battleLogic.declareManeuver(char, maneuver, selectedDamage.target);
         }
         return;
@@ -464,6 +480,7 @@ async function handleManeuverItemClick(event, char, maneuverObj) {
         });
 
         if (selectedDamage) {
+            // redirectDamage ではなく、declareManeuver を呼び出す
             battleLogic.declareManeuver(char, maneuver, selectedDamage.target);
         }
         return;
@@ -2036,15 +2053,21 @@ export function showAttackConfirmationModal(performer, target, maneuver, index, 
     
     // a) パッシブスキル（オート）によるボーナス
     const performerManeuvers = getCharacterManeuvers(performer);
-    performerManeuvers.filter(m => m.data.timing === 'オート' && !m.isDamaged).forEach(m => {
-        if (m.data.effects) {
-            m.data.effects.forEach(effect => {
-                if (effect.ref === 'APPLY_BUFF' && effect.params.stat === 'attackCheckBonus') {
-                    const bonus = effect.params.value || 0;
-                    totalBonus += bonus;
-                    supportSources.push(`<div>${performer.name}の【${m.data.name}】(${bonus > 0 ? '+' : ''}${bonus})</div>`);
-                }
-            });
+    // ▼▼▼ 変更箇所 ▼▼▼
+    performerManeuvers.forEach(mObj => {
+        // 💡がアクティブなマニューバのみを対象にする
+        if (isIconActive(mObj, performer)) {
+            const m = mObj.data;
+            if (m.effects) {
+                m.effects.forEach(effect => {
+                    // 【地獄の住人】や【狂鬼】のような、常時攻撃判定を修正する効果を計上
+                    if (effect.ref === 'APPLY_BUFF' && effect.params.stat === 'attackCheckBonus') {
+                        const bonus = effect.params.value || 0;
+                        totalBonus += bonus;
+                        supportSources.push(`<div>${performer.name}の【${m.name}】(${bonus > 0 ? '+' : ''}${bonus})</div>`);
+                    }
+                });
+            }
         }
     });
 
@@ -2067,6 +2090,11 @@ export function showAttackConfirmationModal(performer, target, maneuver, index, 
         const judgeEffect = judgeManeuver.effects.find(e => e.ref === 'GENERIC_JUDGE_MOD' || e.ref === 'CHOICE_JUDGE_MOD');
 
         if (judgeEffect) {
+            // このジャッジ宣言が、現在の攻撃宣言を対象としているかを確認
+            if (judgeDecl.judgeTarget?.id !== targetDeclaration.id) {
+                return; // 対象が違うので、このジャッジは無視して次のループへ
+            }
+
             let shouldApply = false;
             let value = 0;
             let modType = '';

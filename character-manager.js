@@ -6,7 +6,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.8.10";
+export const version = "1.8.13";
 
 // --- モジュールのインポート ---
 import * as data from './data-handler.js';

@@ -39,6 +39,101 @@
 }
 
 /* ================================
+   リファレンスUI専用スタイル
+================================ */
+
+/* --- 4.1. 全体レイアウト --- */
+#maneuverMenu.is-reference-mode {
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+
+    max-height: none;
+
+    overflow-y: hidden;
+
+    background-color: var(--color-background-4);
+}
+
+/* ================================
+   タブバー
+================================ */
+
+/* --- 4.2. タブバー --- */
+.reference-tab-bar {
+    display: flex;
+    overflow-x: auto;
+    margin: 0;
+    padding: 5px 10px 0 10px;
+    height: 30px;
+    gap: 5px;
+    flex-shrink: 0;
+    /* border-bottom: 2px solid var(--color-accent-gold); */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    background-color: var(--color-background-3);
+    font-weight: normal;
+}
+.reference-tab-bar::-webkit-scrollbar {
+    display: none;
+}
+.reference-tab-button {
+    margin-top: auto;
+    padding: 0 10px;
+    font-size: 14px;
+    border-style: none;
+    border-bottom: 2px solid var(--color-background-3);
+    border-radius: 10px 10px 0 0;
+    cursor: pointer;
+    color: var(--color-fore-7);
+    transition: all 0.2s;
+    white-space: nowrap;
+    background-color: var(--color-background-3);
+}
+.reference-tab-button:hover {
+    background-color: var(--color-background-4);
+}
+.reference-tab-button.is-active {
+    margin-top: 0;
+    border-bottom: 3px solid var(--color-accent-gold);
+    background-color: var(--color-background-4);
+    font-size: 16px;
+    color: var(--color-fore-3);
+    font-weight: bold;
+}
+
+/* --- 4.3. カルーセルUI (スワイプ機能) --- */
+.reference-content-area {
+    flex-grow: 1;
+    overflow: hidden;
+    position: relative;
+}
+.reference-swipe-wrapper {
+    display: flex;
+    height: 100%;
+    width: 500%; /* 5タブ × 100% */
+    transform: translateX(0%);
+}
+.reference-swipe-wrapper.is-swiping {
+    transition: none !important;
+    user-select: none;
+}
+.reference-swipe-wrapper:not(.is-swiping) {
+    transition: transform 0.3s ease-out;
+}
+.reference-content-page {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    margin-top: 0px;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-overflow-scrolling: touch; 
+    background-color: var(--color-background-2);
+}
+
+/* ================================
    2. メニューヘッダー & フィルターバー (共通)
 ================================ */
 .maneuver-menu-header {
@@ -242,97 +337,6 @@
     z-index: 1000;
 }
 
-/* ================================
-   リファレンスUI専用スタイル
-================================ */
-
-/* --- 4.1. 全体レイアウト --- */
-#maneuverMenu.is-reference-mode {
-    height: 100%;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-
-    max-height: none;
-
-    overflow-y: hidden;
-
-    background-color: var(--color-background-4);
-}
-
-/* --- 4.2. タブバー --- */
-.reference-tab-bar {
-    display: flex;
-    overflow-x: auto;
-    margin: 0;
-    padding: 5px 10px 0 10px;
-    height: 30px;
-    gap: 5px;
-    flex-shrink: 0;
-    /* border-bottom: 2px solid var(--color-accent-gold); */
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    background-color: var(--color-background-3);
-    font-weight: normal;
-}
-.reference-tab-bar::-webkit-scrollbar {
-    display: none;
-}
-.reference-tab-button {
-    margin-top: auto;
-    padding: 0 10px;
-    font-size: 14px;
-    border-style: none;
-    border-bottom: 2px solid var(--color-background-3);
-    border-radius: 10px 10px 0 0;
-    cursor: pointer;
-    color: var(--color-fore-7);
-    transition: all 0.2s;
-    white-space: nowrap;
-    background-color: var(--color-background-3);
-}
-.reference-tab-button:hover {
-    background-color: var(--color-background-4);
-}
-.reference-tab-button.is-active {
-    margin-top: 0;
-    border-bottom: 3px solid var(--color-accent-gold);
-    background-color: var(--color-background-4);
-    font-size: 16px;
-    color: var(--color-fore-3);
-    font-weight: bold;
-}
-
-/* --- 4.3. カルーセルUI (スワイプ機能) --- */
-.reference-content-area {
-    flex-grow: 1;
-    overflow: hidden;
-    position: relative;
-}
-.reference-swipe-wrapper {
-    display: flex;
-    height: 100%;
-    width: 500%; /* 5タブ × 100% */
-    transform: translateX(0%);
-}
-.reference-swipe-wrapper.is-swiping {
-    transition: none !important;
-    user-select: none;
-}
-.reference-swipe-wrapper:not(.is-swiping) {
-    transition: transform 0.3s ease-out;
-}
-.reference-content-page {
-    width: 100%;
-    height: 100%;
-    overflow-y: auto;
-    margin-top: 0px;
-    padding: 0;
-    box-sizing: border-box;
-    -webkit-overflow-scrolling: touch; 
-    background-color: var(--color-background-2);
-}
-
 /* --- 4.4. マニューバタブ専用レイアウト --- */
 .reference-maneuver-tab-container {
     display: flex;
@@ -460,12 +464,19 @@
     font-weight: bold;
     background-color: var(--color-fore-4);
     color: var(--color-background-2);
+    background-color: var(--color-background-4);
+    color: var(--color-fore-2);
     padding: 1px 8px;
     border-radius: 10px;
     white-space: nowrap;
 
     display: flex;
     margin-right: auto;
+}
+/* 悪意 */
+.malice-level {
+    padding-left: 0.5em;
+    color: var(--color-accent-red);
 }
 /* 1行目：出典情報 (右寄せ) */
 .ref-source-info {
@@ -487,11 +498,11 @@
 .ref-maneuver-name {
     margin: 0;
     padding: 0;
-    display: flex;
+    display: inline-flex;
+    flex-wrap: nowrap;
     font-size: 18px;
     color: var(--color-text);
     font-weight: bold;
-    display: inline-block; /* テキストの長さに合わせて幅を調整 */
     margin-right: auto; /* ★重要：右に押しやる */
 }
 /* 2行目：箇所プレフィックス */
@@ -502,6 +513,7 @@
     color: var(--color-3);
     border-radius: 15px;
     height: 20px;
+    margin-top: 2px;
     padding: 1px 4px;
 }
 /* 2行目：マニューバ名 */
@@ -574,11 +586,6 @@
     border-radius: 0px;
     background-color: var(--color-background-3);
     color: var(--color-fore-6);
-}
-/* 悪意 */
-.malice-level {
-    padding-left: 0.5em;
-    color: var(--color-accent);
 }
 /* 損傷しているマニューバのスタイル */
 .maneuver-item-new.is-damaged .item-maneuver-name,

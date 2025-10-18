@@ -134,7 +134,7 @@ h2.section-title {
     /* 最小の高さを設定。項目が0個でもこの高さは維持される。 */
     min-height: 30px; 
     /* 最大の高さを400pxに設定。これを超えるとスクロールバーが表示される。 */
-    max-height: 400px;
+    /* max-height: 400px; */
     /* height: auto; を暗黙的に指定し、中身に合わせて高さが変わるようにする */
     height: auto;
 }

@@ -6,7 +6,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.17.91";
+export const version = "1.17.94";
 
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
@@ -47,7 +47,9 @@ export function updateAllUI() {
         }
     });
     for (const targetId in damageSummary) {
-        if (damageSummary[targetId] > 0) createDamagePrompt(targetId, damageSummary[targetId]);
+        // damageSummary[targetId] > 0 という条件を削除
+        createDamagePrompt(targetId, damageSummary[targetId]);
+        // if (damageSummary[targetId] > 0) createDamagePrompt(targetId, damageSummary[targetId]);
     }
 
     // 3. バトルグリッド上のマーカーを再描画
@@ -702,8 +704,36 @@ function updateQueueUI(elementId, queue, headerText) {
 
             labelEl.appendChild(checkbox);
             const textContentSpan = document.createElement('span');
-            let text = `<b>${declaration.performer.name}</b> 【${declaration.summary.name}】`;
+            let text = `<b>${declaration.performer.name}</b>【${declaration.summary.name}】`;
             
+            // ▼▼▼ 変更箇所 ▼▼▼
+            let targetObject = null;
+            // ジャッジ宣言の場合、judgeTargetが対象
+            if (declaration.judgeTarget) {
+                targetObject = declaration.judgeTarget.performer;
+            } 
+            // それ以外で、targetプロパティが存在する場合
+            else if (declaration.target) {
+                // targetがキャラクターオブジェクトか、移動妨害の対象となる宣言オブジェクトかを判定
+                if (declaration.target.name) { // キャラクターオブジェクト
+                    targetObject = declaration.target;
+                } else if (declaration.target.performer) { // 宣言オブジェクト
+                    const moveDecl = declaration.target;
+                    // 移動の実行者と対象が異なる場合
+                    if (moveDecl.target && moveDecl.target.id !== moveDecl.performer.id) {
+                        text += `→ <b>${moveDecl.target.name}</b>（${moveDecl.performer.name}【${moveDecl.sourceManeuver.name}】）`;
+                    } else {
+                        targetObject = moveDecl.performer;
+                    }
+                }
+            }
+
+            if (targetObject) {
+                text += `→ <b>${targetObject.name}</b>`;
+            }
+            // ▲▲▲ 変更ここまで ▲▲▲
+
+            /*
             if (declaration.target) {
                 // targetがキャラクターオブジェクト（nameプロパティを持つ）の場合
                 if (declaration.target.name) {
@@ -723,6 +753,7 @@ function updateQueueUI(elementId, queue, headerText) {
                     }
                 }
             }
+            */
 
             textContentSpan.innerHTML = text;
             labelEl.appendChild(textContentSpan);
@@ -748,10 +779,8 @@ function updateDamageQueueUI(queue) {
             const labelEl = document.createElement('label');
             labelEl.className = 'action-queue-item damage-item';
             
-            // ▼▼▼ 変更箇所 ▼▼▼
             labelEl.dataset.action = 'resolve-damage';
             labelEl.dataset.index = index;
-            // ▲▲▲ 変更ここまで ▲▲▲
 
             let isDisabled = true; // デフォルトは無効
             let isChecked = false;
@@ -762,14 +791,19 @@ function updateDamageQueueUI(queue) {
                 isChecked = item.applied;
                 isDisabled = !isDamageActive || isChecked;
 
-                // ▼▼▼ ここを修正 ▼▼▼
-                // ヘルパー関数を呼び出して最新のダメージ情報を取得する
-                const { baseAmount, totalBonus } = calculateFinalDamage(item);
-                const bonusText = totalBonus > 0 ? `+${totalBonus}` : (totalBonus < 0 ? `${totalBonus}` : '');
+                const { finalAmount, baseAmount, totalBonus, totalDefense } = calculateFinalDamage(item);
+
+                const attackerName = item.sourceAction.performer.name;
                 
-                textSpan.innerHTML = `<b>${item.target.name}</b>：${item.location}：<b>${baseAmount}${bonusText}</b>点`;
-                // ▲▲▲ 修正ここまで ▲▲▲
-                
+                let calcText = '';
+                if (totalBonus > 0 || totalDefense > 0) {
+                    const bonusText = totalBonus > 0 ? `+${totalBonus}` : '';
+                    const defenseText = totalDefense > 0 ? `-${totalDefense}` : '';
+                    calcText = ` (${baseAmount}${bonusText}${defenseText})`;
+                }
+
+                textSpan.innerHTML = `<b>${attackerName}</b> → <b>${item.target.name}</b>：${item.location}：<b>${finalAmount}</b>点${calcText}`;
+
             } else if (item.type === 'declaration') {
                 isChecked = item.checked;
                 isDisabled = isChecked; // 宣言は一度クリックされたら無効
