@@ -6,7 +6,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.17.96";
+export const version = "1.17.97";
 
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
@@ -57,6 +57,9 @@ export function updateAllUI() {
 
     // 4. 右側パネルの全要素を更新
     updateStatusPanel(battleState, characters);
+
+    // 5. 戦闘開始ボタンの状態を更新 ★★★ この行を追加 ★★★
+    checkBattleStartCondition();
 }
 
 // ===================================================================================

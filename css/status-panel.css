@@ -69,7 +69,6 @@ h2.section-title {
     grid-template-columns: auto auto 1fr;
     gap: 5px;
     padding: 5px;
-background-color: red;
 }
 .phase-indicator {
     font-size: 10px;
@@ -228,7 +227,7 @@ label.action-queue-item.is-checked span {
 .in-battle-controls {
     display: grid;
     /* ★ 2列から3列に変更 */
-    grid-template-columns: 1fr 1fr 1fr 1fr; 
+    grid-template-columns: 1fr 1fr; 
     gap: 5px;
 }
 /* ★ リファレンスボタンのスタイルを追加 */
