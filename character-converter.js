@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.3.1"; // 緊急修正
+export const version = "1.3.3"; // 緊急修正
 
 import * as data from './data-handler.js';
 
@@ -25,7 +25,11 @@ export function convertVampireBloodSheet(sourceData) {
         const converted = {};
 
         // --- 基本情報の変換 ---
-        converted.name = sourceData.Name || sourceData.pc_name || sourceData.data_title || '名称未設定';
+        const name = sourceData.Name || sourceData.pc_name || sourceData.data_title || '名称未設定';
+        converted.name = name;
+        converted.displayName = name;
+        converted.originalName = name;
+        
         converted.description = `${sourceData.data_title || ''} | ${sourceData.Position_Name || ''}（${sourceData.MCLS_Name || ''}・${sourceData.SCLS_Name || ''}）`;
         converted.img = "/images/noimage.png";
         converted.category = "ドール";
@@ -72,31 +76,32 @@ export function convertVampireBloodSheet(sourceData) {
         const categoryMap = { '1': '攻撃', '2': '攻撃', '3': '行動値', '4': '補助', '5': '妨害', '6': '防御', '7': '移動' };
         const powerRecordCount = sourceData.Power_name?.length || 0;
 
-        let treasureName = null;
-        let treasureIndex = -1;
-
-        treasureIndex = sourceData.Power_shozoku?.findIndex(s => s && s.includes('たから'));
-        if (treasureIndex > -1) {
-            treasureName = sourceData.Power_name[treasureIndex];
-        } else {
-            treasureIndex = sourceData.Power_memo?.findIndex((memo, i) => {
-                const hanteiCode = sourceData.Power_hantei[i];
-                return !['1', '2', '3'].includes(hanteiCode) && memo && memo.includes('たからもの');
-            });
-            if (treasureIndex > -1) {
-                treasureName = sourceData.Power_name[treasureIndex];
-            }
-        }
-        converted.treasure = treasureName;
+        // ▼▼▼ 変更箇所 ▼▼▼
+        converted.treasures = []; // 配列として初期化
+        const allTreasures = data.getTakaramonoData();
+        // ▲▲▲ 変更ここまで ▲▲▲
 
         for (let i = 0; i < powerRecordCount; i++) {
             const name = sourceData.Power_name[i];
             if (!name) continue;
-            if (name === treasureName) continue;
 
             const hanteiCode = sourceData.Power_hantei[i];
             const location = locationTypeMap[hanteiCode];
 
+            const isTreasure = Object.values(allTreasures).some(treasure => treasure.name === name);
+
+            // ▼▼▼ 変更箇所 (ループ構造を全面的に見直し) ▼▼▼
+
+            if (isTreasure) {
+                // たからものだった場合は、treasures配列に追加するだけ
+                if (!converted.treasures.includes(name)) {
+                    converted.treasures.push(name);
+                }
+                // このループでの処理はこれで完了
+                // continue;
+            }
+
+            // マニューバデータにない未知のものの処理
             if (!data.getManeuverByName(name)) {
                 const typeCode = sourceData.Power_Type[i];
                 const newManeuver = {
@@ -107,29 +112,18 @@ export function convertVampireBloodSheet(sourceData) {
                     effect: sourceData.Power_memo[i] || '効果不明',
                     description: sourceData.Power_memo[i] || '効果不明',
                     category: ['1', '2', '3'].includes(hanteiCode) ? 'スキル' : (categoryMap[typeCode] || '強化パーツ'),
-                    // ★★★ 修正箇所: tagsプロパティを追加 ★★★
                     tags: [] 
                 };
                 data.addManeuverData(newManeuver);
             }
             
+            // 既知のマニューバ、またはカスタム作成されたマニューバをリストに追加
             if (['1', '2', '3'].includes(hanteiCode)) {
                 converted.skills.push(name);
             } else if (location) {
                 converted.parts[location].push(name);
             } else {
                 converted.skills.push(name);
-            }
-        }
-        
-        // --- たからものをパーツリストに追加 ---
-        if (treasureName) {
-            const hanteiCode = sourceData.Power_hantei[treasureIndex];
-            const location = locationTypeMap[hanteiCode];
-            if (location) {
-                converted.parts[location].push(treasureName);
-            } else {
-                converted.parts.body.push(treasureName);
             }
         }
         
@@ -141,10 +135,16 @@ export function convertVampireBloodSheet(sourceData) {
             if (targetName && regretName) {
                 const regret = {
                     name: `${targetName}への${regretName}`,
-                    points: parseInt(sourceData.roice_damage[i], 10) || 3
+                    points: parseInt(sourceData.roice_damage[i], 10) || 3,
+                    // ▼▼▼ 変更箇所 (後で解決するために元情報を保持) ▼▼▼
+                    targetName: targetName,
+                    regretName: regretName
+                    // ▲▲▲ 変更ここまで ▲▲▲
                 };
-                if (targetName === 'たからもの' && converted.treasure) {
-                    regret.name = `${converted.treasure}への${regretName}`;
+                if (targetName === 'たからもの' && converted.treasures.length > 0) {
+                    // ▼▼▼ 変更箇所 (最初のたからものに紐付ける) ▼▼▼
+                    regret.name = `${converted.treasures[0]}への${regretName}`;
+                    // ▲▲▲ 変更ここまで ▲▲▲
                     regret.category = 'たからもの';
                 } else {
                     regret.categoryKey = 'SI';

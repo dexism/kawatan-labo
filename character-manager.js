@@ -6,7 +6,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.8.13";
+export const version = "1.8.15";
 
 // --- モジュールのインポート ---
 import * as data from './data-handler.js';
@@ -78,7 +78,10 @@ function createCharacterInstanceFromObject(characterObject, type, initialArea) {
         set(value) { this.displayName = value; }
     });
 
-    // 状態の初期化
+    newChar.treasures = characterObject.treasures || [];
+
+    // ▼▼▼ 変更箇所 (たからものをpartsStatusに追加する処理) ▼▼▼
+    // 既存パーツの処理
     newChar.partsStatus = {};
     let partIdCounter = 0;
     if (newChar.parts && typeof newChar.parts === 'object') {
@@ -90,15 +93,7 @@ function createCharacterInstanceFromObject(characterObject, type, initialArea) {
             }
         });
     }
-    if (type === 'pc' && newChar.treasure) {
-        for (const location in newChar.partsStatus) {
-            const part = newChar.partsStatus[location].find(p => p.name === newChar.treasure);
-            if (part) {
-                part.id = `${newChar.id}_part_treasure`;
-                break;
-            }
-        }
-    }
+
     newChar.madnessPoints = {};
     newChar.statusEffects = [];
     newChar.activeBuffs = [];
@@ -110,6 +105,7 @@ function createCharacterInstanceFromObject(characterObject, type, initialArea) {
     newChar.hasActedThisCount = false;
     newChar.spineBonus = 0;
     newChar.lastUsedSpineCount = -1;
+    // newChar.treasures = characterObject.treasures || [];
     
     return newChar;
 }
@@ -197,6 +193,15 @@ export function initializeManeuverLimits(character) {
 
 function initializeRegretsForPC(character) {
     character.regrets = [];
+    if (character.treasures && character.treasures.length > 0) {
+        const treasureName = character.treasures[0]; // 最初のたからものを代表とする
+        character.regrets.push({
+          id: `treasure_${character.id}`,
+          name: `${treasureName}への依存`,
+          points: 3,
+          category: 'たからもの'
+        });
+    }
     const otherPCs = characters.filter(c => c.type === 'pc' && c.id !== character.id);
     const treasureName = character.treasure || 'たからもの';
     character.regrets.push({
@@ -436,23 +441,49 @@ export function applyQueuedMoves(moveQueue) {
 export function updateCharacterFromReload(characterId, newData) {
     const char = getCharacterById(characterId);
     if (!char) return null;
+
+    // 1. ユーザーが編集可能なプロパティと、戦闘中の状態を退避
     const preservedState = {
         id: char.id,
         sheetId: char.sheetId,
-        img: char.img,
         type: char.type,
+        
+        // ユーザーが編集する可能性のあるプロパティ
+        displayName: char.displayName, 
+        img: char.img,
+        area: char.area,
+
+        // 戦闘中の状態
         actionValue: char.actionValue,
         regrets: char.regrets,
         madnessPoints: char.madnessPoints,
         isMentallyBroken: char.isMentallyBroken,
-        isDestroyed: false,
-        hasWithdrawn: false,
-        hasActedThisCount: char.hasActedThisCount
+        hasActedThisCount: char.hasActedThisCount,
+
+        // 再読み込み時にリセットされる状態
+        isDestroyed: false, 
+        hasWithdrawn: false, 
     };
+
+    // 退避前の originalName を保持しておく
+    const oldOriginalName = char.originalName;
+
+    // 2. キャラクターオブジェクトを一旦リセットし、保管所の新しいデータで上書き
     Object.keys(char).forEach(key => delete char[key]);
     Object.assign(char, newData);
-    char.area = char.initialArea || ((char.type === 'pc') ? '煉獄' : '奈落');
+
+    // 3. 名前関連のプロパティを正しく設定
+    char.originalName = char.name; // 新しい name を originalName にコピー
+
+    // ユーザーが表示名を編集していなかった場合のみ、displayName も更新する
+    if (preservedState.displayName === oldOriginalName || !preservedState.displayName) {
+        preservedState.displayName = char.name;
+    }
+
+    // 4. 退避しておいたプロパティを書き戻す
     Object.assign(char, preservedState);
+
+    // 5. 新しいパーツリストに基づいて、パーツ状態や行動値などを再初期化
     char.partsStatus = {};
     let partIdCounter = 0;
     if (char.parts && typeof char.parts === 'object') {
@@ -474,8 +505,10 @@ export function updateCharacterFromReload(characterId, newData) {
         }
     }
     recalculateMaxActionValue(char);
-    char.actionValue = Math.min(char.actionValue, char.maxActionValue);
+    // 行動値が最大値を超えないように調整
+    char.actionValue = Math.min(char.actionValue, char.maxActionValue); 
     initializeManeuverLimits(char);
+
     console.log(`キャラクター「${char.name}」が保管所のデータで更新されました。`);
     return char;
 }

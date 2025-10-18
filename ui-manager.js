@@ -6,7 +6,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.17.94";
+export const version = "1.17.96";
 
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
@@ -228,7 +228,8 @@ function createCharacterCard(char, isSetupPhase) {
         if (char.category === 'ドール' || char.category === 'サヴァント') {
             const locations = ['head', 'arms', 'torso', 'legs', 'body'];
             const locationNames = { head: '頭', arms: '腕', torso: '胴', legs: '脚', body: '他' };
-            const treasureName = char.treasure;
+            const treasureNames = new Set(char.treasures || []);
+            // const treasureName = char.treasure;
 
             lines = locations.map(loc => {
                 if (!char.partsStatus[loc] || char.partsStatus[loc].length === 0) return '';
@@ -237,7 +238,8 @@ function createCharacterCard(char, isSetupPhase) {
                   .map(part => {
                     const maneuver = data.getManeuverByName(part.name);
                     const isBasicPart = maneuver && maneuver.id && maneuver.id.startsWith('BP-');
-                    const isTreasure = part.name === treasureName;
+                    // const isTreasure = part.name === treasureName;
+                    const isTreasure = treasureNames.has(part.name);
                     return { part, isBasicPart, isTreasure, damaged: part.damaged };
                   })
                   .sort((a, b) => {
@@ -249,7 +251,7 @@ function createCharacterCard(char, isSetupPhase) {
                 
                 const symbols = sortedParts.map(item => {
                     if (item.isTreasure) {
-                        return item.damaged ? '・' : '★';
+                        return item.damaged ? '・' : '♥';
                     }
                     if (item.isBasicPart) {
                         return item.damaged ? '・' : '■';
@@ -257,7 +259,8 @@ function createCharacterCard(char, isSetupPhase) {
                     return item.damaged ? '・' : '●';
                 }).join('');
 
-                if (loc === 'body' && !char.partsStatus[loc].some(p => p.name !== treasureName)) {
+                if (loc === 'body' && char.partsStatus[loc].every(p => treasureNames.has(p.name))) {
+                // if (loc === 'body' && !char.partsStatus[loc].some(p => p.name !== treasureName)) {
                     return '';
                 }
 

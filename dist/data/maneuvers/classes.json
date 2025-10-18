@@ -178,7 +178,7 @@
     "effects": [{ "ref": "SET_DICE_ROLL", "params": { "target_roll": "self_melee_attack", "value": 6, "prevent_reroll": true } }]
   },
   "TN-07": {
-    "name": "冥王", "category": "補助",
+    "name": "冥王", "category": "無効化",
     "tags": ["攻撃判定修正", "オート", "移動妨害無効"], "maliceLevel": 1.5,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "レギオンの「移動妨害」無効化。レギオンからの攻撃は判定値7以上でなければダメージを受けない。", 
@@ -223,7 +223,7 @@
     "effects": [{ "ref": "DEAL_STATUS_EFFECT_TO_AREA", "params": { "effect": "転倒", "target_type": "enemy" } }]
   },
   "GT-03": {
-    "name": "舌なめずり", "category": "補助", 
+    "name": "舌なめずり", "category": "移動妨害", 
     "tags": ["移動妨害", "ラピッド"], "maliceLevel": 1.5,
     "timing": "ラピッド", "cost": 0, "range": "0～1",
     "description": "射程内の対象の移動距離を-1する。", 
@@ -341,7 +341,7 @@
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "attackCheckBonus", "value": 1, "duration": "end_of_turn" } }]
   },
   "RQ-06": {
-    "name": "後衛の誇り", "category": "その他",
+    "name": "後衛の誇り", "category": "無効化",
     "tags": ["オート", "大失敗無効"], "maliceLevel": 1.5,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "大失敗の無効化。射撃攻撃・砲撃攻撃", 
@@ -577,7 +577,7 @@
     "effects": [{ "ref": "MANIPULATE_MADNESS_POINTS", "params": {} }]
   },
   "SY-05": {
-    "name": "虚空の玉座", "category": "防御",
+    "name": "虚空の玉座", "category": "無効化",
     "tags": ["オート", "妨害無効", "移動妨害無効"], "maliceLevel": 1.5,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "あなたが同エリアから受ける「妨害」「移動妨害」は無効になる。", 

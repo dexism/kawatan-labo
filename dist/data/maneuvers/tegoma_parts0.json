@@ -91,7 +91,7 @@
     "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 2 } }] 
   },
   "P0-14": { 
-    "name": "捕縛触手", "category": "補助", "tags": ["移動妨害", "ラピッド"], "maliceLevel": 0, "description": "移動妨害1。", "description_raw": "移動妨害1", "source": { "book": "基本ルールブック" }, "timing": "ラピッド", "cost": "1", "range": "0～1", "effects": [{ "ref": "GENERIC_MOVE_DEBUFF", "params": { "value": -1 } }] 
+    "name": "捕縛触手", "category": "移動妨害", "tags": ["移動妨害", "ラピッド"], "maliceLevel": 0, "description": "移動妨害1。", "description_raw": "移動妨害1", "source": { "book": "基本ルールブック" }, "timing": "ラピッド", "cost": "1", "range": "0～1", "effects": [{ "ref": "GENERIC_MOVE_DEBUFF", "params": { "value": -1 } }] 
   },
   "P0-15": { 
     "name": "根肢", "category": "補助", "tags": ["オート", "転倒無効", "移動無効"], "maliceLevel": 0, "description": "「転倒」「移動」を無効化可。", "description_raw": "「転倒」「移動」を無効化可", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "NEGATE_STATUS_EFFECT", "params": { "effects_to_negate": ["転倒", "移動"], "optional": true } }] 

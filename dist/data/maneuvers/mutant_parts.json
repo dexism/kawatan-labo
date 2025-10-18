@@ -206,7 +206,7 @@
     "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "target": "any_roll", "value": 2 } }]
   },
   "M2-08": {
-    "name": "しょくしゅ", "category": "補助", "allowedLocations": "任意",
+    "name": "しょくしゅ", "category": "移動妨害", "allowedLocations": "任意",
     "timing": "ラピッド", "cost": 1, "range": "0～1",
     "tags": ["移動妨害", "ラピッド"], "maliceLevel": 1,
     "description": "移動妨害1", 

@@ -222,7 +222,7 @@
     }]
   },
   "R2-09": {
-    "name": "テンタクル", "category": "補助", "allowedLocations": "任意",
+    "name": "テンタクル", "category": "移動妨害", "allowedLocations": "任意",
     "tags": ["移動妨害", "ラピッド"], "maliceLevel": 1,
     "timing": "ラピッド", "cost": 1, "range": "0～1",
     "description": "移動妨害1", 
@@ -293,7 +293,7 @@
     ]
   },
   "R3-03": {
-    "name": "マニピュレーター", "category": "補助", "allowedLocations": "任意",
+    "name": "マニピュレーター", "category": "移動妨害", "allowedLocations": "任意",
     "tags": ["移動妨害", "転倒", "ラピッド"], "maliceLevel": 1.5,
     "timing": "ラピッド", "cost": 2, "range": "0～1",
     "description": "移動妨害1+転倒", 

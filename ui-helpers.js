@@ -2,7 +2,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.2.8";
+export const version = "1.2.10";
 
 import * as data from './data-handler.js';
 
@@ -22,6 +22,11 @@ export function getCategoryClass(categoryName) {
  * @returns {string} - 表示用の出典元テキスト (例: "ポジションスキル：アリス")
  */
 export function getManeuverSourceText(maneuver) {
+    // 1. まず「たからもの」タグがあるか最優先でチェック
+    if (maneuver.tags && maneuver.tags.includes('たからもの')) {
+        return 'たからもの';
+    }
+
     if (!maneuver.id) return 'その他';
     
     const coreData = data.getCoreData();

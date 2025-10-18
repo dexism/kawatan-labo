@@ -222,6 +222,7 @@
 }
 /* --- カテゴリ色分け --- */
 .category-color-move {          border-right: 10px solid var(--color-move); }
+.category-color-move-debuff {   border-right: 10px solid var(--color-move-debuff); }
 .category-color-staffing {      border-right: 10px solid var(--color-staffing); }
 .category-color-attack {        border-right: 10px solid var(--color-attack); }
 .category-color-defense {       border-right: 10px solid var(--color-defense); }
@@ -236,6 +237,7 @@
 .category-color-dialogue {      border-right: 10px solid var(--color-dialogue); } 
 .category-color-reinforcement { border-right: 10px solid var(--color-reinforcement);}
 .category-color-madness {       border-right: 10px solid var(--color-madness); } 
+.category-color-negation {      border-right: 10px solid var(--color-negation); }
 .category-color-cost {          border-right: 10px solid var(--color-cost); }
 .category-color-other {         border-right: 10px solid var(--color-other); }
 
@@ -462,9 +464,8 @@
 .ref-source-category {
     font-size: 12px;
     font-weight: bold;
-    background-color: var(--color-fore-4);
     color: var(--color-background-2);
-    background-color: var(--color-background-4);
+    background-color: var(--color-background-5);
     color: var(--color-fore-2);
     padding: 1px 8px;
     border-radius: 10px;
@@ -570,8 +571,8 @@
 
 /* 未練タブ専用 */
 .ref-regret-madness {
-    background-color: var(--color-fore-5);
-    color: var(--color-background-2);
+    background-color: var(--color-background-5);
+    color: var(--color-fore-2);
     border-radius: 20px;
     font-size: 14px;
     font-weight: bold;

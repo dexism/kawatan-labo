@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.19.85"; // バージョンを更新
+export const version = "1.19.87"; // バージョンを更新
 
 import * as data from './data-handler.js';
 import * as charManager from './character-manager.js';
@@ -101,8 +101,8 @@ export function buildManeuverMenu(char, element) {
         { id: '攻撃', label: '攻撃' },
         { id: '支援', label: '支援' },
         { id: '妨害', label: '妨害' },
-        { id: '防御', label: '防御' },
         { id: '強化', label: '強化' },
+        { id: '防御', label: '防御' },
         { id: '生贄', label: '生贄' },
         { id: 'すべて', label: 'すべて' }
     ];
@@ -938,17 +938,29 @@ export function showCharacterSheetModal(char) {
                     if (!char.partsStatus[loc] || char.partsStatus[loc].length === 0) return '';
                     const locName = {head:'頭', arms:'腕', torso:'胴', legs:'脚', body:'体'}[loc];
                     const partsHtml = char.partsStatus[loc].map(part => {
-                        const isTreasure = part.id.includes('_treasure');
-                        const maneuver = isTreasure 
-                            ? data.getAllManeuvers()['TR-00'] 
-                            : data.getManeuverByName(part.name);
-                        const isBasic = maneuver?.id?.startsWith('BP-');
-                        const type = isTreasure ? 'たからもの' : (isBasic ? '基本' : '強化');
+                        let maneuver;
+                        let type;
+                        const isTreasure = char.treasures && char.treasures.includes(part.name);
+
+                        if (isTreasure) {
+                            maneuver = data.getAllManeuvers()['TR-00'];
+                            type = 'たからもの';
+                        } else {
+                            maneuver = data.getManeuverByName(part.name);
+                            if (maneuver?.id?.startsWith('BP-')) {
+                                type = '基本';
+                            } else {
+                                type = '強化'; // デフォルト
+                            }
+                        }
+                        
                         if (!maneuver) {
-                             return `<div class="part-list-item"><span class="type">[${type}]</span> <b>${part.name}</b></div>`;
+                             return `<div class="part-list-item"><span class="type">[${type || '不明'}]</span> <b>${part.name}</b></div>`;
                         }
                         const description = isTreasure ? maneuver.description_raw : (maneuver.description_raw || maneuver.effect);
-                        return `<div class="part-list-item"><span class="type">[${type}]</span> <b>【${part.name}】</b>《${maneuver.timing}／${maneuver.cost}／${maneuver.range}》：${description}</div>`;
+                        // 実際のたからもの名で表示を上書き
+                        const displayName = isTreasure ? part.name : maneuver.name;
+                        return `<div class="part-list-item"><span class="type">[${type}]</span> <b>【${displayName}】</b>《${maneuver.timing}／${maneuver.cost}／${maneuver.range}》：${description}</div>`;
                     }).join('');
                     return `<div><h4>〈${locName}〉</h4>${partsHtml}</div>`;
                 }).join('')}
@@ -1263,14 +1275,33 @@ export function closeAllMenus() {
 export function getCharacterManeuvers(char) {
     const battleState = battleLogic.getBattleState();
     const allManeuvers = [];
+    const addedPartNames = new Set(); // 処理済みのパーツ名を記録
 
     (char.skills || []).forEach(skillName => {
         const maneuver = data.getManeuverByName(skillName);
-        if (maneuver) allManeuvers.push({ data: maneuver, sourceType: 'skill', sourceName: skillName });
+        if (maneuver) {
+            allManeuvers.push({ data: maneuver, sourceType: 'skill', sourceName: skillName });
+            addedPartNames.add(skillName);
+        }
     });
+
     Object.values(char.partsStatus || {}).flat().forEach(part => {
-        const maneuver = data.getManeuverByName(part.name);
-        if (maneuver) allManeuvers.push({ data: maneuver, sourceType: 'part', sourceName: part.name, isDamaged: part.damaged });
+        if (addedPartNames.has(part.name)) return;
+
+        let maneuver;
+        // 1. パーツ名が treasures 配列に含まれているかチェック
+        if (char.treasures && char.treasures.includes(part.name)) {
+            maneuver = JSON.parse(JSON.stringify(data.getAllManeuvers()['TR-00']));
+            if(maneuver) maneuver.name = part.name;
+        } else {
+        // 2. たからもの以外の場合、通常のマニューバとして処理
+            maneuver = data.getManeuverByName(part.name);
+        }
+
+        if (maneuver) {
+            allManeuvers.push({ data: maneuver, sourceType: 'part', sourceName: part.name, isDamaged: part.damaged });
+            addedPartNames.add(part.name);
+        }
     });
 
     const waitManeuver = data.getManeuverByName('待機');

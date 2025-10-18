@@ -47,7 +47,7 @@
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 1, "on_hit_dynamic": { "type": "CHAIN_ATTACK_BY_ALLY_COUNT", "ally_name": "ゾンビ" } } }]
   },
   "P2-02": {
-    "name": "むらがる", "category": "補助", 
+    "name": "むらがる", "category": "移動妨害", 
     "tags": ["移動妨害", "ラピッド"], "maliceLevel": 1,
     "timing": "ラピッド", "cost": 0, "range": "0",
     "description": "射程0の対象に移動妨害1。", 

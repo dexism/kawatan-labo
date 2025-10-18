@@ -162,6 +162,7 @@ h2 {
     --color-level-f:      rgba(255, 255, 255, 0.5); 
     /* カテゴリ色分け */
     --color-move:         #aed6f1;
+    --color-move-debuff:  #c8d6a2;
     --color-staffing:     #85C1E9;
     --color-attack:       #f5b7b1;
     --color-defense:      #a3e4d7;
@@ -171,12 +172,13 @@ h2 {
     --color-heal:         #f5cba7;
     --color-utility:      #d5d8dc;
     --color-sacrifice:    #e6b0aa;
-    --color-enhancement:  #FAD7A0; /* ★追加 */
+    --color-enhancement:  #FAD7A0;
     --color-vulnerability:#D98880;
-    --color-dialogue:     #E6D7B8; /* ★追加 */
-    --color-reinforcement:#A9DFBF; /* ★追加 */
+    --color-dialogue:     #E6D7B8;
+    --color-reinforcement:#A9DFBF;
+    --color-negation:     #a9cce3;
     --color-cost:         #F5B041;
-    --color-madness:      #EC7063; /* ★追加 */
+    --color-madness:      #EC7063;
     --color-other:        #abb2b9;
 }
 
@@ -233,6 +235,7 @@ html[data-theme="dark"] {
 
       /* カテゴリ色分け */
       --color-move:         #3a6b8c;
+      --color-move-debuff:  #6c7a4a;
       --color-staffing:     #2E86C1;
       --color-attack:       #a65c58;
       --color-defense:      #3d7f73;
@@ -242,11 +245,12 @@ html[data-theme="dark"] {
       --color-heal:         #a6784a;
       --color-utility:      #6b6e72;
       --color-sacrifice:    #8c5c58;
-      --color-enhancement:  #a6823a;       /* ★追加 */
+      --color-enhancement:  #a6823a;
       --color-vulnerability:#a15149;
-      --color-dialogue:     #7c7059;       /* ★追加 */
-      --color-reinforcement:#4e815d;       /* ★追加 */
-      --color-madness:      #9c4942;       /* ★追加 */
+      --color-dialogue:     #7c7059;
+      --color-reinforcement:#4e815d;
+      --color-madness:      #9c4942;
+      --color-negation:     #34658A;
       --color-cost:         #B9770E;
       --color-other:        #5a6066;
 }
@@ -305,6 +309,7 @@ html[data-theme="dark"] {
 
         /* カテゴリ色分け */
         --color-move:         #3a6b8c;
+        --color-move-debuff:  #6c7a4a;
         --color-staffing:     #2E86C1;
         --color-attack:       #a65c58;
         --color-defense:      #3d7f73;
@@ -314,11 +319,12 @@ html[data-theme="dark"] {
         --color-heal:         #a6784a;
         --color-utility:      #6b6e72;
         --color-sacrifice:    #8c5c58;
-        --color-enhancement:  #a6823a;       /* ★追加 */
+        --color-enhancement:  #a6823a;
         --color-vulnerability:#a15149;
-        --color-dialogue:     #7c7059;       /* ★追加 */
-        --color-reinforcement:#4e815d;       /* ★追加 */
-        --color-madness:      #9c4942;       /* ★追加 */
+        --color-dialogue:     #7c7059;
+        --color-reinforcement:#4e815d;
+        --color-madness:      #9c4942;
+        --color-negation:     #34658A;
         --color-cost:         #B9770E;
         --color-other:        #5a6066;
     }
