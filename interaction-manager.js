@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "2.13.34"; // パッチバージョンを更新
+export const version = "2.14.35"; // パッチバージョンを更新
 
 import * as data from './data-handler.js'; 
 import * as charManager from './character-manager.js';
@@ -18,7 +18,8 @@ import {
     showCharacterSheetModal, 
     showUndeadListModal, 
     buildPlacementMenu,  
-    showAttackConfirmationModal
+    showAttackConfirmationModal,
+    showRelationshipModal 
 } from './menu-builder.js';
 // import { buildManeuverMenu, showCharacterSheetModal, showUndeadListModal, buildMoveMenu, buildPlacementMenu, closeAllMenus, showAttackConfirmationModal } from './menu-builder.js';
 import * as stateManager from './state-manager.js';
@@ -194,6 +195,14 @@ export function setupAllEventListeners() {
     if (refBtn) {
         refBtn.onclick = () => {
             buildReferenceUI();
+        };
+    }
+
+    const relationshipBtn = document.getElementById('showRelationshipBtn');
+    if (relationshipBtn) {
+        relationshipBtn.onclick = () => {
+            // menu-builder.js からインポートした関数を呼び出す
+            showRelationshipModal();
         };
     }
 

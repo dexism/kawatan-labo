@@ -258,7 +258,7 @@
 
   "//": "--- レベル3 変異 (M3) ---",
   "M3-01": {
-    "name": "よぶんなあし", "category": "防御", "allowedLocations": "脚",
+    "name": "よぶんなあし", "category": "無効化", "allowedLocations": "脚",
     "tags": ["損傷無効", "オート"], "maliceLevel": 1.5,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "これ以外の脚部パーツが破損しても、マニューバをそのまま使用可", 
@@ -278,8 +278,8 @@
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "maxActionValue", "value": 2, "duration": "permanent_while_undamaged" } }]
   },
   "M3-03": {
-    "name": "やせぎす", "category": "防御", "allowedLocations": "胴",
-    "tags": ["防御", "オート", "妨害無効"], "maliceLevel": 1.5,
+    "name": "やせぎす", "category": "無効化", "allowedLocations": "胴",
+    "tags": ["オート", "妨害無効"], "maliceLevel": 1.5,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "1つの判定につき1回、「妨害」を無効化", 
     "description_raw": "バトルパートで1つの判定につき1回、「妨害」を無効化してよい。",
@@ -338,8 +338,8 @@
     "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "target": "any_roll", "value": -2 } }]
   },
   "M3-09": {
-    "name": "だるま", "category": "防御", "allowedLocations": "胴",
-    "tags": ["防御", "オート"], "maliceLevel": 1.5,
+    "name": "だるま", "category": "難易度変更", "allowedLocations": "胴",
+    "tags": ["オート", "難易度変更"], "maliceLevel": 1.5,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "ダメージを任意の箇所に振り分けてよい。切断判定は、ダメージを受けた箇所１つを選ぶ", 
     "description_raw": "任意の箇所を望む数選び、ダメージを振り分けてよい。切断判定は、ダメージを受けた箇所の１つを選んで行う。",

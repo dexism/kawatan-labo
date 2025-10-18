@@ -326,7 +326,7 @@
     "effects": [{ "ref": "CHOICE_JUDGE_MOD", "params": { "options": [{ "type": "支援", "value": 2 }, { "type": "妨害", "value": -2 }] } }]
   },
   "R3-06": {
-    "name": "オートセパレート", "category": "補助", "allowedLocations": "胴",
+    "name": "オートセパレート", "category": "無効化", "allowedLocations": "胴",
     "tags": ["オート", "切断無効"], "maliceLevel": 1.5,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "「切断」無効化", 

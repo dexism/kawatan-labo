@@ -7,7 +7,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.4.7"; // パッチバージョンを更新
+export const version = "1.5.8"; // パッチバージョンを更新
 
 // ===================================================================================
 //  モジュール内 プライベート変数
@@ -160,4 +160,24 @@ export function addManeuverData(maneuverData) {
     maneuverNameMap[maneuverData.name] = maneuverData;
 
     console.log(`カスタムマニューバ「${maneuverData.name}」を動的に追加しました。`);
+}
+
+// data-handler.js の末尾に関数を追加
+
+/**
+ * 姉妹への未練マスターデータの中からランダムに1つ未練を取得する
+ * @returns {Object|null} ランダムに選ばれた未練オブジェクト {id, name, ...} または null
+ */
+export function getRandomSisterRegret() {
+    if (!regretMasterData) return null;
+
+    // "SI-"で始まるキーのみを抽出
+    const sisterRegretIds = Object.keys(regretMasterData).filter(key => key.startsWith('SI-'));
+    
+    if (sisterRegretIds.length === 0) return null;
+
+    const randomIndex = Math.floor(Math.random() * sisterRegretIds.length);
+    const randomId = sisterRegretIds[randomIndex];
+    
+    return { id: randomId, ...regretMasterData[randomId] };
 }

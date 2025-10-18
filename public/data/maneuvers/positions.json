@@ -111,7 +111,7 @@
     "tags": ["強化", "ダメージ", "狂気点操作"],
     "timing": "ダメージ", "cost": "狂気点1", "range": "自身",
     "description": "自身の与ダメージを+2する。コストとして狂気点1点が必要。", 
-    "description_raw": "自身が与えたダメージに対してのみ使用可。コストとして、あなたは任意の未練に狂気点1点を加える。与ダメージ+2",
+    "description_raw": "自身が与えたダメージに対してのみ使用可。コストとして、あなたは任意の未練に狂気点1点を加える。ダメージ+2。",
     "flavor_text": "お前たちのせいで。許さない。許さない。絶対に許さない。バラバラにしてやる。粉々にしてやる。",
     "source": { "book": "基本ルールブック", "page": 67 }, 
     "effects": [{
@@ -174,7 +174,7 @@
     "effects": [{ "ref": "REROLL_DICE", "params": { "cost_type": "damage_basic_part", "target_roll": ["行動判定", "攻撃判定", "切断判定"] } }]
   },
   "AM-03": {
-    "name": "氷の心", "category": "補助", 
+    "name": "氷の心", "category": "支援", 
     "tags": ["狂気判定修正", "オート"],
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "自身の狂気判定に+1の修正。", 
@@ -184,7 +184,7 @@
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "madnessCheckBonus", "value": 1, "duration": "permanent" } }]
   },
   "AM-04": {
-    "name": "私は人形", "category": "補助", 
+    "name": "私は人形", "category": "無効化", 
     "tags": ["発狂無効", "オート"],
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "バトルパートの1ターン目のみ、あらゆる発狂状態の効果を無視する。", 
@@ -214,8 +214,8 @@
     "effects": [{ "ref": "NEGATE_MADNESS_WITH_DAMAGE", "params": { "part_type": "基本" } }]
   },
   "AM-07": {
-    "name": "敵は敵", "category": "妨害",
-    "tags": ["オート", "狂気点操作"],
+    "name": "敵は敵", "category": "難易度変更",
+    "tags": ["オート", "狂気点操作", "難易度変更"],
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "自身に対する精神攻撃は、判定値7以上でなければ狂気点を与えない。",
     "description_raw": "あなたに対する精神攻撃は、判定値7以上でなければ狂気点を与えない。",
@@ -311,7 +311,7 @@
     "effects": [{ "ref": "CHOICE_JUDGE_MOD", "params": { "options": [{ "type": "支援", "value": 1 }, { "type": "妨害", "value": -1 }] } }]
   },
   "CT-02": {
-    "name": "冷静", "category": "補助", 
+    "name": "冷静", "category": "支援", 
     "tags": ["行動判定修正", "オート"],
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "自身の行動判定に+1の修正。", 
@@ -321,8 +321,8 @@
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "skillCheckBonus", "value": 1, "duration": "permanent" } }]
   },
   "CT-03": {
-    "name": "看破", "category": "妨害", 
-    "tags": ["妨害", "ラピッド"],
+    "name": "看破", "category": "無効化", 
+    "tags": ["効果無効", "ラピッド"],
     "timing": "ラピッド", "cost": 0, "range": "0～3",
     "description": "射程内の「ラピッド」「ダメージ」「ジャッジ」マニューバ1つの効果を打ち消す。", 
     "description_raw": "対象の「ラピッド」「ダメージ」「ジャッジ」マニューバ1つの効果を打ち消す。",
@@ -333,7 +333,7 @@
   "CT-04": {
     "name": "作戦", "category": "配置", 
     "tags": ["配置変更", "オート"],
-    "timing": "オート", "cost": "なし", "range": "味方",
+    "timing": "オート", "cost": "なし", "range": "姉妹1",
     "description": "バトルパート開始時、敵配置を見てから味方ドール1体の配置を変更できる。", 
     "description_raw": "バトルパート開始時、あなたは敵配置を見てから、味方ドール1体の配置を「奈落」以外の望むエリアに変更してもよい。",
     "flavor_text": "とっさの機転に基づいた戦略。臨機応変な布陣を駆使することで、みんなの勝利を約束する。",
@@ -351,8 +351,8 @@
     "effects": [{ "ref": "REDUCE_NEXT_ACTION_COST", "params": { "target": "character", "value": 1, "stackable": true } }]
   },
   "CT-06": {
-    "name": "抑制", "category": "補助",
-    "tags": ["オート", "狂気判定", "損傷"],
+    "name": "抑制", "category": "難易度変更",
+    "tags": ["オート", "狂気判定", "損傷", "難易度変更"],
     "timing": "オート", "cost": "パーツ1", "range": "自身",
     "description": "狂気判定に失敗した際、結果を成功に変えてよい。その場合、パーツ1つを損傷する。",
     "description_raw": "あなたが狂気判定で失敗した際(大失敗は含まない)、その結果を成功に変えてもよい。結果を変更したなら、あなたは自身の任意のパーツ1つを損傷する。",
@@ -361,8 +361,8 @@
     "effects": [{ "ref": "CHANGE_ROLL_RESULT_WITH_COST", "params": { "roll_type": "madness_check", "from": "failure", "to": "success", "cost_type": "damage_any_part" } }]
   },
   "CT-07": {
-    "name": "憎まれ役", "category": "補助",
-    "tags": ["オート", "狂気判定", "狂気点操作"],
+    "name": "憎まれ役", "category": "難易度変更",
+    "tags": ["オート", "狂気判定", "狂気点操作", "難易度変更"],
     "timing": "オート", "cost": "狂気点1", "range": "他の姉妹",
     "description": "他の姉妹が狂気判定に失敗した際、結果を成功に変えてもよい。その場合、自身の狂気点を1点加える。",
     "description_raw": "他の姉妹が、狂気判定に失敗または大失敗した際、その結果を成功に変えてもよい。結果を変更したなら、あなたは任意の未練に狂気点1点を加える。",

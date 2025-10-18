@@ -25,7 +25,7 @@
     -webkit-overflow-scrolling: touch; /* iOSでスムーズなスクロールを有効にする */
     /*  scrollbar-width: none; */
     /* -ms-overflow-style: none; */
-    /* scroll-behavior: smooth;　*/
+    /* scroll-behavior: smooth; */
 
     cursor: grab;
     gap: 15px;
@@ -258,9 +258,9 @@
     transform: scale(1.1);
     z-index: 101;
 }
-body.is-dragging .char.hover-highlight {
-    transform: scale(1);
-}
+    body.is-dragging .char.hover-highlight {
+        transform: scale(1);
+    }
 .is-targeted {
     outline: 3px solid   red;
     box-shadow: 0 0 20px red !important;

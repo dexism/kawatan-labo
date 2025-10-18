@@ -231,7 +231,7 @@
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "精神", "damage": 1 } }]
   },
   "P3-12": {
-    "name": "不動", "category": "補助", 
+    "name": "不動", "category": "無効化", 
     "tags": ["防御", "オート", "転倒無効", "移動無効"], "maliceLevel": 1.5,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "「転倒」「移動」の効果を無効化できる。", 
@@ -373,7 +373,7 @@
     "effects": [{ "ref": "DEFEND_BY_SACRIFICE", "params": { "unit_type": "legion", "ratio": 1 } }]
   },
   "P4-02": {
-    "name": "対策装備", "category": "防御", 
+    "name": "対策装備", "category": "無効化", 
     "tags": ["防御", "オート", "全体攻撃無効"], "maliceLevel": 2,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "自身と味方の「全体攻撃」によるダメージを無効化する。", 
@@ -413,7 +413,7 @@
     "effects": [{ "ref": "ALLY_FOLLOW_MOVE", "params": { "target": "other_pieces_in_area" } }]
   },
   "P4-06": {
-    "name": "肉の拘束", "category": "補助", 
+    "name": "肉の拘束", "category": "無効化", 
     "tags": ["防御", "オート", "転倒無効", "移動無効"], "maliceLevel": 2,
     "timing": "オート", "cost": "なし", "range": "0",
     "description": "同エリアの手駒全てが「転倒」「移動」を無効化できる。", 
@@ -453,7 +453,7 @@
     "effects": [{ "ref": "REPAIR_PART", "params": { "target": "character", "count": 1 } }]
   },
   "P4-10": {
-    "name": "見えざる触手", "category": "支援",
+    "name": "見えざる触手", "category": "難易度変更",
     "tags": ["ジャッジ", "支援", "損傷"], "maliceLevel": 2,
     "timing": "ジャッジ", "cost": "パーツ2", "range": "0～1",
     "description": "任意のパーツ2つを損傷し、判定結果を判定値に関わらず「失敗」とする。",
@@ -473,7 +473,7 @@
     "effects": [{ "ref": "AREA_REPAIR", "params": { "target": "piece", "count": 4, "limit_per_turn": 2 } }]
   },
   "P4-12": {
-    "name": "守護本能", "category": "防御",
+    "name": "守護本能", "category": "補助",
     "tags": ["オート", "身代わり"], "maliceLevel": 2,
     "timing": "オート", "cost": "なし", "range": "0,主",
     "description": "戦闘開始時、特定のサヴァント1体を「主」とする。「主」を対象とするマニューバを自身が代わりに受ける（「主」が無効化されるマニューバも有効）。",
@@ -547,7 +547,7 @@
   "P6-03": {
     "name": "具現する悪意", "category": "攻撃",
     "tags": ["アクション", "攻撃", "損傷"], "maliceLevel": 3,
-    "timing": "アクション", "cost": 4, "range": "効果参照",
+    "timing": "アクション", "cost": 4, "range": "ドール全員",
     "description": "5カウント後、舞台上のドールはパーツを2つ選び損傷。自身がパーツ損傷で無効。残りカウント5以上ないと宣言不可。",
     "description_raw": "このマニューバが宣言されたカウントを1として数え始めて5カウント目の終了時、このパーツが損傷していなければ効果が発動する。舞台上の全てのドールはパーツを2つ選び、損傷させる。このマニューバは残りカウントが5以上なければ宣言できない。",
     "flavor_text": "仕掛けられた罠か、体に仕組まれた自壊作用か、周囲一帯を壊滅させるESPか……。ネクロマンサーの悪意は、戦いの水面下で着々と進む。",

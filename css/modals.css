@@ -748,7 +748,7 @@
     grid-column: 1 / -1;
     display: flex;
     flex-wrap: wrap;
-    grid-template-columns: repeat(auto-fill, var(--list-item-size));
+    /* grid-template-columns: repeat(auto-fill, var(--list-item-size)); */
     gap: 5px;
     padding: 27px 26px;
     overflow-y: auto;
@@ -1063,4 +1063,162 @@
 .sheet-user-memo {
     color: var(--color-text-muted);
     font-size: 0.9em;
+}
+
+/* modals.css の末尾に追加 */
+
+/* ================================
+   人間関係モーダル専用スタイル
+================================ */
+
+/* モーダルコンテンツを正方形にする */
+.relationship-modal-content {
+    width: 90vw;
+    height: auto;
+    aspect-ratio: 1 / 1; /* 幅と高さを1:1に保つ */
+    background-color: var(--color-background-2);
+}
+
+/* モーダルボディをFlexboxにして中央揃え */
+.relationship-modal-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    overflow: hidden; /* はみ出した要素を隠す */
+    margin: 0;
+    margin: 0;
+}
+
+/* ドールを配置する円形のコンテナ */
+.relationship-chart-container {
+    position: relative; /* 子要素を絶対配置するための基準 */
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    border-radius: 50%;
+    box-shadow: 
+        0 0  4px inset var(--color-background-2),
+        0 0  8px inset var(--color-background-2),
+        0 0 16px inset var(--color-background-2),
+        0 0 32px inset var(--color-background-2);
+    background-color:  var(--color-fore-2);
+}
+
+/* 円周上に配置されるドールのアイコン（ノード） */
+.doll-node {
+    position: absolute;
+    width: 10vw;
+    height: 10vw;
+    padding: 5px;
+    transform: translate(-50%, -50%); /* 座標の中心に要素の中心を合わせる */
+    border-radius: 50%;
+    box-shadow: 
+        0 0  4px var(--color-background-2),
+        0 0  8px var(--color-background-2),
+        0 0 16px var(--color-background-2),
+        0 0 32px var(--color-background-2);
+    background-color: var(--color-background-2);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    overflow: visible;
+    z-index: 2;
+}
+
+.doll-node img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* 画像がコンテナに収まるように調整 */
+}
+
+.doll-node .name-label {
+    position: absolute;
+    bottom: 0; /* アイコンの下に表示 */
+    font-size: 1.2vw;
+    font-weight: bold;
+    color: var(--color-background-2);
+    background-color: var(--color-fore-2);
+    padding: 2px 5px;
+    border-radius: 5px;
+    white-space: nowrap;
+}
+
+/* ドール間を結ぶ接続線 */
+.relationship-line {
+    position: absolute;
+    height: 0.8vw; /* 線の太さ */
+    background-color: var(--color-accent-gold);
+    transform-origin: left center; /* 線の左端を回転の中心にする */
+    box-shadow:
+        0 0 1px var(--color-background-2),
+        0 0 2px var(--color-background-2),
+        0 0 4px var(--color-background-2),
+        0 0 8px var(--color-background-2);
+    background-color: var(--color-background-2);
+   z-index: 1;
+}
+
+/* 未練を表示するテキストボックス */
+.regret-textbox {
+    position: absolute;
+    transform: translate(-50%, -50%); /* 自身の中心を座標点に合わせる */
+    
+    color: var(--color-text);
+    border-radius: 20px;
+    padding: 1px 5px;
+    background-color: var(--color-background-1);
+    box-shadow:
+        0 0 1px var(--color-background-2),
+        0 0 2px var(--color-background-2),
+        0 0 4px var(--color-background-2),
+        0 0 8px var(--color-background-2);
+    background-color: var(--color-background-2);
+    text-shadow:
+        0 0 1px var(--color-background-2),
+        0 0 2px var(--color-background-2),
+        0 0 4px var(--color-background-2),
+        0 0 8px var(--color-background-2);
+    
+    font-size: 2.7vw;
+    font-weight: bold;
+    white-space: nowrap; /* テキストが改行しないようにする */
+    
+    z-index: 3; /* アイコンや線より手前に表示 */
+}
+/* modals.css の人間関係モーダルスタイルの末尾に追加 */
+
+/* 発狂状態のテキストボックスのスタイル */
+.regret-textbox.is-madness {
+    background-color: red;
+    color: black;
+    animation: pulse 1.5s infinite;
+    text-shadow:
+        0 0 1px var(--color-f),
+        0 0 2px var(--color-f),
+        0 0 4px var(--color-f),
+        0 0 8px var(--color-f);
+
+}
+
+/* 発狂状態を点滅させるためのキーフレームアニメーション */
+@keyframes pulse {
+    0% {
+        box-shadow: none;
+        background-color: black;
+    }
+    50% {
+        box-shadow: 
+            0 0 1px red,
+            0 0 2px red,
+            0 0 4px red,
+            0 0 8px red;
+        background-color: red;
+    }
+    100% {
+        box-shadow: none;
+        background-color: black;
+    }
 }

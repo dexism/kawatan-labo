@@ -15,7 +15,7 @@
     "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "target": "any_roll", "value": -3, "condition": "is_damaged" } }]
   },
   "ST-01": {
-    "name": "平気", "category": "補助", 
+    "name": "平気", "category": "無効化", 
     "tags": ["損傷無効", "オート"], "maliceLevel": 1.5,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "パーツが損傷しても、そのパーツのマニューバをターン終了まで使用できる。", 
@@ -35,8 +35,8 @@
     "effects": [{ "ref": "REPAIR_PART", "params": { "target": "self", "part_type": "基本", "count": 1 } }]
   },
   "ST-03": {
-    "name": "庇う", "category": "防御", 
-    "tags": ["防御", "ダメージ"], "maliceLevel": 1.5,
+    "name": "庇う", "category": "補助", 
+    "tags": ["ダメージ"], "maliceLevel": 1.5,
     "timing": "ダメージ", "cost": 0, "range": "0～1",
     "description": "射程内の味方が受けたダメージを代わりに受ける。1ターンに何度でも使用可。", 
     "description_raw": "対象が受けたダメージを自身が受ける。1ターンに何度でも使用可。",
@@ -45,7 +45,7 @@
     "effects": [{ "ref": "TAKE_DAMAGE_FOR_ALLY", "params": { "limit_per_turn": "none" } }]
   },
   "ST-04": {
-    "name": "肉の盾", "category": "補助", 
+    "name": "肉の盾", "category": "無効化", 
     "tags": ["切断無効", "連撃無効", "全体攻撃無効", "転倒無効", "移動無効", "ダメージ"], "maliceLevel": 1.5,
     "timing": "ダメージ", "cost": 0, "range": "0～1",
     "description": "ダメージに付随する効果（切断、爆発など）を全て打ち消す。", 
@@ -172,14 +172,14 @@
     "tags": ["ジャッジ", "攻撃判定修正"], "maliceLevel": 1.5,
     "timing": "ジャッジ", "cost": 0, "range": "自身",
     "description": "自身の白兵攻撃$6、サイコロの出目「6」固定。", 
-    "description_raw": "自身の白兵攻撃判定においてのみ使用可能。攻撃判定のサイコロ出目は「６」となり、いかなる効果でも振り直しはできなくなる。",
+    "description_raw": "自身の白兵攻撃判定においてのみ使用可能。攻撃判定のサイコロ出目は「6」となり、いかなる効果でも振り直しはできなくなる。",
     "flavor_text": "外せない一撃がある。いいだろう、絶対に、当ててやる。あやふやな運から解放された、絶対の結末を見せてやる。",
     "source": { "book": "ESP", "page": 40 },
     "effects": [{ "ref": "SET_DICE_ROLL", "params": { "target_roll": "self_melee_attack", "value": 6, "prevent_reroll": true } }]
   },
   "TN-07": {
-    "name": "冥王", "category": "無効化",
-    "tags": ["攻撃判定修正", "オート", "移動妨害無効"], "maliceLevel": 1.5,
+    "name": "冥王", "category": "難易度変更",
+    "tags": ["攻撃判定修正", "オート", "移動妨害無効", "難易度変更"], "maliceLevel": 1.5,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "レギオンの「移動妨害」無効化。レギオンからの攻撃は判定値7以上でなければダメージを受けない。", 
     "description_raw": "レギオンの「移動妨害」を常に無効化してよい。さらに、レギオンがあなたに対して行った攻撃判定は判定値7以上でなければダメージを与えない。",
@@ -363,7 +363,7 @@
 
   "//": "---------- バロック (BR) ----------",
   "BR-SP": {
-    "name": "異形存在", "category": "防御", 
+    "name": "異形存在", "category": "難易度変更", 
     "tags": ["防御", "オート"], "maliceLevel": 2,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "攻撃を受けた際、大成功でなければ命中箇所を任意に決めてよい。", 
@@ -387,7 +387,7 @@
     "tags": ["強化", "オート"], "maliceLevel": 1.5,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "肉弾攻撃・白兵攻撃の与ダメージ+1。", 
-    "description_raw": "肉弾攻撃・白兵攻撃における与ダメージ+1。",
+    "description_raw": "肉弾攻撃・白兵攻撃におけるダメージ+1。",
     "flavor_text": "人間にありえざる死者の筋力。さらにそれを高め、高め、高められた。細胞に込められた怪物は、解放の時を常に待っている。",
     "source": { "book": "基本ルールブック", "page": 76 }, 
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "damageBonus", "value": 1, "duration": "permanent", "condition": ["肉弾攻撃", "白兵攻撃"] } }]
@@ -433,7 +433,7 @@
     "effects": [{ "ref": "TRADE_DAMAGE_FOR_EFFECTS", "params": { "damage_bonus": 1, "removed_tags": ["切断", "爆発", "転倒", "全体攻撃"] } }]
   },
   "BR-07": {
-    "name": "結晶化", "category": "補助",
+    "name": "結晶化", "category": "無効化",
     "tags": ["防御", "ダメージ", "切断無効", "爆発無効", "移動無効"], "maliceLevel": 1.5,
     "timing": "ダメージ", "cost": 1, "range": "自身",
     "description": "「切断」「爆発」「移動」無効化。使用制限なし", 
@@ -475,7 +475,7 @@
     "effects": [{ "ref": "REROLL_DICE", "params": { "target_roll": ["自身の攻撃判定"] } }]
   },
   "RM-03": {
-    "name": "言霊", "category": "補助", 
+    "name": "言霊", "category": "無効化", 
     "tags": ["損傷無効", "ラピッド"], "maliceLevel": 1.5,
     "timing": "ラピッド", "cost": 1, "range": "0",
     "description": "対象の損傷したパーツ1つを選び、ターン終了までそのパーツのマニューバを使用可能にする。", 
@@ -557,8 +557,8 @@
     "effects": []
   },
   "SY-03": {
-    "name": "運命歪曲", "category": "妨害",
-    "tags": ["ジャッジ", "狂気点操作", "妨害"],
+    "name": "運命歪曲", "category": "難易度変更",
+    "tags": ["ジャッジ", "狂気点操作", "難易度変更"],
     "timing": "ジャッジ", "cost": "狂気点1", "range": "0～3",
     "description": "あなたを対象とした攻撃判定でのみ使用可。妨害0", 
     "description_raw": "あなたを対象とした攻撃判定でのみ使用可。コストの代わりに、あなたは任意の未練に狂気点1点を加える。判定の結果は判定値に関係なく「失敗」となる。",

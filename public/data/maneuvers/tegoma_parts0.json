@@ -8,7 +8,7 @@
     "tags": ["移動", "アクション"], "maliceLevel": 0,
     "description": "移動1。", 
     "description_raw": "移動1", 
-    "source": { "book": "基本ルールブック" }, 
+    "source": { "book": "基本ルールブック", "page": 129 }, 
     "timing": "アクション", "cost": "3", "range": "自身", 
     "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": 1 } }] 
   },
@@ -17,7 +17,7 @@
     "tags": ["攻撃", "アクション", "肉弾攻撃", "連撃"],  "maliceLevel": 0,
     "description": "肉弾攻撃1+連撃[同エリアの同名÷10]。", 
     "description_raw": "肉弾攻撃1+連撃[同エリアの同名の数÷10]（切り捨て）", 
-    "source": { "book": "基本ルールブック" }, 
+    "source": { "book": "基本ルールブック", "page": 129 }, 
     "timing": "アクション", "cost": "2", "range": "0", 
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 1, "on_hit_dynamic": { "type": "CHAIN_ATTACK_BY_ALLY_COUNT" } } }] 
   },
@@ -26,7 +26,7 @@
     "tags": ["移動", "アクション"], "maliceLevel": 0,
     "description": "移動1～2。", 
     "description_raw": "移動1～2", 
-    "source": { "book": "基本ルールブック" }, 
+    "source": { "book": "基本ルールブック", "page": 129 }, 
     "timing": "アクション", "cost": "2", "range": "自身", 
     "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": "1-2" } }] 
   },
@@ -35,7 +35,7 @@
     "tags": ["攻撃", "アクション", "肉弾攻撃"], "maliceLevel": 0,
     "description": "肉弾攻撃2。", 
     "description_raw": "肉弾攻撃2", 
-    "source": { "book": "基本ルールブック" }, 
+    "source": { "book": "基本ルールブック", "page": 130 }, 
     "timing": "アクション", "cost": "2", "range": "0", 
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 2 } }] 
   },
@@ -44,7 +44,7 @@
     "tags": ["オート", "攻撃判定修正"], "maliceLevel": 0,
     "description": "肉弾攻撃の判定+1。", 
     "description_raw": "肉弾攻撃マニューバの攻撃判定+1", 
-    "source": { "book": "基本ルールブック" }, 
+    "source": { "book": "基本ルールブック", "page": 130 }, 
     "timing": "オート", "cost": "なし", "range": "自身", 
     "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "attackCheckBonus", "value": 1, "condition": "肉弾攻撃" } }] 
   },
@@ -53,7 +53,7 @@
     "tags": ["行動値", "オート"], "maliceLevel": 0,
     "description": "最大行動値+2。", 
     "description_raw": "最大行動値+2", 
-    "source": { "book": "基本ルールブック" }, 
+    "source": { "book": "基本ルールブック", "page": 130 }, 
     "timing": "オート", "cost": "なし", "range": "自身", 
     "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 2 } }] 
   },
@@ -62,15 +62,27 @@
     "tags": ["妨害", "オート"], "maliceLevel": 0,
     "description": "自身への肉弾・白兵攻撃の判定-1。", 
     "description_raw": "自身を対象とする肉弾攻撃・白兵攻撃の判定値-1(全体攻撃は自身に対してのみ-1)", 
-    "source": { "book": "基本ルールブック" }, 
+    "source": { "book": "基本ルールブック", "page": 132 }, 
     "timing": "オート", "cost": "なし", "range": "自身", 
     "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "defenseCheckBonus", "value": -1, "condition": ["肉弾攻撃", "白兵攻撃"] } }] 
   },
   "P0-08": { 
-    "name": "触肢", "category": "移動", "tags": ["移動", "アクション"], "maliceLevel": 0, "description": "移動1。", "description_raw": "移動1", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "3", "range": "自身", "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": 1 } }] 
+    "name": "触肢", "category": "移動", 
+    "tags": ["移動", "アクション"], "maliceLevel": 0, 
+    "description": "移動1。", 
+    "description_raw": "移動1", 
+    "source": { "book": "基本ルールブック", "page": 132 }, 
+    "timing": "アクション", "cost": "3", "range": "自身", 
+    "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": 1 } }] 
   },
   "P0-09": { 
-    "name": "視界共有", "category": "支援", "tags": ["支援", "ジャッジ"], "maliceLevel": 0, "description": "支援2。", "description_raw": "支援2", "source": { "book": "基本ルールブック" }, "timing": "ジャッジ", "cost": "1", "range": "0～1", "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "value": 2 } }] 
+    "name": "視界共有", "category": "支援", 
+    "tags": ["支援", "ジャッジ"], "maliceLevel": 0, 
+    "description": "支援2。", 
+    "description_raw": "支援2", 
+    "source": { "book": "基本ルールブック", "page": 132 }, 
+    "timing": "ジャッジ", "cost": "1", "range": "0～1", 
+    "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "value": 2 } }] 
   },
   "P0-10": { 
     "name": "呪い髪", "category": "支援", "tags": ["支援", "妨害", "ジャッジ"], "maliceLevel": 0, "description": "支援1か妨害1。", "description_raw": "支援1か妨害1", "source": { "book": "基本ルールブック" }, "timing": "ジャッジ", "cost": "0", "range": "0", "effects": [{ "ref": "CHOICE_JUDGE_MOD", "params": { "options": [{ "value": 1 }, { "value": -1 }] } }] 
@@ -94,7 +106,7 @@
     "name": "捕縛触手", "category": "移動妨害", "tags": ["移動妨害", "ラピッド"], "maliceLevel": 0, "description": "移動妨害1。", "description_raw": "移動妨害1", "source": { "book": "基本ルールブック" }, "timing": "ラピッド", "cost": "1", "range": "0～1", "effects": [{ "ref": "GENERIC_MOVE_DEBUFF", "params": { "value": -1 } }] 
   },
   "P0-15": { 
-    "name": "根肢", "category": "補助", "tags": ["オート", "転倒無効", "移動無効"], "maliceLevel": 0, "description": "「転倒」「移動」を無効化可。", "description_raw": "「転倒」「移動」を無効化可", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "NEGATE_STATUS_EFFECT", "params": { "effects_to_negate": ["転倒", "移動"], "optional": true } }] 
+    "name": "根肢", "category": "無効化", "tags": ["オート", "転倒無効", "移動無効"], "maliceLevel": 0, "description": "「転倒」「移動」を無効化可。", "description_raw": "「転倒」「移動」を無効化可", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "NEGATE_STATUS_EFFECT", "params": { "effects_to_negate": ["転倒", "移動"], "optional": true } }] 
   },
   "P0-16": { 
     "name": "反射行動", "category": "行動値", "tags": ["行動値", "オート"], "maliceLevel": 0, "description": "最大行動値+2。", "description_raw": "最大行動値+2", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 2 } }] 
@@ -129,7 +141,7 @@
     "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 1 } }] 
   },
   "P0-22": { 
-    "name": "オートバランサー", "category": "補助", "tags": ["オート", "転倒無効", "移動無効"], "maliceLevel": 0, "description": "「転倒」「移動」を無効化可。", "description_raw": "「転倒」「移動」を無効化可", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "NEGATE_STATUS_EFFECT", "params": { "effects_to_negate": ["転倒", "移動"], "optional": true } }] },
+    "name": "オートバランサー", "category": "無効化", "tags": ["オート", "転倒無効", "移動無効"], "maliceLevel": 0, "description": "「転倒」「移動」を無効化可。", "description_raw": "「転倒」「移動」を無効化可", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "NEGATE_STATUS_EFFECT", "params": { "effects_to_negate": ["転倒", "移動"], "optional": true } }] },
   "P0-23": { 
     "name": "メインエンジン", "category": "行動値", "tags": ["行動値", "オート"], "maliceLevel": 0, "description": "最大行動値+2。", "description_raw": "最大行動値+2", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 2 } }] },
   "P0-24": { 
@@ -175,7 +187,7 @@
     "source": { "book": "基本ルールブック" }, 
     "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 2 } }] },
   "P0-33": { 
-    "name": "巨体", "category": "補助", "tags": ["オート", "転倒無効", "移動無効"], "maliceLevel": 0, "description": "「転倒」「移動」を無効化可。", "description_raw": "「転倒」「移動」を無効化してよい", "source": { "book": "基本ルールブック", "errata": "1.6.1" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "NEGATE_STATUS_EFFECT", "params": { "effects_to_negate": ["転倒", "移動"], "optional": true } }] },
+    "name": "巨体", "category": "無効化", "tags": ["オート", "転倒無効", "移動無効"], "maliceLevel": 0, "description": "「転倒」「移動」を無効化可。", "description_raw": "「転倒」「移動」を無効化してよい", "source": { "book": "基本ルールブック", "errata": "1.6.1" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "NEGATE_STATUS_EFFECT", "params": { "effects_to_negate": ["転倒", "移動"], "optional": true } }] },
   "P0-34": { 
     "name": "中枢神経", "category": "行動値", "tags": ["行動値", "オート"], "maliceLevel": 0, "description": "最大行動値+2。", "description_raw": "最大行動値+2", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 2 } }] },
   "P0-35": { 
@@ -258,7 +270,7 @@
     "timing": "ダメージ", "cost": "1", "range": "自身", 
     "description": "自身の肉弾・白兵攻撃の与ダメージ+2。", 
     "description_raw": "自身が与える白兵攻撃・肉弾攻撃の与ダメージ+2", 
-    "source": { "book": "基本ルールブック" }, 
+    "source": { "book": "基本ルールブック", "page": 131 }, 
     "effects": [
       { "ref": "INCREASE_DEALT_DAMAGE", "params": { "value": 2, "condition": ["肉弾攻撃", "白兵攻撃"] } }
     ] 
@@ -269,7 +281,7 @@
     "timing": "ダメージ", "cost": "1", "range": "自身", 
     "description": "防御2。", 
     "description_raw": "防御2", 
-    "source": { "book": "基本ルールブック" }, 
+    "source": { "book": "基本ルールブック", "page": 131 }, 
     "effects": [{ "ref": "GENERIC_DEFENSE", "params": { "value": 2 } }] 
   },
   "P0-61": { 
@@ -326,7 +338,7 @@
     "name": "分解ガス", "category": "攻撃", "tags": ["攻撃", "アクション", "射撃攻撃", "全体攻撃"], "maliceLevel": 0, "description": "射撃攻撃1+全体攻撃。", "description_raw": "射撃攻撃1+全体攻撃", "source": { "book": "基本ルールブック" }, "timing": "アクション", "cost": "3", "range": "1", "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "射撃", "damage": 1, "on_hit": ["AREA_ATTACK"] } }] 
   },
   "P0-71": { 
-    "name": "自動制御装置", "category": "補助", "tags": ["損傷無効", "オート"], "maliceLevel": 0, "description": "パーツが損傷してもターン終了まで使用可。", "description_raw": "パーツを損傷しても、ターン終了までマニューバ使用可", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "ignore_part_damage", "value": true, "duration": "end_of_turn" } }] 
+    "name": "自動制御装置", "category": "無効化", "tags": ["損傷無効", "オート"], "maliceLevel": 0, "description": "パーツが損傷してもターン終了まで使用可。", "description_raw": "パーツを損傷しても、ターン終了までマニューバ使用可", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "ignore_part_damage", "value": true, "duration": "end_of_turn" } }] 
   },
   "P0-72": { 
     "name": "スコープS", "category": "支援", "tags": ["支援", "オート"], "maliceLevel": 0, "description": "射撃・砲撃攻撃の判定に+2の支援。", "description_raw": "射撃攻撃・砲撃攻撃のみ支援2", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "attackCheckBonus", "value": 2, "condition": ["射撃攻撃", "砲撃攻撃"] } }] 
@@ -411,7 +423,7 @@
     "effects": []
   },
   "P0-81": {
-    "name": "自動再接続", "category": "防御",
+    "name": "自動再接続", "category": "無効化",
     "tags": ["オート", "切断無効"], "maliceLevel": 0,
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "「切断」を無効化（【オートセパレート】相当）",

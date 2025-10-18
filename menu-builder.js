@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.19.87"; // バージョンを更新
+export const version = "1.21.88"; // バージョンを更新
 
 import * as data from './data-handler.js';
 import * as charManager from './character-manager.js';
@@ -24,6 +24,7 @@ let menuOpener = null;
 const rows = ["奈落", "地獄", "煉獄", "花園", "楽園"];
 let resolveTargetSelection = null;
 let activeFilter = '宣言';
+let relationshipResizeTimer = null;
 // let activeReferenceFilters = {};
 
 /**
@@ -117,6 +118,7 @@ export function buildManeuverMenu(char, element) {
     `;
     menu.appendChild(header);
     header.querySelector('#menuHeaderIcon').onclick = () => showCharacterSheetModal(char);
+    
     header.querySelector('.header-close-btn').onclick = closeAllMenus;
 
     // --- 第二ブロック：フィルタリングボタン ---
@@ -2227,4 +2229,183 @@ export function showAttackConfirmationModal(performer, target, maneuver, index, 
             };
         }
     });
+}
+
+/**
+ * 姉妹間の人間関係モーダルを構築・表示する
+ */
+export function showRelationshipModal() {
+    const modal = document.getElementById('relationshipModal');
+    const chartContainer = document.getElementById('relationshipChartContainer');
+    const closeBtn = document.getElementById('closeRelationshipModalBtn');
+
+    if (!modal || !chartContainer || !closeBtn) return;
+
+    // ▼▼▼ ここからが修正・追加箇所 (1/3) ▼▼▼
+
+    /**
+     * チャートの内容を再描画する内部関数
+     */
+    const renderChart = () => {
+        // 既存の内容をクリア
+        chartContainer.innerHTML = '';
+
+        const pcs = charManager.getCharacters().filter(c => c.type === 'pc' && !c.isDestroyed && !c.hasWithdrawn);
+        const numPcs = pcs.length;
+
+        if (numPcs < 2) {
+            // 再描画時に姉妹が減っていた場合のフォールバック
+            closeModal();
+            return;
+        }
+
+        const containerSize = chartContainer.offsetHeight;
+        const containerSizeX = chartContainer.offsetWidth;
+        const containerSizeY = containerSize;
+        const radius = containerSize / 2 * 0.75;
+        const centerX = containerSizeX / 2;
+        const centerY = containerSizeY / 2;
+        
+        const positions = [];
+
+        // ステップ1: 全てのドールのアイコンを配置し、座標を保存
+        pcs.forEach((pc, i) => {
+            const angle = (i / numPcs) * 2 * Math.PI - Math.PI / 2;
+            const x = centerX + radius * Math.cos(angle);
+            const y = centerY + radius * Math.sin(angle);
+            
+            positions.push({ x, y });
+
+            const node = document.createElement('div');
+            node.className = 'doll-node';
+            node.style.left = `${x}px`;
+            node.style.top = `${y}px`;
+            node.innerHTML = `
+                <img src="${pc.img}" alt="${pc.name}">
+                <div class="name-label">${pc.name}</div>
+            `;
+            chartContainer.appendChild(node);
+        });
+
+        // ステップ2: 保存した座標を使い、線とテキストボックスを配置
+        for (let i = 0; i < numPcs; i++) {
+            for (let j = 0; j < numPcs; j++) {
+                if (i === j) continue;
+
+                const sourceDoll = pcs[i];
+                const targetDoll = pcs[j];
+                const p1 = positions[i];
+                const p2 = positions[j];
+
+                if (j > i) {
+                    const distance = Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+                    const angleRad = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+                    const angleDeg = angleRad * (180 / Math.PI);
+
+                    const line = document.createElement('div');
+                    line.className = 'relationship-line';
+                    line.style.width = `${distance}px`;
+                    line.style.left = `${p1.x}px`;
+                    line.style.top = `${p1.y}px`;
+                    line.style.transform = `rotate(${angleDeg}deg)`;
+                    chartContainer.appendChild(line);
+                }
+                
+                // 1. ドールiがドールjに対して持っている実際の未練データを検索
+                const foundRegretOnDoll = sourceDoll.regrets.find(r => r.name && r.name.includes(targetDoll.name));
+                
+                let regretMasterData = null;
+                let isMadness = false;
+
+                if (foundRegretOnDoll) {
+                    const allRegrets = Object.values(data.getRegretData());
+                    regretMasterData = allRegrets.find(master => foundRegretOnDoll.name.includes(master.name));
+                } else {
+                    regretMasterData = data.getRandomSisterRegret();
+                }
+
+                // 実際の狂気点が4以上、または、約20%の確率でランダムに発狂状態にする
+                if (regretMasterData) {
+                    const isActuallyMad = foundRegretOnDoll && foundRegretOnDoll.points >= 4;
+                    isMadness = isActuallyMad || (Math.random() < 0.2);
+                }
+
+                if (regretMasterData) {
+                    const dx = p2.x - p1.x;
+                    const dy = p2.y - p1.y;
+                    const totalDistance = Math.sqrt(dx * dx + dy * dy);
+                    const unitVectorX = dx / totalDistance;
+                    const unitVectorY = dy / totalDistance;
+                    const textboxDistance = containerSize * 0.16;
+                    const textboxX = p1.x + unitVectorX * textboxDistance;
+                    const textboxY = p1.y + unitVectorY * textboxDistance;
+                    
+                    const textbox = document.createElement('div');
+                    textbox.className = 'regret-textbox';
+
+                    // 4. ツールチップ（title属性）に発狂時の効果を設定
+                    textbox.title = `発狂：${regretMasterData.madnessName}\n効果：${regretMasterData.madnessEffect}`;
+                    
+                    // 5. 発狂状態に応じてクラスと表示テキストを切り替え
+                    if (isMadness) {
+                        textbox.classList.add('is-madness');
+                        textbox.textContent = `${regretMasterData.madnessName}`;
+                    } else {
+                        textbox.textContent = `${regretMasterData.name}`;
+                    }
+
+                    textbox.style.left = `${textboxX}px`;
+                    textbox.style.top = `${textboxY}px`;
+                    chartContainer.appendChild(textbox);
+                }
+            }
+        }
+    };
+
+    // ▼▼▼ ここからが修正・追加箇所 (2/3) ▼▼▼
+
+    /**
+     * リサイズイベントのハンドラ（デバウンス処理付き）
+     */
+    const handleResize = () => {
+        clearTimeout(relationshipResizeTimer);
+        relationshipResizeTimer = setTimeout(() => {
+            if (modal.classList.contains('is-visible')) {
+                renderChart();
+            }
+        }, 250); // 250ミリ秒待ってから再描画
+    };
+
+    /**
+     * モーダルを閉じる際の処理
+     */
+    const closeModal = () => {
+        modal.classList.remove('is-visible');
+        // モーダルが閉じたらリサイズイベントの監視を解除する
+        window.removeEventListener('resize', handleResize);
+    };
+    
+    // ▼▼▼ ここからが修正・追加箇所 (3/3) ▼▼▼
+
+    // 姉妹が2人未満の場合はここで処理を終了
+    const pcs = charManager.getCharacters().filter(c => c.type === 'pc' && !c.isDestroyed && !c.hasWithdrawn);
+    if (pcs.length < 2) {
+        ui.showToastNotification("関係性を表示するには姉妹が2人以上必要です。", 2000);
+        return;
+    }
+
+    // 初回描画
+    renderChart();
+
+    // イベントリスナーを設定
+    closeBtn.onclick = closeModal;
+    modal.onclick = (e) => {
+        if (e.target === modal) closeModal();
+    };
+
+    // モーダル表示時にリサイズイベントの監視を開始
+    window.addEventListener('resize', handleResize);
+    
+    // モーダルを表示
+    modal.classList.add('is-visible');
 }

@@ -221,25 +221,26 @@
     flex-shrink: 0;
 }
 /* --- カテゴリ色分け --- */
-.category-color-move {          border-right: 10px solid var(--color-move); }
-.category-color-move-debuff {   border-right: 10px solid var(--color-move-debuff); }
-.category-color-staffing {      border-right: 10px solid var(--color-staffing); }
-.category-color-attack {        border-right: 10px solid var(--color-attack); }
-.category-color-defense {       border-right: 10px solid var(--color-defense); }
-.category-color-support {       border-right: 10px solid var(--color-support); }
-.category-color-debuff {        border-right: 10px solid var(--color-debuff); }
-.category-color-action-boost {  border-right: 10px solid var(--color-action-boost); }
-.category-color-heal {          border-right: 10px solid var(--color-heal); }
-.category-color-utility {       border-right: 10px solid var(--color-utility); }
-.category-color-sacrifice {     border-right: 10px solid var(--color-sacrifice); }
-.category-color-enhancement {   border-right: 10px solid var(--color-enhancement); } 
-.category-color-vulnerability { border-right: 10px solid var(--color-vulnerability); }
-.category-color-dialogue {      border-right: 10px solid var(--color-dialogue); } 
-.category-color-reinforcement { border-right: 10px solid var(--color-reinforcement);}
-.category-color-madness {       border-right: 10px solid var(--color-madness); } 
-.category-color-negation {      border-right: 10px solid var(--color-negation); }
-.category-color-cost {          border-right: 10px solid var(--color-cost); }
-.category-color-other {         border-right: 10px solid var(--color-other); }
+.category-color-difficulty-change { border-right: 10px solid var(--color-difficulty-change); }
+.category-color-move {              border-right: 10px solid var(--color-move); }
+.category-color-move-debuff {       border-right: 10px solid var(--color-move-debuff); }
+.category-color-staffing {          border-right: 10px solid var(--color-staffing); }
+.category-color-attack {            border-right: 10px solid var(--color-attack); }
+.category-color-defense {           border-right: 10px solid var(--color-defense); }
+.category-color-support {           border-right: 10px solid var(--color-support); }
+.category-color-debuff {            border-right: 10px solid var(--color-debuff); }
+.category-color-action-boost {      border-right: 10px solid var(--color-action-boost); }
+.category-color-heal {              border-right: 10px solid var(--color-heal); }
+.category-color-utility {           border-right: 10px solid var(--color-utility); }
+.category-color-sacrifice {         border-right: 10px solid var(--color-sacrifice); }
+.category-color-enhancement {       border-right: 10px solid var(--color-enhancement); } 
+.category-color-vulnerability {     border-right: 10px solid var(--color-vulnerability); }
+.category-color-dialogue {          border-right: 10px solid var(--color-dialogue); } 
+.category-color-reinforcement {     border-right: 10px solid var(--color-reinforcement);}
+.category-color-madness {           border-right: 10px solid var(--color-madness); } 
+.category-color-negation {          border-right: 10px solid var(--color-negation); }
+.category-color-cost {              border-right: 10px solid var(--color-cost); }
+.category-color-other {             border-right: 10px solid var(--color-other); }
 
 /* ================================
    3.1 マニューバアイテム 本体

@@ -109,7 +109,8 @@
             <div id="damagePhaseIndicator" class="phase-indicator">ダメージ<span class="hide-on-mobile"><br>タイミング</span></div>
           </div>
           <div class="control-container hide-on-mobile">
-            <button id="showReferenceBtn" class="ref-btn">📖</button>
+            <button id="showReferenceBtn" class="ref-btn" title="リファレンス">📖</button>
+            <button id="showRelationshipBtn" class="ref-btn" title="姉妹の関係">🧡</button>
             <div id="inBattleControls" class="in-battle-controls">
               <button id="countdownBtn" class="phase-btn">カウントダウン</button>
               <button id="endTurnBtn" class="phase-btn">ターン終了</button>
@@ -301,7 +302,9 @@
 </div>
 
 <div id="diceRoller" class="dice-roller">🎲</div>
+
 <div id="maneuverMenu"></div>
+
 <div id="simpleMenuModal" class="modal-backdrop simple-menu-modal-backdrop">
   <div class="modal-content simple-menu-modal-content">
     <div class="modal-header">
@@ -312,6 +315,7 @@
     <div id="simpleMenuModalFooter" class="modal-footer" style="display: none;"></div>
   </div>
 </div>
+
 <div id="undeadListModal" class="modal-backdrop">
   <div class="modal-content">
     <div class="modal-header">
@@ -321,6 +325,21 @@
     <div class="modal-body" id="undeadListContainer"></div>
   </div>
 </div>
+
+<div id="relationshipModal" class="modal-backdrop">
+  <div class="modal-content relationship-modal-content">
+    <div class="modal-header">
+      <h3>姉妹の関係性</h3>
+      <button id="closeRelationshipModalBtn" class="close-btn">&times;</button>
+    </div>
+    <div class="modal-body relationship-modal-body">
+      <div id="relationshipChartContainer" class="relationship-chart-container">
+        <!-- ドールのアイコン（ノード）と線はここに動的に生成されます -->
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="damageModal" class="modal-backdrop">
   <div class="modal-content" style="max-width: 600px;">
     <div class="modal-header">
@@ -336,6 +355,7 @@
     </div>
   </div>
 </div>
+
 <div id="madnessModal" class="modal-backdrop">
   <div class="modal-content" style="max-width: 700px;">
     <div class="modal-header">
@@ -347,6 +367,7 @@
     </div>
   </div>
 </div>
+
 <div id="interruptionWindow" class="interruption-window" style="display:none;">
     <div id="interruptionHeader" class="interruption-header">
         <h4>割り込み処理</h4>
@@ -356,6 +377,7 @@
         <button id="skipInterruptionBtn" class="card-action-btn">割り込まない</button>
     </div>
 </div>
+
 <div id="loading-overlay" class="loading-overlay-backdrop">
   <div class="loading-content">
     <div id="loading-message">読み込んでいます...</div>
@@ -364,6 +386,7 @@
     </div>
   </div>
 </div>
+
 <div id="toast-notification" class="toast-notification"></div>
 
 <!-- 外部JavaScriptファイルの読み込み -->
@@ -379,7 +402,6 @@
 <script src="character-converter.js" type="module"></script>
 <script src="settings-manager.js" type="module"></script>
 <script src="script.js" type="module"></script>
-
 <script type="module" src="/dice-3d.js"></script>
 
 <script src="//accaii.com/nbpst/script.js" async></script><noscript><img src="//accaii.com/nbpst/script?guid=on"></noscript>
