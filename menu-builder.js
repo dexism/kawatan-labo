@@ -5,10 +5,11 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.21.88"; // バージョンを更新
+export const version = "1.22.89"; // バージョンを更新
 
 import * as data from './data-handler.js';
 import * as charManager from './character-manager.js';
+import { updateAndComplementRegrets } from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
 import * as ui from './ui-manager.js';
 // import { performDiceRoll } from './dice-roller.js'; 
@@ -18,6 +19,7 @@ import { getLocalStorageUsage, clearLocalImageCache } from './settings-manager.j
 import * as stateManager from './state-manager.js';
 import { calculateManeuverRange } from './battle-helpers.js';
 import { sortManeuvers } from './reference.js';
+import { performDiceRoll } from './dice-roller.js';
 
 // --- モジュール内変数 ---
 let menuOpener = null;
@@ -731,6 +733,45 @@ function filterManeuvers(maneuvers, filterId, char) {
     return results;
 }
 
+/**
+ * 個別の未練リストアイテム（チェックボックス付き）を作成する
+ * @param {object} regret - 未練オブジェクト
+ * @param {object} char - 対象キャラクターオブジェクト
+ * @param {boolean} isFixedChecked - チェック状態を固定するかどうか
+ * @returns {HTMLElement} - 生成されたp要素
+ */
+function createRegretItem(regret, char) { // isFixedChecked 引数を削除
+    const p = document.createElement('p');
+    p.className = 'regret-list-item';
+    
+    const points = regret.points || 0;
+    const symbols = '●'.repeat(points) + '○'.repeat(4 - points);
+    
+    const checkboxId = `regret_check_${char.id}_${Math.random().toString(36).substr(2, 9)}`;
+
+    // isFixedChecked を参照していた部分を regret.isChecked に変更
+    const isDisabled = regret.isForTreasure || (regret.targetName && charManager.getCharacters().some(c => c.type === 'pc' && (c.name === regret.targetName || c.displayName === regret.targetName)));
+
+    p.innerHTML = `
+        <input type="checkbox" id="${checkboxId}" ${regret.isChecked ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
+        <label for="${checkboxId}">
+            <span class="regret-name">${regret.name}</span>
+            <span class="regret-points">：${points}点 ${symbols}</span>
+        </label>
+    `;
+
+    // isDisabled フラグでイベントリスナーの追加を制御
+    if (!isDisabled) {
+        const checkbox = p.querySelector('input[type="checkbox"]');
+        checkbox.addEventListener('change', (e) => {
+            regret.isChecked = e.target.checked;
+            ui.updateSingleCharacterCard(char.id);
+        });
+    }
+
+    return p;
+}
+
 export function showCharacterSheetModal(char) {
     const isDoll = char.category === 'ドール';
     const coreData = data.getCoreData();
@@ -860,6 +901,7 @@ export function showCharacterSheetModal(char) {
                 ? `<p>${char.hint.key || ''}<b>【${char.hint.name}】</b><br>${char.hint.description || '（詳細情報なし）'}</p>` 
                 : '<p>（暗示は設定されていません）</p>'}
         </div>
+
         <div class="sheet-section sheet-memory">
             <h4>記憶のカケラ</h4>
             ${(() => {
@@ -892,20 +934,14 @@ export function showCharacterSheetModal(char) {
                 }).join('');
             })()}
         </div>
+        
         <div class="sheet-section sheet-regrets">
             <h4>未練</h4>
-            ${char.regrets && char.regrets.length > 0
-                ? char.regrets.map(r => {
-                    const points = r.points || 0;
-                    const symbols = '●'.repeat(points) + '○'.repeat(4 - points);
-                    const allRegrets = data.getRegretData();
-                    const regretMaster = Object.values(allRegrets).find(master => r.name.includes(master.name));
-                    const madnessInfo = regretMaster ? `：${regretMaster.madnessName}：${regretMaster.madnessEffect}` : '';
-                    return `<p>${r.name}：${points}点 ${symbols}${madnessInfo}</p>`;
-                  }).join('')
-                : '<p>（未練はありません）</p>'
-            }
-        </div>` : ''}
+            <div id="regretListContainer" class="regret-list-container">
+                <!-- ここに未練が描画される -->
+            </div>
+        </div>` : ''};
+        
         <div class="sheet-section sheet-skills">
             <h4>スキル</h4>
             ${char.skills.map(skillName => {
@@ -933,6 +969,7 @@ export function showCharacterSheetModal(char) {
                 return `<div class="part-list-item"><span class="type">[${skillType}]</span> <b>【${skillName}】</b>《${maneuver.timing}/${maneuver.cost}/${maneuver.range}》：${maneuver.description || maneuver.effect}</div>`;
             }).join('')}
         </div>
+
         <div class="sheet-section sheet-parts">
             <h4>パーツ</h4>
             <div class="sheet-parts-grid">
@@ -969,10 +1006,11 @@ export function showCharacterSheetModal(char) {
             </div>
         </div>
     </div>
+    
     `;
 
     ui.showModal({
-        title: "ネクロニカ 人形設計図",
+        title: "🪪 人形設計図",
         bodyHtml: bodyHtml,
         onRender: (modal, closeFn) => {
             modal.querySelector('.modal-content').classList.add('sheet-modal-content');
@@ -1026,6 +1064,7 @@ export function showCharacterSheetModal(char) {
                     showImageSelectionModal(char, closeFn);
                 };
             }
+
             const areaSelector = modal.querySelector('#areaSelector');
             if (areaSelector) {
                 areaSelector.onchange = (e) => {
@@ -1037,6 +1076,7 @@ export function showCharacterSheetModal(char) {
                     stateManager.autoSave(); 
                 };
             }
+
             const reloadBtn = modal.querySelector('.sheet-reload-btn');
             if (reloadBtn) {
                 reloadBtn.onclick = async () => {
@@ -1053,16 +1093,20 @@ export function showCharacterSheetModal(char) {
                         const convertedData = convertVampireBloodSheet(sourceData);
 
                         if (convertedData) {
-                            // character-managerに新しい更新関数を呼び出す
                             const updatedChar = charManager.updateCharacterFromReload(char.id, convertedData);
                             
-                            ui.renderCharacterCards();
-                            ui.updateMarkers();
+                            // ▼▼▼ ここからが今回の修正箇所 ▼▼▼
+
+                            // 1. UI全体を更新して、アンデッドカードの表示を最新化する
+                            ui.updateAllUI();
+                            
                             ui.showToastNotification(`「${updatedChar.name}」を更新しました。`, 2000);
 
-                            // モーダルを閉じて、更新された内容で再度開く
+                            // 2. モーダルを閉じて、更新された内容で再度開く
                             closeFn();
                             showCharacterSheetModal(updatedChar);
+
+                            // ▲▲▲ 修正ここまで ▲▲▲
                         } else {
                             throw new Error('データの変換に失敗しました。');
                         }
@@ -1085,8 +1129,73 @@ export function showCharacterSheetModal(char) {
                     }
                 };
             }
+
+            const regretContainer = modal.querySelector('#regretListContainer');
+            if (regretContainer) {
+                // ★★★ 表示の直前に、最新の状態にデータを更新 ★★★
+                updateAndComplementRegrets(char);
+
+                regretContainer.innerHTML = '';
+                
+                // 表示用のリストを作成
+                const treasureList = char.regrets.filter(r => r.isForTreasure);
+                const sisterList = char.regrets.filter(r => r.isChecked && !r.isForTreasure);
+                const otherList = char.regrets.filter(r => !r.isChecked);
+
+                // 指定の表示順で描画
+                treasureList.forEach(r => {
+                    const displayRegret = { ...r, name: `たからものへの${r.regretName || '依存'}` };
+                    regretContainer.appendChild(createRegretItemForSheet(displayRegret, char));
+                });
+                sisterList.forEach(r => {
+                    regretContainer.appendChild(createRegretItemForSheet(r, char));
+                });
+                otherList.forEach(r => {
+                    regretContainer.appendChild(createRegretItemForSheet(r, char));
+                });
+            }
         }
     });
+}
+
+/**
+ * 人形設計図モーダル専用の未練リストアイテムUIを構築する
+ * @param {object} regret - 表示する未練オブジェクト
+ * @param {object} char - 対象キャラクターオブジェクト
+ * @returns {HTMLElement}
+ */
+function createRegretItemForSheet(regret, char) {
+    const p = document.createElement('p');
+    p.className = 'regret-list-item';
+    
+    const points = regret.points || 0;
+    const symbols = '●'.repeat(points) + '○'.repeat(4 - points);
+    const checkboxId = `regret_check_${char.id}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    // 姉妹への未練（未設定含む）と、たからものへの未練はチェックボックスを無効化
+    const isDisabled = regret.isForTreasure || regret.isUnset || 
+        charManager.getCharacters().some(c => c.type === 'pc' && (c.name === regret.targetName || c.displayName === regret.targetName));
+
+    p.innerHTML = `
+        <input type="checkbox" id="${checkboxId}" ${regret.isChecked ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
+        <label for="${checkboxId}">
+            <span class="regret-name">${regret.name}</span>
+            <span class="regret-points">：${points}点 ${symbols}</span>
+        </label>
+    `;
+    
+    if (!isDisabled) {
+        p.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
+            // 元のデータ配列内のオブジェクトを探して、isCheckedプロパティを更新
+            const originalRegret = char.regrets.find(r => r.name === regret.name);
+            if (originalRegret) {
+                originalRegret.isChecked = e.target.checked;
+            }
+            // アンデッドカードの表示を即時更新
+            ui.updateSingleCharacterCard(char.id);
+        });
+    }
+    return p;
 }
 
 export function showUndeadListModal(type) {
@@ -1134,6 +1243,16 @@ export function showUndeadListModal(type) {
                 item.onclick = () => {
                     // 1. データ担当にキャラクター追加と合流を依頼する
                     charManager.addCharacterFromTemplate(id, type);
+
+                    // ▼▼▼ ここからが修正箇所 ▼▼▼
+                    if (type === 'pc') {
+                        charManager.getCharacters().forEach(pc => {
+                            if (pc.type === 'pc') {
+                                updateAndComplementRegrets(pc);
+                            }
+                        });
+                    }
+                    // ▲▲▲ 修正ここまで ▲▲▲
                     
                     // 2. データ処理が終わった後、UI担当に画面全体の再描画を命令する
                     ui.updateAllUI();
@@ -1514,9 +1633,22 @@ function showImportCharacterModal(type, charManagerInstance) {
                     if (convertedData) {
                         convertedData.sheetId = sheetId;
 
-                        charManagerInstance.addCharacterFromObject(convertedData, type);
-                        ui.renderCharacterCards();
-                        ui.checkBattleStartCondition();
+                        // 1. キャラクターを戦場に追加
+                        const newChar = charManager.addCharacterFromObject(convertedData, type);
+            
+                        // ▼▼▼ ここからが修正箇所 ▼▼▼
+                        // 2. 【重要】全ての姉妹の未練データを再検証・補完
+                        if (newChar.type === 'pc') {
+                            charManager.getCharacters().forEach(pc => {
+                                if (pc.type === 'pc') {
+                                    updateAndComplementRegrets(pc);
+                                }
+                            });
+                        }
+                        // 3. UI全体を再描画
+                        ui.updateAllUI(); 
+                        // ▲▲▲ 修正ここまで ▲▲▲
+
                         ui.showToastNotification(`「${convertedData.name}」を読み込みました。`, 2000);
                     } else { throw new Error('データの変換に失敗しました。'); }
                 } catch (error) { alert(`エラー: ${error.message}`); }
@@ -2241,38 +2373,45 @@ export function showRelationshipModal() {
 
     if (!modal || !chartContainer || !closeBtn) return;
 
-    // ▼▼▼ ここからが修正・追加箇所 (1/3) ▼▼▼
-
-    /**
-     * チャートの内容を再描画する内部関数
-     */
     const renderChart = () => {
-        // 既存の内容をクリア
         chartContainer.innerHTML = '';
-
         const pcs = charManager.getCharacters().filter(c => c.type === 'pc' && !c.isDestroyed && !c.hasWithdrawn);
         const numPcs = pcs.length;
+        if (numPcs < 2) { closeModal(); return; }
 
-        if (numPcs < 2) {
-            // 再描画時に姉妹が減っていた場合のフォールバック
-            closeModal();
-            return;
-        }
+        const containerWidth = chartContainer.offsetWidth;
+        const containerHeight = chartContainer.offsetHeight;
 
-        const containerSize = chartContainer.offsetHeight;
-        const containerSizeX = chartContainer.offsetWidth;
-        const containerSizeY = containerSize;
-        const radius = containerSize / 2 * 0.75;
-        const centerX = containerSizeX / 2;
-        const centerY = containerSizeY / 2;
+        // 1. ダミーのノードを作成して実際のサイズを取得する
+        const tempNode = document.createElement('div');
+        tempNode.className = 'doll-node';
+        tempNode.style.visibility = 'hidden'; // 画面には表示しない
+        chartContainer.appendChild(tempNode);
+        const nodeRect = tempNode.getBoundingClientRect();
+        const nodeDiameter = nodeRect.width; // 実際の幅（直径）を取得
+        const nodeRadius = nodeDiameter / 2;
+        chartContainer.removeChild(tempNode); // ダミーノードを削除
+
+        // 2. 取得したサイズを基に楕円の半径を計算（アイコンが重ならないように調整）
+        const radiusX = (containerWidth - nodeDiameter) / 2 * 1;
+        const radiusY = (containerHeight - nodeDiameter) / 2 * 1;
         
+        const centerX = containerWidth / 2;
+        const centerY = containerHeight / 2;
         const positions = [];
 
-        // ステップ1: 全てのドールのアイコンを配置し、座標を保存
+        // 1. 人数に応じた回転オフセット角度を計算 (ラジアン単位)
+        //    90度を人数で割り、それをラジアンに変換する
+        const angleOffset = (Math.PI / 3) / numPcs;
+
+        // ステップ1: 全てのドールのアイコンを「楕円周上」に配置
         pcs.forEach((pc, i) => {
-            const angle = (i / numPcs) * 2 * Math.PI - Math.PI / 2;
-            const x = centerX + radius * Math.cos(angle);
-            const y = centerY + radius * Math.sin(angle);
+            // 2. 角度の計算に、算出したオフセットを加える
+            // const angleOffset = (Math.PI / 2) / numPcs;
+            const angle = (i / numPcs) * 2 * Math.PI - Math.PI / 2 + angleOffset;
+            
+            const x = centerX + radiusX * Math.cos(angle);
+            const y = centerY + radiusY * Math.sin(angle);
             
             positions.push({ x, y });
 
@@ -2280,6 +2419,17 @@ export function showRelationshipModal() {
             node.className = 'doll-node';
             node.style.left = `${x}px`;
             node.style.top = `${y}px`;
+            
+            // ▼▼▼ ここからが今回の修正箇所 ▼▼▼
+            
+            // 1. 角度を度数法(degree)に変換
+            const angleDeg = angle * (180 / Math.PI);
+            
+            // 2. CSS変数としてstyle属性に角度を設定
+            node.style.setProperty('--angle', `${angleDeg}deg`);
+            
+            // ▲▲▲ 修正ここまで ▲▲▲
+
             node.innerHTML = `
                 <img src="${pc.img}" alt="${pc.name}">
                 <div class="name-label">${pc.name}</div>
@@ -2287,7 +2437,6 @@ export function showRelationshipModal() {
             chartContainer.appendChild(node);
         });
 
-        // ステップ2: 保存した座標を使い、線とテキストボックスを配置
         for (let i = 0; i < numPcs; i++) {
             for (let j = 0; j < numPcs; j++) {
                 if (i === j) continue;
@@ -2297,115 +2446,174 @@ export function showRelationshipModal() {
                 const p1 = positions[i];
                 const p2 = positions[j];
 
-                if (j > i) {
-                    const distance = Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
-                    const angleRad = Math.atan2(p2.y - p1.y, p2.x - p1.x);
-                    const angleDeg = angleRad * (180 / Math.PI);
+                const dx = p2.x - p1.x;
+                const dy = p2.y - p1.y;
+                const totalDistance = Math.sqrt(dx * dx + dy * dy);
+                const angleRad = Math.atan2(dy, dx);
+                const angleDeg = angleRad * (180 / Math.PI);
 
+                if (j > i) {
                     const line = document.createElement('div');
                     line.className = 'relationship-line';
-                    line.style.width = `${distance}px`;
+                    line.style.width = `${totalDistance}px`;
                     line.style.left = `${p1.x}px`;
                     line.style.top = `${p1.y}px`;
                     line.style.transform = `rotate(${angleDeg}deg)`;
                     chartContainer.appendChild(line);
                 }
                 
-                // 1. ドールiがドールjに対して持っている実際の未練データを検索
+                // ▼▼▼ ここからが今回の修正の中心部分 (2/2) ▼▼▼
+                // 取得した動的な値を使って計算
+                const innerDistance = totalDistance - nodeDiameter;
+                const offsetFromEdge = innerDistance * 0.18;
+                const textboxDistance = nodeRadius + offsetFromEdge;
+                // ▲▲▲ 修正ここまで ▲▲▲
+
+                const unitVectorX = dx / totalDistance;
+                const unitVectorY = dy / totalDistance;
+                const textboxX = p1.x + unitVectorX * textboxDistance;
+                const textboxY = p1.y + unitVectorY * textboxDistance;
+
+                const textbox = document.createElement('div');
+                textbox.className = 'regret-textbox';
+                textbox.style.left = `${textboxX}px`;
+                textbox.style.top = `${textboxY}px`;
+
                 const foundRegretOnDoll = sourceDoll.regrets.find(r => r.name && r.name.includes(targetDoll.name));
-                
                 let regretMasterData = null;
-                let isMadness = false;
 
                 if (foundRegretOnDoll) {
                     const allRegrets = Object.values(data.getRegretData());
                     regretMasterData = allRegrets.find(master => foundRegretOnDoll.name.includes(master.name));
-                } else {
-                    regretMasterData = data.getRandomSisterRegret();
                 }
-
-                // 実際の狂気点が4以上、または、約20%の確率でランダムに発狂状態にする
+                
                 if (regretMasterData) {
-                    const isActuallyMad = foundRegretOnDoll && foundRegretOnDoll.points >= 4;
-                    isMadness = isActuallyMad || (Math.random() < 0.2);
-                }
-
-                if (regretMasterData) {
-                    const dx = p2.x - p1.x;
-                    const dy = p2.y - p1.y;
-                    const totalDistance = Math.sqrt(dx * dx + dy * dy);
-                    const unitVectorX = dx / totalDistance;
-                    const unitVectorY = dy / totalDistance;
-                    const textboxDistance = containerSize * 0.16;
-                    const textboxX = p1.x + unitVectorX * textboxDistance;
-                    const textboxY = p1.y + unitVectorY * textboxDistance;
-                    
-                    const textbox = document.createElement('div');
-                    textbox.className = 'regret-textbox';
-
-                    // 4. ツールチップ（title属性）に発狂時の効果を設定
+                    const isMadness = foundRegretOnDoll.points >= 4;
                     textbox.title = `発狂：${regretMasterData.madnessName}\n効果：${regretMasterData.madnessEffect}`;
                     
-                    // 5. 発狂状態に応じてクラスと表示テキストを切り替え
                     if (isMadness) {
                         textbox.classList.add('is-madness');
-                        textbox.textContent = `${regretMasterData.madnessName}`;
+                        textbox.textContent = regretMasterData.madnessName;
                     } else {
-                        textbox.textContent = `${regretMasterData.name}`;
+                        textbox.textContent = regretMasterData.name;
+                        // 1. マスターデータに色が定義されていれば、スタイルを適用
+                        if (regretMasterData.color) {
+                            // textbox.style.borderColor = regretMasterData.color;
+                            textbox.style.color = regretMasterData.color;
+                        }
                     }
-
-                    textbox.style.left = `${textboxX}px`;
-                    textbox.style.top = `${textboxY}px`;
-                    chartContainer.appendChild(textbox);
+                } else {
+                    textbox.textContent = '未設定';
+                    textbox.classList.add('is-unset');
                 }
+                
+                chartContainer.appendChild(textbox);
+
+                textbox.addEventListener('click', (e) => {
+                    e.stopPropagation();
+
+                    // メニュー項目を定義
+                    const menuItems = [
+                        {
+                            label: '未練変更',
+                            onClick: () => {
+                                // ダイスロールを実行し、結果をコールバックで受け取る
+                                performDiceRoll({
+                                    command: 'NM',
+                                    showToast: true,
+                                    callback: (resultValue, hitLocation, resultText, newRegretMaster) => {
+                                        if (newRegretMaster) {
+                                            // character-managerの関数を呼び出してデータを更新
+                                            charManager.changeSisterRegret(sourceDoll.id, targetDoll.displayName, newRegretMaster);
+                                            // UIを再描画
+                                            renderChart();
+                                        }
+                                    }
+                                });
+                            }
+                        },
+                        {
+                            label: '発狂切替',
+                            onClick: () => {
+                                if (foundRegretOnDoll) {
+                                    // 狂気点を4と0でトグルさせる
+                                    foundRegretOnDoll.points = (foundRegretOnDoll.points >= 4) ? 0 : 4;
+                                    // UIを再描画
+                                    renderChart();
+                                } else {
+                                    ui.showToastNotification("未設定の未練は発狂状態を変更できません。", 2000);
+                                }
+                            }
+                        }
+                    ];
+                    
+                    // シンプルメニューモーダルでメニューを表示
+                    ui.showModal({
+                        title: `${sourceDoll.name} -> ${targetDoll.name}`,
+                        items: menuItems
+                    });
+                });
             }
         }
     };
-
-    // ▼▼▼ ここからが修正・追加箇所 (2/3) ▼▼▼
-
-    /**
-     * リサイズイベントのハンドラ（デバウンス処理付き）
-     */
+    
+    // ▼▼▼ ここからが修正箇所 (3/3) ▼▼▼
+    // handleResize と closeModal の定義を renderChart の外に移動
     const handleResize = () => {
         clearTimeout(relationshipResizeTimer);
         relationshipResizeTimer = setTimeout(() => {
             if (modal.classList.contains('is-visible')) {
                 renderChart();
             }
-        }, 250); // 250ミリ秒待ってから再描画
+        }, 250);
     };
 
-    /**
-     * モーダルを閉じる際の処理
-     */
     const closeModal = () => {
         modal.classList.remove('is-visible');
-        // モーダルが閉じたらリサイズイベントの監視を解除する
         window.removeEventListener('resize', handleResize);
     };
     
-    // ▼▼▼ ここからが修正・追加箇所 (3/3) ▼▼▼
-
-    // 姉妹が2人未満の場合はここで処理を終了
     const pcs = charManager.getCharacters().filter(c => c.type === 'pc' && !c.isDestroyed && !c.hasWithdrawn);
     if (pcs.length < 2) {
         ui.showToastNotification("関係性を表示するには姉妹が2人以上必要です。", 2000);
         return;
     }
 
-    // 初回描画
     renderChart();
-
-    // イベントリスナーを設定
     closeBtn.onclick = closeModal;
-    modal.onclick = (e) => {
-        if (e.target === modal) closeModal();
-    };
-
-    // モーダル表示時にリサイズイベントの監視を開始
+    modal.onclick = (e) => { if (e.target === modal) closeModal(); };
     window.addEventListener('resize', handleResize);
-    
-    // モーダルを表示
     modal.classList.add('is-visible');
+    // ▲▲▲ 修正ここまで ▲▲▲
+}
+
+/**
+ * 【新設・エクスポート】指定されたキャラクターの未練リストを、現在の姉妹構成に基づいて更新する
+ * isCheckedプロパティを正しく設定し、不要な未練をフィルタリングする責務を持つ
+ * @param {object} char - 更新対象のキャラクターオブジェクト
+ */
+export function updateRegretsForCharacter(char) {
+    if (!char || !char.regrets) return;
+
+    const allRegretsFromSheet = char.regrets;
+    const otherSisters = charManager.getCharacters().filter(c => c.type === 'pc' && c.id !== char.id);
+    const sisterNames = otherSisters.flatMap(s => [s.name, s.displayName]);
+
+    // isCheckedプロパティを一度リセット
+    allRegretsFromSheet.forEach(r => r.isChecked = false);
+
+    // 1. たからものへの未練をチェック
+    const treasureRegret = allRegretsFromSheet.find(r => r.isForTreasure);
+    if (treasureRegret) {
+        treasureRegret.isChecked = true;
+    }
+
+    // 2. 姉妹への未練をチェック
+    allRegretsFromSheet.forEach(regret => {
+        if (!regret.isForTreasure && sisterNames.includes(regret.targetName)) {
+            regret.isChecked = true;
+        }
+    });
+
+    // これでchar.regrets配列内の各未練のisCheckedプロパティが最新の状態になる
 }

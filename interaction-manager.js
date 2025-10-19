@@ -5,10 +5,11 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "2.14.35"; // パッチバージョンを更新
+export const version = "2.15.36"; // パッチバージョンを更新
 
 import * as data from './data-handler.js'; 
 import * as charManager from './character-manager.js';
+import { updateAndComplementRegrets } from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
 import * as ui from './ui-manager.js';
 import { buildDiceMenu, performDiceRoll } from './dice-roller.js';
@@ -19,9 +20,8 @@ import {
     showUndeadListModal, 
     buildPlacementMenu,  
     showAttackConfirmationModal,
-    showRelationshipModal 
+    showRelationshipModal
 } from './menu-builder.js';
-// import { buildManeuverMenu, showCharacterSheetModal, showUndeadListModal, buildMoveMenu, buildPlacementMenu, closeAllMenus, showAttackConfirmationModal } from './menu-builder.js';
 import * as stateManager from './state-manager.js';
 import { calculateFinalDamage } from './battle-helpers.js';
 
@@ -278,8 +278,21 @@ export function setupCharacterEventListeners() {
             if (deleteBtn) {
                 deleteBtn.onclick = (e) => {
                     e.stopPropagation();
+                    const charToDelete = charManager.getCharacterById(id); // 削除対象を先に取得
+                    
                     charManager.removeCharacter(id);
-                    ui.updateAllUI(); // 修正: renderCharacterCards/checkBattleStartCondition を updateAllUI に一本化
+
+                    // ▼▼▼ ここからが修正箇所 ▼▼▼
+                    if (charToDelete && charToDelete.type === 'pc') {
+                        charManager.getCharacters().forEach(pc => {
+                            if (pc.type === 'pc') {
+                                updateAndComplementRegrets(pc);
+                            }
+                        });
+                    }
+                    // ▲▲▲ 修正ここまで ▲▲▲
+
+                    ui.updateAllUI();
                     selectedCardElement = null;
                 };
             }

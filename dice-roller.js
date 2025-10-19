@@ -6,7 +6,7 @@
 /**
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.3.26";
+export const version = "1.4.27";
 
 // import { showModal } from './ui-manager.js';
 import { showModal, showToastNotification } from './ui-manager.js';
@@ -281,27 +281,38 @@ export function performDiceRoll(rollData) {
                 console.error("3Dダイスロールの結果がありません。");
                 return;
             }
+            let selectedMasterData = null;
+
             const diceValue = results[0].value;
             const resultValue = diceValue === 0 ? 10 : diceValue;
             let resultText = "";
 
             switch (command) {
                 case 'nm':
+                    // formatRegretResultを呼び出して、詳細なログテキストを生成する
                     resultText = formatRegretResult('SI-', '姉妹への未練表', resultValue);
+                    // selectedMasterDataには、対応するマスターデータを別途格納する
+                    selectedMasterData = regretMasterData[`SI-${String(resultValue).padStart(2, '0')}`];
                     break;
                 case 'nme':
                     resultText = formatRegretResult('EN-', '敵への未練表', resultValue);
+                    selectedMasterData = regretMasterData[`EN-${String(resultValue).padStart(2, '0')}`];
                     break;
                 case 'nmn':
                     resultText = formatRegretResult('NP-', '中立者への未練表', resultValue);
+                    selectedMasterData = regretMasterData[`NP-${String(resultValue).padStart(2, '0')}`];
                     break;
                 case 'nt':
-                    const takaramono = takaramonoMasterData[resultValue];
-                    resultText = takaramono ? `🎲 たからもの表(${resultValue})<br>【${takaramono.name}】 ${takaramono.description}` : `たからものデータ[${resultValue}]が見つかりませんでした。`;
+                    selectedMasterData = takaramonoMasterData[resultValue];
+                    resultText = selectedMasterData ? `🎲 たからもの表(${resultValue})<br>【${selectedMasterData.name}】 ${selectedMasterData.description}` : `たからものデータ[${resultValue}]が見つかりませんでした。`;
+                    // const takaramono = takaramonoMasterData[resultValue];
+                    // resultText = takaramono ? `🎲 たからもの表(${resultValue})<br>【${takaramono.name}】 ${takaramono.description}` : `たからものデータ[${resultValue}]が見つかりませんでした。`;
                     break;
                 case 'nh':
-                    const hint = hintMasterData[resultValue];
-                    resultText = hint ? `🎲 暗示表(${resultValue})<br>【${hint.name}】 ${hint.description}` : `暗示データ[${resultValue}]が見つかりませんでした。`;
+                    selectedMasterData = hintMasterData[resultValue]; // ★ ここで代入
+                    resultText = selectedMasterData ? `🎲 暗示表(${resultValue})<br>【${selectedMasterData.name}】 ${selectedMasterData.description}` : `暗示データ[${resultValue}]が見つかりませんでした。`;
+                    // const hint = hintMasterData[resultValue];
+                    // resultText = hint ? `🎲 暗示表(${resultValue})<br>【${hint.name}】 ${hint.description}` : `暗示データ[${resultValue}]が見つかりませんでした。`;
                     break;
                 case '1d10':
                 case 'd10':
@@ -312,6 +323,9 @@ export function performDiceRoll(rollData) {
             addLog(resultText);
             if ((typeof rollData === 'object' && rollData.showToast)) {
                 showToastNotification(resultText, 3000);
+            }
+            if (callback) {
+                callback(resultValue, null, resultText, selectedMasterData);
             }
         });
 

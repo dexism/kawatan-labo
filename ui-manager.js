@@ -6,7 +6,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.17.97";
+export const version = "1.18.98";
 
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
@@ -200,7 +200,7 @@ function createCharacterCard(char, isSetupPhase) {
     const setupPhaseActions = `
         <div class="card-actions-overlay">
             <div class="card-action-row">
-                <button class="card-action-btn" data-action="place">移動</button>
+                <button class="card-action-btn" data-action="place">配置</button>
                 <button class="card-action-btn" data-action="details">詳細</button>
                 <button class="card-action-btn" data-action="delete">削除</button>
             </div>
@@ -211,13 +211,22 @@ function createCharacterCard(char, isSetupPhase) {
         </div>`;
 
     let madnessHtml = '';
-    if (char.regrets && char.regrets.length > 0) {
-        const madnessLines = char.regrets.map(regret => {
+    // isCheckedプロパティを持つ未練のみをフィルタリング
+    const checkedRegrets = char.regrets ? char.regrets.filter(r => r.isChecked) : [];
+
+    if (checkedRegrets.length > 0) {
+        const madnessLines = checkedRegrets.map(regret => {
             const points = regret.points || 0;
             let line = '';
+            
+            // 1. 未練の種類に応じて、満たされている場合のシンボルを決定
+            const filledSymbol = regret.isForTreasure ? '♥' : '◆';
+
+            // 2. シンボルを使ってゲージを生成
             for (let i = 0; i < 4; i++) {
-                line += (i < points) ? '◆' : '・';
+                line += (i < points) ? filledSymbol : '・';
             }
+            
             const madnessClass = (points >= 4) ? 'is-madness' : '';
             return `<div class="${madnessClass}">${line}</div>`;
         }).join('');

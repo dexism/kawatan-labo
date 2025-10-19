@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.3.3"; // 緊急修正
+export const version = "1.4.4"; // 緊急修正
 
 import * as data from './data-handler.js';
 
@@ -70,16 +70,17 @@ export function convertVampireBloodSheet(sourceData) {
 
         converted.skills = [];
         converted.parts = { head: [], arms: [], torso: [], legs: [], body: [] };
-        
+        converted.treasures = []; // treasures配列を初期化
+
         const locationTypeMap = { '4': 'head', '5': 'arms', '6': 'torso', '7': 'legs' };
         const timingMap = { '1': 'オート', '2': 'アクション', '3': 'ジャッジ', '4': 'ダメージ', '5': 'ラピッド' };
         const categoryMap = { '1': '攻撃', '2': '攻撃', '3': '行動値', '4': '補助', '5': '妨害', '6': '防御', '7': '移動' };
         const powerRecordCount = sourceData.Power_name?.length || 0;
 
-        // ▼▼▼ 変更箇所 ▼▼▼
-        converted.treasures = []; // 配列として初期化
+        // ループの前に一度だけたからものマスターデータを取得
         const allTreasures = data.getTakaramonoData();
-        // ▲▲▲ 変更ここまで ▲▲▲
+        const treasureNames = Object.values(allTreasures).map(t => t.name);
+        // ▲▲▲ 修正ここまで ▲▲▲
 
         for (let i = 0; i < powerRecordCount; i++) {
             const name = sourceData.Power_name[i];
@@ -88,18 +89,16 @@ export function convertVampireBloodSheet(sourceData) {
             const hanteiCode = sourceData.Power_hantei[i];
             const location = locationTypeMap[hanteiCode];
 
-            const isTreasure = Object.values(allTreasures).some(treasure => treasure.name === name);
-
-            // ▼▼▼ 変更箇所 (ループ構造を全面的に見直し) ▼▼▼
+            // ▼▼▼ ここからが今回の修正の中心 (2/2) ▼▼▼
+            // isTreasureの判定を、上で定義したtreasureNamesを使って行う
+            const isTreasure = treasureNames.includes(name);
 
             if (isTreasure) {
-                // たからものだった場合は、treasures配列に追加するだけ
                 if (!converted.treasures.includes(name)) {
                     converted.treasures.push(name);
                 }
-                // このループでの処理はこれで完了
-                // continue;
             }
+            // ▲▲▲ 修正ここまで ▲▲▲
 
             // マニューバデータにない未知のものの処理
             if (!data.getManeuverByName(name)) {
@@ -127,29 +126,37 @@ export function convertVampireBloodSheet(sourceData) {
             }
         }
         
+        // --- 未練の変換 ---
         converted.regrets = [];
         const regretRecordCount = sourceData.roice_name?.length || 0;
+
         for (let i = 0; i < regretRecordCount; i++) {
             const targetName = sourceData.roice_name[i];
             const regretName = sourceData.roice_pos[i];
             if (targetName && regretName) {
+
+                // ▼▼▼ ここからが今回の修正箇所 ▼▼▼
+                
+                // 1. sourceDataから値を取得し、数値に変換
+                const pointsFromSheet = parseInt(sourceData.roice_damage[i], 10);
+
+                // 2. 変換結果が数値でなければ(NaNであれば)、デフォルト値の3を設定
+                const finalPoints = !isNaN(pointsFromSheet) ? pointsFromSheet : 3;
+
+                const hasTreasureKeyword = targetName.includes('たからもの');
+                const hasTreasureItemName = treasureNames.some(tName => targetName.includes(tName));
+                const isForTreasure = hasTreasureKeyword || hasTreasureItemName;
+
                 const regret = {
                     name: `${targetName}への${regretName}`,
-                    points: parseInt(sourceData.roice_damage[i], 10) || 3,
-                    // ▼▼▼ 変更箇所 (後で解決するために元情報を保持) ▼▼▼
+                    points: finalPoints, // ★ 修正した値を代入
                     targetName: targetName,
-                    regretName: regretName
-                    // ▲▲▲ 変更ここまで ▲▲▲
+                    regretName: regretName,
+                    isForTreasure: isForTreasure
                 };
-                if (targetName === 'たからもの' && converted.treasures.length > 0) {
-                    // ▼▼▼ 変更箇所 (最初のたからものに紐付ける) ▼▼▼
-                    regret.name = `${converted.treasures[0]}への${regretName}`;
-                    // ▲▲▲ 変更ここまで ▲▲▲
-                    regret.category = 'たからもの';
-                } else {
-                    regret.categoryKey = 'SI';
-                }
                 converted.regrets.push(regret);
+                
+                // ▲▲▲ 修正ここまで ▲▲▲
             }
         }
         

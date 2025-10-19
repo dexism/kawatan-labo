@@ -2,7 +2,7 @@
  * @file state-manager.js
  * @description アプリケーションのセッション状態の保存と復元を担当するモジュール
  */
-export const version = "2.3.16"; // ロード処理の完全な修正版
+export const version = "2.4.17"; // ロード処理の完全な修正版
 
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
@@ -54,7 +54,9 @@ function createSaveObject() {
 
     const charactersToSave = characters.map(char => {
         const savedInitialState = existingInitialStatesMap.get(char.id) || {};
-
+        // isCheckedがtrueの未練のみを保存対象とする
+        const regretsToSave = char.regrets.filter(r => r.isChecked);
+        
         const initialState = {
             charId: char.id,
             sourceType: char.sheetId ? 'sheet' : 'template',
@@ -62,7 +64,7 @@ function createSaveObject() {
             type: char.type,
             displayName: char.displayName,
             img: char.img,
-            regrets: char.regrets,
+            regrets: regretsToSave, // フィルタリングした未練を保存
             area: savedInitialState.area,
             stackCount: savedInitialState.stackCount,
         };

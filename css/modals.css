@@ -356,7 +356,7 @@
     color:            white;
 }
 /* ================================
-   キャラクターシートモーダル専用スタイル
+   人形設計図モーダル専用スタイル
 ================================ */
 .sheet-modal-content {
     display: flex; /* gridを解除 */
@@ -601,6 +601,48 @@
     height: 300px;
     min-height: 100px;
 }
+/* 未練 */
+.regret-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.regret-list-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 3px;
+    border-radius: 3px;
+}
+
+.regret-list-item:hover {
+    background-color: var(--color-surface-1);
+}
+
+.regret-list-item input[type="checkbox"] {
+    flex-shrink: 0;
+}
+
+.regret-list-item label {
+    flex-grow: 1;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+.regret-name {
+    font-weight: bold;
+}
+
+.regret-points {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+}
+
 /* ================================
    シンプルメニューモーダル専用のレイアウト上書き
 ================================ */
@@ -1065,26 +1107,29 @@
     font-size: 0.9em;
 }
 
-/* modals.css の末尾に追加 */
-
 /* ================================
    人間関係モーダル専用スタイル
 ================================ */
 
 /* モーダルコンテンツを正方形にする */
 .relationship-modal-content {
-    width: 95vw;
+    width: 100vw;
     height: auto;
-    aspect-ratio: 1 / 1; /* 幅と高さを1:1に保つ */
+    max-width: 520px; /* PCでの最大幅を制限 */
+    max-height: 600px; /* PCでの最大高さを制限 */
     background-color: var(--color-background-2);
+    overflow-x: auto;
 }
 
 /* モーダルボディをFlexboxにして中央揃え */
 .relationship-modal-body {
+    width: 500px;
+    height: 500px;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 0;
+    box-sizing: border-box;
     overflow: hidden; /* はみ出した要素を隠す */
     margin: 0;
 }
@@ -1092,10 +1137,12 @@
 /* ドールを配置する円形のコンテナ */
 .relationship-chart-container {
     position: relative; /* 子要素を絶対配置するための基準 */
-    width: 100%;
-    height: 100%;
+    width: 90%;
+    height: 90%;
     box-sizing: border-box;
     border-radius: 50%;
+    padding: 0;
+    margin: 0;
     box-shadow: 
         0 0  4px inset var(--color-background-2),
         0 0  8px inset var(--color-background-2),
@@ -1107,9 +1154,9 @@
 /* 円周上に配置されるドールのアイコン（ノード） */
 .doll-node {
     position: absolute;
-    width: 11vw;
-    height: 11vw;
-    padding: 5px;
+    width: 100px;
+    height: 100px;
+    padding: 0;
     transform: translate(-50%, -50%); /* 座標の中心に要素の中心を合わせる */
     border-radius: 50%;
     box-shadow: 
@@ -1128,27 +1175,59 @@
 }
 
 .doll-node img {
-    width: 100%;
-    height: 100%;
+    width: 90%;
+    height: 90%;
     object-fit: contain; /* 画像がコンテナに収まるように調整 */
 }
 
 .doll-node .name-label {
     position: absolute;
-    bottom: 0; /* アイコンの下に表示 */
-    font-size: 1.2vw;
+    /* 1. 配置の基点をアイコンの中心に設定 */
+    top: 50%;
+    left: 50%;
+    
+    /* transform: translate(-50%, -50%); /* 自身の中心を座標点に合わせる */
+    
+    /* 2. JSから渡される角度で回転させる (CSS変数を使用) */
+    transform: translate(-50%, -50%) rotate(var(--angle)) translateX(50px) rotate(-90deg);
+    transform-origin: center center;
+    
+    /* 3. translateYでアイコンの外側へ移動 (半径 + 余白) */
+    /* translateY(-100%)はアイコンの半径分、-10pxは追加の余白 */
+
+    /* 4. rotate(-90deg)で文字の向きを接線方向の横書きに調整 */
+
+    /* 以前のスタイル指定を上書き・調整 */
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--color-text);
+    color: var(--color-fore-2);
+    background-color: transparent; /* 背景色をなくす */
+    text-shadow:
+        0 0 1px var(--color-fore-2),
+        0 0 1px var(--color-fore-2),
+        0 0 4px var(--color-background-2),
+        0 0 8px var(--color-background-2); /* 読みやすくするための影 */
+    padding: 0 5px;
+    white-space: nowrap;
+
+/*
+    bottom: 0;
+    font-size: 12px;
     font-weight: bold;
     color: var(--color-background-2);
     background-color: var(--color-fore-2);
     padding: 2px 5px;
     border-radius: 5px;
     white-space: nowrap;
+    */
+    cursor: default;
 }
 
 /* ドール間を結ぶ接続線 */
 .relationship-line {
     position: absolute;
-    height: 0.8vw; /* 線の太さ */
+    height: 4px; /* 線の太さ */
     background-color: var(--color-accent-gold);
     transform-origin: left center; /* 線の左端を回転の中心にする */
     box-shadow:
@@ -1157,7 +1236,7 @@
         0 0 4px var(--color-background-2),
         0 0 8px var(--color-background-2);
     background-color: var(--color-background-2);
-   z-index: 1;
+    z-index: 1;
 }
 
 /* 未練を表示するテキストボックス */
@@ -1167,7 +1246,7 @@
     
     color: var(--color-text);
     border-radius: 20px;
-    padding: 1px 5px;
+    padding: 0 2px 2px 2px;
     background-color: var(--color-background-2);
     box-shadow:
         0 0 1px var(--color-background-2),
@@ -1181,37 +1260,50 @@
         0 0 4px var(--color-background-2),
         0 0 8px var(--color-background-2);
     
-    font-size: 2.7vw;
+    font-size: 18px;
     font-weight: bold;
     white-space: nowrap; /* テキストが改行しないようにする */
+    border: 3px solid var(--color-background-2);
     
+    cursor: pointer;
     z-index: 3; /* アイコンや線より手前に表示 */
 }
-/* modals.css の人間関係モーダルスタイルの末尾に追加 */
+.regret-textbox:hover {
+    border: 2px solid gold;
+    z-index: 5; /* アイコンや線より手前に表示 */
+}
 
 /* 発狂状態のテキストボックスのスタイル */
 .regret-textbox.is-madness {
     background-color: red;
     animation: pulse 1.5s infinite;
+    border-color: transparent;
     z-index: 4;
 }
-
+/* 未設定の未練テキストボックスのスタイル */
+.regret-textbox.is-unset {
+    color: var(--color-text-muted); /* 文字色を薄くする */
+    border-style: dashed;           /* 枠線を点線にする */
+    border-color: var(--color-text-muted); /* 枠線の色も薄くする */
+    border: 3px dashed var(--color-7);
+    background-color: var(--color-surface-1); /* 背景色を少し変える */
+}
 /* 発狂状態を点滅させるためのキーフレームアニメーション */
 @keyframes pulse {
     0% {
         box-shadow: none;
-        background-color: black;
+        background-color: #433;
     }
     50% {
         box-shadow: 
-            0 0 1px red,
-            0 0 2px red,
-            0 0 4px red,
-            0 0 8px red;
-        background-color: red;
+            0 0 1px #a00,
+            0 0 2px #a00,
+            0 0 4px #a00,
+            0 0 8px #a00;
+        background-color: #a00;
     }
     100% {
         box-shadow: none;
-        background-color: black;
+        background-color: #433;
     }
 }
