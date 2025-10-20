@@ -114,7 +114,7 @@
     "description": "白兵攻撃・肉弾攻撃の判定に妨害1。1ターンに何度でも使用可(1判定1回)。",
     "description_raw": "自身を対象とした攻撃判定にのみ使用可。妨害1、1ターンに何度使用してもよい。ただし、1回の判定に対し1回のみ。",
     "flavor_text": "その肌を覆う、ぬらぬらとした粘液は、不快の極みだが。敵の攻撃をそらしてくれることも少なくはない。",
-    "source": { "book": "ESP", "page": 42 },
+    "source": { "book": "歪曲の舞踏", "page": 42 },
     "effects": [{ "ref": "GENERIC_JUDGE_MOD", "params": { "target": "incoming_attack_roll", "value": -1, "condition": ["白兵攻撃", "肉弾攻撃"], "limit_per_roll": 1 } }]
   },
   "M1-12": {
@@ -124,7 +124,7 @@
     "description": "肉弾攻撃1。この攻撃で【はらわた】を損傷した場合、追加で【はらわた】1つを損傷させる。",
     "description_raw": "肉弾攻撃1。この攻撃で敵のパーツを損傷させた際、あなたの【はらわた】が損傷しているなら1つだけ損傷前の状態に戻してよい。",
     "flavor_text": "管状になった長い舌。あなたはそれを敵に突き刺し、その身を構成する肉や有機コンピューターを文字通り、すすり取ることができる。",
-    "source": { "book": "ESP", "page": 42 },
+    "source": { "book": "歪曲の舞踏", "page": 42 },
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 2, "on_hit_effect": "GUT_DAMAGE" } }]
   },
 
@@ -242,7 +242,7 @@
     "description": "ターン終了時まで、パーツが損傷するまでホラー・レギオンへの攻撃判定に+1。(累積しない)",
     "description_raw": "ターンが終了するか、このパーツが損傷するまで、舞台上のホラー・レギオンはあなた以外を対象とした攻撃判定に-1の修正を受ける(この修正は累積しない)。",
     "flavor_text": "ぼんやりと明滅する青白い光を、体から放つことができる。それは下級のアンデッドらを引き寄せる信号でもあるようだ。",
-    "source": { "book": "ESP", "page": 42 },
+    "source": { "book": "歪曲の舞踏", "page": 42 },
     "effects": [{ "ref": "AURA_DEBUFF", "params": { "target": ["ホラー", "レギオン"], "stat": "attackCheckBonus", "value": -1, "duration": "until_damaged_or_turn_end" } }]
   },
   "M2-12": {
@@ -252,7 +252,7 @@
     "description": "射程0の肉弾・白兵攻撃で大成功時、「連撃1」か「転倒」の効果を追加。1カウント1回まで。",
     "description_raw": "あなたは射程0の対象へ、肉弾攻撃判定で大成功が出た時、攻撃に「連撃1(既にあるなら+1)」か「転倒(重複しない)」を加えてよい。この効果は1カウントに1回まで発動する。",
     "flavor_text": "巨大かつ凶悪な角が体の一部から生えている。至近距離の敵を貫いたり、引っ掛けて投げるには十分な凶器だ。",
-    "source": { "book": "ESP", "page": 42 },
+    "source": { "book": "歪曲の舞踏", "page": 42 },
     "effects": [{ "ref": "ADD_EFFECT_ON_CRITICAL", "params": { "condition_range": 0, "condition_attack_type": ["肉弾攻撃", "白兵攻撃"], "options": ["CHAIN_ATTACK", "TUMBLE"], "limit_per_count": 1 } }]
   },
 
@@ -364,7 +364,7 @@
     "description": "ターン終了まで、攻撃マニューバはホラー・レギオンを対象にできなくなる。",
     "description_raw": "ターンが終了するか、攻撃マニューバの使用を宣言するまで、あなたは敵のホラー・レギオンのマニューバ対象にならない。",
     "flavor_text": "ただ擬態というには不自然なほど、ほぼ透明に変わるが如く。あなたは周囲に溶け込み、その姿を消すことのできる肌を持つ。",
-    "source": { "book": "ESP", "page": 42 },
+    "source": { "book": "歪曲の舞踏", "page": 42 },
     "effects": [{ "ref": "BECOME_UNTARGETABLE", "params": { "by": ["ホラー", "レギオン"], "duration": "until_attack_or_turn_end" } }]
   },
   "M3-12": {
@@ -374,7 +374,7 @@
     "description": "肉弾攻撃2+連撃2。攻撃判定において、連撃で発生した判定も含めて1回だけダイスを振りなおしてよい。",
     "description_raw": "肉弾攻撃2+連撃2。攻撃判定において、(連撃で発生した判定も含めた中で)1回だけサイコロを振りなおしてもよい。",
     "flavor_text": "無数の醜悪な蟲があなたの体の中に巣くっている。それは忌まわしくもあなたの敵に襲い掛かっては溶かし喰らうのだ。",
-    "source": { "book": "ESP", "page": 42 },
+    "source": { "book": "歪曲の舞踏", "page": 42 },
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 2, "on_hit": ["CHAIN_ATTACK"], "reroll_once": true } }]
   }
 }

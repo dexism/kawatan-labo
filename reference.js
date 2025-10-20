@@ -2,7 +2,7 @@
  * @file reference.js
  * @description ルールリファレンスUIの構築と管理を担当するモジュール
  */
-export const version = "2.3.16"; // カルーセルUI完全移行版
+export const version = "2.4.1"; // カルーセルUI完全移行版 + 新規データソース対応
 
 import * as data from './data-handler.js';
 import * as ui from './ui-manager.js';
@@ -12,10 +12,14 @@ import { closeAllMenus } from './menu-builder.js';
 // --- モジュール内変数 ---
 const tabs = [
     { id: 'maneuver', label: 'マニューバ' },
-    { id: 'regret', label: '未練' },
+    { id: 'hint', label: '暗示' },
     { id: 'treasure', label: 'たからもの' },
-    { id: 'memory', label: '記憶のカケラ' },
-    { id: 'hint', label: '暗示' }
+    { id: 'regret', label: '未練' },
+    { id: 'memory_base', label: '記憶のカケラ' },
+    { id: 'memory_alpha', label: '記憶のカケラ α' },
+    { id: 'memory_beta', label: '記憶のカケラ β' },
+    { id: 'posthumous_history', label: '死後経歴' },
+    { id: 'awakening_location', label: '目覚めの場所' }
 ];
 let currentIndex = 0;
 let activeManeuverFilters = {};
@@ -135,13 +139,24 @@ function switchToTab(index) {
 }
 
 function renderTabViewContent(tabId, container) {
+    const simpleListMap = {
+        regret: 'regret',
+        treasure: 'treasure',
+        memory_base: 'memory_base',
+        memory_alpha: 'memory_alpha',
+        memory_beta: 'memory_beta',
+        posthumous_history: 'posthumous_history',
+        awakening_location: 'awakening_location',
+        hint: 'hint'
+    };
+
     if (tabId === 'maneuver') {
         renderManeuverTab(container);
-    } else {
-        const dataTypeMap = { regret: 'regret', treasure: 'treasure', memory: 'memory', hint: 'hint' };
-        renderSimpleListTab(dataTypeMap[tabId], container);
+    } else if (simpleListMap[tabId]) {
+        renderSimpleListTab(simpleListMap[tabId], container);
     }
 }
+
 
 // --- 各タブの描画関数 ---
 
@@ -211,8 +226,6 @@ function renderSimpleListTab(dataType, container) {
 
     if (dataType === 'regret') {
         const allRegrets = data.getRegretData();
-        
-        // 1. 未練をカテゴリごとにグループ化する
         const regretGroups = {
             'SI': { title: '姉妹への未練', items: [] },
             'EN': { title: '敵への未練', items: [] },
@@ -220,49 +233,53 @@ function renderSimpleListTab(dataType, container) {
         };
 
         for (const key in allRegrets) {
-            if (key.startsWith('//')) continue; // "//"キーを除外
-            
+            if (key.startsWith('//')) continue;
             const prefix = key.substring(0, 2);
             if (regretGroups[prefix]) {
                 regretGroups[prefix].items.push({ id: key, ...allRegrets[key] });
             }
         }
         
-        // グループごとにヘッダーとアイテムリストを直接 container に描画する
         for (const groupKey in regretGroups) {
             const group = regretGroups[groupKey];
             if (group.items.length > 0) {
-                // <div class="maneuver-group"> はここでは不要
-                
-                // ヘッダーを生成
                 const groupHeader = document.createElement('div');
                 groupHeader.className = 'group-header';
                 groupHeader.textContent = group.title;
                 container.appendChild(groupHeader);
 
-                // アイテムを生成
                 group.items.forEach(item => {
                     const itemElement = createListItem(item, dataType);
                     container.appendChild(itemElement);
                 });
             }
         }
-
     } else {
-        // 未練以外のタブは、これまで通りの処理
         let items = [];
         switch (dataType) {
-            case 'regret':
-                const allRegrets = data.getRegretData();
-                items = Object.keys(allRegrets).map(key => ({ id: key, ...allRegrets[key] }));
-                break;
             case 'treasure':
                 const allTreasures = data.getTakaramonoData();
                 items = Object.keys(allTreasures).map(key => ({ id: key, ...allTreasures[key] }));
                 break;
-            case 'memory':
-                const allMemories = data.getMemoryFragmentData();
+            case 'memory_base':
+                const allMemories = data.getMemoryFragmentsData();
                 items = Object.keys(allMemories).map(key => ({ id: key, ...allMemories[key] }));
+                break;
+            case 'memory_alpha':
+                const allMemoriesAlpha = data.getMemoryFragmentsAlphaData();
+                items = Object.keys(allMemoriesAlpha).map(key => ({ id: key, ...allMemoriesAlpha[key] }));
+                break;
+            case 'memory_beta':
+                const allMemoriesBeta = data.getMemoryFragmentsBetaData();
+                items = Object.keys(allMemoriesBeta).map(key => ({ id: key, ...allMemoriesBeta[key] }));
+                break;
+            case 'posthumous_history':
+                const allPosthumous = data.getPosthumousHistoryData();
+                items = Object.keys(allPosthumous).map(key => ({ id: key, ...allPosthumous[key] }));
+                break;
+            case 'awakening_location':
+                const allAwakening = data.getAwakeningLocationsData();
+                items = Object.keys(allAwakening).map(key => ({ id: key, ...allAwakening[key] }));
                 break;
             case 'hint':
                 const allHints = data.getHintData();
@@ -270,15 +287,30 @@ function renderSimpleListTab(dataType, container) {
                 break;
         }
 
+        // 数値IDでソート（'0'と'00'を特別扱い）
+        items.sort((a, b) => {
+            const mapIdToNumber = (id) => {
+                if (id === '0') return 10; // 'awakening_location'用
+                if (id === '00') return 100; // 'memory_fragments_alpha'用
+                return parseInt(id, 10);
+            };
+            const idA = mapIdToNumber(a.id);
+            const idB = mapIdToNumber(b.id);
+            return idA - idB;
+        });
+
+        const options = { needsPadding: ['posthumous_history', 'memory_alpha', 'memory_beta'].includes(dataType) };
+
         items.forEach(item => {
-            const itemElement = createListItem(item, dataType);
+            const itemElement = createListItem(item, dataType, options);
             listContainer.appendChild(itemElement);
         });
+        container.appendChild(listContainer);
     }
-    container.appendChild(listContainer);
 }
 
-function createListItem(item, dataType) {
+
+function createListItem(item, dataType, options = {}) {
     const itemElement = document.createElement('div');
     itemElement.className = 'maneuver-item-new is-reference-item';
 
@@ -309,20 +341,31 @@ function createListItem(item, dataType) {
     } else {
         let idText = '', title = '', description = '';
         
-        idText = String(item.id).padStart(2, '0');
         title = `【${item.name}】`;
         description = item.description;
 
+        const needsPadding = ['posthumous_history', 'memory_alpha', 'memory_beta'].includes(dataType);
+
+        if (needsPadding) {
+            idText = String(item.id).padStart(2, '0');
+        } else {
+            idText = String(item.id);
+        }
+
         const textToCopy = `${idText}${title}\n${description}`.trim();
+        
+        const source = item.source;
+        const sourceInfoText = source ? `${source.book} p${source.page}` : '';
 
         itemElement.innerHTML = `
             <div class="item-right-col" style="width: 100%;">
-                <div class="item-row-1 has-copy-button">
+                <div class="ref-container-top">
+                    <div class="ref-source-info">${sourceInfoText}</div>
                     <span class="item-name">${idText}${title}</span>
-                    <button class="copy-description-btn" data-copy-text="${encodeURIComponent(textToCopy)}">📋</button>
                 </div>
-                <div class="item-row-2">
+                <div class="item-row-2 has-copy-button">
                     <span>${description}</span>
+                    <button class="copy-description-btn" data-copy-text="${encodeURIComponent(textToCopy)}">📋</button>
                 </div>
             </div>
         `;
@@ -336,6 +379,7 @@ function createListItem(item, dataType) {
     };
     return itemElement;
 }
+
 
 // --- スワイプ処理関数 ---
 
@@ -420,7 +464,7 @@ const filterGroups = {
     'タイミング': ['オート', 'アクション', 'ジャッジ', 'ダメージ', 'ラピッド'],
     'コスト': ['なし', '0', '1', '2', '3', '4', 'その他'],
     '最大射程': ['なし', '自身', '0', '1', '2', '3', 'その他'],
-    'ルールブック': ['基本ルール', 'ESP']
+    'ルールブック': ['基本ルール', '歪曲の舞踏']
 };
 
 function createManeuverFilters(container, onFilterChange) {
@@ -567,10 +611,10 @@ function checkManeuverMatch(maneuver, groupName, filterName, masterData) {
         case 'ルールブック': {
             const bookName = maneuver.source?.book || '';
             if (filterName === '基本ルール') {
-                return bookName === '基本ルールブック';
+                return bookName === '基本ルール';
             }
-            if (filterName === 'ESP') {
-                return bookName === 'ESP';
+            if (filterName === '歪曲の舞踏') {
+                return bookName === '歪曲の舞踏';
             }
             return false;
         }

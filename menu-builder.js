@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.22.89"; // バージョンを更新
+export const version = "1.22.90"; // バージョンを更新
 
 import * as data from './data-handler.js';
 import * as charManager from './character-manager.js';
@@ -908,7 +908,7 @@ export function showCharacterSheetModal(char) {
                 if (!char.memories || char.memories.length === 0) {
                     return '<p>（記憶のカケラはありません）</p>';
                 }
-                const allMemories = data.getMemoryFragmentData();
+                const allMemories = data.getMemoryFragmentsData();
                 return char.memories.map(mem => {
                     const memoryMasterEntry = Object.entries(allMemories).find(([key, value]) => value.name === mem.name);
                     
@@ -2549,7 +2549,7 @@ export function showRelationshipModal() {
                     
                     // シンプルメニューモーダルでメニューを表示
                     ui.showModal({
-                        title: `${sourceDoll.name} -> ${targetDoll.name}`,
+                        title: `${sourceDoll.name} から ${targetDoll.name} への未練`,
                         items: menuItems
                     });
                 });

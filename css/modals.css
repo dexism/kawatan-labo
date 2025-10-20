@@ -1113,7 +1113,7 @@
 
 /* モーダルコンテンツを正方形にする */
 .relationship-modal-content {
-    width: 100vw;
+    width: 95vw;
     height: auto;
     max-width: 520px; /* PCでの最大幅を制限 */
     max-height: 600px; /* PCでの最大高さを制限 */
@@ -1148,7 +1148,7 @@
         0 0  8px inset var(--color-background-2),
         0 0 16px inset var(--color-background-2),
         0 0 32px inset var(--color-background-2);
-    background-color:  var(--color-fore-2);
+    background-color:  var(--color-fore-7);
 }
 
 /* 円周上に配置されるドールのアイコン（ノード） */
@@ -1227,14 +1227,13 @@
 /* ドール間を結ぶ接続線 */
 .relationship-line {
     position: absolute;
-    height: 4px; /* 線の太さ */
-    background-color: var(--color-accent-gold);
+    height: 3px; /* 線の太さ */
     transform-origin: left center; /* 線の左端を回転の中心にする */
     box-shadow:
-        0 0 1px var(--color-background-2),
-        0 0 2px var(--color-background-2),
-        0 0 4px var(--color-background-2),
-        0 0 8px var(--color-background-2);
+        0 0  2px var(--color-background-2),
+        0 0  4px var(--color-background-2),
+        0 0  8px var(--color-background-2),
+        0 0 16px var(--color-background-2);
     background-color: var(--color-background-2);
     z-index: 1;
 }
@@ -1244,21 +1243,21 @@
     position: absolute;
     transform: translate(-50%, -50%); /* 自身の中心を座標点に合わせる */
     
-    color: var(--color-text);
+    color: var(--color-e);
     border-radius: 20px;
     padding: 0 2px 2px 2px;
     background-color: var(--color-background-2);
     box-shadow:
-        0 0 1px var(--color-background-2),
-        0 0 2px var(--color-background-2),
-        0 0 4px var(--color-background-2),
-        0 0 8px var(--color-background-2);
+        0 0  2px var(--color-background-2),
+        0 0  4px var(--color-background-2),
+        0 0  8px var(--color-background-2),
+        0 0 16px var(--color-background-2);
     background-color: var(--color-background-2);
     text-shadow:
-        0 0 1px var(--color-background-2),
-        0 0 2px var(--color-background-2),
-        0 0 4px var(--color-background-2),
-        0 0 8px var(--color-background-2);
+        0 0 1px var(--color-2),
+        0 0 2px var(--color-2),
+        0 0 3px var(--color-2),
+        0 0 4px var(--color-2);
     
     font-size: 18px;
     font-weight: bold;
@@ -1278,6 +1277,7 @@
     background-color: red;
     animation: pulse 1.5s infinite;
     border-color: transparent;
+    color: red;
     z-index: 4;
 }
 /* 未設定の未練テキストボックスのスタイル */

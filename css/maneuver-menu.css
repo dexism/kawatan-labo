@@ -112,7 +112,7 @@
 .reference-swipe-wrapper {
     display: flex;
     height: 100%;
-    width: 500%; /* 5タブ × 100% */
+    width: 900%; /* 5タブ × 100% */
     transform: translateX(0%);
 }
 .reference-swipe-wrapper.is-swiping {
@@ -315,7 +315,7 @@
     color: var(--color-fore-5);
     font-weight: normal;
     margin-top: 2px;
-    padding: 5px;
+    padding: 0 0 5px 10px;
 }
 
 /* 中項目 */
@@ -484,6 +484,7 @@
 .ref-source-info {
     display: flex;
     margin-left: auto; /* ★重要：右に押しやる */
+    margin-top: 0;
     font-size: 12px;
     font-weight: normal;
     padding-left: 4px;
@@ -547,7 +548,7 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: 8px;
+    gap: 0;
     pointer-events: auto;
 }
 .has-copy-button > span {

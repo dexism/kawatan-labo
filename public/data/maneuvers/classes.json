@@ -75,7 +75,7 @@
     "description": "戦闘終了時、自身を含む姉妹全員の、損傷している【はらわた】を修復してよい。", 
     "description_raw": "戦闘終了時、あなたを含む姉妹全員、損傷している【はらわた】を修復してよい。",
     "flavor_text": "どんな理由でこんな体なのか、想像したくもないけれど。あなたの体は、臓物だけは短時間で再生する。抉られても焼かれても喰われても。",
-    "source": { "book": "ESP", "page": 40 },
+    "source": { "book": "歪曲の舞踏", "page": 40 },
     "effects": [{ "ref": "REPAIR_ALLY_PART", "params": { "trigger": "battle_end", "part_name": "はらわた" } }]
   },
   "ST-07": {
@@ -85,7 +85,7 @@
     "description": "支援2か妨害2", 
     "description_raw": "コストの代わりに、あなたは任意の基本パーツを1つ損傷する。支援2か妨害2。",
     "flavor_text": "自らもぎとった腕で相手を掴む。己の顎を投げつけて噛み付かせる。真に覚悟を決めた死人なら、できて当たり前の戦術だ。",
-    "source": { "book": "ESP", "page": 40 },
+    "source": { "book": "歪曲の舞踏", "page": 40 },
     "effects": [{ "ref": "CHOICE_JUDGE_MOD", "params": { "cost_type": "damage_basic_part", "options": [{ "value": 2 }, { "value": -2 }] } }]
   },
 
@@ -174,7 +174,7 @@
     "description": "自身の白兵攻撃$6、サイコロの出目「6」固定。", 
     "description_raw": "自身の白兵攻撃判定においてのみ使用可能。攻撃判定のサイコロ出目は「6」となり、いかなる効果でも振り直しはできなくなる。",
     "flavor_text": "外せない一撃がある。いいだろう、絶対に、当ててやる。あやふやな運から解放された、絶対の結末を見せてやる。",
-    "source": { "book": "ESP", "page": 40 },
+    "source": { "book": "歪曲の舞踏", "page": 40 },
     "effects": [{ "ref": "SET_DICE_ROLL", "params": { "target_roll": "self_melee_attack", "value": 6, "prevent_reroll": true } }]
   },
   "TN-07": {
@@ -184,7 +184,7 @@
     "description": "レギオンの「移動妨害」無効化。レギオンからの攻撃は判定値7以上でなければダメージを受けない。", 
     "description_raw": "レギオンの「移動妨害」を常に無効化してよい。さらに、レギオンがあなたに対して行った攻撃判定は判定値7以上でなければダメージを与えない。",
     "flavor_text": "いかに数をそろえようと、ものを考えることすらできぬ死者の中など、無人の野をゆくが如し。奴らの指はあなたに触れることすらできない。",
-    "source": { "book": "ESP", "page": 40 },
+    "source": { "book": "歪曲の舞踏", "page": 40 },
     "effects": [
       { "ref": "NEGATE_EFFECT_FROM", "params": { "effect_tag": "移動妨害", "source_category": "レギオン" } },
       { "ref": "MINIMUM_HIT_ROLL", "params": { "value": 7, "source_category": "レギオン" } }
@@ -259,7 +259,7 @@
     "description": "肉弾攻撃1+切断。【あご】【こぶし】のみ。", 
     "description_raw": "あなたの【あご】【こぶし】の効果は「肉弾攻撃1+切断」となる。",
     "flavor_text": "あなたは屍肉を喰らう。ただ喰らうだけではない。引き裂き、貪り、喰らい尽くす。あなたの牙は、あらゆるものを引き裂く。",
-    "source": { "book": "ESP", "page": 40 },
+    "source": { "book": "歪曲の舞踏", "page": 40 },
     "effects": [{ "ref": "MODIFY_MANEUVER_EFFECT", "params": { "target_maneuvers": ["あご", "こぶし"], "new_effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 1, "on_hit": ["SEVERANCE"] } }] } }]
   },
   "GT-07": {
@@ -269,7 +269,7 @@
     "description": "完全破壊。肉弾攻撃成功時。対象の残りパーツ総数が[攻撃判定値-5]以下。", 
     "description_raw": "あなたが射程0の対象に肉弾攻撃を成功させた際、対象の残りパーツ総数が［攻撃判定値-5］以下だったなら、対象は全てのパーツが損傷する（ただしレギオンには無効）。",
     "flavor_text": "あなたは屍肉を喰らう。ただ喰らうだけではない。喰らい尽くし、完全に自らの肉体へと変えてしまうのだ。",
-    "source": { "book": "ESP", "page": 40 },
+    "source": { "book": "歪曲の舞踏", "page": 40 },
     "effects": [{ "ref": "DESTROY_TARGET_ON_HIT", "params": { "condition": "remaining_parts <= roll_value - 5", "exclude": "レギオン" } }]
   },
 
@@ -347,7 +347,7 @@
     "description": "大失敗の無効化。射撃攻撃・砲撃攻撃", 
     "description_raw": "あなたは射撃攻撃・砲撃攻撃において、攻撃判定値が1以下でも大失敗ではなく通常の失敗となる。",
     "flavor_text": "味方の背後から敵を撃つ。あなたを信じているから、後衛の戦いに専念できるのだ。そんな信頼を、わずかなミスで裏切っていいはずがない。",
-    "source": { "book": "ESP", "page": 41 },
+    "source": { "book": "歪曲の舞踏", "page": 41 },
     "effects": [{ "ref": "PREVENT_FUMBLE", "params": { "condition": ["射撃攻撃", "砲撃攻撃"] } }]
   },
   "RQ-07": {
@@ -357,7 +357,7 @@
     "description": "修復1。白兵攻撃・射撃攻撃のパーツ1つ", 
     "description_raw": "あなたは損傷中の「白兵攻撃」か「射撃攻撃」の効果を持つパーツ１つを、損傷前の状態に戻してよい。",
     "flavor_text": "あなたの手にあるは、自身の腕より信じる武器。常に触れ続けた武器。折れようと曲がろうと、裏切るはずがない。それは、必ず、あなたに応える。",
-    "source": { "book": "ESP", "page": 41 },
+    "source": { "book": "歪曲の舞踏", "page": 41 },
     "effects": [{ "ref": "REPAIR_PART_BY_TYPE", "params": { "count": 1, "attack_types": ["白兵攻撃", "射撃攻撃"] } }]
   },
 
@@ -429,7 +429,7 @@
     "description": "与ダメージ+1。「切断」「爆発」「転倒」「連撃」「全体攻撃」の効果は失われる。", 
     "description_raw": "あなたが持つ、あらゆる攻撃マニューバが与えるダメージを、使用宣言時に1上昇させてもよい。ただし、その際に「切断」「爆発」「転倒」「連撃」「全体攻撃」の効果は失われる。",
     "flavor_text": "本来の武器や攻撃器官を、あなたの肉体は模倣し強化し、より禍々しい凶器として発現させる。破壊の力はいや増したろうが、そのおぞましさは本来の比ではない。",
-    "source": { "book": "ESP", "page": 41 },
+    "source": { "book": "歪曲の舞踏", "page": 41 },
     "effects": [{ "ref": "TRADE_DAMAGE_FOR_EFFECTS", "params": { "damage_bonus": 1, "removed_tags": ["切断", "爆発", "転倒", "全体攻撃"] } }]
   },
   "BR-07": {
@@ -439,7 +439,7 @@
     "description": "「切断」「爆発」「移動」無効化。使用制限なし", 
     "description_raw": "受けたダメージに付属した「切断」「爆発」「移動」は全てを無効化される。このマニューバは1ターンに何度でも使用してよい。",
     "flavor_text": "異形の体に流れるは異様な体液。外気に触れれば結晶となり硬化する。切断されようともつながり、爆発も吸収。なるほど怪物の体……しかし便利な体だ！",
-    "source": { "book": "ESP", "page": 41 },
+    "source": { "book": "歪曲の舞踏", "page": 41 },
     "effects": [{ "ref": "NEGATE_DAMAGE_EFFECTS", "params": { "effects_to_negate": ["切断", "爆発", "移動"] } }]
   },
 
@@ -511,7 +511,7 @@
     "description": "コスト-1（最低0）。【うで】【あし】使用時。", 
     "description_raw": "あなたが【うで】【あし】を使用する際、コストは1減少する（最低0）。",
     "flavor_text": "めまぐるしく踊り交わされる、あなたの手足。よらば共に踊りましょうと身を絡め、戦いの中でもあなたは多情な舞踏会を催すだろう。",
-    "source": { "book": "ESP", "page": 41 },
+    "source": { "book": "歪曲の舞踏", "page": 41 },
     "effects": [{ "ref": "REDUCE_COST_OF_MANEUVER", "params": { "value": 1, "target_maneuvers": ["うで", "あし"] } }]
   },
   "RM-07": {
@@ -521,7 +521,7 @@
     "description": "与ダメージ+1。敵の大失敗時", 
     "description_raw": "あなたがいるエリアで、いずれかの敵が大失敗した際、その結果によって発生するダメージを1点上昇させてよい。",
     "flavor_text": "無様な踊りは、しかるべき喜劇に。中途半端な醜態など許されない。せめて笑える道化の芸に変えてさしあげなくては。",
-    "source": { "book": "ESP", "page": 41 },
+    "source": { "book": "歪曲の舞踏", "page": 41 },
     "effects": [{ "ref": "INCREASE_FUMBLE_DAMAGE", "params": { "value": 1, "target": "enemy_in_area" } }]
   },
 
@@ -533,7 +533,7 @@
     "description": "第1ターン終了まで使用不可。コストの代わりに、あなたは発狂していない未練全てに、狂気点1点を加える。舞台上の全存在はパーツ4つを各自選び、損傷させる（レギオンは全滅）。", 
     "description_raw": "第1ターン終了まで使用不可。コストの代わりに、あなたは発狂していない未練全てに、狂気点1点を加える。舞台上の全存在はパーツ4つを各自選び、損傷させる（レギオンは全滅）。",
     "flavor_text": "あなたの中で抑えられていた“もっとも恐ろしいもの”が溢れ出し、目に映る全てを破壊していく。そう、あなた自身さえも含めて。",
-    "source": { "book": "ESP", "page": 36 },
+    "source": { "book": "歪曲の舞踏", "page": 36 },
     "effects": [{ "ref": "UNIVERSAL_DESTRUCTION", "params": { "cost_type": "madness_all_sane", "damage": 4, "legion_destruction": true } }]
   },
   "SY-01": {
@@ -543,7 +543,7 @@
     "description": "『完全解体』状態でも使用可。対象がパーツを2つ任意に選び損傷させる。", 
     "description_raw": "『完全解体』状態でも使用可。対象はパーツを2つ選ぶ。そのパーツは損傷する（レギオンは2体減少）。",
     "flavor_text": "もっともわかりやすい破壊の超能力。目にしたものを意の力で歪め、捩り、裂く。見えない暴力が敵を蹂躙し、肉塊や鉄屑に変えるのだ。",
-    "source": { "book": "ESP", "page": 36 },
+    "source": { "book": "歪曲の舞踏", "page": 36 },
     "effects": [{ "ref": "INFLICT_DAMAGE", "params": { "damage": 2, "legion_damage": 2 } }]
   },
   "SY-02": {
@@ -553,7 +553,7 @@
     "description": "『完全解体』状態でも使用可。防御1。1ターンに何度でも使用可（一回の攻撃に対しては一度のみ）。", 
     "description_raw": "『完全解体』状態でも使用可。防御1。1ターンに何度でも使用可。ただし一回の攻撃に対しては一度しか使用できない。",
     "flavor_text": "あなたは思うだけで結果を弾き出す。望まぬ未来を跳ね除けることができる力。常に、弾丸に、あなたの矢になるものをやすやすと食らわしはしない。",
-    "source": { "book": "ESP", "page": 36 },
+    "source": { "book": "歪曲の舞踏", "page": 36 },
     "effects": []
   },
   "SY-03": {
@@ -563,7 +563,7 @@
     "description": "あなたを対象とした攻撃判定でのみ使用可。妨害0", 
     "description_raw": "あなたを対象とした攻撃判定でのみ使用可。コストの代わりに、あなたは任意の未練に狂気点1点を加える。判定の結果は判定値に関係なく「失敗」となる。",
     "flavor_text": "未来を見る目。天の心には重すぎる力。魂の軋みを代償に、最悪の危機だけは避ける。",
-    "source": { "book": "ESP", "page": 36 },
+    "source": { "book": "歪曲の舞踏", "page": 36 },
     "effects": [{ "ref": "FORCE_FAILURE", "params": { "cost_type": "madness_1", "target_roll": "incoming_attack" } }]
   },
   "SY-04": {
@@ -573,7 +573,7 @@
     "description": "『完全解体』状態でも使用可。対象の未練1つから狂気点1点を減らし、自身の未練1つに狂気点1点を加える。", 
     "description_raw": "『完全解体』状態でも使用可。対象が持つ未練1つを任意に選んで狂気点1点を減らす。その後、自身の発狂していない未練1つを任意に選び、狂気点1点を加える。",
     "flavor_text": "あなたの魂は肉の檻に囚われない。そっと抜け出し、大切な人の魂に直接触れることができる。そして抱きしめ、その苦しみを分かち合うことも。",
-    "source": { "book": "ESP", "page": 36 },
+    "source": { "book": "歪曲の舞踏", "page": 36 },
     "effects": [{ "ref": "MANIPULATE_MADNESS_POINTS", "params": {} }]
   },
   "SY-05": {
@@ -583,7 +583,7 @@
     "description": "あなたが同エリアから受ける「妨害」「移動妨害」は無効になる。", 
     "description_raw": "あなたが同エリアから受けた「妨害」「移動妨害」は無効にしてもよい。",
     "flavor_text": "わずかだが、あなたの体は常に浮遊している。重力に囚われぬ身さばきは、無粋な差し出しなど気にも留めさせない。",
-    "source": { "book": "ESP", "page": 1 },
+    "source": { "book": "歪曲の舞踏", "page": 1 },
     "effects": [{ "ref": "NEGATE_EFFECT_IN_AREA", "params": { "effect_tags": ["妨害", "移動妨害"] } }]
   },
   "SY-06": {
@@ -593,7 +593,7 @@
     "description": "ホラーに対してのみ有効。自身の箇所1つを選び、「その箇所にある損傷しているパーツ」と同数を対象自身のパーツから損傷させる。", 
     "description_raw": "ホラーに対してのみ有効。自身の箇所1つを任意で選ぶ。対象は「選んだ箇所にある損傷しているパーツ」と同数を対象自身のパーツから選び、損傷させる。",
     "flavor_text": "己の受けた破壊を、敵の自我に投影して誤認させる。……ごくごく軽度の低い自我しか持たない相手にだけ有効な攻撃。破壊せず、使えなくするのだ。",
-    "source": { "book": "ESP", "page": 36 },
+    "source": { "book": "歪曲の舞踏", "page": 36 },
     "effects": [{ "ref": "SHARED_DAMAGE", "params": { "target_category": "ホラー", "self_damage": 1 } }]
   },
   "SY-07": {
@@ -603,7 +603,7 @@
     "description": "移動1。対象の現在行動値-2。『完全解体』状態でも使用可。", 
     "description_raw": "『完全解体』状態でも使用可。移動1。さらに移動させた対象の現在行動値を2点減らす（移動が妨害されても行動値は減少する）。",
     "flavor_text": "強力な意志の力は、重力にさえささやかな影響を与える。狙った相手を“力”の突風で吹き飛ばし、叩きつけるのだ。上下感覚さえ狂った相手は、大きな隙を見せるだろう。",
-    "source": { "book": "ESP", "page": 36 },
+    "source": { "book": "歪曲の舞踏", "page": 36 },
     "effects": [
       { "ref": "MOVE_CHARACTER", "params": { "target": "character", "distance": 1 } },
       { "ref": "REDUCE_ACTION_VALUE", "params": { "target": "moved_character", "value": 2 } }

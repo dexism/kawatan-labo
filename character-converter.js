@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.4.4"; // 緊急修正
+export const version = "1.4.5"; // 緊急修正
 
 import * as data from './data-handler.js';
 
@@ -161,7 +161,8 @@ export function convertVampireBloodSheet(sourceData) {
         }
         
         converted.memories = [];
-        const allMemories = data.getMemoryFragmentData();
+        // const allMemories = data.getMemoryFragmentData();
+        const allMemories = data.getMemoryFragmentsData();
         const memoryRecordCount = sourceData.kakera_name?.length || 0;
         for (let i = 0; i < memoryRecordCount; i++) {
             const rawInput = sourceData.kakera_name[i];

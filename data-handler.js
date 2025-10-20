@@ -7,7 +7,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.5.8"; // パッチバージョンを更新
+export const version = "1.6.1"; // パッチバージョンを更新: 新規データソース追加
 
 // ===================================================================================
 //  モジュール内 プライベート変数
@@ -18,6 +18,10 @@ let maneuverNameMap = {};
 let regretMasterData = {};
 let takaramonoMasterData = {};
 let memoryFragmentsData = {};
+let memoryFragmentsAlphaData = {}; // 追加
+let memoryFragmentsBetaData = {}; // 追加
+let awakeningLocationsData = {}; // 追加
+let posthumousHistoryData = {}; // 追加
 let maneuverEffectsDB = {};
 let undeadMasterData = {};
 let coreData = {}; 
@@ -48,6 +52,10 @@ export async function loadAllData() {
     const [
       hintRes,
       regretRes, takaramonoRes, memoryRes, undeadRes, coreRes, effectsDbRes,
+      awakeningRes, // 追加
+      posthumousRes, // 追加
+      memoryAlphaRes, // 追加
+      memoryBetaRes, // 追加
       ...maneuverResults
     ] = await Promise.all([
       fetch('/data/hint.json'),
@@ -57,6 +65,10 @@ export async function loadAllData() {
       fetch('/data/undead.json'),
       fetch('/data/core-data.json'), 
       fetch('/data/effects_db.json'),
+      fetch('/data/awakening_locations.json'), // 追加
+      fetch('/data/posthumous_history.json'), // 追加
+      fetch('/data/memory_fragments_alpha.json'), // 追加
+      fetch('/data/memory_fragments_beta.json'), // 追加
       ...maneuverPromises
     ]);
 
@@ -70,7 +82,11 @@ export async function loadAllData() {
         memoryFragmentsData,
         undeadMasterData, 
         coreData, 
-        maneuverEffectsDB
+        maneuverEffectsDB,
+        awakeningLocationsData, // 追加
+        posthumousHistoryData, // 追加
+        memoryFragmentsAlphaData, // 追加
+        memoryFragmentsBetaData // 追加
     ] = await Promise.all([
         hintRes.json(), 
         regretRes.json(),
@@ -78,7 +94,11 @@ export async function loadAllData() {
         memoryRes.json(),
         undeadRes.json(), 
         coreRes.json(), 
-        effectsDbRes.json()
+        effectsDbRes.json(),
+        awakeningRes.json(), // 追加
+        posthumousRes.json(), // 追加
+        memoryAlphaRes.json(), // 追加
+        memoryBetaRes.json() // 追加
     ]);
 
     maneuverNameMap = {};
@@ -89,7 +109,7 @@ export async function loadAllData() {
       }
     }
     
-    console.log("Data handler initialized successfully!");
+    console.log("Data handler initialized successfully with new datasets!");
 
   } catch (error) {
     console.error("Error in data handler initialization:", error);
@@ -101,7 +121,11 @@ export function getAllManeuvers() { return allManeuverData; }
 export function getManeuverByName(name) { return maneuverNameMap[name]; }
 export function getRegretData() { return regretMasterData; }
 export function getTakaramonoData() { return takaramonoMasterData; }
-export function getMemoryFragmentData() { return memoryFragmentsData; }
+export function getMemoryFragmentsData() { return memoryFragmentsData; }
+export function getMemoryFragmentsAlphaData() { return memoryFragmentsAlphaData; } // 追加
+export function getMemoryFragmentsBetaData() { return memoryFragmentsBetaData; } // 追加
+export function getAwakeningLocationsData() { return awakeningLocationsData; } // 追加
+export function getPosthumousHistoryData() { return posthumousHistoryData; } // 追加
 export function getManeuverEffects() { return maneuverEffectsDB; }
 export function getUndeadTemplates() { return undeadMasterData; }
 export function getCoreData() { return coreData; }

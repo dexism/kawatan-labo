@@ -6,7 +6,7 @@
 /**
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.4.27";
+export const version = "1.5.28";
 
 // import { showModal } from './ui-manager.js';
 import { showModal, showToastNotification } from './ui-manager.js';
@@ -18,6 +18,10 @@ let hintMasterData = {};
 let regretMasterData = {};
 let takaramonoMasterData = {};
 let memoryFragmentsData = {};
+let memoryFragmentsAlphaData = {}; // 追加
+let memoryFragmentsBetaData = {}; // 追加
+let awakeningLocationsData = {}; // 追加
+let posthumousHistoryData = {}; // 追加
 let addLog = () => {};
 let is3DInitialized = false; // 初期化済みかを管理するフラグ
 
@@ -26,7 +30,11 @@ export function initializeDiceRoller(data) {
     hintMasterData = data.hintMasterData;
     regretMasterData = data.regretMasterData;
     takaramonoMasterData = data.takaramonoMasterData;
-    memoryFragmentsData = data.memoryFragmentsData;
+     memoryFragmentsData = data.memoryFragmentsData; // 正しくはオブジェクトのプロパティとして受け取る
+    memoryFragmentsAlphaData = data.memoryFragmentsAlphaData; // ★修正
+    memoryFragmentsBetaData = data.memoryFragmentsBetaData; // ★修正
+    awakeningLocationsData = data.awakeningLocationsData; // ★修正
+    posthumousHistoryData = data.posthumousHistoryData; // ★修正
     addLog = data.addLog;
 
     // 3Dダイスがまだ初期化されていなければ、ここで初期化する
@@ -47,10 +55,14 @@ export function buildDiceMenu() {
         { label: 'NA 攻撃判定', onClick: () => performDiceRoll({ command: 'NA', showToast: true }) },
         { label: 'NC 判定', onClick: () => performDiceRoll({ command: 'NC', showToast: true }) },
         { label: 'NM 姉妹への未練', onClick: () => performDiceRoll({ command: 'NM', showToast: true }) },
-        { label: 'NME 敵への未練', onClick: () => performDiceRoll({ command: 'NME', showToast: true }) },
-        { label: 'NMN 中立者への未練', onClick: () => performDiceRoll({ command: 'NMN', showToast: true }) },
+        { label: 'NME 敵への未練 (歪曲の舞踏)', onClick: () => performDiceRoll({ command: 'NME', showToast: true }) },
+        { label: 'NMN 中立者への未練 (歪曲の舞踏)', onClick: () => performDiceRoll({ command: 'NMN', showToast: true }) },
         { label: 'NT たからもの表', onClick: () => performDiceRoll({ command: 'NT', showToast: true }) },
         { label: 'NK 記憶のカケラ', onClick: () => performDiceRoll({ command: 'NK', showToast: true }) },
+        { label: 'NKA 記憶のカケラ-α (最果ての戯曲)', onClick: () => performDiceRoll({ command: 'NKA', showToast: true }) }, // 追加
+        { label: 'NKB 記憶のカケラ-β (最果ての戯曲)', onClick: () => performDiceRoll({ command: 'NKB', showToast: true }) }, // 追加
+        { label: 'NPH 死後経歴 (最果ての戯曲)', onClick: () => performDiceRoll({ command: 'NPH', showToast: true }) }, // 追加
+        { label: 'NAL 目覚めの場所 (最果ての戯曲)', onClick: () => performDiceRoll({ command: 'NAL', showToast: true }) }, // 追加
         { label: 'NH 暗示表', onClick: () => performDiceRoll({ command: 'NH', showToast: true }) },
         { label: '1D10', onClick: () => performDiceRoll({ command: '1d10', showToast: true }) },
         { label: '1D100', onClick: () => performDiceRoll({ command: '1d100', showToast: true }) },
@@ -166,6 +178,28 @@ function performD100Roll(rollData, processResultCallback) {
     });
 }
 
+// ... (performDiceRoll 関数の直前、またはファイルのヘルパー関数セクションに追加)
+
+/**
+ * D10の結果を使い、単純なキー（数値または文字列）でマスターデータを検索して結果をフォーマットする
+ * @param {string} tableName - 表の名前
+ * @param {object} masterData - 検索対象のマスターデータ
+ * @param {number} diceResult - D10の出目 (1-10)
+ * @returns {{resultText: string, selectedMasterData: object|null}}
+ */
+function formatSimpleTableResult(tableName, masterData, diceResult) {
+    // ② JSONのキーを数値に変換して比較し、一致するキーを探す
+    const foundKey = Object.keys(masterData).find(key => parseInt(key, 10) === diceResult);
+    const item = foundKey ? masterData[foundKey] : null;
+    const displayKey = foundKey || diceResult;
+
+    const resultText = item
+        ? `🎲 ${tableName}(${displayKey})<br>【${item.name}】 ${item.description}`
+        : `${tableName}データ[${displayKey}]が見つかりませんでした。`;
+    
+    return { resultText, selectedMasterData: item };
+}
+
 export function performDiceRoll(rollData) {
     const input = (typeof rollData === 'string') ? rollData : rollData.command;
     const callback = (typeof rollData === 'object' && rollData.callback) ? rollData.callback : null;
@@ -173,16 +207,15 @@ export function performDiceRoll(rollData) {
     if (!input) return;
     const cleanedInput = input.toLowerCase().replace(/\s/g, '');
 
-    const d10Pattern = /^(nm|nme|nmn|nt|nh|1?d10)$/;
-    // 修正前: /^(\d*)?(nc|na)([+-]\d+)?$/
+    const d10Pattern = /^(nm|nme|nmn|nt|nh|nal|1?d10)$/; // "nal"を追加
     const systemCommandPattern = /^(\d*)?(nc|na)([+-]\d+|0)?$/;
-    // ★★★ 1. D100用の正規表現を追加 ★★★
-    const d100Match = /^(1?d100)$/;
+    const d100Pattern = /^(1?d100)$/;
+    const table100Pattern = /^(nk|nka|nkb|nph)$/; // D100表コマンドをまとめた正規表現を追加
 
     const systemMatch = cleanedInput.match(systemCommandPattern);
     const d10Match = cleanedInput.match(d10Pattern);
-    // ★★★ 2. D100のmatch結果を格納する変数を追加 ★★★
-    const d100MatchResult = cleanedInput.match(d100Match);
+    const d100Match = cleanedInput.match(d100Pattern);
+    const table100Match = cleanedInput.match(table100Pattern); // 新しいmatch変数を追加
 
     if (systemMatch) {
         // --- システムコマンド (NA, NC) の場合 ---
@@ -289,9 +322,7 @@ export function performDiceRoll(rollData) {
 
             switch (command) {
                 case 'nm':
-                    // formatRegretResultを呼び出して、詳細なログテキストを生成する
                     resultText = formatRegretResult('SI-', '姉妹への未練表', resultValue);
-                    // selectedMasterDataには、対応するマスターデータを別途格納する
                     selectedMasterData = regretMasterData[`SI-${String(resultValue).padStart(2, '0')}`];
                     break;
                 case 'nme':
@@ -303,16 +334,22 @@ export function performDiceRoll(rollData) {
                     selectedMasterData = regretMasterData[`NP-${String(resultValue).padStart(2, '0')}`];
                     break;
                 case 'nt':
-                    selectedMasterData = takaramonoMasterData[resultValue];
-                    resultText = selectedMasterData ? `🎲 たからもの表(${resultValue})<br>【${selectedMasterData.name}】 ${selectedMasterData.description}` : `たからものデータ[${resultValue}]が見つかりませんでした。`;
-                    // const takaramono = takaramonoMasterData[resultValue];
-                    // resultText = takaramono ? `🎲 たからもの表(${resultValue})<br>【${takaramono.name}】 ${takaramono.description}` : `たからものデータ[${resultValue}]が見つかりませんでした。`;
+                    // ★★★ 新しいヘルパー関数を呼び出す ★★★
+                    const ntResult = formatSimpleTableResult('たからもの表', takaramonoMasterData, resultValue);
+                    resultText = ntResult.resultText;
+                    selectedMasterData = ntResult.selectedMasterData;
                     break;
                 case 'nh':
-                    selectedMasterData = hintMasterData[resultValue]; // ★ ここで代入
-                    resultText = selectedMasterData ? `🎲 暗示表(${resultValue})<br>【${selectedMasterData.name}】 ${selectedMasterData.description}` : `暗示データ[${resultValue}]が見つかりませんでした。`;
-                    // const hint = hintMasterData[resultValue];
-                    // resultText = hint ? `🎲 暗示表(${resultValue})<br>【${hint.name}】 ${hint.description}` : `暗示データ[${resultValue}]が見つかりませんでした。`;
+                    // ★★★ 新しいヘルパー関数を呼び出す ★★★
+                    const nhResult = formatSimpleTableResult('暗示表', hintMasterData, resultValue);
+                    resultText = nhResult.resultText;
+                    selectedMasterData = nhResult.selectedMasterData;
+                    break;
+                case 'nal':
+                    // このコマンドは 10 -> '0' の特殊マッピングがあるため固有ロジックを維持
+                    const awakeningKey = resultValue === 10 ? '0' : String(resultValue);
+                    selectedMasterData = awakeningLocationsData[awakeningKey];
+                    resultText = selectedMasterData ? `🎲 目覚めの場所表(${awakeningKey})<br>【${selectedMasterData.name}】 ${selectedMasterData.description}` : `目覚めの場所データ[${awakeningKey}]が見つかりませんでした。`;
                     break;
                 case '1d10':
                 case 'd10':
@@ -329,17 +366,60 @@ export function performDiceRoll(rollData) {
             }
         });
 
-    } else if (d100MatchResult) {
+    } else if (d100Match) {
+        // --- 汎用D100コマンドの場合 ---
         performD100Roll(rollData, (finalResult, tensValue, onesValue) => {
             return `🎲 1D100 ＞ ${finalResult} [${tensValue*10} + ${onesValue}]`;
         });
-
-    } else if (cleanedInput === 'nk') {
+    } else if (table100Match) {
         performD100Roll(rollData, (finalResult) => {
-            const fragment = memoryFragmentsData[finalResult];
-            return fragment 
-                ? `🎲 記憶のカケラ表(${finalResult})<br>【${fragment.name}】 ${fragment.description}` 
-                : `記憶のカケラデータ[${finalResult}]が見つかりませんでした。`;
+            let item, tableName, displayKey, data;
+
+            switch(cleanedInput) {
+                case 'nk':
+                    data = memoryFragmentsData;
+                    tableName = '記憶のカケラ表';
+                    break;
+                case 'nka':
+                    data = memoryFragmentsAlphaData;
+                    tableName = '記憶のカケラ-α表';
+                    break;
+                case 'nkb':
+                    data = memoryFragmentsBetaData;
+                    tableName = '記憶のカケラ-β表';
+                    break;
+                case 'nph':
+                    data = posthumousHistoryData;
+                    tableName = '死後経歴表';
+                    break;
+            }
+            
+            // --- ▼▼▼ ここからがご指示のロジックです ▼▼▼ ---
+
+            // ① ダイスの出目を数値にする (finalResultがすでに数値なので、そのまま使用)
+            const diceResultAsNumber = finalResult;
+
+            // ② JSONデータのキーを全て数値に変換して検索
+            const foundKey = Object.keys(data).find(key => {
+                let keyAsNumber;
+                if (key === '0') {
+                    keyAsNumber = 10;
+                } else if (key === '00') {
+                    keyAsNumber = 100;
+                } else {
+                    keyAsNumber = parseInt(key, 10);
+                }
+                // ③ ①と②を比べる
+                return keyAsNumber === diceResultAsNumber;
+            });
+            
+            item = foundKey ? data[foundKey] : null;
+            displayKey = foundKey || finalResult; // 見つかったキーを表示。見つからなければダイス目を表示
+
+            // --- ▲▲▲ ロジックここまで ▲▲▲ ---
+            return item 
+                ? `🎲 ${tableName}(${displayKey})<br>【${item.name}】 ${item.description}` 
+                : `${tableName}データ[${displayKey}]が見つかりませんでした。`;
         });
     } else {
         // --- システムコマンドとD10系以外 (1d8 など) の場合 ---

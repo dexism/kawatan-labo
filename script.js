@@ -7,7 +7,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-const appVersion = "7.10.2002";
+const appVersion = "7.10.2016";
 
 // --- モジュールのインポート ---
 import * as data from './data-handler.js';
@@ -63,7 +63,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             hintMasterData: data.getHintData(),
             regretMasterData: data.getRegretData(),
             takaramonoMasterData: data.getTakaramonoData(),
-            memoryFragmentsData: data.getMemoryFragmentData(),
+            memoryFragmentsData: data.getMemoryFragmentsData(), // 正しい関数名でデータ取得
+            memoryFragmentsAlphaData: data.getMemoryFragmentsAlphaData(), // 追加
+            memoryFragmentsBetaData: data.getMemoryFragmentsBetaData(), // 追加
+            awakeningLocationsData: data.getAwakeningLocationsData(), // 追加
+            posthumousHistoryData: data.getPosthumousHistoryData(), // 追加
             addLog: uiAddLog 
         });
 

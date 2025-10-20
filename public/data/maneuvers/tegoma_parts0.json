@@ -350,7 +350,7 @@
     "description": "移動1（【ほね】相当）。",
     "description_raw": "移動1（【ほね】相当）",
     "flavor_text": "死者たちは地を歩む。それは二本の足であるが、足先が多少どうこうなっていても骨さえあればなんとかなる。",
-    "source": { "book": "ESP", "page": 50 },
+    "source": { "book": "歪曲の舞踏", "page": 50 },
     "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": 1, "direction": "performer_choice" } }]
   },
   "P0-74": {
@@ -359,7 +359,7 @@
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "このパーツが損傷した際、損傷させた者は狂気点1点を得る（【トラウマスイッチ】相当）",
     "description_raw": "このパーツが損傷した際、損傷させた者は狂気点1点を得る（【トラウマスイッチ】相当）",
-    "source": { "book": "ESP", "page": 50 },
+    "source": { "book": "歪曲の舞踏", "page": 50 },
     "effects": [{ "ref": "INFLICT_MADNESS_ON_DAMAGE_TAKEN", "params": { "value": 1 } }]
   },
   "P0-75": {
@@ -369,7 +369,7 @@
     "description": "移動1～2（【けもあし】相当）",
     "description_raw": "移動1～2（【けもあし】相当）",
     "flavor_text": "あなたの足は切り落とされ、獣のものがつながれている。ひどく歪んだ造形だが、早く走れることは間違いない。",
-    "source": { "book": "ESP", "page": 50 },
+    "source": { "book": "歪曲の舞踏", "page": 50 },
     "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": "1-2", "direction": "performer_choice" } }]
   },
   "P0-76": {
@@ -379,7 +379,7 @@
     "description": "肉弾攻撃2（【かぎづめ】相当）",
     "description_raw": "肉弾攻撃2（【かぎづめ】相当）",
     "flavor_text": "敵を引き裂くために発達した鉤爪。日常生活に不便こそあれ、アンデッドに日常はない。よって問題なし。",
-    "source": { "book": "ESP", "page": 50 },
+    "source": { "book": "歪曲の舞踏", "page": 50 },
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "肉弾", "damage": 2 } }]
   },
   "P0-77": {
@@ -389,7 +389,7 @@
     "description": "移動1、移動妨害無効（【ホッパー】相当）",
     "description_raw": "移動1、移動妨害無効（【ホッパー】相当）",
     "flavor_text": "脚に仕込まれた強力なバネによって、瞬間的にジャンプできる。ダイナミックな回避や移動を行うことが可能だ。",
-    "source": { "book": "ESP", "page": 50 },
+    "source": { "book": "歪曲の舞踏", "page": 50 },
     "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": 1, "direction": "performer_choice", "ignore_move_debuff": true } }]
   },
   "P0-78": {
@@ -399,7 +399,7 @@
     "description": "なし（【はらわた】相当）",
     "description_raw": "なし（【はらわた】相当）",
     "flavor_text": "体の中がスカスカでは格好がつかない。死者であろうと、体内には用途不明の器官が多数押し込められているのだ。",
-    "source": { "book": "ESP", "page": 50 },
+    "source": { "book": "歪曲の舞踏", "page": 50 },
     "effects": []
   },
   "P0-79": {
@@ -409,7 +409,7 @@
     "description": "最大行動値+2（【よぶんなあたま】相当）",
     "description_raw": "最大行動値+2（【よぶんなあたま】相当）",
     "flavor_text": "あなたの肩の上には、もう一つの頭がある。もう一人いるほど何かとすごくやってくる。二つの知見は早い反応をさせてくれる。",
-    "source": { "book": "ESP", "page": 51 },
+    "source": { "book": "歪曲の舞踏", "page": 51 },
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "maxActionValue", "value": 2, "duration": "permanent_while_undamaged" } }]
   },
   "P0-80": {
@@ -419,7 +419,7 @@
     "description": "なし（【はらわた】相当）",
     "description_raw": "なし（【はらわた】相当）",
     "flavor_text": "体の中がスカスカでは格好がつかない。死者であろうと、体内には用途不明の器官が多数押し込められているのだ。",
-    "source": { "book": "ESP", "page": 51 },
+    "source": { "book": "歪曲の舞踏", "page": 51 },
     "effects": []
   },
   "P0-81": {
@@ -429,7 +429,7 @@
     "description": "「切断」を無効化（【オートセパレート】相当）",
     "description_raw": "「切断」を無効化（【オートセパレート】相当）",
     "flavor_text": "自らを切り離す分離システム。たやすく解体されるが、それぞれが独自に動き、再びつながるのだ。",
-    "source": { "book": "ESP", "page": 51 },
+    "source": { "book": "歪曲の舞踏", "page": 51 },
     "effects": [{ "ref": "NEGATE_DAMAGE_EFFECT", "params": { "effect_to_negate": "切断", "optional": true } }]
   },
   "P0-82": {
@@ -439,7 +439,7 @@
     "description": "移動1、「移動妨害」無効（【はりつき】相当）。",
     "description_raw": "移動1、「移動妨害」無効（【はりつき】相当）",
     "flavor_text": "あなたの足には鉤爪や吸盤があり、壁や天井を駆け上ることでトリッキーな移動が可能となる。",
-    "source": { "book": "ESP", "page": 51 },
+    "source": { "book": "歪曲の舞踏", "page": 51 },
     "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": 1, "direction": "performer_choice", "ignore_move_debuff": true } }]
   },
   "P0-83": {
@@ -449,7 +449,7 @@
     "description": "最大行動値+1（【めだま】相当）",
     "description_raw": "最大行動値+1（【めだま】相当）",
     "flavor_text": "人間にとって最も重大な感覚器官。感覚の鋭さはそのまま、手数の多さに直結するのが死者の戦いだ。",
-    "source": { "book": "ESP", "page": 51 },
+    "source": { "book": "歪曲の舞踏", "page": 51 },
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "maxActionValue", "value": 1, "duration": "permanent_while_undamaged" } }]
   },
   "P0-84": {
@@ -458,7 +458,7 @@
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "なし（【はらわた】相当）",
     "description_raw": "なし（【はらわた】相当）",
-    "source": { "book": "ESP", "page": 51 },
+    "source": { "book": "歪曲の舞踏", "page": 51 },
     "effects": []
   },
   "P0-85": {
@@ -467,7 +467,7 @@
     "timing": "オート", "cost": "なし", "range": "自身",
     "description": "最大行動値+2（【よぶんなあたま】相当）",
     "description_raw": "最大行動値+2（【よぶんなあたま】相当）",
-    "source": { "book": "ESP", "page": 50 },
+    "source": { "book": "歪曲の舞踏", "page": 50 },
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "maxActionValue", "value": 2, "duration": "permanent_while_undamaged" } }]
   },
   "P0-86": {
@@ -477,7 +477,7 @@
     "description": "最大行動値+1（【アドレナリン】相当）。",
     "description_raw": "最大行動値+1（【アドレナリン】相当）",
     "flavor_text": "脳の働きを活性化させ、反応速度を無理矢理に活性化させる改造。アンデッドならではの薬物強化である。",
-    "source": { "book": "ESP", "page": 50 },
+    "source": { "book": "歪曲の舞踏", "page": 50 },
     "effects": [{ "ref": "APPLY_BUFF", "params": { "target": "self", "stat": "maxActionValue", "value": 1, "duration": "permanent_while_undamaged" } }]
   },
   "P0-87": {
@@ -487,7 +487,7 @@
     "description": "なし（【よぶんなにく】相当）",
     "description_raw": "なし（【よぶんなにく】相当）",
     "flavor_text": "これといった機能のないパーツ。しかし、機能などなくとも最低限の盾としては活用できるものだ。",
-    "source": { "book": "ESP", "page": 50 },
+    "source": { "book": "歪曲の舞踏", "page": 50 },
     "effects": []
   },
   "P0-88": {
@@ -497,7 +497,7 @@
     "description": "なし（【よぶんなにく】相当）",
     "description_raw": "なし（【よぶんなにく】相当）",
     "flavor_text": "これといった機能のないパーツ。しかし、機能などなくとも最低限の盾としては活用できるものだ。",
-    "source": { "book": "ESP", "page": 50 },
+    "source": { "book": "歪曲の舞踏", "page": 50 },
     "effects": []
   },
   "P0-89": { 

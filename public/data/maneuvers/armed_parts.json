@@ -111,7 +111,7 @@
     "description": "白兵攻撃1+切断。この攻撃に対し「防御」によるダメージ軽減は無効化される。",
     "description_raw": "白兵攻撃1+切断(相手は切断判定修正+2)、防御によって軽減されない。",
     "flavor_text": "死者を埋葬するにはスコップが必要だ。たとえ未だ動き続けていようとも、穿ち、削り、崩して埋めてやろう。",
-    "source": { "book": "ESP", "page": 42 },
+    "source": { "book": "歪曲の舞踏", "page": 42 },
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 1, "on_hit": ["SEVERANCE_MOD_PLUS_2"], "defense_piercing_reduction": true } }]
   },
   "A1-12": {
@@ -121,7 +121,7 @@
     "description": "このパーツが戦闘終了時に破壊されていなければ、自分以外の姉妹の基本パーツ合計3つを修復する。",
     "description_raw": "このパーツが戦闘終了時に破壊されていなければ、自分以外の姉妹の損傷している基本パーツ合計3つを選んで損傷前の状態に戻してもよい。",
     "flavor_text": "縫い針と有機繊維、アンデッド用の活性化軟膏。人間向けとはまるで違う品が入った、死者のための修理道具入れ。",
-    "source": { "book": "ESP", "page": 42 },
+    "source": { "book": "歪曲の舞踏", "page": 42 },
     "effects": [{ "ref": "REPAIR_ALLY_PARTS_ON_BATTLE_END", "params": { "part_type": "基本", "count": 3 } }]
   },
 
@@ -239,7 +239,7 @@
     "description": "防御2。このパーツが戦闘終了時に破壊されていなければ、自身のパーツ2つを修復する。",
     "description_raw": "防御2。このパーツが戦闘終了時に破壊されていなければ、自身の損傷している任意のパーツ2つを選んで損傷前の状態に戻してもよい。",
     "flavor_text": "棺を背負って……あるいは引きずっている。そして特殊な保存装置でもあるその中には、予備のパーツを保管できる。",
-    "source": { "book": "ESP", "page": 42 },
+    "source": { "book": "歪曲の舞踏", "page": 42 },
     "effects": [{ "ref": "DEFEND_AND_REPAIR_SELF", "params": { "defense_value": 2, "repair_count": 2 } }]
   },
   "A2-12": {
@@ -249,7 +249,7 @@
     "description": "射撃攻撃1+転倒。命中した場合、ターン終了まで対象は移動マニューバを使用できず、行動値-2。",
     "description_raw": "射撃攻撃1+転倒。命中したならターン終了まで、対象は移動マニューバを自身に使用する際、行動値2点を追加で減らす(この効果は累積しない)。",
     "flavor_text": "肉を切り裂くワイヤーのネットと強力な粘着剤を打ち出す銃。殺傷力は低いが、制圧力は高い。",
-    "source": { "book": "ESP", "page": 42 },
+    "source": { "book": "歪曲の舞踏", "page": 42 },
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "射撃", "damage": 1, "on_hit": ["TUMBLE", "MOVE_COST_DEBUFF"] } }]
   },
 
@@ -361,7 +361,7 @@
     "description": "「白兵攻撃1+切断」か「白兵攻撃1+転倒」のどちらかを選択して使用する。",
     "description_raw": "宣言時、『白兵攻撃1+切断』か『白兵攻撃1+転倒』のどちらかの効果を選び、処理を行う。",
     "flavor_text": "曰く、信じられないほど邪悪なデザインをした武器。多く付いた刃を応用して戦い、また投擲して使うこともできる。",
-    "source": { "book": "ESP", "page": 42 },
+    "source": { "book": "歪曲の舞踏", "page": 42 },
     "effects": [{ "ref": "CHOICE_ATTACK", "params": { "options": [
       { "name": "切断", "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 1, "on_hit": ["SEVERANCE"] } }] },
       { "name": "転倒", "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 1, "on_hit": ["TUMBLE"] } }] }
@@ -374,7 +374,7 @@
     "description": "白兵攻撃2+切断。相手は切断判定-2。",
     "description_raw": "白兵攻撃2+切断(相手は切断判定修正-2)。",
     "flavor_text": "敵の体を切り刻みバラバラにするためだけに作られた凶悪無比な武器。取り回しにくいが、効果は凄まじい。",
-    "source": { "book": "ESP", "page": 42 },
+    "source": { "book": "歪曲の舞踏", "page": 42 },
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "白兵", "damage": 2, "on_hit": ["SEVERANCE_MOD_MINUS_2"] } }]
   }
 }

@@ -120,7 +120,7 @@
     "description": "このパーツが戦闘終了時に破壊されていなければ、このパーツが装備された箇所の基本パーツは全て修復される。",
     "description_raw": "このパーツが破壊されず戦闘終了したなら、このパーツが装備された箇所の基本パーツは全て損傷前の状態に戻る。",
     "flavor_text": "鉄パイプや簡単なボルトといった、ガラクタで作られた体。活動に特に支障がないことと、壊れても簡単に修復できることが強み。",
-    "source": { "book": "ESP", "page": 43 },
+    "source": { "book": "歪曲の舞踏", "page": 43 },
     "effects": [{ "ref": "REPAIR_LOCATION_ON_BATTLE_END", "params": { "part_type": "基本" } }]
   },
   "R1-12": {
@@ -130,7 +130,7 @@
     "description": "狂気点を1点無効化する代わりに、このパーツを損傷させてもよい。",
     "description_raw": "あなたは受けた狂気点1点を無効化する代わり、このパーツを損傷させてもよい。",
     "flavor_text": "緊急時に自我をある程度マヒさせる、メンタル面のプロテクトシステム。過剰なストレスをわずかながら、やわらげてくれる。",
-    "source": { "book": "ESP", "page": 43 },
+    "source": { "book": "歪曲の舞踏", "page": 43 },
     "effects": [{ "ref": "NEGATE_MADNESS_WITH_SELF_DAMAGE", "params": { "part_name": "カルマプロセッサ" } }]
   },
 
@@ -248,7 +248,7 @@
     "description": "戦闘中1ターン1回、コストの狂気点1点を無効化。",
     "description_raw": "あなたは戦闘中の1ターンにつき1回だけ、コストの代わりに加えられる狂気点1点を無効化できる。",
     "flavor_text": "あなたは頭に取り付けられた目立つアンテナで、何処かから発信される精神安定化電波を受信している。あなたを狂わせまいという気づかいだろうか。",
-    "source": { "book": "ESP", "page": 43 },
+    "source": { "book": "歪曲の舞踏", "page": 43 },
     "effects": [{ "ref": "NEGATE_MADNESS_COST_ONCE_PER_TURN", "params": {} }]
   },
   "R2-12": {
@@ -258,7 +258,7 @@
     "description": "最大行動値+2。装備箇所にダメージを受けたらパーツ1つ追加で損傷。",
     "description_raw": "最大行動値+2。装備箇所にダメージを受けた際、あなたは任意の基本パーツ1つを追加で損傷しなくてはならない。",
     "flavor_text": "体に取り付けられたむきだしの太いチューブ。常に多量のエネルギ－を循環させており、ドールの肉体を異常活性化させる。",
-    "source": { "book": "ESP", "page": 43 },
+    "source": { "book": "歪曲の舞踏", "page": 43 },
     "effects": [
       { "ref": "APPLY_BUFF", "params": { "stat": "maxActionValue", "value": 2 } },
       { "ref": "TAKE_EXTRA_DAMAGE_ON_HIT", "params": { "part_type": "基本", "count": 1 } }
@@ -382,7 +382,7 @@
     "description": "行動値1減らす代わりに、未練の狂気点を1点加えて射撃攻撃4。",
     "description_raw": "コストの代わりにあなたは現在行動値を1減らした上で、任意の未練に狂気点1点を加える。射撃攻撃4。",
     "flavor_text": "超能力開発の副産物。使用者の自我に強制干渉し、ある種の超能力を無理やり発動させてエネルギーとして発射。敵を破壊する。",
-    "source": { "book": "ESP", "page": 43 },
+    "source": { "book": "歪曲の舞踏", "page": 43 },
     "effects": [{ "ref": "GENERIC_ATTACK", "params": { "attack_type": "射撃", "damage": 4, "cost_type": "ap_and_madness", "cost_value": 1 } }]
   },
   "R3-12": {
@@ -392,7 +392,7 @@
     "description": "移動1～2。1つのパートにつき1回のみ。",
     "description_raw": "移動1～2。1つのパートにつき、1回のみ使用可。",
     "flavor_text": "体内の粘菌コミュニティと連動、貯蓄したエネルギーを燃焼し、ごく短時間の飛行を可能とする兵装。",
-    "source": { "book": "ESP", "page": 43 },
+    "source": { "book": "歪曲の舞踏", "page": 43 },
     "effects": [{ "ref": "MOVE_CHARACTER", "params": { "target": "self", "distance": "1-2", "limit_per_part": 1 } }]
   }
 }
