@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.22.90"; // バージョンを更新
+export const version = "1.22.91"; // バージョンを更新
 
 import * as data from './data-handler.js';
 import * as charManager from './character-manager.js';
@@ -1398,6 +1398,7 @@ export function getCharacterManeuvers(char) {
     const allManeuvers = [];
     const addedPartNames = new Set(); // 処理済みのパーツ名を記録
 
+    // 1. キャラクター固有のスキルを追加
     (char.skills || []).forEach(skillName => {
         const maneuver = data.getManeuverByName(skillName);
         if (maneuver) {
@@ -1406,6 +1407,7 @@ export function getCharacterManeuvers(char) {
         }
     });
 
+    // 2. キャラクター固有のパーツを追加
     Object.values(char.partsStatus || {}).flat().forEach(part => {
         if (addedPartNames.has(part.name)) return;
 
@@ -1425,10 +1427,19 @@ export function getCharacterManeuvers(char) {
         }
     });
 
-    const waitManeuver = data.getManeuverByName('待機');
-    if (waitManeuver) allManeuvers.push({ data: waitManeuver, sourceType: 'common' });
-    const arbitraryManeuver = data.getManeuverByName('任意');
-    if (arbitraryManeuver) allManeuvers.push({ data: arbitraryManeuver, sourceType: 'common' });
+    // 3. 全ての一般動作（CA-XX）をリストに追加する
+    const allManeuverData = data.getAllManeuvers();
+    for (const id in allManeuverData) {
+        if (id.startsWith('CA-')) {
+            const maneuver = allManeuverData[id];
+            allManeuvers.push({ data: maneuver, sourceType: 'common' });
+        }
+    }
+
+    // const waitManeuver = data.getManeuverByName('待機');
+    // if (waitManeuver) allManeuvers.push({ data: waitManeuver, sourceType: 'common' });
+    // const arbitraryManeuver = data.getManeuverByName('任意');
+    // if (arbitraryManeuver) allManeuvers.push({ data: arbitraryManeuver, sourceType: 'common' });
     
     const isCharDamaged = Object.values(char.partsStatus).flat().some(part => part.damaged);
 
@@ -1469,6 +1480,7 @@ export function getCharacterManeuvers(char) {
         activeIndicators.add('ジャッジ');
     }
 
+    // 4. 全マニューバの使用可否を判定して返す
     return allManeuvers.map(m => {
         const maneuver = m.data;
         let isUsable = true;
@@ -2383,18 +2395,19 @@ export function showRelationshipModal() {
         const containerHeight = chartContainer.offsetHeight;
 
         // 1. ダミーのノードを作成して実際のサイズを取得する
-        const tempNode = document.createElement('div');
-        tempNode.className = 'doll-node';
-        tempNode.style.visibility = 'hidden'; // 画面には表示しない
-        chartContainer.appendChild(tempNode);
-        const nodeRect = tempNode.getBoundingClientRect();
-        const nodeDiameter = nodeRect.width; // 実際の幅（直径）を取得
+        // const tempNode = document.createElement('div');
+        // tempNode.className = 'doll-node';
+        // tempNode.style.visibility = 'hidden'; // 画面には表示しない
+        // chartContainer.appendChild(tempNode);
+        // const nodeRect = tempNode.getBoundingClientRect();
+        // const nodeDiameter = nodeRect.width; // 実際の幅（直径）を取得
+        const nodeDiameter = 100; // .doll-node width
         const nodeRadius = nodeDiameter / 2;
-        chartContainer.removeChild(tempNode); // ダミーノードを削除
+        // chartContainer.removeChild(tempNode); // ダミーノードを削除
 
         // 2. 取得したサイズを基に楕円の半径を計算（アイコンが重ならないように調整）
-        const radiusX = (containerWidth - nodeDiameter) / 2 * 1;
-        const radiusY = (containerHeight - nodeDiameter) / 2 * 1;
+        const radiusX = (containerWidth - nodeDiameter) / 2;
+        const radiusY = (containerHeight - nodeDiameter) / 2;
         
         const centerX = containerWidth / 2;
         const centerY = containerHeight / 2;
@@ -2420,16 +2433,12 @@ export function showRelationshipModal() {
             node.style.left = `${x}px`;
             node.style.top = `${y}px`;
             
-            // ▼▼▼ ここからが今回の修正箇所 ▼▼▼
-            
             // 1. 角度を度数法(degree)に変換
             const angleDeg = angle * (180 / Math.PI);
             
             // 2. CSS変数としてstyle属性に角度を設定
             node.style.setProperty('--angle', `${angleDeg}deg`);
             
-            // ▲▲▲ 修正ここまで ▲▲▲
-
             node.innerHTML = `
                 <img src="${pc.img}" alt="${pc.name}">
                 <div class="name-label">${pc.name}</div>
@@ -2465,8 +2474,9 @@ export function showRelationshipModal() {
                 // ▼▼▼ ここからが今回の修正の中心部分 (2/2) ▼▼▼
                 // 取得した動的な値を使って計算
                 const innerDistance = totalDistance - nodeDiameter;
-                const offsetFromEdge = innerDistance * 0.18;
-                const textboxDistance = nodeRadius + offsetFromEdge;
+                // const offsetFromEdge = innerDistance * 0.18;
+                // const textboxDistance = nodeRadius + offsetFromEdge;
+                const textboxDistance = 80;
                 // ▲▲▲ 修正ここまで ▲▲▲
 
                 const unitVectorX = dx / totalDistance;

@@ -41,7 +41,6 @@
   },
 
   "maneuverCategories": [
-    { "name": "一般",       "slug": "utility" },
     { "name": "移動",       "slug": "move" },
     { "name": "配置",       "slug": "staffing" },
     { "name": "攻撃",       "slug": "attack" },
@@ -61,7 +60,8 @@
     { "name": "行動値",     "slug": "action-boost" },
     { "name": "生贄",       "slug": "sacrifice" },
     { "name": "増援",       "slug": "reinforcement" },
-    { "name": "その他",     "slug": "other" }
+    { "name": "その他",     "slug": "other" },
+    { "name": "一般",       "slug": "utility" }
   ],
 
   "maneuverTags": [

@@ -576,9 +576,11 @@
     background-color: var(--color-background-5);
     color: var(--color-fore-2);
     border-radius: 20px;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: bold;
     padding: 1px 8px;
+    width: fit-content;
+    white-space: nowrap; /* 改行を防ぐ */
 }
 .ref-regret-flavor {
     font-weight: normal;

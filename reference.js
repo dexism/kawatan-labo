@@ -2,7 +2,7 @@
  * @file reference.js
  * @description ルールリファレンスUIの構築と管理を担当するモジュール
  */
-export const version = "2.4.1"; // カルーセルUI完全移行版 + 新規データソース対応
+export const version = "2.4.2"; // カルーセルUI完全移行版 + 新規データソース対応
 
 import * as data from './data-handler.js';
 import * as ui from './ui-manager.js';
@@ -321,14 +321,16 @@ function createListItem(item, dataType, options = {}) {
         const madnessName = item.madnessName;
         const madnessQuote = item.madnessQuote;
         const madnessEffect = item.madnessEffect;
+        const source = item.source;
+        const sourceInfoText = source ? `${source.book} p${source.page}` : '';
 
         const textToCopy = `${idNum} ${title}\n${description}\n発狂：${madnessName}\n「${madnessQuote}」\n${madnessEffect}`.trim();
 
         itemElement.innerHTML = `
             <div class="item-right-col" style="width: 100%;">
-                <div class="ref-container">
-                    <div class="ref-maneuver-name">${idNum}${title}</div>
-                    <div class="ref-regret-madness">発狂<span class="malice-level">${madnessName}</span></div>
+                <div class="ref-container-top">
+                    <div class="ref-source-info">${sourceInfoText}</div>
+                    <div class="ref-maneuver-name">${idNum}${title}<div class="ref-regret-madness">発狂<span class="malice-level">${madnessName}</span></div></div>
                 </div>
                 <div class="item-row-2">${description}</div>
                 <div class="item-row-3 ref-regret-flavor">「${madnessQuote}」</div>
@@ -453,7 +455,7 @@ function handleTouchEnd(event) {
 // --- フィルタリング＆ソート ---
 
 const filterGroups = {
-    'カテゴリ': ['移動', "配置", '攻撃', '支援', '妨害', '強化', '防御', '脆弱', '補助', '難易度変更', '移動妨害', '無効化', 'コスト', '修復', '対話', '狂気点', '行動値', '生贄', '増援'],
+    'カテゴリ': ['移動', "配置", '攻撃', '支援', '妨害', '強化', '防御', '脆弱', '補助', '難易度変更', '移動妨害', '無効化', 'コスト', '修復', '対話', '狂気点', '行動値', '生贄', '増援', '一般'],
     '区分1': ['ポジション', 'クラススキル', '特化スキル', '基本パーツ', '強化パーツ', '手駒専用'],
     '区分2': ['アリス', 'ホリック', 'オートマトン', 'ジャンク', 'コート', 'ソロリティ', 'ステーシー', 'タナトス', 'ゴシック', 'レクイエム', 'バロック', 'ロマネスク', 'サイケデリック', '武装', '変異', '改造'],
     '攻撃': ['肉弾攻撃', '白兵攻撃', '射撃攻撃', '砲撃攻撃', '精神攻撃'],
@@ -611,7 +613,7 @@ function checkManeuverMatch(maneuver, groupName, filterName, masterData) {
         case 'ルールブック': {
             const bookName = maneuver.source?.book || '';
             if (filterName === '基本ルール') {
-                return bookName === '基本ルール';
+                return bookName === '基本ルールブック';
             }
             if (filterName === '歪曲の舞踏') {
                 return bookName === '歪曲の舞踏';
