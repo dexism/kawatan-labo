@@ -2,7 +2,7 @@
  * @file state-manager.js
  * @description アプリケーションのセッション状態の保存と復元を担当するモジュール
  */
-export const version = "2.4.17"; // ロード処理の完全な修正版
+export const version = "2.5.1"; // 保存・復元ロジックの最終修正版
 
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
@@ -11,14 +11,14 @@ import { convertVampireBloodSheet } from './character-converter.js';
 import * as data from './data-handler.js';
 import { checkAppVersion } from './script.js';
 
-const STORAGE_KEY = 'nechronica-battle-session-v3'; // 新しいデータ構造のため、キーをv3に戻す
+const STORAGE_KEY = 'nechronica-battle-session-v3';
 const AUTOSAVE_KEY = 'nechronica-autosave-enabled';
 
 let isAutoSaveEnabled = false;
 let isLoading = false;
 
 export function initialize() {
-    localStorage.removeItem('nechronica-battle-session-v2'); // 古いキーは削除
+    localStorage.removeItem('nechronica-battle-session-v2');
     const savedSetting = localStorage.getItem(AUTOSAVE_KEY);
     isAutoSaveEnabled = savedSetting !== 'false';
     console.log(`State Manager initialized. Auto-save is ${isAutoSaveEnabled ? 'ON' : 'OFF'}.`);
@@ -28,15 +28,14 @@ export function initialize() {
 export function setAutoSave(isEnabled) {
     isAutoSaveEnabled = isEnabled;
     localStorage.setItem(AUTOSAVE_KEY, isEnabled);
-    if (isEnabled) {
-        saveState();
-    }
+    if (isEnabled) saveState();
 }
 
 export function autoSave() {
     if (isLoading || !isAutoSaveEnabled) return;
     saveState();
 }
+
 function createSaveObject() {
     const battleState = battleLogic.getBattleState();
     const characters = charManager.getCharacters();
@@ -44,30 +43,43 @@ function createSaveObject() {
 
     let existingState = {};
     try {
-        existingState = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+        const storedData = localStorage.getItem(STORAGE_KEY);
+        if (storedData) {
+            existingState = JSON.parse(storedData);
+        }
     } catch (e) {
+        console.error("既存のセーブデータの解析に失敗:", e);
         existingState = { characters: [] };
     }
     const existingInitialStatesMap = new Map(
-        (existingState.characters || []).map(c => [c.initialState.charId, c.initialState])
+        (existingState.characters || []).map(c => c.initialState && [c.initialState.charId, c.initialState]).filter(Boolean)
     );
 
     const charactersToSave = characters.map(char => {
         const savedInitialState = existingInitialStatesMap.get(char.id) || {};
-        // isCheckedがtrueの未練のみを保存対象とする
         const regretsToSave = char.regrets.filter(r => r.isChecked);
         
+        // ▼▼▼ ここからが今回の修正の中心 ▼▼▼
+        const sourceType = char.sheetId ? 'sheet' : 'template';
+        const sourceId = char.sheetId || char.templateId;
+
+        if (!sourceId) {
+            console.error(`保存エラー: キャラクター「${char.name}」に sourceId (sheetId or templateId) がありません。`, char);
+        }
+
         const initialState = {
             charId: char.id,
-            sourceType: char.sheetId ? 'sheet' : 'template',
-            id: char.sheetId || char.templateId,
+            sourceType: sourceType,
+            id: sourceId,
             type: char.type,
             displayName: char.displayName,
             img: char.img,
-            regrets: regretsToSave, // フィルタリングした未練を保存
+            regrets: regretsToSave,
             area: savedInitialState.area,
             stackCount: savedInitialState.stackCount,
         };
+        // ▲▲▲ 修正ここまで ▲▲▲
+
         if (isSetupPhase) {
             initialState.area = char.area;
             initialState.stackCount = char.stackCount;
@@ -80,8 +92,7 @@ function createSaveObject() {
             actionValue: char.actionValue,
             isDestroyed: char.isDestroyed || false,
             hasWithdrawn: char.hasWithdrawn || false,
-            damagedPartNames: Object.values(char.partsStatus).flat()
-                .filter(p => p.damaged).map(p => p.name),
+            damagedPartNames: Object.values(char.partsStatus || {}).flat().filter(p => p.damaged).map(p => p.name),
             usedManeuvers: Array.from(char.usedManeuvers || [])
         };
 
@@ -95,15 +106,10 @@ function createSaveObject() {
     };
 }
 
-/**
- * 【新ロジック】現在の状態をクリーンなスナップショットとしてローカルストレージに保存する
- * @param {boolean} isManualSave - 手動保存かどうか
- */
 export function saveState(isManualSave = false) {
     try {
         const stateToSave = createSaveObject();
         localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
-
         if (isManualSave) {
             ui.showToastNotification('ブラウザに保存しました', 2000);
         } else if (isAutoSaveEnabled) {

@@ -7,7 +7,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-const appVersion = "7.10.2121";
+const appVersion = "7.10.2203";
 
 // --- モジュールのインポート ---
 import * as data from './data-handler.js';
@@ -44,6 +44,7 @@ import { version as menuBuilderVersion } from './menu-builder.js';
 import { version as referenceVersion } from './reference.js';
 import { version as Dice3dVersion } from './dice-3d.js';
 import { version as p2pManagerVersion } from './p2p-manager.js';
+import { version as personalityGeneratorVersion } from './personality-generator.js';
 
 // ===================================================================================
 //  アプリケーション初期化フロー
@@ -157,24 +158,25 @@ function showUpdateNotesModal() {
         const LATEST_UPDATE_NOTES = `
         <div class="modal-header modal-header-sub">📢主な更新内容 Ver.${appVersion}</div>
         <div class="modal-body welcome-modal-body">
-            <p>◆ 📖リファレンスに<strong>記憶のカケラ（α・β）・死後経歴・目覚めの場所</strong>を追加しました。</p>
-            <p>◆ <strong>💛姉妹の関係</strong>を追加しました。</p>
-            <p>◆ リファレンスを刷新、<strong>未練・たからもの・記憶のカケラ・暗示</strong>を追加しました。</p>
-            <p>◆ 最新バージョンへの<strong>自動更新機能</strong>を実装しました。</p>
-            <p>◆ <strong>📖全マニューバリファレンス</strong>を実装しました。</p>
-            <p>◆ <strong>防御・妨害・追加ダメージ・転倒・移動妨害</strong>を実装しました。</p>
-            <p>◆ <strong>セッションのファイルへの保存・ファイルから読込み</strong>を実装しました。</p>
-            <p>◆ <strong>【✏️画像の変更】※透過png対応</strong>：「🪪人形設計図」において<strong>画像の変更</strong>機能を追加しました。
-            <p>◆ <strong>状態の自動保存・復元機能</strong>を実装しました。（自動保存ON/OFF対応）</p>
-            <p>◆ <strong>データの誤記を訂正</strong>しました。
-            <p>◆ <strong>【保管所から読込み】【保管所で見る】【保管所から再読込み】</strong>：キャラクターシート保管所との連携を強化しました。
-            <p>◆ 3Dダイス<strong>複数ダイス、D100に対応</strong>しました。
-            <p>◆ 試しに<strong>ダイスが転がる</strong>ようにしてみましたが、動作が怪しいです。
-            <p>◆ ジャッジウィンドウで<strong>適用されている支援、妨害を確認</strong>できるようになりました。
-            <p>◆ <strong>支援</strong>がダイスロールに適用できるようになりました。
-            <p>◆ ユーザーが<strong>画像を追加</strong>できるようになりました。
-            <p>◆ <strong>【新着/IDリスト】</strong>：キャラクターシート保管所の<strong>キャラクターリスト表示</strong>機能を追加しました。
-            <p>◆ <strong>マニューバリスト</strong>を更新し、<strong>表示機能を拡張</strong>しました。
+            <p>◆ 📖待望の<b>セッション通信機能</b>を追加しました。（テスト段階）</p>
+            <p>◆ <b>💛姉妹の関係</b>に<b>二人の関係フレーバー</b>を追加しました。</p>
+            <p>◆ 📖リファレンスに<b>記憶のカケラ（α・β）・死後経歴・目覚めの場所</b>を追加しました。</p>
+            <p>◆ リファレンスを刷新、<b>未練・たからもの・記憶のカケラ・暗示</b>を追加しました。</p>
+            <p>◆ 最新バージョンへの<b>自動更新機能</b>を実装しました。</p>
+            <p>◆ <b>📖全マニューバリファレンス</b>を実装しました。</p>
+            <p>◆ <b>防御・妨害・追加ダメージ・転倒・移動妨害</b>を実装しました。</p>
+            <p>◆ <b>セッションのファイルへの保存・ファイルから読込み</b>を実装しました。</p>
+            <p>◆ <b>【✏️画像の変更】※透過png対応</b>：「🪪人形設計図」において<b>画像の変更</b>機能を追加しました。
+            <p>◆ <b>状態の自動保存・復元機能</b>を実装しました。（自動保存ON/OFF対応）</p>
+            <p>◆ <b>データの誤記を訂正</b>しました。
+            <p>◆ <b>【保管所から読込み】【保管所で見る】【保管所から再読込み】</b>：キャラクターシート保管所との連携を強化しました。
+            <p>◆ 3Dダイス<b>複数ダイス、D100に対応</b>しました。
+            <p>◆ 試しに<b>ダイスが転がる</b>ようにしてみましたが、動作が怪しいです。
+            <p>◆ ジャッジウィンドウで<b>適用されている支援、妨害を確認</b>できるようになりました。
+            <p>◆ <b>支援</b>がダイスロールに適用できるようになりました。
+            <p>◆ ユーザーが<b>画像を追加</b>できるようになりました。
+            <p>◆ <b>【新着/IDリスト】</b>：キャラクターシート保管所の<b>キャラクターリスト表示</b>機能を追加しました。
+            <p>◆ <b>マニューバリスト</b>を更新し、<b>表示機能を拡張</b>しました。
             <p>◆ その他、軽微なUI調整と不具合の修正を行いました。
         </div>
         `;
@@ -337,7 +339,8 @@ function displayAppVersionInfo() {
         "state-manager": stateManagerVersion,
         "reference": referenceVersion,
         "character-converter": characterConverterVersion,
-        "p2p-manager": p2pManagerVersion
+        "p2p-manager": p2pManagerVersion,
+        "personality-generator": personalityGeneratorVersion
     };
     displayVersionInfo(versionInfo);
 }

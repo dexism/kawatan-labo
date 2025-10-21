@@ -5,13 +5,14 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "2.0.14";
+export const version = "2.1.15";
 
 import * as stateManager from './state-manager.js';
 import * as p2p from './p2p-manager.js';
 import { database } from './p2p-manager.js';
 import * as ui from './ui-manager.js';
 import * as charManager from './character-manager.js';
+
 
 export async function initialize() {
     // --- テーマ・自動保存などの既存機能の初期化 ---
@@ -42,8 +43,19 @@ export async function initialize() {
     const sessionPlPanel = document.getElementById('sessionPlPanel');
 
     // P2Pマネージャーの初期化
+    // P2Pマネージャーの初期化 (コールバックを修正)
     p2p.initialize(
-        (data) => { console.log('受信:', data); },
+        (data) => {
+            console.log('受信:', data);
+            // ▼▼▼ 受信データの処理を追加 ▼▼▼
+            if (data.type === 'notification') {
+                ui.showToastNotification(data.payload, 3000);
+            } else if (data.type === 'kicked') {
+                alert("ルームから追放されました。");
+                p2p.disconnectSession();
+                window.location.href = window.location.pathname;
+            }
+        },
         (id, state) => {
             console.log(`接続状態: ${id} is ${state}`);
             const statusEl = document.getElementById('plConnectionStatus');
@@ -55,8 +67,35 @@ export async function initialize() {
             const listEl = document.getElementById('ncPeerList');
             const countEl = document.getElementById('ncPeerCount');
             if (listEl && countEl) {
-                listEl.innerHTML = peerList.map(id => `<li>${id}</li>`).join('');
+                // ▼▼▼ PL名と追放ボタンを表示するように修正 ▼▼▼
+                listEl.innerHTML = ''; // 一旦クリア
+                
+                // peerListはIDの配列なので、各IDの詳細情報をFirebaseから取得
+                peerList.forEach(plId => {
+                    const plRef = p2p.database.ref(`rooms/${document.getElementById('ncRoomId').textContent}/pls/${plId}/profile`);
+                    plRef.once('value', snapshot => {
+                        const profile = snapshot.val();
+                        if (profile) {
+                            const itemEl = document.createElement('div');
+                            itemEl.className = 'peer-list-item';
+                            itemEl.innerHTML = `
+                                <span class="peer-name">${profile.name}</span>
+                                <button class="kick-btn" data-pl-id="${plId}">追放</button>
+                            `;
+                            listEl.appendChild(itemEl);
+
+                            // 追放ボタンにイベントリスナーを設定
+                            itemEl.querySelector('.kick-btn').addEventListener('click', (e) => {
+                                const targetPlId = e.target.dataset.plId;
+                                if (confirm(`PL「${profile.name}」を追放しますか？`)) {
+                                    p2p.kickPlayer(targetPlId);
+                                }
+                            });
+                        }
+                    });
+                });
                 countEl.textContent = peerList.length;
+                // ▲▲▲ 修正ここまで ▲▲▲
             }
         }
     );
@@ -79,11 +118,16 @@ export async function initialize() {
 
     // --- イベントリスナーの設定 ---
 
-    // ページ読み込み時のURLパラメータチェック
+    // 1. 最初にURLパラメータとローカルストレージから値を取得する
     const params = new URLSearchParams(window.location.search);
     const roomIdFromUrl = params.get('room');
-    if (roomIdFromUrl) {
-        // PLモードで即時接続開始
+    const plNameFromUrl = params.get('plName');
+    const HOST_ROOM_ID_KEY = 'nechronica-session-host-room-id';
+    const hostRoomIdFromStorage = localStorage.getItem(HOST_ROOM_ID_KEY);
+
+    // 2. 取得した値を使って、PL参加かNC復帰かを判断する
+    if (roomIdFromUrl && plNameFromUrl) {
+        // PLとして参加
         document.body.classList.add('pl-mode');
         sessionStartBtn.style.display = 'none';
         sessionJoinContainer.style.display = 'none';
@@ -92,13 +136,45 @@ export async function initialize() {
         document.getElementById('plRoomId').textContent = roomIdFromUrl;
         
         try {
-            await p2p.joinClientSession(roomIdFromUrl);
+            await p2p.joinClientSession(roomIdFromUrl, decodeURIComponent(plNameFromUrl));
         } catch (error) {
             alert(error.message + "\n通常モードで起動します。");
             window.location.href = window.location.pathname;
         }
+    } else if (roomIdFromUrl && !plNameFromUrl) {
+        // PL名がない場合は入力を促す
+        alert("PL名が指定されていません。入室画面に戻ります。");
+        window.location.href = window.location.pathname;
+        
+    } else if (hostRoomIdFromStorage) {
+        // NCとしてセッションに復帰
+        if (confirm(`前回のセッション[${hostRoomIdFromStorage}]が中断されています。復帰しますか？`)) {
+            try {
+                ui.showToastNotification(`セッション[${hostRoomIdFromStorage}]に復帰しています...`, 2000);
+                
+                const rejoinedSessionId = await p2p.createHostSession(hostRoomIdFromStorage);
+                
+                sessionStartBtn.style.display = 'none';
+                sessionJoinContainer.style.display = 'none';
+                sessionNcPanel.style.display = 'block';
+
+                const inviteUrl = `${window.location.origin}${window.location.pathname}?room=${rejoinedSessionId}`;
+                document.getElementById('ncInviteUrl').value = inviteUrl;
+                document.getElementById('ncRoomId').textContent = rejoinedSessionId;
+                document.body.classList.add('nc-mode');
+
+                ui.showToastNotification(`セッション[${rejoinedSessionId}]に復帰しました`, 2000);
+            } catch (error) {
+                alert(`セッションへの復帰に失敗しました: ${error.message}\n新規セッションとして開始します。`);
+                localStorage.removeItem(HOST_ROOM_ID_KEY);
+            }
+        } else {
+            localStorage.removeItem(HOST_ROOM_ID_KEY);
+            database.ref(`rooms/${hostRoomIdFromStorage}`).remove();
+            alert("セッションへの復帰をキャンセルし、古いルーム情報を削除しました。新規セッションとして開始します。");
+        }
     } else {
-        // 通常起動 (NCモードUIがデフォルト)
+        // 通常起動
         document.body.classList.add('nc-mode');
     }
 
@@ -131,15 +207,49 @@ export async function initialize() {
         });
     });
 
-    // PLモードで「ルームに入室」ボタン
+    // PLモードで「ルームに入室」ボタン (ロジックを修正)
     document.getElementById('sessionJoinBtn').addEventListener('click', () => {
+        const plName = document.getElementById('plNameInput').value.trim();
         const roomId = document.getElementById('sessionRoomIdInput').value.trim();
+        
+        if (!plName) {
+            alert("PL名を入力してください。");
+            return;
+        }
+
         if (/^\d{4}$/.test(roomId)) {
-            window.location.href = `${window.location.origin}${window.location.pathname}?room=${roomId}`;
+            // URLにPL名をクエリパラメータとして追加して遷移
+            const url = new URL(window.location.href);
+            url.searchParams.set('room', roomId);
+            url.searchParams.set('plName', encodeURIComponent(plName));
+            window.location.href = url.toString();
         } else {
             alert("4桁のルーム番号を正しく入力してください。");
         }
     });
+
+    if (roomIdFromUrl && plNameFromUrl) { // PL名も必須
+        // PLモードで即時接続開始
+        document.body.classList.add('pl-mode');
+        sessionStartBtn.style.display = 'none';
+        sessionJoinContainer.style.display = 'none';
+        sessionNcPanel.style.display = 'none';
+        sessionPlPanel.style.display = 'block';
+        document.getElementById('plRoomId').textContent = roomIdFromUrl;
+        
+        try {
+            // joinClientSessionにPL名を渡す
+            await p2p.joinClientSession(roomIdFromUrl, decodeURIComponent(plNameFromUrl));
+        } catch (error) {
+            alert(error.message + "\n通常モードで起動します。");
+            // エラー時はクエリパラメータを削除してリダイレクト
+            window.location.href = window.location.pathname;
+        }
+    } else if (roomIdFromUrl && !plNameFromUrl) {
+        // PL名がない場合は入力を促す
+        alert("PL名が指定されていません。入室画面に戻ります。");
+        window.location.href = window.location.pathname;
+    }
     
     // NC: ルーム状態セレクター
     document.querySelectorAll('input[name="room-status"]').forEach(radio => {
@@ -154,7 +264,7 @@ export async function initialize() {
             // passcodeAreaの表示/非表示を切り替え
             document.getElementById('passcodeArea').style.display = (newStatus === 'locked') ? 'grid' : 'none';
             
-            const statusLabels = { public: '公開', locked: '鍵付', restricted: '制限' };
+            const statusLabels = { public: '参加受付中', locked: '鍵付き部屋', restricted: '入室制限中' };
             document.getElementById('ncRoomStatusLabel').textContent = statusLabels[newStatus];
             ui.showToastNotification(`ルームを「${statusLabels[newStatus]}」状態に変更しました。`, 1500);
         });

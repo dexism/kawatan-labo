@@ -1,7 +1,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "2.1.9"; // パッチバージョンを更新
+export const version = "2.1.10"; // パッチバージョンを更新
 
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
@@ -51,7 +51,7 @@ const settings = {
     timeouts: {
         stopCheck:    100,      // 停止チェックの間隔 (ms)
         forceResult: 4000,      // 強制終了までの時間 (ms)
-        hide:        3000       // 結果表示後に非表示になるまでの時間 (ms)
+        hide:        2000       // 結果表示後に非表示になるまでの時間 (ms)
     },
     manualStopDetection: {
         velocityThreshold:        0.001, // この速度(m/s)未満を「静止」と見なす

@@ -229,3 +229,57 @@ h3.section-title {
     margin: auto 0 0 auto;
     width: fit-content;
 }
+
+/* in layout.css or utility.css */
+
+/* PL名の入力欄の調整 */
+.session-join-container {
+    grid-template-columns: 1fr; /* 縦に並べる */
+    gap: 8px;
+}
+
+#plNameInput {
+    background-color: var(--input-bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 8px;
+    border-radius: 4px;
+}
+
+/* NC側のPLリストのコンテナ */
+.peer-list-container {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+/* 各PLの表示項目 */
+.peer-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 8px;
+    background-color: var(--bg-color-offset);
+    border-radius: 4px;
+}
+
+.peer-name {
+    font-weight: bold;
+}
+
+/* 追放ボタン */
+.kick-btn {
+    background-color: #a00;
+    color: white;
+    border: none;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.8em;
+    cursor: pointer;
+}
+.kick-btn:hover {
+    background-color: #c00;
+}

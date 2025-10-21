@@ -917,8 +917,9 @@ export function displayVersionInfo(versionInfo) {
             'data-handler', 
             'ui-helpers', 
             'reference', 
+            'p2p-manager',
             'character-converter',
-            'p2p-manager'
+            'personality-generator'
         ];
         
         const versionHtml = displayOrder

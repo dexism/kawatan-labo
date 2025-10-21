@@ -2,7 +2,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.1.5";
+export const version = "1.2.6";
 
 // --- Firebaseの初期化 ---
 const firebaseConfig = {
@@ -30,6 +30,7 @@ let localId; // 自身のユニークID
 let sessionRef = null; // ★セッションの参照を保持するための変数を追加
 let myRef = null;      // ★自身の参照を保持するための変数を追加
 const plsListener = null; // ★ NC用のリスナーを保持する変数を追加
+const HOST_ROOM_ID_KEY = 'nechronica-session-host-room-id';
 
 /**
  * 文字列をSHA-256ハッシュ化し、Base64文字列として返す
@@ -55,40 +56,52 @@ export function initialize(dataCallback, connectionCallback, peerListCallback) {
 // ===============================================
 // NC（ホスト）側の処理
 // ===============================================
-export async function createHostSession() {
+
+/**
+ * 【修正】ホストセッションを新規作成、または既存のセッションに復帰する
+ * @param {string|null} sessionId - 復帰するセッションID。nullの場合は新規作成。
+ * @returns {Promise<string>} - 確立されたセッションのID
+ */
+export async function createHostSession(sessionId = null) {
     const db = database.ref('rooms');
-    let sessionId;
-    let roomExists = true;
-    while (roomExists) {
-        sessionId = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-        const snapshot = await db.child(sessionId).once('value');
-        roomExists = snapshot.exists();
+    let isNewSession = false;
+
+    if (!sessionId) {
+        // sessionIdがなければ、新しいものを生成
+        isNewSession = true;
+        let roomExists = true;
+        while (roomExists) {
+            sessionId = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            const snapshot = await db.child(sessionId).once('value');
+            roomExists = snapshot.exists();
+        }
     }
 
-    sessionRef = database.ref(`rooms/${sessionId}`); // ★ sessionRefをここで設定
-    
-    // removeの代わりに初期メタ情報を書き込む
-    await sessionRef.set({
-        createdAt: firebase.database.ServerValue.TIMESTAMP,
-        meta: {
-            status: 'public',       // 初期状態は「公開」
-            passcodeHash: ''        // passcodeHashも初期化
+    sessionRef = database.ref(`rooms/${sessionId}`);
+
+    if (isNewSession) {
+        // 新規セッションの場合のみ、ルームを初期化
+        await sessionRef.set({
+            createdAt: firebase.database.ServerValue.TIMESTAMP,
+            meta: { status: 'public', passcodeHash: '' }
+        });
+        console.log(`Firebase: 新規セッション[${sessionId}]を初期化しました。`);
+    } else {
+        // 復帰セッションの場合
+        const snapshot = await sessionRef.once('value');
+        if (!snapshot.exists()) {
+            localStorage.removeItem(HOST_ROOM_ID_KEY);
+            throw new Error(`ルーム[${sessionId}]が見つかりませんでした。`);
         }
-    });
+        await sessionRef.child('nc').remove(); // 自分の古い情報だけ消す
+        console.log(`Firebase: 既存セッション[${sessionId}]に復帰します。`);
+    }
 
-    // 1. remove()の前に、ルームパスの存在を保証するためのダミー書き込みを行う
-    // await sessionRef.child('createdAt').set(firebase.database.ServerValue.TIMESTAMP);
-
-    // 2. その後、pls と nc パスだけをクリーンアップする（ルーム自体は消さない）
-    // await sessionRef.child('pls').remove();
-    // await sessionRef.child('nc').remove();
-    
-    console.log(`Firebase: セッション[${sessionId}]を初期化しました。`);
+    // ローカルストレージにホストしたルーム番号を保存
+    localStorage.setItem(HOST_ROOM_ID_KEY, sessionId);
 
     const plsRef = sessionRef.child('pls');
 
-    // ▼▼▼ plsRef.on('value', ...) を修正 ▼▼▼
-    // on()の戻り値を変数に代入せず、直接呼び出す形に戻す
     plsRef.on('value', (snapshot) => {
         const connectedPlsData = snapshot.val();
         const connectedPls = connectedPlsData ? Object.keys(connectedPlsData) : [];
@@ -99,43 +112,36 @@ export async function createHostSession() {
     });
 
     plsRef.on('child_added', async (snapshot) => {
-    // plsRef.on('child_added', async (snapshot) => {
         const plId = snapshot.key;
         if (!plId) return;
 
-        console.log(`Firebase: 新しいPL[${plId}]が参加しました。`);
+        console.log(`Firebase: PL[${plId}]との接続を開始します。`);
         
-        // --- 1. PeerConnectionのセットアップ ---
         const pc = new RTCPeerConnection(iceConfiguration);
         peerConnections.set(plId, pc);
 
-        // ICE候補を収集し、Firebaseに書き込む
         pc.onicecandidate = event => {
             if (event.candidate) {
                 sessionRef.child('nc/iceCandidates').push(event.candidate.toJSON());
             }
         };
 
-        // データチャネルを作成
         const channel = pc.createDataChannel('data');
         setupDataChannel(plId, channel);
 
-        // --- 2. PLの接続情報をリッスン ---
         const plRef = plsRef.child(plId);
-        // SDP(アンサー)をリッスン
         plRef.child('sdp').on('value', sdpSnapshot => {
-            if (sdpSnapshot.exists()) {
+            if (sdpSnapshot.exists() && (!pc.remoteDescription || pc.remoteDescription.sdp !== sdpSnapshot.val().sdp)) {
                 pc.setRemoteDescription(new RTCSessionDescription(sdpSnapshot.val()));
             }
         });
-        // ICE候補をリッスン
+        
         plRef.child('iceCandidates').on('child_added', iceSnapshot => {
             if (iceSnapshot.exists()) {
                 pc.addIceCandidate(new RTCIceCandidate(iceSnapshot.val()));
             }
         });
         
-        // --- 3. オファーを作成してFirebaseに書き込む ---
         const offerDescription = await pc.createOffer();
         await pc.setLocalDescription(offerDescription);
         
@@ -143,13 +149,13 @@ export async function createHostSession() {
         await sessionRef.child('nc/sdp').set(offer);
     });
 
-    return sessionId; // ★生成したsessionIdを返す
+    return sessionId;
 }
 
 // ===============================================
 // PL（クライアント）側の処理
 // ===============================================
-export async function joinClientSession(sessionId) {
+export async function joinClientSession(sessionId, plName) {
     sessionRef = database.ref(`rooms/${sessionId}`);
 
     // ▼▼▼ ルームチェックのロジックを全面的に書き換え ▼▼▼
@@ -222,7 +228,10 @@ export async function joinClientSession(sessionId) {
     });
 
     // 自分の存在をNCに通知
-    await myRef.child('status').set('joined');
+    await myRef.child('profile').set({
+        name: plName,
+        joinedAt: firebase.database.ServerValue.TIMESTAMP
+    });
 }
 
 // ===============================================
@@ -265,6 +274,34 @@ export function sendToHost(data) {
 }
 
 /**
+ * 【新設】指定されたPLをセッションから追放する (NC専用)
+ * @param {string} plId - 追放するPLのユニークID
+ */
+export async function kickPlayer(plId) {
+    if (!sessionRef) return;
+
+    // 1. PLに追放を通知
+    const channel = dataChannels.get(plId);
+    if (channel && channel.readyState === 'open') {
+        channel.send(JSON.stringify({ type: 'kicked' }));
+    }
+
+    // 2. 接続を閉じる
+    peerConnections.get(plId)?.close();
+    peerConnections.delete(plId);
+    dataChannels.delete(plId);
+
+    // 3. FirebaseからPLのデータを削除
+    const plRef = sessionRef.child(`pls/${plId}`);
+    await plRef.remove();
+
+    console.log(`Firebase: PL[${plId}]を追放しました。`);
+
+    // 追放ログを全端末にブロードキャスト
+    broadcastToAll({ type: 'log', payload: `PL「${plId}」がセッションから追放されました。` });
+}
+
+/**
  * 【新設】現在のセッションから切断する
  */
 export function disconnectSession() {
@@ -276,7 +313,7 @@ export function disconnectSession() {
 
     // 2. Firebaseのリスナーを全て解除し、データを削除
     if (sessionRef) {
-        sessionRef.off(); // この参照に紐づく全てのリスナー('value', 'child_added'など)を解除
+        sessionRef.off(); // この参照に紐づく全てのリスナーを解除
 
         if (myRef) {
             // PLの場合、自分のデータをDBから削除して退席を通知
@@ -286,6 +323,9 @@ export function disconnectSession() {
             myRef = null;
         } else {
             // NCの場合、ルーム全体を削除してセッションを終了
+            // ▼▼▼ 以下の行を追加 ▼▼▼
+            localStorage.removeItem(HOST_ROOM_ID_KEY);
+            // ▲▲▲ 追加ここまで ▲▲▲
             sessionRef.remove()
                 .then(() => console.log("Firebaseからルーム全体を削除しました。"))
                 .catch(err => console.error("ルーム削除エラー:", err));

@@ -6,7 +6,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.9.16";
+export const version = "1.9.17";
 
 // --- モジュールのインポート ---
 import * as data from './data-handler.js';
@@ -52,22 +52,10 @@ export function recalculateMaxActionValue(character) {
     character.maxActionValue = (character.baseActionValue || 6) + bonus;
 }
 
-function createCharacterInstance(templateId, type, initialArea) {
-    const template = undeadTemplates[templateId];
-    if (!template) {
-        console.error(`テンプレートIDが見つかりません: ${templateId}`);
-        return null;
-    }
-    const newChar = JSON.parse(JSON.stringify(template));
-    newChar.templateId = templateId;
-    return createCharacterInstanceFromObject(newChar, type, initialArea);
-}
-
-function createCharacterInstanceFromObject(characterObject, type, initialArea) {
+function createCharacterInstanceFromObject(characterObject, type) {
     const newChar = JSON.parse(JSON.stringify(characterObject));
     newChar.id = `char_${nextUniqueId++}`;
     newChar.type = type;
-
     newChar.originalName = characterObject.name || '名称未設定';
     newChar.displayName = characterObject.name || '名称未設定';
     Object.defineProperty(newChar, 'name', {
@@ -75,35 +63,19 @@ function createCharacterInstanceFromObject(characterObject, type, initialArea) {
         set(value) { this.displayName = value; }
     });
 
-    // 1. テンプレート/オブジェクトから「たからもの」の名前を取得
-    const treasureNameFromSource = characterObject.treasure || null;
-    // 1. characterObjectからtreasures配列（名前のリスト）を取得
     newChar.treasures = characterObject.treasures || [];
-
-    // 2. partsStatusを構築
     newChar.partsStatus = {};
     let partIdCounter = 0;
     if (newChar.parts && typeof newChar.parts === 'object') {
         Object.keys(newChar.parts).forEach(location => {
             if (Array.isArray(newChar.parts[location])) {
-                newChar.partsStatus[location] = newChar.parts[location].map(partName => {
-                    // isTreasureフラグはここでは不要。treasures配列に含まれるかで判断する
-                    return {
-                        id: `${newChar.id}_part_${partIdCounter++}`,
-                        name: partName,
-                        damaged: false,
-                    };
-                });
+                newChar.partsStatus[location] = newChar.parts[location].map(partName => ({
+                    id: `${newChar.id}_part_${partIdCounter++}`, name: partName, damaged: false,
+                }));
             }
         });
     }
 
-    // 4. (フォールバック) もしparts内にたからものが見つからなかった場合も、
-    //    treasures配列には名前を保持しておく（character-converter用）
-    if (treasureNameFromSource && newChar.treasures.length === 0) {
-         newChar.treasures.push(treasureNameFromSource);
-    }
-    
     newChar.madnessPoints = {};
     newChar.statusEffects = [];
     newChar.activeBuffs = [];
@@ -242,7 +214,7 @@ export function initialize(templates) {
     console.log("Character Manager initialized.");
 }
 
-export function getCharacters(forSetup = false) {
+export function getCharacters() {
     return characters;
 }
 
@@ -254,18 +226,30 @@ export function addCharacterFromTemplate(templateId, type, initialArea) {
     const template = undeadTemplates[templateId];
     if (!template) {
         console.error(`テンプレートIDが見つかりません: ${templateId}`);
-        return; // ★ 失敗した場合はここで終了
+        return;
     }
 
     const count = (template.category === 'レギオン') ? 5 : 1;
     let lastName = '';
 
     for (let i = 0; i < count; i++) {
-        const newChar = createCharacterInstance(templateId, type, initialArea);
+        // ▼▼▼ ここからが今回の修正箇所 ▼▼▼
+        
+        // 1. テンプレートのコピーを作成
+        const characterObject = JSON.parse(JSON.stringify(template));
+        
+        // 2. コピーしたオブジェクトに templateId を明示的に追加
+        characterObject.templateId = templateId;
+        
+        // 3. templateId を含んだオブジェクトを渡してキャラクターを生成
+        const newChar = createCharacterInstanceFromObject(characterObject, type);
+        
+        // ▲▲▲ 修正ここまで ▲▲▲
+
         if (!newChar) continue;
+
         newChar.area = initialArea || newChar.initialArea || ((type === 'pc') ? '煉獄' : '奈落');
         
-        // PCの場合、たからもの未練がなければ追加する（最低限の初期化）
         if (type === 'pc' && newChar.treasures && newChar.treasures.length > 0) {
             if (!newChar.regrets.some(r => r.isForTreasure)) {
                 newChar.regrets.push({
@@ -287,28 +271,19 @@ export function addCharacterFromTemplate(templateId, type, initialArea) {
         console.log(`${lastName} (${type}) を${count > 1 ? count + '体' : ''}戦場に追加しました。`);
     }
 
-    // ループ完了後に合流処理を一度だけ呼び出す
     mergeCharactersOnBoard();
-    
-    // 自動保存の命令のみ行い、UI更新の命令は削除
     stateManager.autoSave();
-
-    // ★★★ 以下のUI更新命令をすべて削除 ★★★
-    // ui.renderCharacterCards();
-    // ui.checkBattleStartCondition();
 }
 
 export function addCharacterFromObject(characterObject, type) {
     const newChar = createCharacterInstanceFromObject(characterObject, type);
     newChar.area = characterObject.area || characterObject.initialArea || ((type === 'pc') ? '煉獄' : '奈落');
     
-    // PCで、かつ保管所データにたからもの未練がなかった場合のみ追加
     if (type === 'pc' && newChar.treasures && newChar.treasures.length > 0) {
         if (!newChar.regrets.some(r => r.isForTreasure)) {
             newChar.regrets.push({
-                id: `treasure_${newChar.id}`,
-                name: `たからものへの依存`, points: 3, isForTreasure: true,
-                targetName: 'たからもの', regretName: '依存'
+                id: `treasure_${newChar.id}`, name: `たからものへの依存`, points: 3, 
+                isForTreasure: true, targetName: 'たからもの', regretName: '依存'
             });
         }
     }
@@ -318,45 +293,22 @@ export function addCharacterFromObject(characterObject, type) {
     initializeManeuverLimits(newChar);
     characters.push(newChar);
     
-    // ★★★ 姉妹への未練に関する処理は、ここでは一切行わない ★★★
-
-    console.log(`${newChar.name} (imported ${type}) を戦場に追加しました。`);
     stateManager.autoSave();
     return newChar;
 }
 
 export function removeCharacter(id) {
     const char = getCharacterById(id);
-    if (!char) return false; // ★ 変数名を char に統一
+    if (!char) return false;
 
-    let wasPcRemoved = false;
-    if (char.type === 'pc') { // ★ 変数名を char に変更
-        wasPcRemoved = true;
-    }
-
-    // ▼▼▼ ここからが今回の修正の中心 ▼▼▼
-    // charToRemove を char に修正
-    if (char && char.stackCount > 1) {
+    if (char.stackCount > 1) {
         char.stackCount--;
         stateManager.autoSave();
         return true;
     }
-    // ▲▲▲ 修正ここまで ▲▲▲
-
     const index = characters.findIndex(c => c.id === id);
     if (index !== -1) {
         characters.splice(index, 1);
-
-        if (wasPcRemoved) {
-            const remainingPcs = characters.filter(c => c.type === 'pc');
-            remainingPcs.forEach(pc => {
-                // charToRemove を char に修正
-                pc.regrets = pc.regrets.filter(r => !r.name.includes(char.name));
-            });
-            // charToRemove を char に修正
-            console.log(`${char.name} への未練を他の姉妹から削除しました。`);
-        }
-
         stateManager.autoSave();
         return true;
     }
@@ -390,27 +342,11 @@ export function moveCharacter(id, direction) {
 export function updateCharacter(id, updates) {
     const char = getCharacterById(id);
     if (char) {
-        // ▼▼▼ ここからが今回の修正箇所 ▼▼▼
-
-        // 1. 表示名が変更されるかどうかのフラグを立てる
-        const isDisplayNameChanging = updates.displayName && updates.displayName !== char.displayName;
-        const oldDisplayName = char.displayName;
-
-        // 'name' への更新は 'displayName' への更新として扱う
         if (updates.name) {
             updates.displayName = updates.name;
             delete updates.name;
         }
-        
         Object.assign(char, updates);
-        
-        // 2. 表示名が変更された場合、未練の再同期処理を呼び出す
-        if (isDisplayNameChanging) {
-            resyncSisterRegrets(char, oldDisplayName);
-        }
-
-        // ▲▲▲ 修正ここまで ▲▲▲
-
         if (char.isDestroyed || char.hasWithdrawn) {
             char.actionValue = 0;
             if (char.isDestroyed && char.partsStatus) {
@@ -419,8 +355,6 @@ export function updateCharacter(id, updates) {
         }
         recalculateMaxActionValue(char);
         mergeCharactersOnBoard();
-    } else {
-        console.warn(`更新対象のキャラクターが見つかりません: ${id}`);
     }
 }
 
@@ -645,38 +579,45 @@ export function revalidateAllSisterRegrets() {
  * - ランダムな生成は一切行わない
  * @param {object} char - 更新対象のPCキャラクターオブジェクト
  */
+/**
+ * 【修正】指定されたPCの未練データを、現在の姉妹構成に基づいて補完・更新する
+ * - isCheckedプロパティを決定する唯一のソース
+ * - 不足している姉妹への未練を「（未設定）」として一時的に追加する
+ * - ランダムな生成は一切行わない
+ * @param {object} char - 更新対象のPCキャラクターオブジェクト
+ */
 export function updateAndComplementRegrets(char) {
     if (!char || char.type !== 'pc' || !char.regrets) return;
 
-    const otherSisters = characters.filter(c => c.type === 'pc' && c.id !== char.id);
-    const sisterNamesAndDisplayNames = otherSisters.flatMap(s => [s.name, s.displayName]);
+    const allPcs = getCharacters().filter(c => c.type === 'pc');
+    const otherSisters = allPcs.filter(c => c.id !== char.id);
+    const otherSisterNamesAndDisplayNames = otherSisters.flatMap(s => [s.name, s.displayName]);
 
-    // 一時的な「（未設定）」の未練を一旦リセット
+    // 一時的な「（未設定）」の未練をリセット
     char.regrets = char.regrets.filter(r => !r.isUnset);
 
-    // 1. isCheckedプロパティを再評価
+    // isCheckedプロパティを再評価
     char.regrets.forEach(regret => {
         if (regret.isForTreasure) {
             regret.isChecked = true;
-        } else if (sisterNamesAndDisplayNames.includes(regret.targetName)) {
+        } else if (otherSisterNamesAndDisplayNames.includes(regret.targetName)) {
             regret.isChecked = true;
         } else {
-            regret.isChecked = false; // それ以外（戦場にいないキャラへの未練など）は非表示
+            regret.isChecked = false;
         }
     });
 
-    // 2. 不足している姉妹への未練を「（未設定）」として追加
+    // 不足している姉妹への未練を「（未設定）」として追加
     otherSisters.forEach(sister => {
         const hasRegretForSister = char.regrets.some(r => 
             r.targetName === sister.name || r.targetName === sister.displayName
         );
-
         if (!hasRegretForSister) {
             char.regrets.push({
                 name: `${sister.displayName}への未練（未設定）`,
                 points: 3,
-                isChecked: true, // 仕様通りチェック状態
-                isUnset: true,   // 未設定フラグ
+                isChecked: true,
+                isUnset: true,
                 targetName: sister.displayName,
                 regretName: '未練（未設定）'
             });
@@ -694,31 +635,27 @@ export function changeSisterRegret(sourceDollId, targetDollName, newRegretMaster
     const sourceDoll = getCharacterById(sourceDollId);
     if (!sourceDoll) return;
 
+    // 「（未設定）」の未練をまず削除
+    sourceDoll.regrets = sourceDoll.regrets.filter(r => !(r.isUnset && r.targetName === targetDollName));
+
     // 変更対象の未練を探す
     const regretToChange = sourceDoll.regrets.find(r => 
         r.targetName === targetDollName && !r.isForTreasure
     );
 
     if (regretToChange) {
-        // 既存の未練が見つかった場合、内容を更新
         regretToChange.name = `${targetDollName}への${newRegretMaster.name}`;
         regretToChange.regretName = newRegretMaster.name;
-        console.log(`${sourceDoll.name}の${targetDollName}への未練が「${newRegretMaster.name}」に変更されました。`);
     } else {
-        // 「（未設定）」の状態から新しく設定する場合
-        const newRegret = {
-            id: `regret_${sourceDoll.id}_to_${targetDoll.id}_${Date.now()}`,
+        sourceDoll.regrets.push({
+            id: `regret_${sourceDoll.id}_to_${targetDollName}_${Date.now()}`,
             name: `${targetDollName}への${newRegretMaster.name}`,
             points: 3,
             isForTreasure: false,
             isChecked: true,
             targetName: targetDollName,
             regretName: newRegretMaster.name
-        };
-        sourceDoll.regrets.push(newRegret);
-        console.log(`${sourceDoll.name}の${targetDollName}への未練が「${newRegretMaster.name}」に設定されました。`);
+        });
     }
-
-    // データが変更されたので、UI全体を更新するよう命令
     stateManager.autoSave();
 }

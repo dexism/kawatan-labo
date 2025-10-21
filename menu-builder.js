@@ -2,17 +2,13 @@
  * @file menu-builder.js
  * @description メニューやモーダルなど、動的なUIの構築を担当するモジュール
  */
-/*
- * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
- */
-export const version = "1.22.92"; // バージョンを更新
+export const version = "1.23.1"; // 安定版への復元
 
 import * as data from './data-handler.js';
 import * as charManager from './character-manager.js';
 import { updateAndComplementRegrets } from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
 import * as ui from './ui-manager.js';
-// import { performDiceRoll } from './dice-roller.js'; 
 import { convertVampireBloodSheet } from './character-converter.js';
 import { getCategoryClass, getManeuverSourceText, getManeuverRulebookText } from './ui-helpers.js';
 import { getLocalStorageUsage, clearLocalImageCache } from './settings-manager.js';
@@ -20,97 +16,55 @@ import * as stateManager from './state-manager.js';
 import { calculateManeuverRange } from './battle-helpers.js';
 import { sortManeuvers } from './reference.js';
 import { performDiceRoll } from './dice-roller.js';
+import { generateSisterPersonality, generateRelationship } from './personality-generator.js';
 
-// --- モジュール内変数 ---
 let menuOpener = null;
 const rows = ["奈落", "地獄", "煉獄", "花園", "楽園"];
 let resolveTargetSelection = null;
 let activeFilter = '宣言';
 let relationshipResizeTimer = null;
-// let activeReferenceFilters = {};
 
-/**
- * ターゲット選択モードを安全にキャンセルし、UIの状態をリセットする
- */
 function cancelTargetSelection() {
     if (resolveTargetSelection) {
-        resolveTargetSelection(null); // Promiseを解決して待機状態を解除
-        resolveTargetSelection = null; // グローバル変数をリセット
-
-        // ▼▼▼ ここからが修正箇所です ▼▼▼
-        
-        // 1. UIのクリーンアップ：全ての.target-selectableクラスを削除
+        resolveTargetSelection(null);
+        resolveTargetSelection = null;
         document.querySelectorAll('.target-selectable').forEach(el => {
             el.classList.remove('target-selectable');
-            // 安全のため、onclickハンドラもクリアする
             el.onclick = null; 
         });
-
-        // 2. ログにキャンセルした旨を表示
-        // ui.addLog(">> ターゲット選択をキャンセルしました。");
-
-        // 3. ロジックの再評価を依頼し、UIを完全に最新の状態に戻す
-        //    これにより、キャラクターカードのクリックイベントなどが再設定される
         battleLogic.determineNextStep();
-        
-        // ▲▲▲ 修正はここまでです ▲▲▲
     }
 }
 
 const handleOutsideClick = (e) => {
     const menu = document.getElementById('maneuverMenu');
-    
     if (menu && !menu.contains(e.target) && menuOpener && !menuOpener.contains(e.target)) {
         closeAllMenus();
     }
-
-    // --- ターゲット選択中に、ターゲット外をクリックしたらキャンセルする処理 ---
     if (resolveTargetSelection) {
         if (!e.target.closest('.target-selectable')) {
-            cancelTargetSelection(); // 新しい関数を呼び出す
+            cancelTargetSelection();
         }
     }
 };
 
-// --- エクスポートする関数 ---
-/**
- * キャラクターのマニューバメニューを構築・表示する
- * @param {object} char - 対象キャラクター
- * @param {HTMLElement} element - メニューを開く起点となった要素
- */
 export function buildManeuverMenu(char, element) {
     if (resolveTargetSelection) {
-        cancelTargetSelection(); // 新しい関数を呼び出す
+        cancelTargetSelection();
     }
-
     closeAllMenus();
     menuOpener = element;
     const menu = document.getElementById('maneuverMenu');
-    menu.innerHTML = ''; // メニューをクリア
+    menu.innerHTML = '';
     menu.classList.remove('is-reference-mode');
-
-    // --- フィルタリングボタンの定義 ---
     const filters = [
-        { id: '宣言', label: '宣言' },
-        { id: 'スキル', label: 'スキル' },
-        { id: 'パーツ', label: 'パーツ' },
-        { id: 'オート', label: 'オート' },
-        { id: 'アクション', label: 'アクション' },
-        { id: 'ラピッド', label: 'ラピッド' },
-        { id: 'ジャッジ', label: 'ジャッジ' },
-        { id: 'ダメージ', label: 'ダメージ' },
-        { id: 'バフ', label: 'バフ' },
-        { id: '移動', label: '移動' },
-        { id: '攻撃', label: '攻撃' },
-        { id: '支援', label: '支援' },
-        { id: '妨害', label: '妨害' },
-        { id: '強化', label: '強化' },
-        { id: '防御', label: '防御' },
-        { id: '生贄', label: '生贄' },
-        { id: 'すべて', label: 'すべて' }
+        { id: '宣言', label: '宣言' }, { id: 'スキル', label: 'スキル' }, { id: 'パーツ', label: 'パーツ' },
+        { id: 'オート', label: 'オート' }, { id: 'アクション', label: 'アクション' }, { id: 'ラピッド', label: 'ラピッド' },
+        { id: 'ジャッジ', label: 'ジャッジ' }, { id: 'ダメージ', label: 'ダメージ' }, { id: 'バフ', label: 'バフ' },
+        { id: '移動', label: '移動' }, { id: '攻撃', label: '攻撃' }, { id: '支援', label: '支援' },
+        { id: '妨害', label: '妨害' }, { id: '強化', label: '強化' }, { id: '防御', label: '防御' },
+        { id: '生贄', label: '生贄' }, { id: 'すべて', label: 'すべて' }
     ];
-
-    // --- 第一ブロック：ヘッダー ---
     const header = document.createElement('div');
     header.className = 'maneuver-menu-header';
     header.innerHTML = `
@@ -120,10 +74,7 @@ export function buildManeuverMenu(char, element) {
     `;
     menu.appendChild(header);
     header.querySelector('#menuHeaderIcon').onclick = () => showCharacterSheetModal(char);
-    
     header.querySelector('.header-close-btn').onclick = closeAllMenus;
-
-    // --- 第二ブロック：フィルタリングボタン ---
     const filterBar = document.createElement('div');
     filterBar.className = 'maneuver-menu-filter-bar';
     filters.forEach(filter => {
@@ -136,39 +87,29 @@ export function buildManeuverMenu(char, element) {
         }
         btn.onclick = () => {
             activeFilter = filter.id;
-            // 全てのボタンから is-active を削除し、クリックされたボタンにだけ付ける
             filterBar.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('is-active'));
             btn.classList.add('is-active');
-            renderManeuverList(); // リストを再描画
+            renderManeuverList();
         };
         filterBar.appendChild(btn);
     });
     menu.appendChild(filterBar);
-
-    // --- 第三ブロック：マニューバリストのコンテナ ---
     const listContainer = document.createElement('div');
     listContainer.className = 'maneuver-menu-list-container';
     menu.appendChild(listContainer);
-
-    // --- マニューバリストのレンダリング関数 ---
     const renderManeuverList = () => {
         listContainer.innerHTML = '';
         const allManeuvers = getCharacterManeuvers(char);
         let filteredManeuvers = filterManeuvers(allManeuvers, activeFilter, char);
-
-        // ★★★ ここを変更：新しい共通ソート関数を呼び出す ★★★
         if (activeFilter !== 'パーツ') {
             filteredManeuvers = sortManeuvers(filteredManeuvers);
         }
-
         if (activeFilter === 'パーツ') {
             renderPartsView(filteredManeuvers, char);
         } else {
             renderDefaultView(filteredManeuvers, char);
         }
     };
-
-    // --- 描画ヘルパー関数群 ---
     const renderPartsView = (maneuvers, char) => {
         const locations = ['頭', '腕', '胴', '脚', '他'];
         locations.forEach(loc => {
@@ -182,7 +123,6 @@ export function buildManeuverMenu(char, element) {
             }
         });
     };
-    
     const renderDefaultView = (maneuvers, char) => {
         if (maneuvers.length === 0) {
             listContainer.innerHTML = `<div class="maneuver-item is-empty">対象のマニューバはありません</div>`;
@@ -190,11 +130,7 @@ export function buildManeuverMenu(char, element) {
         }
         maneuvers.forEach(m => listContainer.appendChild(createManeuverItem(m, char)));
     };
-    
-    // --- 初期描画 ---
     renderManeuverList();
-
-    // --- メニュー表示 ---
     menu.classList.add('is-visible');
     setTimeout(() => { document.addEventListener('click', handleOutsideClick); }, 0);
 }
@@ -808,6 +744,16 @@ export function showCharacterSheetModal(char) {
         `<option value="${area}" ${char.area === area ? 'selected' : ''}>${area}</option>`
     ).join('');
 
+    let personalityHtml = '';
+    if (isDoll) {
+        // 姉妹への未練（未設定でないもの）を抽出
+        const sisterRegrets = char.regrets.filter(r => 
+            r.isChecked && !r.isForTreasure && !r.isUnset
+        );
+        const personality = generateSisterPersonality(sisterRegrets);
+        personalityHtml = `<div class="sheet-personality-title">【 ${personality} 】</div>`;
+    }
+
     const bodyHtml = `
     <div class="sheet-grid-container">
         <div class="sheet-img">
@@ -824,6 +770,7 @@ export function showCharacterSheetModal(char) {
             ${char.personalData && char.personalData.title ? `
                 <div class="sheet-char-title">${char.personalData.title}</div>
             ` : ''}
+            ${personalityHtml}
         </div>
         <div class="sheet-basic-info">
             <div class="sheet-input-group">
@@ -1167,15 +1114,10 @@ export function showCharacterSheetModal(char) {
 function createRegretItemForSheet(regret, char) {
     const p = document.createElement('p');
     p.className = 'regret-list-item';
-    
     const points = regret.points || 0;
     const symbols = '●'.repeat(points) + '○'.repeat(4 - points);
     const checkboxId = `regret_check_${char.id}_${Math.random().toString(36).substr(2, 9)}`;
-    
-    // 姉妹への未練（未設定含む）と、たからものへの未練はチェックボックスを無効化
-    const isDisabled = regret.isForTreasure || regret.isUnset || 
-        charManager.getCharacters().some(c => c.type === 'pc' && (c.name === regret.targetName || c.displayName === regret.targetName));
-
+    const isDisabled = regret.isForTreasure || regret.isUnset || charManager.getCharacters().some(c => c.type === 'pc' && (c.name === regret.targetName || c.displayName === regret.targetName));
     p.innerHTML = `
         <input type="checkbox" id="${checkboxId}" ${regret.isChecked ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
         <label for="${checkboxId}">
@@ -1183,15 +1125,12 @@ function createRegretItemForSheet(regret, char) {
             <span class="regret-points">：${points}点 ${symbols}</span>
         </label>
     `;
-    
     if (!isDisabled) {
         p.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
-            // 元のデータ配列内のオブジェクトを探して、isCheckedプロパティを更新
             const originalRegret = char.regrets.find(r => r.name === regret.name);
             if (originalRegret) {
                 originalRegret.isChecked = e.target.checked;
             }
-            // アンデッドカードの表示を即時更新
             ui.updateSingleCharacterCard(char.id);
         });
     }
@@ -1395,10 +1334,8 @@ export function closeAllMenus() {
  */
 export function getCharacterManeuvers(char) {
     const battleState = battleLogic.getBattleState();
-    const allManeuvers = []; // ここは const のままでも問題ない
+    const allManeuvers = [];
     const addedPartNames = new Set();
-
-    // 1. キャラクター固有のスキルとパーツを追加
     (char.skills || []).forEach(skillName => {
         const maneuver = data.getManeuverByName(skillName);
         if (maneuver) {
@@ -1420,8 +1357,6 @@ export function getCharacterManeuvers(char) {
             addedPartNames.add(part.name);
         }
     });
-
-    // 2. 全ての一般動作（CA-XX）を追加
     const allManeuverData = data.getAllManeuvers();
     for (const id in allManeuverData) {
         if (id.startsWith('CA-')) {
@@ -1430,31 +1365,22 @@ export function getCharacterManeuvers(char) {
         }
     }
     
-    // ▼▼▼ ここからが今回の修正の中心 ▼▼▼
-
-    // 3. フィルタリング処理。結果を新しい変数に格納する
-    let filteredManeuvers = allManeuvers; // まず元のリストをコピー
+    // ▼▼▼ ここからが今回の修正箇所 ▼▼▼
+    // フィルタリングの結果を格納する新しい変数を 'let' で宣言
+    let filteredManeuvers = [...allManeuvers];
     if (char.type === 'enemy') {
         const generalForbiddenNames = new Set(["行動判定", "対話判定", "狂気判定"]);
         filteredManeuvers = filteredManeuvers.filter(m => !generalForbiddenNames.has(m.data.name));
-
         if (char.category === 'レギオン' || char.category === 'ホラー') {
             const specificForbiddenNames = new Set(["逃走判定", "切断判定"]);
             filteredManeuvers = filteredManeuvers.filter(m => !specificForbiddenNames.has(m.data.name));
         }
     }
-    
     // ▲▲▲ 修正ここまで ▲▲▲
     
     const isCharDamaged = Object.values(char.partsStatus).flat().some(part => part.damaged);
-
-    // --- 現在アクティブなタイミングを判断 ---
-    // (変更なし)
     const activeIndicators = new Set();
-    const { 
-        phase, activeActors = [], actionQueue = [], rapidQueue = [], damageQueue = []
-    } = battleState;
-
+    const { phase, activeActors = [], actionQueue = [], rapidQueue = [], damageQueue = [] } = battleState;
     if (activeActors.some(a => a.id === char.id)) {
         activeIndicators.add('アクション');
         activeIndicators.add('ラピッド');
@@ -1462,9 +1388,7 @@ export function getCharacterManeuvers(char) {
     if (activeActors.length === 0) {
         activeIndicators.add('ラピッド');
     }
-    const allDeclarations = [
-        ...actionQueue, ...rapidQueue, ...damageQueue.filter(item => item.type === 'declaration')
-    ];
+    const allDeclarations = [...actionQueue, ...rapidQueue, ...damageQueue.filter(item => item.type === 'declaration')];
     if (allDeclarations.some(a => !a.checked)) {
         activeIndicators.add('ジャッジ');
     }
@@ -1476,15 +1400,12 @@ export function getCharacterManeuvers(char) {
         activeIndicators.add('ジャッジ');
     }
 
-    // 4. フィルタリング後のリストを使って、使用可否を判定する
     return filteredManeuvers.map(m => {
         const maneuver = m.data;
         let isUsable = true;
-
         if (char.actionValue <= 0 && maneuver.timing !== 'オート') isUsable = false;
         if (m.isDamaged) isUsable = false;
         if (char.usedManeuvers.has(maneuver.name) && maneuver.usageLimit !== false) isUsable = false;
-        
         if (maneuver.timing !== 'オート' && !activeIndicators.has(maneuver.timing)) {
             if (maneuver.timing === '効果参照') {
                 isUsable = false;
@@ -1500,7 +1421,6 @@ export function getCharacterManeuvers(char) {
                 isUsable = false;
             }
         }
-
         if (isUsable && maneuver.timing === 'ダメージ') {
             let canUseInDamagePhase = false;
             const isDefense = maneuver.tags?.includes('防御');
@@ -1525,13 +1445,11 @@ export function getCharacterManeuvers(char) {
             if (!canUseInDamagePhase && isTakeDamage) {
                 const allOtherAllies = charManager.getCharacters().filter(c => c.type === char.type && c.id !== char.id);
                 const { targets: alliesInRange } = checkTargetAvailability(char, maneuver, allOtherAllies);
-
                 if (alliesInRange.length > 0) {
                     const alliesInRangeIds = new Set(alliesInRange.map(ally => ally.id));
                     const canProtectAlly = battleState.damageQueue.some(d => 
                         d.type === 'instance' && !d.applied && alliesInRangeIds.has(d.target.id)
                     );
-                    
                     if (canProtectAlly) {
                         canUseInDamagePhase = true;
                     }
@@ -1541,11 +1459,9 @@ export function getCharacterManeuvers(char) {
                 isUsable = false;
             }
         }
-
         if (isUsable && maneuver.tags && maneuver.tags.includes('移動妨害')) {
             let canDebuff = false;
             const allMoveCandidates = [...battleState.actionQueue, ...battleState.rapidQueue];
-
             for (const declaration of allMoveCandidates) {
                 if (!declaration.checked &&
                     declaration.performer.type !== char.type &&
@@ -1560,17 +1476,14 @@ export function getCharacterManeuvers(char) {
                 isUsable = false;
             }
         }
-        
         if (isUsable && maneuver.timing !== 'オート' && maneuver.timing !== 'ジャッジ') {
             if (!checkTargetAvailability(char, maneuver).hasTarget) {
                 isUsable = false;
             }
         }
-
         if (maneuver.timing === 'オート') {
             isUsable = false;
         }
-
         return { ...m, isUsable };
     });
 }
@@ -2388,125 +2301,116 @@ export function showRelationshipModal() {
         const pcs = charManager.getCharacters().filter(c => c.type === 'pc' && !c.isDestroyed && !c.hasWithdrawn);
         const numPcs = pcs.length;
         if (numPcs < 2) { closeModal(); return; }
-
         const containerWidth = chartContainer.offsetWidth;
         const containerHeight = chartContainer.offsetHeight;
-
-        // 1. ダミーのノードを作成して実際のサイズを取得する
-        // const tempNode = document.createElement('div');
-        // tempNode.className = 'doll-node';
-        // tempNode.style.visibility = 'hidden'; // 画面には表示しない
-        // chartContainer.appendChild(tempNode);
-        // const nodeRect = tempNode.getBoundingClientRect();
-        // const nodeDiameter = nodeRect.width; // 実際の幅（直径）を取得
-        const nodeDiameter = 100; // .doll-node width
+        const tempNode = document.createElement('div');
+        tempNode.className = 'doll-node';
+        tempNode.style.visibility = 'hidden';
+        chartContainer.appendChild(tempNode);
+        const nodeRect = tempNode.getBoundingClientRect();
+        const nodeDiameter = nodeRect.width;
         const nodeRadius = nodeDiameter / 2;
-        // chartContainer.removeChild(tempNode); // ダミーノードを削除
-
-        // 2. 取得したサイズを基に楕円の半径を計算（アイコンが重ならないように調整）
+        chartContainer.removeChild(tempNode);
         const radiusX = (containerWidth - nodeDiameter) / 2;
         const radiusY = (containerHeight - nodeDiameter) / 2;
-        
         const centerX = containerWidth / 2;
         const centerY = containerHeight / 2;
         const positions = [];
-
-        // 1. 人数に応じた回転オフセット角度を計算 (ラジアン単位)
-        //    90度を人数で割り、それをラジアンに変換する
         const angleOffset = (Math.PI / 3) / numPcs;
-
-        // ステップ1: 全てのドールのアイコンを「楕円周上」に配置
         pcs.forEach((pc, i) => {
-            // 2. 角度の計算に、算出したオフセットを加える
-            // const angleOffset = (Math.PI / 2) / numPcs;
             const angle = (i / numPcs) * 2 * Math.PI - Math.PI / 2 + angleOffset;
-            
             const x = centerX + radiusX * Math.cos(angle);
             const y = centerY + radiusY * Math.sin(angle);
-            
             positions.push({ x, y });
-
             const node = document.createElement('div');
             node.className = 'doll-node';
             node.style.left = `${x}px`;
             node.style.top = `${y}px`;
-            
-            // 1. 角度を度数法(degree)に変換
             const angleDeg = angle * (180 / Math.PI);
-            
-            // 2. CSS変数としてstyle属性に角度を設定
             node.style.setProperty('--angle', `${angleDeg}deg`);
-            
             node.innerHTML = `
                 <img src="${pc.img}" alt="${pc.name}">
                 <div class="name-label">${pc.name}</div>
             `;
             chartContainer.appendChild(node);
         });
-
+        
         for (let i = 0; i < numPcs; i++) {
-            for (let j = 0; j < numPcs; j++) {
-                if (i === j) continue;
-
+            for (let j = i + 1; j < numPcs; j++) {
                 const sourceDoll = pcs[i];
                 const targetDoll = pcs[j];
                 const p1 = positions[i];
                 const p2 = positions[j];
-
                 const dx = p2.x - p1.x;
                 const dy = p2.y - p1.y;
                 const totalDistance = Math.sqrt(dx * dx + dy * dy);
                 const angleRad = Math.atan2(dy, dx);
-                const angleDeg = angleRad * (180 / Math.PI);
-
-                if (j > i) {
-                    const line = document.createElement('div');
-                    line.className = 'relationship-line';
-                    line.style.width = `${totalDistance}px`;
-                    line.style.left = `${p1.x}px`;
-                    line.style.top = `${p1.y}px`;
-                    line.style.transform = `rotate(${angleDeg}deg)`;
-                    chartContainer.appendChild(line);
+                let angleDeg = angleRad * (180 / Math.PI);
+                const line = document.createElement('div');
+                line.className = 'relationship-line';
+                line.style.width = `${totalDistance}px`;
+                line.style.left = `${p1.x}px`;
+                line.style.top = `${p1.y}px`;
+                line.style.transform = `rotate(${angleDeg}deg)`;
+                chartContainer.appendChild(line);
+                const regret_i_to_j_obj = sourceDoll.regrets.find(r => (r.targetName === targetDoll.name || r.targetName === targetDoll.displayName) && !r.isForTreasure);
+                const regret_j_to_i_obj = targetDoll.regrets.find(r => (r.targetName === sourceDoll.name || r.targetName === sourceDoll.displayName) && !r.isForTreasure);
+                const regret_i_to_j = regret_i_to_j_obj ? regret_i_to_j_obj.regretName : null;
+                const regret_j_to_i = regret_j_to_i_obj ? regret_j_to_i_obj.regretName : null;
+                if (regret_i_to_j && regret_j_to_i) {
+                    const relationshipWord = generateRelationship([regret_i_to_j, regret_j_to_i]);
+                    const midX = p1.x + dx / 2;
+                    const midY = p1.y + dy / 2;
+                    const label = document.createElement('div');
+                    label.className = 'relationship-label';
+                    label.textContent = relationshipWord;
+                    label.style.setProperty('--x', `${midX}px`);
+                    label.style.setProperty('--y', `${midY}px`);
+                    if (angleDeg > 90) angleDeg -= 180;
+                    else if (angleDeg < -90) angleDeg += 180;
+                    label.style.setProperty('--angle', `${angleDeg}deg`);
+                    chartContainer.appendChild(label);
                 }
-                
-                // ▼▼▼ ここからが今回の修正の中心部分 (2/2) ▼▼▼
-                // 取得した動的な値を使って計算
-                const innerDistance = totalDistance - nodeDiameter;
-                // const offsetFromEdge = innerDistance * 0.18;
+            }
+        // }
+        
+        // for (let i = 0; i < numPcs; i++) {
+            for (let j = 0; j < numPcs; j++) {
+                if (i === j) continue;
+                const sourceDoll = pcs[i];
+                const targetDoll = pcs[j];
+                const p1 = positions[i];
+                const p2 = positions[j];
+                const dx = p2.x - p1.x;
+                const dy = p2.y - p1.y;
+                const totalDistance = Math.sqrt(dx * dx + dy * dy);
+                // const innerDistance = totalDistance - nodeDiameter;
+                // const offsetFromEdge = innerDistance * 0.25;
                 // const textboxDistance = nodeRadius + offsetFromEdge;
                 const textboxDistance = 80;
-                // ▲▲▲ 修正ここまで ▲▲▲
-
                 const unitVectorX = dx / totalDistance;
                 const unitVectorY = dy / totalDistance;
                 const textboxX = p1.x + unitVectorX * textboxDistance;
                 const textboxY = p1.y + unitVectorY * textboxDistance;
-
                 const textbox = document.createElement('div');
                 textbox.className = 'regret-textbox';
                 textbox.style.left = `${textboxX}px`;
                 textbox.style.top = `${textboxY}px`;
-
-                const foundRegretOnDoll = sourceDoll.regrets.find(r => r.name && r.name.includes(targetDoll.name));
+                const foundRegretOnDoll = sourceDoll.regrets.find(r => (r.targetName === targetDoll.name || r.targetName === targetDoll.displayName) && !r.isForTreasure);
                 let regretMasterData = null;
-
                 if (foundRegretOnDoll) {
                     const allRegrets = Object.values(data.getRegretData());
                     regretMasterData = allRegrets.find(master => foundRegretOnDoll.name.includes(master.name));
                 }
-                
                 if (regretMasterData) {
                     const isMadness = foundRegretOnDoll.points >= 4;
                     textbox.title = `発狂：${regretMasterData.madnessName}\n効果：${regretMasterData.madnessEffect}`;
-                    
                     if (isMadness) {
                         textbox.classList.add('is-madness');
                         textbox.textContent = regretMasterData.madnessName;
                     } else {
                         textbox.textContent = regretMasterData.name;
-                        // 1. マスターデータに色が定義されていれば、スタイルを適用
                         if (regretMasterData.color) {
-                            // textbox.style.borderColor = regretMasterData.color;
                             textbox.style.color = regretMasterData.color;
                         }
                     }
@@ -2514,59 +2418,42 @@ export function showRelationshipModal() {
                     textbox.textContent = '未設定';
                     textbox.classList.add('is-unset');
                 }
-                
                 chartContainer.appendChild(textbox);
-
                 textbox.addEventListener('click', (e) => {
                     e.stopPropagation();
-
-                    // メニュー項目を定義
-                    const menuItems = [
-                        {
-                            label: '未練変更',
-                            onClick: () => {
-                                // ダイスロールを実行し、結果をコールバックで受け取る
-                                performDiceRoll({
-                                    command: 'NM',
-                                    showToast: true,
-                                    callback: (resultValue, hitLocation, resultText, newRegretMaster) => {
-                                        if (newRegretMaster) {
-                                            // character-managerの関数を呼び出してデータを更新
-                                            charManager.changeSisterRegret(sourceDoll.id, targetDoll.displayName, newRegretMaster);
-                                            // UIを再描画
-                                            renderChart();
-                                        }
+                    const menuItems = [{
+                        label: '未練変更',
+                        onClick: () => {
+                            performDiceRoll({
+                                command: 'NM',
+                                showToast: true,
+                                callback: (resultValue, hitLocation, resultText, newRegretMaster) => {
+                                    if (newRegretMaster) {
+                                        charManager.changeSisterRegret(sourceDoll.id, targetDoll.displayName, newRegretMaster);
+                                        renderChart();
                                     }
-                                });
-                            }
-                        },
-                        {
-                            label: '発狂切替',
-                            onClick: () => {
-                                if (foundRegretOnDoll) {
-                                    // 狂気点を4と0でトグルさせる
-                                    foundRegretOnDoll.points = (foundRegretOnDoll.points >= 4) ? 0 : 4;
-                                    // UIを再描画
-                                    renderChart();
-                                } else {
-                                    ui.showToastNotification("未設定の未練は発狂状態を変更できません。", 2000);
                                 }
+                            });
+                        }
+                    }, {
+                        label: '発狂切替',
+                        onClick: () => {
+                            if (foundRegretOnDoll) {
+                                foundRegretOnDoll.points = (foundRegretOnDoll.points >= 4) ? 0 : 4;
+                                renderChart();
+                            } else {
+                                ui.showToastNotification("未設定の未練は発狂状態を変更できません。", 2000);
                             }
                         }
-                    ];
-                    
-                    // シンプルメニューモーダルでメニューを表示
+                    }];
                     ui.showModal({
-                        title: `${sourceDoll.name} から ${targetDoll.name} への未練`,
+                        title: `${sourceDoll.name} -> ${targetDoll.name}`,
                         items: menuItems
                     });
                 });
             }
         }
     };
-    
-    // ▼▼▼ ここからが修正箇所 (3/3) ▼▼▼
-    // handleResize と closeModal の定義を renderChart の外に移動
     const handleResize = () => {
         clearTimeout(relationshipResizeTimer);
         relationshipResizeTimer = setTimeout(() => {
@@ -2575,24 +2462,20 @@ export function showRelationshipModal() {
             }
         }, 250);
     };
-
     const closeModal = () => {
         modal.classList.remove('is-visible');
         window.removeEventListener('resize', handleResize);
     };
-    
     const pcs = charManager.getCharacters().filter(c => c.type === 'pc' && !c.isDestroyed && !c.hasWithdrawn);
     if (pcs.length < 2) {
         ui.showToastNotification("関係性を表示するには姉妹が2人以上必要です。", 2000);
         return;
     }
-
     renderChart();
     closeBtn.onclick = closeModal;
     modal.onclick = (e) => { if (e.target === modal) closeModal(); };
     window.addEventListener('resize', handleResize);
     modal.classList.add('is-visible');
-    // ▲▲▲ 修正ここまで ▲▲▲
 }
 
 /**
