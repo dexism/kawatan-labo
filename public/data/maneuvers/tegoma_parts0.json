@@ -340,9 +340,6 @@
   "P0-71": { 
     "name": "自動制御装置", "category": "無効化", "tags": ["損傷無効", "オート"], "maliceLevel": 0, "description": "パーツが損傷してもターン終了まで使用可。", "description_raw": "パーツを損傷しても、ターン終了までマニューバ使用可", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "ignore_part_damage", "value": true, "duration": "end_of_turn" } }] 
   },
-  "P0-72": { 
-    "name": "スコープS", "category": "支援", "tags": ["支援", "オート"], "maliceLevel": 0, "description": "射撃・砲撃攻撃の判定に+2の支援。", "description_raw": "射撃攻撃・砲撃攻撃のみ支援2", "source": { "book": "基本ルールブック" }, "timing": "オート", "cost": "なし", "range": "自身", "effects": [{ "ref": "APPLY_BUFF", "params": { "stat": "attackCheckBonus", "value": 2, "condition": ["射撃攻撃", "砲撃攻撃"] } }] 
-  },
   "P0-73": {
     "name": "ただよう", "category": "移動",
     "tags": ["アクション", "移動"], "maliceLevel": 0,

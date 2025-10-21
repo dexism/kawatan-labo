@@ -58,7 +58,7 @@
 }
 /* キャンセル可能なモーダルの場合、コンテンツ以外はクリックを透過させる */
 .modal-backdrop:not(.is-not-closable) {
-    pointer-events: none;
+    pointer-events: auto;
 }
 .modal-content {
     background-color: var(--color-background-2);
@@ -88,9 +88,9 @@
     pointer-events: auto;
 
     /* 初期状態：少し下にあり、透明 */
-    transform: translateY(100%);
-    opacity: 1;
-    transition: all 0.2s ease-out;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: all 0.2s;
     padding: 10px;
 }
 /* モーダル表示時に、コンテンツをスライドインさせる */
@@ -1118,9 +1118,7 @@
     max-width: 520px; /* PCでの最大幅を制限 */
     max-height: 600px; /* PCでの最大高さを制限 */
     background-color: var(--color-background-2);
-    overflow-x: auto;
 }
-
 /* モーダルボディをFlexboxにして中央揃え */
 .relationship-modal-body {
     width: 500px;
@@ -1132,7 +1130,9 @@
     box-sizing: border-box;
     overflow: hidden; /* はみ出した要素を隠す */
     margin: 0;
+    overflow-x: auto;
 }
+
 
 /* ドールを配置する円形のコンテナ */
 .relationship-chart-container {
@@ -1254,10 +1254,10 @@
         0 0 16px var(--color-background-2);
     background-color: var(--color-background-2);
     text-shadow:
-        0 0 1px var(--color-2),
-        0 0 2px var(--color-2),
-        0 0 3px var(--color-2),
-        0 0 4px var(--color-2);
+        0 0 2px var(--color-1),
+        0 0 2px var(--color-1),
+        0 0 2px var(--color-1),
+        0 0 3px var(--color-1);
     
     font-size: 20px;
     font-weight: bold;
@@ -1269,6 +1269,7 @@
 }
 .regret-textbox:hover {
     border: 2px solid gold;
+    background-color: var(--color-shadow);
     z-index: 5; /* アイコンや線より手前に表示 */
 }
 
@@ -1280,13 +1281,20 @@
     color: red;
     z-index: 4;
 }
+.regret-textbox.is-madness:hover {
+    z-index: 5;
+}
 /* 未設定の未練テキストボックスのスタイル */
 .regret-textbox.is-unset {
-    color: var(--color-text-muted); /* 文字色を薄くする */
+    color: var(--color-8); /* 文字色を薄くする */
     border-style: dashed;           /* 枠線を点線にする */
-    border-color: var(--color-text-muted); /* 枠線の色も薄くする */
-    border: 3px dashed var(--color-7);
-    background-color: var(--color-surface-1); /* 背景色を少し変える */
+    border: 3px dashed var(--color-8);
+    background-color: var(--color-4); /* 背景色を少し変える */
+    z-index: 4;
+}
+.regret-textbox.is-unset:hover {
+    background-color: var(--color-e);
+    z-index: 5;
 }
 /* 発狂状態を点滅させるためのキーフレームアニメーション */
 @keyframes pulse {

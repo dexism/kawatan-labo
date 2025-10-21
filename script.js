@@ -7,7 +7,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-const appVersion = "7.10.2021";
+const appVersion = "7.10.2114";
 
 // --- モジュールのインポート ---
 import * as data from './data-handler.js';
@@ -156,7 +156,7 @@ function showUpdateNotesModal() {
         const LATEST_UPDATE_NOTES = `
         <div class="modal-header modal-header-sub">📢主な更新内容 Ver.${appVersion}</div>
         <div class="modal-body welcome-modal-body">
-            <p>◆ <strong>記憶のカケラ（α・β）・死後経歴・目覚めの場所</strong>を追加しました。</p>
+            <p>◆ 📖リファレンスに<strong>記憶のカケラ（α・β）・死後経歴・目覚めの場所</strong>を追加しました。</p>
             <p>◆ <strong>💛姉妹の関係</strong>を追加しました。</p>
             <p>◆ リファレンスを刷新、<strong>未練・たからもの・記憶のカケラ・暗示</strong>を追加しました。</p>
             <p>◆ 最新バージョンへの<strong>自動更新機能</strong>を実装しました。</p>

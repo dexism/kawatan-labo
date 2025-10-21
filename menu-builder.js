@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.22.91"; // バージョンを更新
+export const version = "1.22.92"; // バージョンを更新
 
 import * as data from './data-handler.js';
 import * as charManager from './character-manager.js';
@@ -1395,10 +1395,10 @@ export function closeAllMenus() {
  */
 export function getCharacterManeuvers(char) {
     const battleState = battleLogic.getBattleState();
-    const allManeuvers = [];
-    const addedPartNames = new Set(); // 処理済みのパーツ名を記録
+    const allManeuvers = []; // ここは const のままでも問題ない
+    const addedPartNames = new Set();
 
-    // 1. キャラクター固有のスキルを追加
+    // 1. キャラクター固有のスキルとパーツを追加
     (char.skills || []).forEach(skillName => {
         const maneuver = data.getManeuverByName(skillName);
         if (maneuver) {
@@ -1406,28 +1406,22 @@ export function getCharacterManeuvers(char) {
             addedPartNames.add(skillName);
         }
     });
-
-    // 2. キャラクター固有のパーツを追加
     Object.values(char.partsStatus || {}).flat().forEach(part => {
         if (addedPartNames.has(part.name)) return;
-
         let maneuver;
-        // 1. パーツ名が treasures 配列に含まれているかチェック
         if (char.treasures && char.treasures.includes(part.name)) {
             maneuver = JSON.parse(JSON.stringify(data.getAllManeuvers()['TR-00']));
             if(maneuver) maneuver.name = part.name;
         } else {
-        // 2. たからもの以外の場合、通常のマニューバとして処理
             maneuver = data.getManeuverByName(part.name);
         }
-
         if (maneuver) {
             allManeuvers.push({ data: maneuver, sourceType: 'part', sourceName: part.name, isDamaged: part.damaged });
             addedPartNames.add(part.name);
         }
     });
 
-    // 3. 全ての一般動作（CA-XX）をリストに追加する
+    // 2. 全ての一般動作（CA-XX）を追加
     const allManeuverData = data.getAllManeuvers();
     for (const id in allManeuverData) {
         if (id.startsWith('CA-')) {
@@ -1435,53 +1429,55 @@ export function getCharacterManeuvers(char) {
             allManeuvers.push({ data: maneuver, sourceType: 'common' });
         }
     }
+    
+    // ▼▼▼ ここからが今回の修正の中心 ▼▼▼
 
-    // const waitManeuver = data.getManeuverByName('待機');
-    // if (waitManeuver) allManeuvers.push({ data: waitManeuver, sourceType: 'common' });
-    // const arbitraryManeuver = data.getManeuverByName('任意');
-    // if (arbitraryManeuver) allManeuvers.push({ data: arbitraryManeuver, sourceType: 'common' });
+    // 3. フィルタリング処理。結果を新しい変数に格納する
+    let filteredManeuvers = allManeuvers; // まず元のリストをコピー
+    if (char.type === 'enemy') {
+        const generalForbiddenNames = new Set(["行動判定", "対話判定", "狂気判定"]);
+        filteredManeuvers = filteredManeuvers.filter(m => !generalForbiddenNames.has(m.data.name));
+
+        if (char.category === 'レギオン' || char.category === 'ホラー') {
+            const specificForbiddenNames = new Set(["逃走判定", "切断判定"]);
+            filteredManeuvers = filteredManeuvers.filter(m => !specificForbiddenNames.has(m.data.name));
+        }
+    }
+    
+    // ▲▲▲ 修正ここまで ▲▲▲
     
     const isCharDamaged = Object.values(char.partsStatus).flat().some(part => part.damaged);
 
     // --- 現在アクティブなタイミングを判断 ---
+    // (変更なし)
     const activeIndicators = new Set();
     const { 
-        phase, 
-        activeActors = [], 
-        actionQueue = [], 
-        rapidQueue = [], 
-        damageQueue = []
+        phase, activeActors = [], actionQueue = [], rapidQueue = [], damageQueue = []
     } = battleState;
 
     if (activeActors.some(a => a.id === char.id)) {
         activeIndicators.add('アクション');
         activeIndicators.add('ラピッド');
     }
-
     if (activeActors.length === 0) {
         activeIndicators.add('ラピッド');
     }
-
     const allDeclarations = [
-        ...actionQueue, 
-        ...rapidQueue, 
-        ...damageQueue.filter(item => item.type === 'declaration')
+        ...actionQueue, ...rapidQueue, ...damageQueue.filter(item => item.type === 'declaration')
     ];
     if (allDeclarations.some(a => !a.checked)) {
         activeIndicators.add('ジャッジ');
     }
-
     if (phase === 'DAMAGE_RESOLUTION' || (actionQueue.every(a => a.checked) && damageQueue.some(d => !d.applied))) {
         activeIndicators.add('ダメージ');
     }
-
     if (allDeclarations.some(a => !a.checked && a.performer && a.performer.id === char.id)) {
         activeIndicators.add('ラピッド');
         activeIndicators.add('ジャッジ');
     }
 
-    // 4. 全マニューバの使用可否を判定して返す
-    return allManeuvers.map(m => {
+    // 4. フィルタリング後のリストを使って、使用可否を判定する
+    return filteredManeuvers.map(m => {
         const maneuver = m.data;
         let isUsable = true;
 
@@ -1490,13 +1486,15 @@ export function getCharacterManeuvers(char) {
         if (char.usedManeuvers.has(maneuver.name) && maneuver.usageLimit !== false) isUsable = false;
         
         if (maneuver.timing !== 'オート' && !activeIndicators.has(maneuver.timing)) {
-            isUsable = false;
+            if (maneuver.timing === '効果参照') {
+                isUsable = false;
+            } else {
+                isUsable = false;
+            }
         }
-        
         if (isUsable && maneuver.effects?.some(e => e.params?.condition === 'is_damaged') && !isCharDamaged) {
             isUsable = false;
         }
-        
         if (isUsable && maneuver.timing === 'ジャッジ') {
             if (getTargetableDeclarations(char, maneuver).length === 0) {
                 isUsable = false;
