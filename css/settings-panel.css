@@ -4,6 +4,18 @@
 .settings-content {
     padding: 5px;
 }
+.settings {
+    background-color: var(--color-background-3);
+    border-radius: 10px;
+    box-shadow: 0 0 5px inset var(--color-7);
+    border: 1px solid var(--color-7)
+}
+.room {
+    background-color: var(--color-background-3);
+    border-radius: 10px;
+    box-shadow: 0 0 5px inset var(--color-7);
+    border: 1px solid var(--color-7)
+}
 
 .theme-switcher-container {
     display: flex;
@@ -72,4 +84,148 @@
 }
 .session-btn-danger:hover {
     color: var(--color-accent-red);
+}
+
+/* ================================
+   5. ルーム管理
+================================ */
+h3.section-title {
+    margin: 0 0 0 10px;
+}
+/* --- セッション管理 --- */
+.session-management {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-sizing: border-box;
+}
+
+/* PL参加フォーム */
+.session-join-container {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 5px;
+}
+#sessionRoomIdInput {
+    padding: 4px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background-color: var(--color-background-1);
+    color: var(--color-text);
+    text-align: center;
+    font-size: 18px;
+    width: 150px;
+}
+/* 「ルームを作成」「ルームに入室」ボタン */
+.session-join-btn {
+    padding: 3px 10px;
+    border: none;
+    border-radius: 30px;
+    background-color: var(--color-accent-blue);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 14px;
+    text-wrap: nowrap;
+    margin: auto 0 0 auto;
+    width: fit-content;
+}
+.session-join-btn:hover {
+    opacity: 0.9;
+}
+.session-join-btn:disabled {
+    background-color: var(--color-text-muted);
+    cursor: not-allowed;
+}
+
+/* NC/PL共通パネル */
+.session-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background-color: var(--color-background-2);
+    border: 1px solid var(--color-7);
+    box-shadow: 0 0 5px var(--color-7);
+    padding: 10px;
+    border-radius: 10px;
+}
+.session-panel h4 {
+    margin: 0;
+    text-align: center;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 5px;
+}
+.session-info {
+    display: flex;
+    justify-content: space-around;
+    align-items: baseline;
+    font-size: 14px;
+}
+.session-info b {
+    font-size: 18px;
+}
+#ncInviteUrl {
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    background-color: var(--color-log-bg);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    padding: 5px;
+    margin: 5px 0; 
+}
+#ncPeerList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 12px;
+    color: var(--color-text-muted);
+    text-align: center;
+}
+
+/* --- ルーム状態セレクター --- */
+.room-status-selector {
+    display: flex;
+    justify-content: space-around;
+    background-color: var(--color-background-2);
+    border-radius: 5px;
+    padding: 5px;
+    margin: 5px; 
+}
+.room-status-selector label {
+    cursor: pointer;
+    font-size: 14px;
+}
+
+/* --- パスコード設定エリア --- */
+.passcode-area {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 5px;
+}
+#passcodeInput {
+    /* sessionRoomIdInput と同じスタイルを流用 */
+    margin: 5px; 
+    padding: 4px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background-color: var(--color-background-1);
+    color: var(--color-text);
+    text-align: center;
+    font-size: 18px;
+    width: 150px;
+}
+#setPasscodeBtn {
+    /* sessionJoinBtn と同じスタイルを流用 */
+    padding: 3px 10px;
+    border: none;
+    border-radius: 30px;
+    background-color: var(--color-accent-blue);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 14px;
+    text-wrap: nowrap;
+    margin: auto 0 0 auto;
+    width: fit-content;
 }

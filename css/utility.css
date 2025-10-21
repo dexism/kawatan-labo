@@ -42,7 +42,7 @@
 }
 /* 開閉されるコンテンツ部分 */
 .accordion-content {
-    max-height: 500px; /* 十分な高さを確保 */
+    max-height: auto; /* 十分な高さを確保 */
     overflow: hidden;
     transition: all 0.3s ease;
 }

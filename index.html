@@ -174,15 +174,69 @@
       </div>
     </aside>
 
+    <!-- ルームパネル -->
+    <aside class="grid-area-room-panel">
+      <div class="section accordion-container is-closed" id="settingsArea">
+        <h2 class="section-title accordion-header">🚪ルーム設定</h2>
+        <div class="section room accordion-content" id="settingsArea">
+
+          <h2 class="section-title">セッションモード</h2>
+          <div class="settings-content session-management">
+            
+            <!-- NC: セッション開始ボタン (初期表示) -->
+            <button id="sessionStartBtn" class="session-join-btn">ルームを作成</button>
+
+            <!-- PL: ルーム番号入力 (初期表示) -->
+            <div id="sessionJoinContainer" class="session-join-container">
+              <input type="text" id="sessionRoomIdInput" placeholder="4桁のルーム番号" maxlength="4">
+              <button id="sessionJoinBtn" class="session-join-btn">ルームに入室</button>
+            </div>
+
+            <!-- NC: セッション管理パネル (モード移行後に表示) -->
+            <div id="sessionNcPanel" class="session-panel" style="display: none;">
+              <h4>NCモード：接続待機中</h4>
+              <div class="session-info">
+                <span>ルーム番号: <b id="ncRoomId"></b></span>
+                <span>接続人数: <b id="ncPeerCount">0</b> 名</span>
+              </div>
+              <div class="room-status-selector">
+                <label><input type="radio" name="room-status" value="public" checked> 🔓公開</label>
+                <label><input type="radio" name="room-status" value="locked"> 🔐鍵付</label>
+                <label><input type="radio" name="room-status" value="restricted"> 🚫制限</label>
+              </div>
+
+              <div id="passcodeArea" class="passcode-area" style="display: none;">
+                <input type="text" id="passcodeInput" placeholder="4桁のパスコード" maxlength="4">
+                <button id="setPasscodeBtn">設定</button>
+              </div>
+              <input type="text" id="ncInviteUrl" readonly>
+              <button id="ncCopyUrlBtn" class="session-btn">招待URLをコピー</button>
+              <ul id="ncPeerList"></ul>
+              <button id="sessionEndBtn" class="session-btn session-btn-danger">セッションを終了</button>
+            </div>
+
+            <!-- PL: セッション情報パネル (モード移行後に表示) -->
+            <div id="sessionPlPanel" class="session-panel" style="display: none;">
+                <h4>PLモード</h4>
+                <div class="session-info">
+                  <span>ルーム番号: <b id="plRoomId"></b></span>
+                  <span id="plConnectionStatus">リンク正常</span>
+                </div>
+                <button id="sessionLeaveBtn" class="session-btn session-btn-danger">セッションから退席する</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </aside>
+
     <!-- 設定パネル -->
     <aside class="grid-area-settings-panel">
       <div class="section accordion-container is-closed" id="settingsArea">
-        <h2 class="section-title accordion-header">設定</h2>
+        <h2 class="section-title accordion-header">⚙️設定</h2>
         <div class="section settings accordion-content" id="settingsArea">
 
-          <div class="section status control-container">
-            <button id="resetBattleBtn" class="phase-btn phase-btn-danger">戦闘を中断して初期画面に戻る</button>
-          </div>
+          <button id="resetBattleBtn" class="phase-btn phase-btn-danger">戦闘を中断して初期画面に戻る</button>
           
           <h2 class="section-title">セッションデータ管理</h2>
           <div class="settings-content" id="session-controls">
@@ -201,7 +255,7 @@
             </label>
           </div>
           
-          <h2 class="section-title">セッション接続</h2>
+          <!--h2 class="section-title">セッション接続</h2>
           <div class="settings-content">
             <div class="theme-switcher-container">
               <label>
@@ -213,7 +267,8 @@
                 <span>PLモード</span>
               </label>
             </div>
-          </div>
+          </div-->
+
 
           <h2 class="section-title">ダイスロール</h2>
           <div class="settings-content">
@@ -390,6 +445,10 @@
 </div>
 
 <div id="toast-notification" class="toast-notification"></div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <!-- 外部JavaScriptファイルの読み込み -->
 <script src="data-handler.js" type="module"></script>

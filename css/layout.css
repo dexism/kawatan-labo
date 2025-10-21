@@ -110,6 +110,7 @@ body {
         auto 
         1fr 
         auto
+        auto
         auto;
     grid-template-areas:
         "status"
@@ -119,6 +120,7 @@ body {
         "action"
         "damage"
         "log"
+        "room"
         "settings"
         "footer";
     align-content: start;
@@ -189,6 +191,10 @@ body {
     margin-bottom: 5px;
     height: 100%;
 }
+.grid-area-room-panel {
+    grid-area: room;
+    z-index: 90;
+}
 .grid-area-settings-panel {
     grid-area: settings;
     z-index: 90;
@@ -217,6 +223,7 @@ body {
             "damage"
             "log"
             "timing"
+            "room"
             "settings"
             "footer";
         grid-template-columns: 1fr;
@@ -230,6 +237,7 @@ body {
             auto
             auto
             1fr
+            auto
             auto
             auto
             auto;

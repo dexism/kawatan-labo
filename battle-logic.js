@@ -2,7 +2,7 @@
  * @file battle-logic.js
  * @description 戦闘の進行、状態管理、ルール判定、アクション解決を担当するモジュール。
  */
-export const version = "1.26.97"; // UI分離リファクタリング完了版
+export const version = "1.26.98"; // UI分離リファクタリング完了版
 
 import * as charManager from './character-manager.js';
 import * as ui from './ui-manager.js';
@@ -10,6 +10,19 @@ import { performDiceRoll } from './dice-roller.js';
 import * as data from './data-handler.js';
 import * as stateManager from './state-manager.js';
 import { checkTargetAvailability, isIconActive, getCharacterManeuvers } from './menu-builder.js';
+
+import { broadcastToAll, sendToHost } from './p2p-manager.js';
+
+// NC側: 現況データが更新されたら...
+function updateGameState() {
+    // ... 状態更新処理 ...
+    broadcastToAll({ type: 'gameStateUpdate', payload: battleState });
+}
+
+// PL側: マニューバを宣言したら...
+function declareManeuverAsPlayer(declaration) {
+    sendToHost({ type: 'declareManeuver', payload: declaration });
+}
 
 // ===================================================================================
 //  戦闘状態 (State)

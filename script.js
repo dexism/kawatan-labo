@@ -7,7 +7,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-const appVersion = "7.10.2114";
+const appVersion = "7.10.2121";
 
 // --- モジュールのインポート ---
 import * as data from './data-handler.js';
@@ -43,6 +43,7 @@ import { version as characterConverterVersion } from './character-converter.js';
 import { version as menuBuilderVersion } from './menu-builder.js';
 import { version as referenceVersion } from './reference.js';
 import { version as Dice3dVersion } from './dice-3d.js';
+import { version as p2pManagerVersion } from './p2p-manager.js';
 
 // ===================================================================================
 //  アプリケーション初期化フロー
@@ -58,7 +59,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         characterManager.initialize(data.getUndeadTemplates());
         initializeUI();
         initializeInteraction();
-        initializeSettings();
+        await initializeSettings();
         initializeDiceRoller({
             hintMasterData: data.getHintData(),
             regretMasterData: data.getRegretData(),
@@ -335,7 +336,8 @@ function displayAppVersionInfo() {
         "settings-manager": settingsManagerVersion,
         "state-manager": stateManagerVersion,
         "reference": referenceVersion,
-        "character-converter": characterConverterVersion
+        "character-converter": characterConverterVersion,
+        "p2p-manager": p2pManagerVersion
     };
     displayVersionInfo(versionInfo);
 }
