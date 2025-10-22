@@ -2,7 +2,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.2.6";
+export const version = "1.2.7";
 
 // --- Firebaseの初期化 ---
 const firebaseConfig = {
@@ -53,6 +53,22 @@ export function initialize(dataCallback, connectionCallback, peerListCallback) {
     localId = `user_${Math.random().toString(36).substr(2, 9)}`;
 }
 
+/**
+ * データベースのトップレベル `/logs` に操作ログを記録する
+ * @param {string} userName - 操作を行ったユーザー名
+ * @param {string} action - 操作内容 (例: 'ルーム作成')
+ * @param {string} roomId - 関連するルームID
+ */
+function writeAuditLog(userName, action, roomId) {
+    const logRef = database.ref('logs').push(); // 新しいログエントリのためのユニークIDを生成
+    logRef.set({
+        user: userName,
+        timestamp: firebase.database.ServerValue.TIMESTAMP,
+        action: action,
+        roomId: roomId
+    });
+}
+
 // ===============================================
 // NC（ホスト）側の処理
 // ===============================================
@@ -60,9 +76,10 @@ export function initialize(dataCallback, connectionCallback, peerListCallback) {
 /**
  * 【修正】ホストセッションを新規作成、または既存のセッションに復帰する
  * @param {string|null} sessionId - 復帰するセッションID。nullの場合は新規作成。
+ * @param {string} hostName - ホスト（NC）の名前
  * @returns {Promise<string>} - 確立されたセッションのID
  */
-export async function createHostSession(sessionId = null) {
+export async function createHostSession(sessionId = null, hostName = 'NC') { // hostName引数を追加
     const db = database.ref('rooms');
     let isNewSession = false;
 
@@ -76,10 +93,12 @@ export async function createHostSession(sessionId = null) {
             roomExists = snapshot.exists();
         }
     }
-
     sessionRef = database.ref(`rooms/${sessionId}`);
 
     if (isNewSession) {
+        // const hostName = localStorage.getItem('nechronica-pl-name') || 'NC'; // ローカルから名前を取得
+        writeAuditLog(hostName, 'ルーム作成', sessionId);
+
         // 新規セッションの場合のみ、ルームを初期化
         await sessionRef.set({
             createdAt: firebase.database.ServerValue.TIMESTAMP,
@@ -106,14 +125,25 @@ export async function createHostSession(sessionId = null) {
         const connectedPlsData = snapshot.val();
         const connectedPls = connectedPlsData ? Object.keys(connectedPlsData) : [];
         console.log('接続中のPLリスト:', connectedPls);
+
+        // 1. NC自身のUIを更新するためのコールバックを呼び出す
         if (onPeerListChangeCallback) {
             onPeerListChangeCallback(connectedPls);
         }
+
+        // 2. 【重要】接続している全クライアントに参加者リストをブロードキャストする
+        broadcastToAll({ type: 'peerListUpdate', payload: connectedPls });
     });
 
     plsRef.on('child_added', async (snapshot) => {
         const plId = snapshot.key;
         if (!plId) return;
+
+        const profile = snapshot.child('profile').val();
+        if (profile) {
+            console.log(`通知: ${profile.name} が入室しました。`);
+            broadcastToAll({ type: 'notification', payload: `PL「${profile.name}」が入室しました。` });
+        }
 
         console.log(`Firebase: PL[${plId}]との接続を開始します。`);
         
@@ -131,6 +161,7 @@ export async function createHostSession(sessionId = null) {
 
         const plRef = plsRef.child(plId);
         plRef.child('sdp').on('value', sdpSnapshot => {
+            // if (sdpSnapshot.exists() && (!pc.remoteDescription || pc.remoteDescription.sdp !== sdpSnapshot.val().sdp)) {
             if (sdpSnapshot.exists() && (!pc.remoteDescription || pc.remoteDescription.sdp !== sdpSnapshot.val().sdp)) {
                 pc.setRemoteDescription(new RTCSessionDescription(sdpSnapshot.val()));
             }
@@ -147,6 +178,16 @@ export async function createHostSession(sessionId = null) {
         
         const offer = { sdp: offerDescription.sdp, type: offerDescription.type };
         await sessionRef.child('nc/sdp').set(offer);
+    });
+
+    // child_removedリスナー
+    plsRef.on('child_removed', (snapshot) => {
+        const profile = snapshot.child('profile').val();
+        if (profile) {
+            console.log(`通知: ${profile.name} が退室しました。`);
+            broadcastToAll({ type: 'notification', payload: `PL「${profile.name}」が退室しました。` });
+        }
+        // 接続リストの更新は 'value' イベントで自動的に処理される
     });
 
     return sessionId;
@@ -172,7 +213,7 @@ export async function joinClientSession(sessionId, plName) {
     if (meta.status === 'locked') {
         let isAuthorized = false;
         while (!isAuthorized) {
-            const enteredPasscode = prompt("このルームはパスコードで保護されています。\n4桁のパスコードを入力してください：");
+            const enteredPasscode = prompt("このルームはパスコードで保護されています。\nパスコードを入力してください：");
             if (enteredPasscode === null) {
                 throw new Error("入室をキャンセルしました。");
             }
@@ -185,6 +226,8 @@ export async function joinClientSession(sessionId, plName) {
         }
     }
     // ▲▲▲ 修正ここまで ▲▲▲
+
+    writeAuditLog(plName, 'ルーム入室', sessionId);
 
     myRef = sessionRef.child(`pls/${localId}`);
     console.log(`Firebase: ルーム[${sessionId}]への参加を開始します。`);
@@ -280,25 +323,36 @@ export function sendToHost(data) {
 export async function kickPlayer(plId) {
     if (!sessionRef) return;
 
-    // 1. PLに追放を通知
+    // ▼▼▼ ここからが修正箇所です ▼▼▼
+
+    // 1. まず、追放対象のPLのプロファイル(名前など)をFirebaseから非同期で取得
+    const plRef = sessionRef.child(`pls/${plId}`);
+    const snapshot = await plRef.child('profile').once('value');
+    const profile = snapshot.val();
+    
+    // 取得したプロファイルがあればその名前を、なければIDをログ用に使用
+    const plNameToLog = profile ? profile.name : plId;
+
+    // ▲▲▲ 修正はここまでです ▲▲▲
+
+    // 2. PLに追放を通知
     const channel = dataChannels.get(plId);
     if (channel && channel.readyState === 'open') {
         channel.send(JSON.stringify({ type: 'kicked' }));
     }
 
-    // 2. 接続を閉じる
+    // 3. ローカルの接続情報を閉じる
     peerConnections.get(plId)?.close();
     peerConnections.delete(plId);
     dataChannels.delete(plId);
 
-    // 3. FirebaseからPLのデータを削除
-    const plRef = sessionRef.child(`pls/${plId}`);
+    // 4. FirebaseからPLのデータを完全に削除
     await plRef.remove();
 
-    console.log(`Firebase: PL[${plId}]を追放しました。`);
+    console.log(`Firebase: PL「${plNameToLog}」を追放しました。`);
 
-    // 追放ログを全端末にブロードキャスト
-    broadcastToAll({ type: 'log', payload: `PL「${plId}」がセッションから追放されました。` });
+    // 5. 追放ログを全端末にブロードキャスト
+    broadcastToAll({ type: 'notification', payload: `PL「${plNameToLog}」がセッションから追放されました。` });
 }
 
 /**
@@ -326,6 +380,11 @@ export function disconnectSession() {
             // ▼▼▼ 以下の行を追加 ▼▼▼
             localStorage.removeItem(HOST_ROOM_ID_KEY);
             // ▲▲▲ 追加ここまで ▲▲▲
+
+            const roomId = sessionRef.key;
+            const hostName = localStorage.getItem('nechronica-pl-name') || 'NC';
+            writeAuditLog(hostName, 'ルーム削除', roomId);
+
             sessionRef.remove()
                 .then(() => console.log("Firebaseからルーム全体を削除しました。"))
                 .catch(err => console.error("ルーム削除エラー:", err));

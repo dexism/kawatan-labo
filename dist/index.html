@@ -13,8 +13,8 @@
 
 <!-- 分割した外部スタイルシートの読み込み -->
 
-  <script type="module" crossorigin src="/assets/index-2EdCyKxs.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-8L7uaOlz.css">
+  <script type="module" crossorigin src="/assets/index-M7z8klhZ.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-BenGSJtT.css">
 </head>
 <body>
 <div id="splash">
@@ -167,57 +167,65 @@
 
     <!-- ルームパネル -->
     <aside class="grid-area-room-panel">
-      <div class="section accordion-container is-closed" id="settingsArea">
+      <div class="section accordion-container is-closed" id="roomSettingsArea"> <!-- IDを変更 -->
         <h2 class="section-title accordion-header">🚪ルーム設定</h2>
-        <div class="section room accordion-content" id="settingsArea">
+        <div class="section settings accordion-content" id="roomSettingsContent"> <!-- IDを変更 -->
 
-          <h2 class="section-title">セッションモード</h2>
-          <div class="settings-content session-management">
+          <!-- アカウント (初期表示) -->
+          <div class="session-join-container settings-container">
+            <h4>アカウント</h4>
+            <input type="text" id="plNameInput" placeholder="NC/PL名 (必須)" maxlength="10">
+          </div>
             
+          <div id="sessionJoinContainer">
             <!-- NC: セッション開始ボタン (初期表示) -->
-            <button id="sessionStartBtn" class="session-join-btn">ルームを作成</button>
+            <div class="session-join-container settings-container">
+              <h4>NCとしてルームを管理</h4>
+              <button id="sessionStartBtn" class="session-join-btn">ルームを作成</button>
+            </div>
 
             <!-- PL: ルーム番号入力 (初期表示) -->
-            <div id="sessionJoinContainer" class="session-join-container">
-              <input type="text" id="plNameInput" placeholder="PL名を入力 (必須)" maxlength="10">
+            <div class="session-join-container settings-container">
+              <h4>PLとして参加</h4>
               <input type="text" id="sessionRoomIdInput" placeholder="4桁のルーム番号" maxlength="4">
               <button id="sessionJoinBtn" class="session-join-btn">ルームに入室</button>
             </div>
-
-            <!-- NC: セッション管理パネル (モード移行後に表示) -->
-            <div id="sessionNcPanel" class="session-panel" style="display: none;">
-              <h4>NCモード：<span><b id="ncRoomStatusLabel">参加受付中</b></span></h4>
-              <div class="session-info">
-                <span>ルーム番号: <b id="ncRoomId"></b></span>
-                <span>接続人数: <b id="ncPeerCount">0</b> 名</span>
-              </div>
-              <div class="room-status-selector">
-                <label><input type="radio" name="room-status" value="public" checked> 🔓公開</label>
-                <label><input type="radio" name="room-status" value="locked"> 🔐鍵付</label>
-                <label><input type="radio" name="room-status" value="restricted"> 🚫制限</label>
-              </div>
-
-              <div id="passcodeArea" class="passcode-area" style="display: none;">
-                <input type="text" id="passcodeInput" placeholder="4桁のパスコード" maxlength="4">
-                <button id="setPasscodeBtn">設定</button>
-              </div>
-              <input type="text" id="ncInviteUrl" readonly>
-              <button id="ncCopyUrlBtn" class="session-btn">招待URLをコピー</button>
-              <div id="ncPeerList" class="peer-list-container"></div>
-              <button id="sessionEndBtn" class="session-btn session-btn-danger">セッションを終了</button>
-            </div>
-
-            <!-- PL: セッション情報パネル (モード移行後に表示) -->
-            <div id="sessionPlPanel" class="session-panel" style="display: none;">
-                <h4>PLモード</h4>
-                <div class="session-info">
-                  <span>ルーム番号: <b id="plRoomId"></b></span>
-                  <span id="plConnectionStatus">リンク正常</span>
-                </div>
-                <button id="sessionLeaveBtn" class="session-btn session-btn-danger">セッションから退席する</button>
-            </div>
-
           </div>
+
+          <!-- NC: セッション管理パネル (NCモードで表示) -->
+          <div id="sessionNcPanel" class="session-join-container settings-container" style="display: none;">
+            <h3>ルーム状況：<b id="ncRoomStatusLabel">参加受付中</b></h3>
+            <div class="session-info">
+              <span>ルーム番号: <b id="ncRoomId"></b></span>
+              <span>接続人数: <b id="ncPeerCount">0</b> 名</span>
+            </div>
+            <div class="room-status-selector">
+              <label><input type="radio" name="room-status" value="public" checked> 🔓公開</label>
+              <label><input type="radio" name="room-status" value="locked"> 🔐鍵付</label>
+              <label><input type="radio" name="room-status" value="restricted"> 🚫制限</label>
+            </div>
+            <div id="passcodeArea" class="passcode-area" style="display: none;">
+              <input type="text" id="passcodeInput" placeholder="パスコード4桁" maxlength="4">
+              <button id="setPasscodeBtn">設定</button>
+            </div>
+            <input type="text" id="ncInviteUrl" readonly>
+            <button id="ncCopyUrlBtn" class="session-btn">招待URLをコピー</button>
+            <button id="sessionEndBtn" class="session-btn session-btn-danger">セッションを終了</button>
+          </div>
+
+          <!-- PL: セッション情報パネル (全モードで表示) -->
+          <div id="sessionPlPanel" class="session-join-container settings-container" style="display: none;">
+              <h3>通信状況</h3>
+              <div class="session-info">
+                <span>ルーム番号: <b id="plRoomId"></b></span>
+                <span id="plConnectionStatus">接続待機中...</span>
+              </div>
+              <!-- 参加者リストコンテナ -->
+              <h4 class="peer-list-title">参加者リスト</h4>
+              <div id="peerList" class="peer-list-container"></div>
+              <button id="sessionLeaveBtn" class="session-btn session-btn-danger">セッションから退席する</button>
+          </div>
+
         </div>
       </div>
     </aside>
@@ -226,77 +234,73 @@
     <aside class="grid-area-settings-panel">
       <div class="section accordion-container is-closed" id="settingsArea">
         <h2 class="section-title accordion-header">⚙️設定</h2>
-        <div class="section settings accordion-content" id="settingsArea">
+        <div class="section settings accordion-content">
 
-          <button id="resetBattleBtn" class="phase-btn phase-btn-danger">戦闘を中断して初期画面に戻る</button>
-          
-          <h2 class="section-title">セッションデータ管理</h2>
-          <div class="settings-content" id="session-controls">
-            <input type="file" id="fileInput" accept=".json" style="display: none;">
-            <button id="saveStateToFileBtn" class="session-btn">ファイルに保存</button>
-            <button id="saveStateBtn" class="session-btn">ブラウザに保存</button>
-            <button id="loadStateFromFileBtn" class="session-btn">ファイルから読込み</button>
-            <button id="clearStateBtn" class="session-btn session-btn-danger">保存データ削除</button>
+          <div class="settings-container">
+            <button id="resetBattleBtn" class="phase-btn phase-btn-danger">戦闘を中断して初期画面に戻る</button>
+          </div>
+
+          <div class="settings-container">
+            <h4>セッションデータ管理</h4>
+            <div class="settings-content" id="session-controls">
+              <input type="file" id="fileInput" accept=".json" style="display: none;">
+              <button id="saveStateToFileBtn" class="session-btn">ファイルに保存</button>
+              <button id="saveStateBtn" class="session-btn">ブラウザに保存</button>
+              <button id="loadStateFromFileBtn" class="session-btn">ファイルから読込</button>
+              <button id="clearStateBtn" class="session-btn session-btn-danger">保存データ削除</button>
+            </div>
           </div>
           
-          <div class="setting-row">
-            <span class="label">自動保存</span>
-            <label class="switch">
-              <input type="checkbox" name="autosave-switcher" checked>
-              <span class="slider"></span>
-            </label>
+          <div class="settings-container">
+            <div class="setting-row">
+              <span class="label">自動保存</span>
+              <label class="switch">
+                <input type="checkbox" name="autosave-switcher" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
           </div>
           
-          <!--h2 class="section-title">セッション接続</h2>
-          <div class="settings-content">
-            <div class="theme-switcher-container">
-              <label>
-                <input type="radio" name="conect-switcher" value="ncMode" checked>
-                <span>NCモード</span>
-              </label>
-              <label>
-                <input type="radio" name="conect-switcher" value="plMode">
-                <span>PLモード</span>
-              </label>
+          <!--div class="settings-container">
+            <h2 class="section-title">ダイスロール</h2>
+            <div class="settings-content">
+              <div class="theme-switcher-container">
+                <label>
+                  <input type="radio" name="diceroll-switcher" value="manual">
+                  <span>手動</span>
+                </label>
+                <label>
+                  <input type="radio" name="diceroll-switcher" value="nc">
+                  <span>NC自動</span>
+                </label>
+                <label>
+                  <input type="radio" name="diceroll-switcher" value="auto" checked>
+                  <span>自動</span>
+                </label>
+              </div>
             </div>
           </div-->
 
-
-          <h2 class="section-title">ダイスロール</h2>
-          <div class="settings-content">
-            <div class="theme-switcher-container">
-              <label>
-                <input type="radio" name="diceroll-switcher" value="manual">
-                <span>手動</span>
-              </label>
-              <label>
-                <input type="radio" name="diceroll-switcher" value="nc">
-                <span>NC自動</span>
-              </label>
-              <label>
-                <input type="radio" name="diceroll-switcher" value="auto" checked>
-                <span>自動</span>
-              </label>
+          <div class="settings-container">
+            <h4>テーマ</h4>
+            <div class="settings-content">
+              <div class="theme-switcher-container">
+                <label>
+                  <input type="radio" name="theme-switcher" value="light">
+                  <span>ライト</span>
+                </label>
+                <label>
+                  <input type="radio" name="theme-switcher" value="dark">
+                  <span>ダーク</span>
+                </label>
+                <label>
+                  <input type="radio" name="theme-switcher" value="system" checked>
+                  <span>システム</span>
+                </label>
+              </div>
             </div>
           </div>
 
-          <h2 class="section-title">テーマ</h2>
-          <div class="settings-content">
-            <div class="theme-switcher-container">
-              <label>
-                <input type="radio" name="theme-switcher" value="light">
-                <span>ライト</span>
-              </label>
-              <label>
-                <input type="radio" name="theme-switcher" value="dark">
-                <span>ダーク</span>
-              </label>
-              <label>
-                <input type="radio" name="theme-switcher" value="system" checked>
-                <span>システム</span>
-              </label>
-            </div>
-          </div>
         </div>
       </div>
     </aside>

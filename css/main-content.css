@@ -7,7 +7,7 @@
 .grid-area-pc-panel h2.section-title {
     justify-content: center;
 }
-
+/* アンデッド表示領域 */
 .char-area-wrapper {
     display: flex;
     align-items: center;
@@ -53,10 +53,51 @@
     box-shadow: 0 0 10px var(--color-8);
     transition: all 0.2s ease-out;
     overflow: visible;
+    transform: translateY(10px);
 }
 .grid-area-enemy-panel .char {
-    transform: rotate(180deg);
+    transform: rotate(180deg) translateY(10px);
 }
+.target-selectable {
+    cursor: crosshair;
+    box-shadow: 0 0 10px limegreen;
+    background:          #dfd;
+    outline: 2px solid   limegreen;
+    transform: scale(1.05) translateY(0);
+    z-index: 100;
+}
+.hover-highlight {
+    box-shadow: 0 0 10px cyan;
+    background:          #bff;
+    outline: 2px solid   cyan;
+    transform: scale(1.1) translateY(0);
+    z-index: 101;
+}
+.grid-area-enemy-panel .hover-highlight {
+    box-shadow: 0 0 10px cyan;
+    background:          #bff;
+    outline: 2px solid   cyan;
+    transform: rotate(180deg) scale(1.1) translateY(0);
+    z-index: 101;
+}
+.highlight-char {
+    box-shadow: 0 0 10px gold;
+    background:          #ffb;
+    outline: 2px solid   gold;
+    transform: scale(1) translateY(-10px);
+    z-index: 100;
+}
+.highlight-char.hover-highlight {
+    box-shadow: 0 0 10px gold;
+    background:          #ffb;
+    outline: 2px solid   gold;
+    transform: scale(1.1) translateY(0);
+    z-index: 100;
+}
+body.is-dragging .char.hover-highlight {
+    transform: scale(1);
+}
+/* 立ち絵 */
 .char img {
     width: 100%;
     margin-top: 15px;
@@ -236,33 +277,6 @@
     border-radius: 10px;
     z-index: 7;
 }
-.highlight-char {
-    box-shadow:
-        0 0 20px       gold,
-        0 0 20px       gold;
-    background:        gold;
-    outline: 2px solid yellow;
-    transform: scale(1.05);
-    z-index: 100;
-}
-.target-selectable {
-    cursor: crosshair;
-    outline: 2px solid   limegreen;
-    box-shadow: 0 0 20px limegreen;
-    background:          #dfd;
-    transform: scale(1.05);
-    z-index: 100;
-}
-.hover-highlight {
-    box-shadow: 0 0 15px cyan;
-    background:          #dff;
-    outline: 2px solid   cyan;
-    transform: scale(1.1);
-    z-index: 101;
-}
-    body.is-dragging .char.hover-highlight {
-        transform: scale(1);
-    }
 .is-targeted {
     outline: 3px solid   red;
     box-shadow: 0 0 20px red !important;

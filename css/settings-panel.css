@@ -1,20 +1,38 @@
 /* ================================
    5. 設定パネル (右側サイドバー下部)
 ================================ */
-.settings-content {
-    padding: 5px;
-}
 .settings {
+    display: flex;
+    flex-direction: column;
     background-color: var(--color-background-3);
+    padding: 10px;
+    gap: 10px;
     border-radius: 10px;
-    box-shadow: 0 0 5px inset var(--color-7);
-    border: 1px solid var(--color-7)
+    /*box-shadow: 0 0 5px inset var(--color-7);*/
+    border: 1px solid var(--color-a);
 }
-.room {
-    background-color: var(--color-background-3);
+.settings-container {
+    background-color: var(--color-background-2);
     border-radius: 10px;
-    box-shadow: 0 0 5px inset var(--color-7);
-    border: 1px solid var(--color-7)
+    padding: 10px;
+    box-shadow: 0 0 5px var(--color-7);
+    border: 1px solid var(--color-8);
+    gap: 5px;
+}
+#sessionNcPanel.settings-container {
+    border: 3px solid var(--color-accent-red);
+}
+#sessionPlPanel.settings-container {
+    border: 3px solid var(--color-accent-blue);
+}
+.settings-container h4 {
+    margin: 0;
+    padding: 0;
+    font-size: 14px;
+}
+
+.settings-content {
+    padding: 5px 0;
 }
 
 .theme-switcher-container {
@@ -89,32 +107,43 @@
 /* ================================
    5. ルーム管理
 ================================ */
-h3.section-title {
-    margin: 0 0 0 10px;
+.session-join-container h3 {
+    padding: 0;
+    margin: 0;
+    font-size: 18px;
+    text-align: center;
+    border-bottom: 1px solid var(--color-background-5)
 }
 /* --- セッション管理 --- */
-.session-management {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    box-sizing: border-box;
-}
 
 /* PL参加フォーム */
-.session-join-container {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 5px;
+#sessionJoinContainer {
+    display: flex; /* ★ SP表示用に flex に変更 */
+    flex-direction: column; /* 縦に並べる */
+    margin: 0;
+    padding: 0;
+    gap: 10px;
 }
+/* PL名の入力欄の調整 */
+.session-join-container {
+    display: flex; /* ★ SP表示用に flex に変更 */
+    flex-direction: column; /* 縦に並べる */
+    box-shadow: 0 0 5px var(--color-shadow);
+}
+
+/* PL名の入力欄 */
+/* ルーム番号入力欄 */
+#plNameInput,
 #sessionRoomIdInput {
-    padding: 4px;
+    padding: 5px;
     border: 1px solid var(--color-border);
-    border-radius: 10px;
+    border-radius: 5px;
     background-color: var(--color-background-1);
-    color: var(--color-text);
+    color: var(--color-fore-2);
     text-align: center;
-    font-size: 18px;
-    width: 150px;
+    font-size: 16px;
+    width: 100%; /* 幅を100%に */
+    box-sizing: border-box;
 }
 /* 「ルームを作成」「ルームに入室」ボタン */
 .session-join-btn {
@@ -155,6 +184,13 @@ h3.section-title {
     border-bottom: 1px solid var(--color-border);
     padding-bottom: 5px;
 }
+.peer-list-title {
+    font-size: 14px;
+    margin-top: 15px !important;
+    text-align: left !important;
+    border-bottom: none !important;
+}
+
 .session-info {
     display: flex;
     justify-content: space-around;
@@ -230,56 +266,41 @@ h3.section-title {
     width: fit-content;
 }
 
-/* in layout.css or utility.css */
-
-/* PL名の入力欄の調整 */
-.session-join-container {
-    grid-template-columns: 1fr; /* 縦に並べる */
-    gap: 8px;
-}
-
-#plNameInput {
-    background-color: var(--input-bg-color);
-    color: var(--text-color);
-    border: 1px solid var(--border-color);
-    padding: 8px;
-    border-radius: 4px;
-}
-
-/* NC側のPLリストのコンテナ */
+/* NC/PL共通の参加者リストコンテナ */
 .peer-list-container {
-    margin-top: 10px;
     display: flex;
     flex-direction: column;
+    margin: 5px;
+    padding: 10px 5px;
     gap: 5px;
-    max-height: 150px;
-    overflow-y: auto;
 }
-
 /* 各PLの表示項目 */
 .peer-list-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 4px 8px;
-    background-color: var(--bg-color-offset);
-    border-radius: 4px;
+    padding: 5px 10px 5px 15px;
+    background-color: var(--color-background-3);
+    color: var(--color-fore-5);
+    border-radius: 20px;
+    font-size: 12px;
 }
-
 .peer-name {
     font-weight: bold;
 }
-
 /* 追放ボタン */
 .kick-btn {
-    background-color: #a00;
-    color: white;
+    background-color: var(--color-accent-red);
+    color:            yellow;
     border: none;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-size: 0.8em;
+    border: 1px solid var(--color-accent-red);
+    padding: 3px 5px;
+    border-radius: 5px;
     cursor: pointer;
+    font-size: 10px;
 }
 .kick-btn:hover {
-    background-color: #c00;
+    background-color: gold;
+    color: var(--color-accent-red);
+    font-weight: bold;
 }
