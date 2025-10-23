@@ -78,25 +78,25 @@ perspective-origin: center center; /* 視点の中心を設定 */
         0 0 10px inset cyan,
         0 0 10px       cyan;
     outline: 2px solid cyan;
-    transform: scale(1) translateY(20px) translateZ(40px) rotateX(-20deg);
+    transform: scale(1) translateY(10px) translateZ(80px) rotateX(-20deg);
     z-index: 11;
 }
 .target-selectable {
     cursor: crosshair;
-    background-color: color-mix(in srgb, limegreen 20%, transparent); 
+    background-color: color-mix(in srgb, lime 20%, transparent); 
     box-shadow: 
-        0 0 10px inset limegreen,
-        0 0 10px       limegreen;
-    outline: 2px solid limegreen;
-    transform: scale(1) translateY(10px) translateZ(0px) rotateX(0deg);
+        0 0 10px inset lime,
+        0 0 10px       lime;
+    outline: 2px solid lime;
+    transform: scale(1) translateY(-10px) translateZ(0px) rotateX(0deg);
     z-index: 10;
 }
 .target-selectable.hover-highlight {
-    transform: scale(1) translateY(20px) translateZ(40px) rotateX(-20deg);
+    transform: scale(1) translateY(10px) translateZ(80px) rotateX(-20deg);
     z-index: 12;
 }
 .highlight-char {
-    background-color: color-mix(in srgb, gold 10%, transparent); 
+    background-color: color-mix(in srgb, gold 20%, transparent); 
     box-shadow: 
         0 0 10px inset gold,
         0 0 10px       gold;
@@ -105,7 +105,7 @@ perspective-origin: center center; /* 視点の中心を設定 */
     z-index: 11;
 }
 .highlight-char.hover-highlight {
-    transform: scale(1) translateY(0px) translateZ(50px) rotateX(-20deg);
+    transform: scale(1) translateY(10px) translateZ(80px) rotateX(-20deg);
 }
 body.is-dragging .char.hover-highlight {
     transform: scale(1);
