@@ -8,11 +8,11 @@
     min-width: 300px;
     transform: translate(-50%, -50%); /* X軸・Y軸ともに中央に配置 */
     
-    background-color: rgba(0, 0, 0, 0.8); /* 半透明の黒背景 */
+    background-color: #000a; /* 半透明の黒背景 */
     color: white;
     padding: 15px 30px;
     border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 4px 15px 0008;
     
     font-size: 1.5rem;
     font-weight: bold;

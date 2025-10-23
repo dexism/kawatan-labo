@@ -6,6 +6,7 @@
     background-color: var(--color-background-2);
     color:            var(--color-text-2);
     padding: 0 5px 5px 5px;
+transform-style: preserve-3d;
 }
 .section-title {
     font-size: 0.8rem;
@@ -53,7 +54,7 @@ h2.section-title {
 }
 /* --- タイミングインジケータ --- */
 .phase-control-wrapper {
-    padding-bottom: 10px;
+    padding: 0px;
     display: flex;
     flex-direction: column;
 }
@@ -66,9 +67,9 @@ h2.section-title {
 }
 .control-container {
     display: grid;
-    grid-template-columns: auto auto 1fr;
-    gap: 5px;
-    padding: 5px;
+    grid-template-columns: auto auto auto 1fr;
+    gap: 0;
+    padding: 0;
 }
 .phase-indicator {
     font-size: 10px;
@@ -227,18 +228,19 @@ label.action-queue-item.is-checked span {
 .in-battle-controls {
     display: grid;
     /* ★ 2列から3列に変更 */
-    grid-template-columns: 1fr 1fr; 
+    grid-template-columns: auto auto; 
     gap: 5px;
 }
 /* ★ リファレンスボタンのスタイルを追加 */
 .ref-btn {
-    padding: 0;
+    padding: 0 5px;
     font-size: 20px;
     border: none;
     background: none;
     border-radius: 5px;
     font-weight: bold;
     transition: all 0.2s;
+    z-index: 2;
 }
 .ref-btn:hover {
     background-color:        #dff;
@@ -248,20 +250,21 @@ label.action-queue-item.is-checked span {
 
 #resetBattleBtn {
     /* ボタンを2列全体に広げる */
-    display: grid;
-    justify-content: center;
-    justify-items: center;
-    grid-template-columns: 1fr;
-    margin: 10px;
+    display: flex;
+    margin: 5px auto;
     padding: 5px 10px;
 
     font-size: 14px;
+    font-weight: bold;
     box-sizing: border-box;
-
 }
-
 /* 危険な操作を示すためのボタンスタイル */
 .phase-btn-danger {
+    border-radius: 25px;
+    align-items: baseline;
+    cursor: pointer;
+    transition: all 0.2s;
+
     background-color: var(--color-accent-red);
     color: white;
     border-color: var(--color-accent-red);
@@ -272,6 +275,16 @@ label.action-queue-item.is-checked span {
     background-color: gold;
     color: var(--color-accent-red);
 }
+.phase-btn-danger:disabled {
+    background:       var(--color-surface-dark);
+    color:            var(--color-text-muted);
+    border-color: transparent;
+    cursor: default;
+    opacity: 0.6;
+    pointer-events: none;
+    box-shadow: none;
+}
+
 
 /* ★★★ 表示/非表示の切り替えロジック ★★★ */
 

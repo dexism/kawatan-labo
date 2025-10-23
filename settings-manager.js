@@ -2,7 +2,7 @@
  * @file settings-manager.js
  * @description アプリケーションの設定（テーマ、セッション管理など）を統括するモジュール
  */
-export const version = "3.0.0"; // 責務分離リファクタリング版
+export const version = "3.0.2"; // 責務分離リファクタリング版
 
 import * as stateManager from './state-manager.js';
 import * as p2p from './p2p-manager.js';
@@ -38,16 +38,21 @@ const PLAYER_NAME_KEY = 'nechronica-pl-name';
 // ===============================================
 
 export async function initialize() {
-    // 1-1. UI設定（テーマ、自動保存など）のイベントリスナーを登録
+    // 1-1. 保存されたPL名を読み込んで入力欄に設定
+    const savedPlName = localStorage.getItem(PLAYER_NAME_KEY) || '';
+    if (uiElements.plNameInput) {
+        uiElements.plNameInput.value = savedPlName;
+    }
+    // 1-2. UI設定（テーマ、自動保存など）のイベントリスナーを登録
     setupStaticEventListeners();
 
-    // 1-2. P2Pマネージャーを初期化し、コールバック関数を設定
+    // 1-3. P2Pマネージャーを初期化し、コールバック関数を設定
     initializeP2PManager();
 
-    // 1-3. セッション開始ボタンの状態を監視
+    // 1-4. セッション開始ボタンの状態を監視
     setupSessionStartButtonObserver();
 
-    // 1-4. ページ読み込み時のセッション状態を判断し、適切なモードに移行
+    // 1-5. ページ読み込み時のセッション状態を判断し、適切なモードに移行
     await determineInitialSessionMode();
 
     console.log("Settings Manager initialized.");
@@ -122,9 +127,25 @@ function setupStaticEventListeners() {
         }
     });
 
-    document.getElementById('plNameInput').addEventListener('change', (e) => {
-        localStorage.setItem(PLAYER_NAME_KEY, e.target.value.trim());
-    });
+    // document.getElementById('plNameInput').addEventListener('change', (e) => {
+    //     localStorage.setItem(PLAYER_NAME_KEY, e.target.value.trim());
+    // });
+
+    // --- アカウント名（NC/PL名）の変更を監視 ---
+    if (uiElements.plNameInput) {
+        uiElements.plNameInput.addEventListener('input', (e) => {
+            const newName = e.target.value.trim();
+            // 1. ローカルストレージには常に保存する
+            localStorage.setItem(PLAYER_NAME_KEY, newName);
+
+            // ▼▼▼ ここからが今回の修正箇所 ▼▼▼
+            // 2. PLモードでセッションに参加中の場合のみ、Firebaseのプロファイルを更新する
+            if (currentSessionMode === 'pl' && newName) {
+                p2p.updateMyProfile({ name: newName });
+            }
+            // ▲▲▲ 修正ここまで ▲▲▲
+        });
+    }
 }
 
 /**
@@ -165,8 +186,13 @@ async function determineInitialSessionMode() {
     const hostRoomIdFromStorage = localStorage.getItem(HOST_ROOM_ID_KEY);
 
     if (roomIdFromUrl && plNameFromUrl) {
+        // PLとして参加するフロー（変更なし）
         await switchToPlMode(roomIdFromUrl, decodeURIComponent(plNameFromUrl));
     } else if (hostRoomIdFromStorage) {
+        // ▼▼▼ ここからが今回の修正箇所 ▼▼▼
+        
+        // 以前の実装（confirmダイアログを表示）
+        /*
         if (confirm(`前回のセッション[${hostRoomIdFromStorage}]が中断されています。復帰しますか？`)) {
             await switchToNcMode(hostRoomIdFromStorage);
         } else {
@@ -174,7 +200,16 @@ async function determineInitialSessionMode() {
             p2p.database.ref(`rooms/${hostRoomIdFromStorage}`).remove();
             switchToOfflineMode();
         }
+        */
+
+        // 新しい実装（自動で復帰）
+        console.log(`中断されたセッション[${hostRoomIdFromStorage}]に自動で復帰します。`);
+        await switchToNcMode(hostRoomIdFromStorage);
+        
+        // ▲▲▲ 修正ここまで ▲▲▲
+
     } else {
+        // 通常のオフラインモードで起動（変更なし）
         switchToOfflineMode();
     }
 }

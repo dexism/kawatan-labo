@@ -33,45 +33,44 @@
 
 <div id="dice3d-container"></div>
 
-<!-- ヘッダー -->
-<header class="app-header">
-  <h1>
-    <span class="responsive-item">■ 『<span class="hide-on-mobile">永い後日談の</span>ネクロニカ』バトルパート支援ツール</span>
-    <span class="hide-on-mobile"> - 基本動作確認版</span>
-  </h1>
-</header>
-
 <!-- メインコンテンツ -->
 <main class="main-container">
 
   <!-- 左列 -->
   <div class="left-column">
-  
-    <!-- 手駒エリアコンテンツ -->
-    <aside class="grid-area-enemy-panel .scroll-horizontal-area">
-      <div class="section">
-        <span class="hide-on-mobile"><h2 class="section-title">▼ ネクロマンサーの手駒 ▼</h2></span>
-        <div class="char-area-wrapper" id="enemyAreaWrapper">
-          <div class="char-container" id="enemyContainer"></div>
-        </div>
-      </div>
-    </aside>
 
-    <!-- ② 舞台見取図コンテンツ -->
-    <aside class="grid-area-battle-panel .scroll-horizontal-area">
-        <div class="battle-wrap battle-grid-scroll-wrapper" id="battleWrap"></div>
-    </aside>
+    <!-- ヘッダー -->
+    <header class="app-header">
+      <h1>
+        <span class="responsive-item">■ 『<span class="hide-on-mobile">永い後日談の</span>ネクロニカ』バトルパート支援ツール</span>
+        <span class="hide-on-mobile"> - 基本動作確認版</span>
+      </h1>
+    </header>
+    
+    <div class="grid-area-main-panel">
 
-    <!-- ③ 姉妹エリアコンテンツ -->
-    <aside class="grid-area-pc-panel .scroll-horizontal-area">
-      <div class="section">
-        <div class="char-area-wrapper" id="pcAreaWrapper">
-          <div class="char-container" id="pcContainer"></div>
-        </div>
-        <span class="hide-on-mobile"><h2 class="section-title">▲ 姉妹ドール ▲</h2></span>
-      </div>
-    </aside>
+      <!-- 手駒エリアコンテンツ -->
+      <aside class="grid-area-enemy-panel">
+          <div class="char-area-wrapper" id="enemyAreaWrapper">
+            <div class="char-container" id="enemyContainer"></div>
+          </div>
+          <span class="hide-on-mobile"><h2 class="section-title">▲ ネクロマンサーの手駒 ▲</h2></span>
+      </aside>
 
+      <!-- ② 舞台見取図コンテンツ -->
+      <aside class="grid-area-battle-panel">
+          <div class="battle-wrap battle-grid-scroll-wrapper" id="battleWrap"></div>
+      </aside>
+
+      <!-- ③ 姉妹エリアコンテンツ -->
+      <aside class="grid-area-pc-panel">
+          <div class="char-area-wrapper" id="pcAreaWrapper">
+            <div class="char-container" id="pcContainer"></div>
+          </div>
+          <span class="hide-on-mobile"><h2 class="section-title">▲ 姉妹ドール ▲</h2></span>
+      </aside>
+
+    </div>
   </div>
 
   <!-- 右列 -->
@@ -109,6 +108,7 @@
             <div id="damagePhaseIndicator" class="phase-indicator">ダメージ<span class="hide-on-mobile"><br>タイミング</span></div>
           </div>
           <div class="control-container hide-on-mobile">
+            <button id="diceRoller" class="ref-btn" title="ダイスロール">🎲</button>
             <button id="showReferenceBtn" class="ref-btn" title="リファレンス">📖</button>
             <button id="showRelationshipBtn" class="ref-btn" title="姉妹の関係">💛</button>
             <div id="inBattleControls" class="in-battle-controls">
@@ -246,7 +246,7 @@
         <div class="section settings accordion-content">
 
           <div class="settings-container">
-            <button id="resetBattleBtn" class="phase-btn phase-btn-danger">戦闘を中断して初期画面に戻る</button>
+            <button id="resetBattleBtn" class="phase-btn-danger">戦闘を中断して初期画面に戻る</button>
           </div>
 
           <div class="settings-container">
@@ -361,7 +361,7 @@
   </div>
 </div>
 
-<div id="diceRoller" class="dice-roller">🎲</div>
+<!--div id="diceRoller" class="dice-roller">🎲</div-->
 
 <div id="maneuverMenu"></div>
 

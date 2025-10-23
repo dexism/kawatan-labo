@@ -5,7 +5,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "2.15.36"; // パッチバージョンを更新
+export const version = "2.15.37"; // パッチバージョンを更新
 
 import * as data from './data-handler.js'; 
 import * as charManager from './character-manager.js';
@@ -206,21 +206,6 @@ export function setupAllEventListeners() {
         };
     }
 
-    const resetBtn = document.getElementById('resetBattleBtn'); // ← 正しいID
-    if (resetBtn) {
-        resetBtn.onclick = async () => {
-            if (confirm('バトルパートを終了して、戦闘開始直前の状態に戻します。よろしいですか？')) {
-                ui.showToastNotification("盤面を初期状態に戻しています...", 2000);
-                
-                await stateManager.restoreInitialState();
-                battleLogic.resetToSetupPhase();
-                
-                ui.updateAllUI();
-
-                ui.showToastNotification("初期状態に戻りました。", 2000);
-            }
-        };
-    }
     // セッション管理ボタンのイベントリスナー
     const saveToFileBtn = document.getElementById('saveStateToFileBtn');
     if (saveToFileBtn) {

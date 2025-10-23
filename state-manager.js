@@ -2,7 +2,7 @@
  * @file state-manager.js
  * @description アプリケーションのセッション状態の保存と復元を担当するモジュール
  */
-export const version = "2.5.1"; // 保存・復元ロジックの最終修正版
+export const version = "2.5.3"; // 保存・復元ロジックの最終修正版
 
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';

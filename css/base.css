@@ -105,7 +105,7 @@ h2 {
     --color-d:            #ddd;
     --color-e:            #eee;
     --color-f:            #fff;
-    --color-shadow:       rgba(0, 0, 0, 0.5);
+    --color-shadow:       #0008;
     /* エリアカラー */
     --color-naraku:   #500;
     --color-jigoku:   #300;
@@ -142,8 +142,8 @@ h2 {
     --color-dice-bd:      var(--color-e);
     --color-log-bg:       var(--color-f);
     --color-border:       var(--color-a);
-    --color-shadow-1:     rgba(255, 255, 255, 0.5);
-    --color-shadow-2:     rgba(127, 127, 127, 0.5);
+    --color-shadow-1:     #fff8;
+    --color-shadow-2:     #8888;
     --color-accent:       #f77;
     --color-accent-red:   #c33;
     --color-accent-gold:  gold;
@@ -157,9 +157,9 @@ h2 {
     --color-sub-bg:       var(--color-c);
     --color-btn-text:     var(--color-8);
     --color-btn-bg:       var(--color-f);
-    --color-level-1:      rgba(0, 0, 0, 0.1); 
-    --color-level-3:      rgba(0, 0, 0, 0.3); 
-    --color-level-f:      rgba(255, 255, 255, 0.5); 
+    --color-level-1:      #0001; 
+    --color-level-3:      #0004; 
+    --color-level-f:      #fff8; 
     /* カテゴリ色分け */
     --color-difficulty-change: #b8e994;
     --color-move:              #aed6f1;
@@ -216,7 +216,7 @@ html[data-theme="dark"] {
       --color-dice-bd:      var(--color-5);
       --color-log-bg:       var(--color-0);
       --color-border:       var(--color-6);
-      --color-shadow-1:     rgba(0, 0, 0, 0.5);
+      --color-shadow-1:     #0008;
       --color-accent:       #a00;
       --color-accent-red:   #ff5555;
       --color-accent-gold:  #ffd700;
@@ -230,9 +230,9 @@ html[data-theme="dark"] {
       --color-sub-bg:       #200;
       --color-btn-text:     var(--color-c);
       --color-btn-bg:       var(--color-0);
-      --color-level-1:      rgba(255, 255, 255, 0.1); 
-      --color-level-3:      rgba(255, 255, 255, 0.3); 
-      --color-level-f:      rgba(0, 0, 0, 0.8); 
+      --color-level-1:      #fff1; 
+      --color-level-3:      #fff4; 
+      --color-level-f:      #000d; 
 
       /* カテゴリ色分け */
       --color-difficulty-change: #5a7f4a;
@@ -291,7 +291,7 @@ html[data-theme="dark"] {
         --color-dice-bd:      var(--color-5);
         --color-log-bg:       var(--color-0);
         --color-border:       var(--color-6);
-        --color-shadow-1:     rgba(0, 0, 0, 0.5);
+        --color-shadow-1:     #0008;
         --color-accent:       #a00;
         --color-accent-red:   #ff5555;
         --color-accent-gold:  #ffd700;
@@ -305,9 +305,9 @@ html[data-theme="dark"] {
         --color-sub-bg:       #200;
         --color-btn-text:     var(--color-c);
         --color-btn-bg:       var(--color-0);
-        --color-level-1:      rgba(255, 255, 255, 0.1); 
-        --color-level-3:      rgba(255, 255, 255, 0.3); 
-        --color-level-f:      rgba(0, 0, 0, 0.8); 
+        --color-level-1:      #ffffff20; 
+        --color-level-3:      #ffffff40; 
+        --color-level-f:      #000000d0; 
 
         /* カテゴリ色分け */
       --color-difficulty-change: #5a7f4a;

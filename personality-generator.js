@@ -1,7 +1,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.1.1";
+export const version = "1.1.3";
 
 const personalityDefinitions = {
     "cores": { 

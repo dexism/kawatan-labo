@@ -2,7 +2,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.2.7";
+export const version = "1.2.9";
 
 // --- Firebaseの初期化 ---
 const firebaseConfig = {
@@ -21,8 +21,10 @@ export { database };
 
 // --- モジュール内変数 ---
 const iceConfiguration = { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }] };
+const PLAYER_ID_KEY = 'nechronica-player-id';
 let peerConnections = new Map(); // PLごとのPeerConnectionを管理
 let dataChannels = new Map(); // PLごとのDataChannelを管理
+const plListeners = new Map(); // PLごとのリスナーを管理するMap
 let onDataReceivedCallback;
 let onConnectionStateChangeCallback;
 let onPeerListChangeCallback; // 接続中のピアリストが変更された際のコールバック
@@ -51,6 +53,18 @@ export function initialize(dataCallback, connectionCallback, peerListCallback) {
     onConnectionStateChangeCallback = connectionCallback;
     onPeerListChangeCallback = peerListCallback; // ★コールバックを保存
     localId = `user_${Math.random().toString(36).substr(2, 9)}`;
+
+    // ローカルストレージから永続的なIDを取得する
+    let savedId = localStorage.getItem(PLAYER_ID_KEY);
+    if (!savedId) {
+        // IDがなければ新規に生成して保存する
+        savedId = `user_${Math.random().toString(36).substr(2, 9)}`;
+        localStorage.setItem(PLAYER_ID_KEY, savedId);
+        console.log(`新規プレイヤーIDを生成しました: ${savedId}`);
+    } else {
+        console.log(`既存のプレイヤーIDを読込みました: ${savedId}`);
+    }
+    localId = savedId; // モジュール内のlocalIdを永続IDで設定
 }
 
 /**
@@ -121,76 +135,145 @@ export async function createHostSession(sessionId = null, hostName = 'NC') { // 
 
     const plsRef = sessionRef.child('pls');
 
+    // 参加者リスト(/pls)のあらゆる変更（追加、削除、子の変更）をこのリスナーで一元管理する
     plsRef.on('value', (snapshot) => {
         const connectedPlsData = snapshot.val();
-        const connectedPls = connectedPlsData ? Object.keys(connectedPlsData) : [];
-        console.log('接続中のPLリスト:', connectedPls);
+        const connectedPlIds = connectedPlsData ? Object.keys(connectedPlsData) : [];
+
+        // 【重要】この時点で plId のリストは必ず一意になる
+        console.log('接続中のPL IDリスト（重複排除済）:', connectedPlIds);
 
         // 1. NC自身のUIを更新するためのコールバックを呼び出す
+        //    渡すのは一意なIDの配列のみ。名前の取得やUI構築はコールバック側で行う。
         if (onPeerListChangeCallback) {
-            onPeerListChangeCallback(connectedPls);
+            onPeerListChangeCallback(connectedPlIds);
         }
 
-        // 2. 【重要】接続している全クライアントに参加者リストをブロードキャストする
-        broadcastToAll({ type: 'peerListUpdate', payload: connectedPls });
-    });
+        // 2. 接続している全クライアントに参加者リストをブロードキャストする
+        //    これにより、全PLの画面も同期される。
+        broadcastToAll({ type: 'peerListUpdate', payload: connectedPlIds });
 
-    plsRef.on('child_added', async (snapshot) => {
-        const plId = snapshot.key;
-        if (!plId) return;
-
-        const profile = snapshot.child('profile').val();
-        if (profile) {
-            console.log(`通知: ${profile.name} が入室しました。`);
-            broadcastToAll({ type: 'notification', payload: `PL「${profile.name}」が入室しました。` });
-        }
-
-        console.log(`Firebase: PL[${plId}]との接続を開始します。`);
-        
-        const pc = new RTCPeerConnection(iceConfiguration);
-        peerConnections.set(plId, pc);
-
-        pc.onicecandidate = event => {
-            if (event.candidate) {
-                sessionRef.child('nc/iceCandidates').push(event.candidate.toJSON());
-            }
-        };
-
-        const channel = pc.createDataChannel('data');
-        setupDataChannel(plId, channel);
-
-        const plRef = plsRef.child(plId);
-        plRef.child('sdp').on('value', sdpSnapshot => {
-            // if (sdpSnapshot.exists() && (!pc.remoteDescription || pc.remoteDescription.sdp !== sdpSnapshot.val().sdp)) {
-            if (sdpSnapshot.exists() && (!pc.remoteDescription || pc.remoteDescription.sdp !== sdpSnapshot.val().sdp)) {
-                pc.setRemoteDescription(new RTCSessionDescription(sdpSnapshot.val()));
+        // 3. 新規接続者に対するPeerConnectionのセットアップを行う
+        connectedPlIds.forEach(plId => {
+            // peerConnectionsにまだ存在しないIDは新規接続者とみなす
+            if (!peerConnections.has(plId)) {
+                console.log(`Firebase: 新規PL[${plId}]との接続を開始します。`);
+                setupPeerConnectionForPl(plId, sessionRef);
             }
         });
         
-        plRef.child('iceCandidates').on('child_added', iceSnapshot => {
-            if (iceSnapshot.exists()) {
-                pc.addIceCandidate(new RTCIceCandidate(iceSnapshot.val()));
+        // 切断されたPLの接続情報とリスナーをクリーンアップする
+        const currentPeerIds = new Set(peerConnections.keys());
+        const connectedPlIdsSet = new Set(connectedPlIds);
+        
+        currentPeerIds.forEach(plId => {
+            if (!connectedPlIdsSet.has(plId)) {
+                console.log(`Firebase: PL[${plId}]の接続が切断されました。クリーンアップします。`);
+                
+                // 1. PeerConnectionを閉じる
+                peerConnections.get(plId)?.close();
+                peerConnections.delete(plId);
+                dataChannels.delete(plId);
+
+                // 2. 関連するFirebaseリスナーを全て解除する
+                if (plListeners.has(plId)) {
+                    plListeners.get(plId).forEach(listener => {
+                        // 'child_added' イベントの場合は3つの引数が必要
+                        if (listener.ref.toString().includes('iceCandidates')) {
+                            listener.ref.off('child_added', listener.callback);
+                        } else {
+                            listener.ref.off('value', listener.callback);
+                        }
+                    });
+                    plListeners.delete(plId);
+                    console.log(`[${plId}] のFirebaseリスナーを全て解除しました。`);
+                }
             }
         });
-        
-        const offerDescription = await pc.createOffer();
-        await pc.setLocalDescription(offerDescription);
-        
-        const offer = { sdp: offerDescription.sdp, type: offerDescription.type };
-        await sessionRef.child('nc/sdp').set(offer);
     });
-
-    // child_removedリスナー
-    plsRef.on('child_removed', (snapshot) => {
-        const profile = snapshot.child('profile').val();
-        if (profile) {
-            console.log(`通知: ${profile.name} が退室しました。`);
-            broadcastToAll({ type: 'notification', payload: `PL「${profile.name}」が退室しました。` });
-        }
-        // 接続リストの更新は 'value' イベントで自動的に処理される
-    });
-
     return sessionId;
+}
+
+/**
+ * 【新設】指定されたPL IDのためのPeerConnectionをセットアップする内部関数
+ * @param {string} plId - セットアップ対象のPL ID
+ * @param {firebase.database.Reference} sessionRef - セッション全体の参照
+ */
+async function setupPeerConnectionForPl(plId, sessionRef) {
+    // このPLに対する既存のリスナーがあれば、念のため全て解除する
+    if (plListeners.has(plId)) {
+        plListeners.get(plId).forEach(listener => listener.ref.off('value', listener.callback));
+        plListeners.delete(plId);
+    }
+    
+    const pc = new RTCPeerConnection(iceConfiguration);
+    peerConnections.set(plId, pc);
+
+    // ▼▼▼ ここからが今回の修正箇所 (1/2) ▼▼▼
+    const listeners = []; // この接続に関連するリスナーを格納する配列
+
+    pc.onicecandidate = event => {
+        if (event.candidate) {
+            sessionRef.child('nc/iceCandidates').push(event.candidate.toJSON());
+        }
+    };
+
+    const channel = pc.createDataChannel('data');
+    setupDataChannel(plId, channel);
+
+    const plRef = sessionRef.child(`pls/${plId}`);
+
+    // SDP(アンサー)をリッスンするコールバック
+    const sdpCallback = async (sdpSnapshot) => {
+        // PeerConnectionがすでに閉じられていたら、何もしない
+        if (pc.signalingState === 'closed') return;
+        
+        if (sdpSnapshot.exists() && pc.signalingState === 'have-local-offer') {
+            try {
+                await pc.setRemoteDescription(new RTCSessionDescription(sdpSnapshot.val()));
+            } catch (e) {
+                console.error(`[${plId}] setRemoteDescription失敗:`, e);
+            }
+        }
+    };
+    plRef.child('sdp').on('value', sdpCallback);
+    listeners.push({ ref: plRef.child('sdp'), callback: sdpCallback });
+
+
+    // ICE候補をリッスンするコールバック
+    const iceCallback = (iceSnapshot) => {
+        // PeerConnectionがすでに閉じられていたら、何もしない
+        if (pc.signalingState === 'closed') return;
+        
+        if (iceSnapshot.exists()) {
+            try {
+                pc.addIceCandidate(new RTCIceCandidate(iceSnapshot.val()));
+            } catch (e) {
+                // 'closed' 状態でのエラーは頻発しうるので、警告レベルに留める
+                if (e.name === 'InvalidStateError') {
+                    console.warn(`[${plId}] addIceCandidate失敗 (接続はすでに閉じられています):`, e.message);
+                } else {
+                    console.error(`[${plId}] addIceCandidate失敗:`, e);
+                }
+            }
+        }
+    };
+    plRef.child('iceCandidates').on('child_added', iceCallback);
+    listeners.push({ ref: plRef.child('iceCandidates'), callback: iceCallback });
+
+    // このPL IDに対応するリスナーとして保存
+    plListeners.set(plId, listeners);
+    
+    // ▲▲▲ 修正ここまで ▲▲▲
+
+    // オファーを作成して送信
+    const offerDescription = await pc.createOffer();
+    // オファー設定前に状態をチェック
+    if (pc.signalingState !== 'stable') return;
+    await pc.setLocalDescription(offerDescription);
+
+    const offer = { sdp: offerDescription.sdp, type: offerDescription.type };
+    await sessionRef.child('nc/sdp').set(offer);
 }
 
 // ===============================================
@@ -231,6 +314,9 @@ export async function joinClientSession(sessionId, plName) {
 
     myRef = sessionRef.child(`pls/${localId}`);
     console.log(`Firebase: ルーム[${sessionId}]への参加を開始します。`);
+
+    // **【重要】接続が切断された場合に、自身のデータをDBから削除するようFirebaseに予約する**
+    myRef.onDisconnect().remove();
 
     // --- 1. PeerConnectionのセットアップ ---
     const pc = new RTCPeerConnection(iceConfiguration);
@@ -275,6 +361,16 @@ export async function joinClientSession(sessionId, plName) {
         name: plName,
         joinedAt: firebase.database.ServerValue.TIMESTAMP
     });
+}
+
+/**
+ * 【新設】PLが自身のプロファイル情報（名前など）を更新する
+ * @param {object} profileData - 更新するプロファイルデータ (例: { name: "新しい名前" })
+ */
+export function updateMyProfile(profileData) {
+    if (myRef && myRef.child) {
+        myRef.child('profile').update(profileData);
+    }
 }
 
 // ===============================================

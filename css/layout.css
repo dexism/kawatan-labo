@@ -3,11 +3,6 @@
 ================================ */
 body {
     display: grid;
-    grid-template-areas:
-        "header"
-        "main";
-    grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
     align-content: start;
     overflow-y: hidden;
 }
@@ -18,17 +13,28 @@ body {
 /* --- ヘッダー・フッター --- */
 .app-header {
     grid-area: header;
-    background-color:        var(--color-title-bg);
-    color:                   var(--color-title-text);
+    /* background-color:        var(--color-title-bg);*/
+    background-color: color-mix(in srgb, var(--color-background-2) 50%, transparent); 
+    color:          var(--color-fore-4);
+    text-shadow: 
+        0 0 1px var(--color-background-1),
+        0 0 2px var(--color-background-1),
+        0 0 4px var(--color-background-1),
+        0 0 8px var(--color-background-1);
     /* border-bottom: 1px solid var(--color-border); */
     margin: 0;
     padding: 5px 10px;
     box-sizing: border-box;
-    box-shadow: 0 0 10px black;
+    /* box-shadow: 0 0 10px black; */
     z-index: 70;
+    z-index: 1;
     font-size: 0.9rem;
     position: sticky;
     top: 0;
+    z-index: 70;
+}
+.app-header:hover {
+    background-color: color-mix(in srgb, var(--color-fore-2) 10%, transparent); 
 }
 .app-header h1 {
     font-size: 0.9rem;
@@ -63,7 +69,6 @@ body {
   メインコンテナとエリア分割
 ================================ */
 .main-container {
-    grid-area: main;
     display: grid;
     grid-template-columns: 1fr var(--right-width);
     grid-template-rows: 1fr;
@@ -76,26 +81,52 @@ body {
     align-items: start;
     grid-auto-rows: auto;
     align-content: start;
-    overflow-y: auto;
+    overflow: hidden;
 }
 .left-column {
     grid-area: left;
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: 
+        auto
+        auto;
+    grid-template-areas:
+        "header"
+        "main";
+    height: 100dvh;
+    width: 100%;
+    margin:  0;
+    padding: 0;
+    gap:     0;
+    box-sizing: border-box;
+    overflow: hidden auto;
+    align-content: start;
+z-index: 1;
+perspective: 1000px; /* グリッド全体を見渡すため、大きめの値を設定 */
+perspective-origin: center center; /* 視点の中心を設定 */
+}
+.grid-area-main-panel {
+    grid-area: main;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 
         auto 
-        auto 
-        1fr;
+        auto
+        auto;
     grid-template-areas:
         "enemy"
         "battle"
         "player";
     height: 100%;
+    width: 100%;
     margin:  0;
+    margin-top: -100px;
     padding: 0;
     gap:     0;
     box-sizing: border-box;
-    overflow-y: auto;
+    overflow: visible;
+    align-content: start;
+rotate: x 20deg;
 }
 .right-column {
     grid-area: right;
@@ -131,7 +162,7 @@ body {
     gap:     0;
     box-sizing: border-box;
     box-shadow: 0 0 10px black;
-    height: 100%;
+    height: 100dvh;
     z-index: 60;
     overflow-y: auto;
 }
@@ -141,9 +172,11 @@ body {
 .grid-area-enemy-panel {
     grid-area: enemy;
     min-width: 0;
+    width: 100%;
     margin:  0;
     padding: 0;
     box-sizing: border-box;
+    rotate: 180deg;
 }
 .grid-area-battle-panel {
     grid-area: battle;
@@ -159,6 +192,7 @@ body {
 .grid-area-pc-panel {
     grid-area: player;
     min-width: 0;
+    width: 100%;
     height: 100%;
     margin:  0;
     padding: 0;
@@ -173,6 +207,7 @@ body {
     position: sticky;
     top: 0;
     z-index: 90;
+    border-bottom: 1px solid var(--color-border)
 }
 .grid-area-rapid-panel {
     grid-area: rapid;
@@ -213,22 +248,20 @@ body {
     .main-container {
         display: grid;
         grid-template-areas:
-            "status"
-            "enemy"
-            "battle"
-            "player"
+            "header"
+            "timing"
+            "main"
             "rapid"
             "judge"
             "action"
             "damage"
             "log"
-            "timing"
+            "status"
             "room"
             "settings"
             "footer";
         grid-template-columns: 1fr;
         grid-template-rows:
-            auto
             auto
             auto
             auto
@@ -244,16 +277,19 @@ body {
         align-content: start;
         width: 100%;
         min-width: 0;
+        overflow-y: auto;
+perspective: 1000px; /* グリッド全体を見渡すため、大きめの値を設定 */
+perspective-origin: center center; /* 視点の中心を設定 */
     }
     .grid-area-status-panel {
         position: sticky;
-        top: 0;
+        bottom: 0;
         box-shadow: 0 0 10px black;
         /* border-radius: 0 0 10px 10px; */
     }
     .grid-area-timing-panel {
         position: sticky;
-        bottom: 0;
+        top: 0;
         border: none;
         box-shadow: 0 0 10px black;
         /* border-radius: 10px 10px 0 0; */
