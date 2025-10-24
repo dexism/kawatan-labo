@@ -37,7 +37,7 @@
     position: relative;
 
 /* transform-style: preserve-3d; */
-perspective: 1000px; /* グリッド全体を見渡すため、大きめの値を設定 */
+perspective: var(--perspective); /* グリッド全体を見渡すため、大きめの値を設定 */
 perspective-origin: center center; /* 視点の中心を設定 */
 }
 .char-container::-webkit-scrollbar {
@@ -72,7 +72,7 @@ perspective-origin: center center; /* 視点の中心を設定 */
     padding: 5px;
     box-sizing: border-box;
     box-shadow: 0 0 10px var(--color-7);
-    transition: all 0.2s ease-out;
+    transition: all 0.3s ease-out;
     overflow: visible;
     transform: translateY(10px);
 }
@@ -92,7 +92,7 @@ perspective-origin: center center; /* 視点の中心を設定 */
         0 0 10px inset lime,
         0 0 10px       lime;
     outline: 2px solid lime;
-    transform: scale(1) translateY(-10px) translateZ(0px) rotateX(0deg);
+    transform: scale(1) translateY(-10px);
     z-index: 10;
 }
 .target-selectable.hover-highlight {
@@ -101,6 +101,7 @@ perspective-origin: center center; /* 視点の中心を設定 */
 }
 .highlight-char {
     background-color: color-mix(in srgb, gold 20%, transparent); 
+    background-color: color-mix(in srgb, gold, var(--color-background-1)); 
     box-shadow: 
         0 0 10px inset gold,
         0 0 10px       gold;
@@ -109,6 +110,7 @@ perspective-origin: center center; /* 視点の中心を設定 */
     z-index: 11;
 }
 .highlight-char.hover-highlight {
+    background-color: color-mix(in srgb, gold 20%, transparent); 
     transform: scale(1) translateY(10px) translateZ(80px) rotateX(-20deg);
 }
 body.is-dragging .char.hover-highlight {
@@ -598,7 +600,7 @@ body.is-dragging .char.hover-highlight {
 }
 #battleWrap {
     /* transform-style: preserve-3d; */
-    perspective: 1000px; /* グリッド全体を見渡すため、大きめの値を設定 */
+    perspective: var(--perspective);
     perspective-origin: center center; /* 視点の中心を設定 */
 }
 /* グリッドのヘッダーとセル */
@@ -728,13 +730,13 @@ transform-style: preserve-3d;
     height: var(--cell-height);   /* 高さを40pxに固定 */
     display: flex;
     flex-shrink: 0;               /* ★★★ マーカーが縮むのを防ぐ最重要設定 ★★★ */
-
-transition: transform 0.4s ease;
+    z-index: 1;
+transition: all 0.3s ease;
 transform: translateZ(15px) rotateX(0deg);
 }
 .marker:hover {
   /* 例：さらに手前に浮き上がらせて回転させる */
-  transform: translateZ(30px) rotateX(-30deg) scale(1.1);
+  transform: translateY(-20px) translateZ(20px) rotateX(-20deg) scale(1.2);
   z-index: 1000;
 }
 .marker-img {
@@ -742,9 +744,7 @@ transform: translateZ(15px) rotateX(0deg);
     height: 100%; /* 親である.markerの高さ(40px)に追従 */
     object-fit: contain;
     display: flex;
-    z-index: 1;
     /* 以前のwidth, height, aspect-ratio指定は不要になるので削除・上書き */
-rotate: x -10deg;
 }
 /* 名前のポップアップ */
 .marker::after {

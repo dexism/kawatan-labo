@@ -6,7 +6,7 @@
 /**
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.5.28";
+export const version = "1.5.29";
 
 // import { showModal } from './ui-manager.js';
 import { showModal, showToastNotification } from './ui-manager.js';
@@ -235,192 +235,167 @@ export function performDiceRoll(rollData) {
                 color: diceColor // 決定した色を適用
             }))
         };
-        
-        roll3DDice(rollConfig, (results) => {
-            if (!results || results.length < numDice) {
-                console.error("3Dダイスロールの結果が不足しています。");
-                return;
-            }
+        // 500msの遅延を入れてから roll3DDice を呼び出す
+        setTimeout(() => {    
+            roll3DDice(rollConfig, (results) => {
+                if (!results || results.length < numDice) {
+                    console.error("3Dダイスロールの結果が不足しています。");
+                    return;
+                }
+                // let modifier = -9;
 
-// let modifier = -9;
+                // 1. 各ダイスの出目(1-10)と、それに修正値を加えた「判定値」の配列を計算
+                const rawValues = results.map(r => r.value === 0 ? 10 : r.value);
+                const finalValues = rawValues.map(v => v + modifier);
+                
+                // 数値として昇順にソートする (a - b)
+                rawValues.sort((a, b) => a - b);
+                finalValues.sort((a, b) => a - b);
 
-            // 1. 各ダイスの出目(1-10)と、それに修正値を加えた「判定値」の配列を計算
-            const rawValues = results.map(r => r.value === 0 ? 10 : r.value);
-            const finalValues = rawValues.map(v => v + modifier);
-            
-            // 数値として昇順にソートする (a - b)
-            rawValues.sort((a, b) => a - b);
-            finalValues.sort((a, b) => a - b);
+                // 2. 判定値の最大値(max)と最小値(min)を取得
+                const maxFinalValue = Math.max(...finalValues);
+                const minFinalValue = Math.min(...finalValues);
 
-            // 2. 判定値の最大値(max)と最小値(min)を取得
-            const maxFinalValue = Math.max(...finalValues);
-            const minFinalValue = Math.min(...finalValues);
+                // 3. 最終的な結果を、ご指示の優先順位で決定する
+                let bestResult = '';
+                let bestResultDetails = '';
+                let bestHitLocation = null;
 
-            // 3. 最終的な結果を、ご指示の優先順位で決定する
-            let bestResult = '';
-            let bestResultDetails = '';
-            let bestHitLocation = null;
+                if (maxFinalValue >= 11) {
+                    bestResult = '大成功';
+                    // 詳細テキストはコマンドに応じて設定
+                    if (command === 'na') { bestResultDetails = `攻撃側任意（追加ダメージ${maxFinalValue - 10}）`; bestHitLocation = '任意'; }
 
-            if (maxFinalValue >= 11) {
-                bestResult = '大成功';
-                // 詳細テキストはコマンドに応じて設定
-                if (command === 'na') { bestResultDetails = `攻撃側任意（追加ダメージ${maxFinalValue - 10}）`; bestHitLocation = '任意'; }
+                } else if (maxFinalValue >= 6) {
+                    bestResult = '成功';
+                    // 詳細テキストはコマンドに応じて設定 (NAのみ)
+                    if (command === 'na') {
+                        if (maxFinalValue >= 10) { bestResultDetails = '頭（なければ攻撃側任意）'; bestHitLocation = '頭'; }
+                        else if (maxFinalValue >= 9) { bestResultDetails = '腕（なければ攻撃側任意）'; bestHitLocation = '腕'; }
+                        else if (maxFinalValue >= 8) { bestResultDetails = '胴（なければ攻撃側任意）'; bestHitLocation = '胴'; }
+                        else if (maxFinalValue >= 7) { bestResultDetails = '脚（なければ攻撃側任意）'; bestHitLocation = '脚'; }
+                        else { bestResultDetails = '防御側任意'; bestHitLocation = '任意'; }
+                    }
 
-            } else if (maxFinalValue >= 6) {
-                bestResult = '成功';
-                // 詳細テキストはコマンドに応じて設定 (NAのみ)
-                if (command === 'na') {
-                    if (maxFinalValue >= 10) { bestResultDetails = '頭（なければ攻撃側任意）'; bestHitLocation = '頭'; }
-                    else if (maxFinalValue >= 9) { bestResultDetails = '腕（なければ攻撃側任意）'; bestHitLocation = '腕'; }
-                    else if (maxFinalValue >= 8) { bestResultDetails = '胴（なければ攻撃側任意）'; bestHitLocation = '胴'; }
-                    else if (maxFinalValue >= 7) { bestResultDetails = '脚（なければ攻撃側任意）'; bestHitLocation = '脚'; }
-                    else { bestResultDetails = '防御側任意'; bestHitLocation = '任意'; }
+                } else if (minFinalValue <= 1) {
+                    bestResult = '大失敗';
+                    // 詳細テキストはコマンドに応じて設定
+                    if (command === 'na') { bestResultDetails = '味方か自身に命中'; }
+                    else if (command === 'nc') { bestResultDetails = '使用パーツ全損'; }
+
+                } else {
+                    bestResult = '失敗';
+                }
+                
+                // 4. ログ用のテキストをお客様の仕様に合わせて組み立て
+                const modifierText = modifier > 0 ? `+${modifier}` : (modifier < 0 ? `${modifier}` : "");
+                const color = (bestResult === '大成功' || bestResult === '成功') ? '#007bff' : '#dc3545';
+                
+                const resultText = `<span style="color: ${color};">🎲 ${input.toUpperCase()} ＞ [${rawValues.join(',')}]${modifierText} ＞ ${maxFinalValue}[${finalValues.join(',')}]<br>${bestResult}<br>${bestResultDetails}</span>`;
+
+                // 5. ログとトーストに表示
+                addLog(resultText);
+                if (rollData.showToast) {
+                    showToastNotification(resultText, 2000);
                 }
 
-            } else if (minFinalValue <= 1) {
-                bestResult = '大失敗';
-                // 詳細テキストはコマンドに応じて設定
-                if (command === 'na') { bestResultDetails = '味方か自身に命中'; }
-                else if (command === 'nc') { bestResultDetails = '使用パーツ全損'; }
-
-            } else {
-                bestResult = '失敗';
-            }
-            
-            // 4. ログ用のテキストをお客様の仕様に合わせて組み立て
-            const modifierText = modifier > 0 ? `+${modifier}` : (modifier < 0 ? `${modifier}` : "");
-            const color = (bestResult === '大成功' || bestResult === '成功') ? '#007bff' : '#dc3545';
-            
-            const resultText = `<span style="color: ${color};">🎲 ${input.toUpperCase()} ＞ [${rawValues.join(',')}]${modifierText} ＞ ${maxFinalValue}[${finalValues.join(',')}]<br>${bestResult}<br>${bestResultDetails}</span>`;
-
-            // 5. ログとトーストに表示
-            addLog(resultText);
-            if (rollData.showToast) {
-                showToastNotification(resultText, 2000);
-            }
-
-            // 6. battle-logicに最終結果と「判定値」を渡す
-            if (callback) {
-                // bestResult, bestHitLocation, resultText に加えて、maxFinalValue を渡す
-                callback(bestResult, bestHitLocation, resultText, maxFinalValue);
-            }
-        });
+                // 6. battle-logicに最終結果と「判定値」を渡す
+                if (callback) {
+                    // bestResult, bestHitLocation, resultText に加えて、maxFinalValue を渡す
+                    callback(bestResult, bestHitLocation, resultText, maxFinalValue);
+                }
+            });
+        }, 500); // 遅延時間
     } else if (d10Match) {
         const command = d10Match[1];
         
         const rollConfig = { dices: [{ color: 0xffffff }] }; // 1個の白いダイス
-        roll3DDice(rollConfig, (results) => {
-            if (!results || results.length === 0) {
-                console.error("3Dダイスロールの結果がありません。");
-                return;
-            }
-            let selectedMasterData = null;
-
-            const diceValue = results[0].value;
-            const resultValue = diceValue === 0 ? 10 : diceValue;
-            let resultText = "";
-
-            switch (command) {
-                case 'nm':
-                    resultText = formatRegretResult('SI-', '姉妹への未練表', resultValue);
-                    selectedMasterData = regretMasterData[`SI-${String(resultValue).padStart(2, '0')}`];
-                    break;
-                case 'nme':
-                    resultText = formatRegretResult('EN-', '敵への未練表', resultValue);
-                    selectedMasterData = regretMasterData[`EN-${String(resultValue).padStart(2, '0')}`];
-                    break;
-                case 'nmn':
-                    resultText = formatRegretResult('NP-', '中立者への未練表', resultValue);
-                    selectedMasterData = regretMasterData[`NP-${String(resultValue).padStart(2, '0')}`];
-                    break;
-                case 'nt':
-                    // ★★★ 新しいヘルパー関数を呼び出す ★★★
-                    const ntResult = formatSimpleTableResult('たからもの表', takaramonoMasterData, resultValue);
-                    resultText = ntResult.resultText;
-                    selectedMasterData = ntResult.selectedMasterData;
-                    break;
-                case 'nh':
-                    // ★★★ 新しいヘルパー関数を呼び出す ★★★
-                    const nhResult = formatSimpleTableResult('暗示表', hintMasterData, resultValue);
-                    resultText = nhResult.resultText;
-                    selectedMasterData = nhResult.selectedMasterData;
-                    break;
-                case 'nal':
-                    // このコマンドは 10 -> '0' の特殊マッピングがあるため固有ロジックを維持
-                    const awakeningKey = resultValue === 10 ? '0' : String(resultValue);
-                    selectedMasterData = awakeningLocationsData[awakeningKey];
-                    resultText = selectedMasterData ? `🎲 目覚めの場所表(${awakeningKey})<br>【${selectedMasterData.name}】 ${selectedMasterData.description}` : `目覚めの場所データ[${awakeningKey}]が見つかりませんでした。`;
-                    break;
-                case '1d10':
-                case 'd10':
-                    resultText = `🎲 D10 ＞ ${resultValue}`;
-                    break;
-            }
-
-            addLog(resultText);
-            if ((typeof rollData === 'object' && rollData.showToast)) {
-                showToastNotification(resultText, 3000);
-            }
-            if (callback) {
-                callback(resultValue, null, resultText, selectedMasterData);
-            }
-        });
-
-    } else if (d100Match) {
-        // --- 汎用D100コマンドの場合 ---
-        performD100Roll(rollData, (finalResult, tensValue, onesValue) => {
-            return `🎲 1D100 ＞ ${finalResult} [${tensValue*10} + ${onesValue}]`;
-        });
-    } else if (table100Match) {
-        performD100Roll(rollData, (finalResult) => {
-            let item, tableName, displayKey, data;
-
-            switch(cleanedInput) {
-                case 'nk':
-                    data = memoryFragmentsData;
-                    tableName = '記憶のカケラ表';
-                    break;
-                case 'nka':
-                    data = memoryFragmentsAlphaData;
-                    tableName = '記憶のカケラ-α表';
-                    break;
-                case 'nkb':
-                    data = memoryFragmentsBetaData;
-                    tableName = '記憶のカケラ-β表';
-                    break;
-                case 'nph':
-                    data = posthumousHistoryData;
-                    tableName = '死後経歴表';
-                    break;
-            }
-            
-            // --- ▼▼▼ ここからがご指示のロジックです ▼▼▼ ---
-
-            // ① ダイスの出目を数値にする (finalResultがすでに数値なので、そのまま使用)
-            const diceResultAsNumber = finalResult;
-
-            // ② JSONデータのキーを全て数値に変換して検索
-            const foundKey = Object.keys(data).find(key => {
-                let keyAsNumber;
-                if (key === '0') {
-                    keyAsNumber = 10;
-                } else if (key === '00') {
-                    keyAsNumber = 100;
-                } else {
-                    keyAsNumber = parseInt(key, 10);
+        // 500msの遅延を入れてから roll3DDice を呼び出す
+        setTimeout(() => {
+            roll3DDice(rollConfig, (results) => {
+                if (!results || results.length === 0) {
+                    console.error("3Dダイスロールの結果がありません。");
+                    return;
                 }
-                // ③ ①と②を比べる
-                return keyAsNumber === diceResultAsNumber;
-            });
-            
-            item = foundKey ? data[foundKey] : null;
-            displayKey = foundKey || finalResult; // 見つかったキーを表示。見つからなければダイス目を表示
+                let selectedMasterData = null;
 
-            // --- ▲▲▲ ロジックここまで ▲▲▲ ---
-            return item 
-                ? `🎲 ${tableName}(${displayKey})<br>【${item.name}】 ${item.description}` 
-                : `${tableName}データ[${displayKey}]が見つかりませんでした。`;
-        });
+                const diceValue = results[0].value;
+                const resultValue = diceValue === 0 ? 10 : diceValue;
+                let resultText = "";
+
+                switch (command) {
+                    case 'nm':
+                        resultText = formatRegretResult('SI-', '姉妹への未練表', resultValue);
+                        selectedMasterData = regretMasterData[`SI-${String(resultValue).padStart(2, '0')}`];
+                        break;
+                    case 'nme':
+                        resultText = formatRegretResult('EN-', '敵への未練表', resultValue);
+                        selectedMasterData = regretMasterData[`EN-${String(resultValue).padStart(2, '0')}`];
+                        break;
+                    case 'nmn':
+                        resultText = formatRegretResult('NP-', '中立者への未練表', resultValue);
+                        selectedMasterData = regretMasterData[`NP-${String(resultValue).padStart(2, '0')}`];
+                        break;
+                    case 'nt':
+                        // ★★★ 新しいヘルパー関数を呼び出す ★★★
+                        const ntResult = formatSimpleTableResult('たからもの表', takaramonoMasterData, resultValue);
+                        resultText = ntResult.resultText;
+                        selectedMasterData = ntResult.selectedMasterData;
+                        break;
+                    case 'nh':
+                        // ★★★ 新しいヘルパー関数を呼び出す ★★★
+                        const nhResult = formatSimpleTableResult('暗示表', hintMasterData, resultValue);
+                        resultText = nhResult.resultText;
+                        selectedMasterData = nhResult.selectedMasterData;
+                        break;
+                    case 'nal':
+                        // このコマンドは 10 -> '0' の特殊マッピングがあるため固有ロジックを維持
+                        const awakeningKey = resultValue === 10 ? '0' : String(resultValue);
+                        selectedMasterData = awakeningLocationsData[awakeningKey];
+                        resultText = selectedMasterData ? `🎲 目覚めの場所表(${awakeningKey})<br>【${selectedMasterData.name}】 ${selectedMasterData.description}` : `目覚めの場所データ[${awakeningKey}]が見つかりませんでした。`;
+                        break;
+                    case '1d10':
+                    case 'd10':
+                        resultText = `🎲 D10 ＞ ${resultValue}`;
+                        break;
+                }
+
+                addLog(resultText);
+                if ((typeof rollData === 'object' && rollData.showToast)) {
+                    showToastNotification(resultText, 3000);
+                }
+                if (callback) {
+                    callback(resultValue, null, resultText, selectedMasterData);
+                }
+            });
+        }, 500); // 遅延時間
+    } else if (d100Match || table100Match) {
+        // --- D100系コマンドの場合 ---
+        // 500msの遅延を入れてから performD100Roll を呼び出す
+        setTimeout(() => {
+            performD100Roll(rollData, (finalResult, tensValue, onesValue) => {
+                if (d100Match) {
+                    return `🎲 1D100 ＞ ${finalResult} [${tensValue*10} + ${onesValue}]`;
+                } else { // table100Match
+                    let item, tableName, data;
+                    switch(cleanedInput) {
+                        case 'nk': data = memoryFragmentsData; tableName = '記憶のカケラ表'; break;
+                        case 'nka': data = memoryFragmentsAlphaData; tableName = '記憶のカケラ-α表'; break;
+                        case 'nkb': data = memoryFragmentsBetaData; tableName = '記憶のカケラ-β表'; break;
+                        case 'nph': data = posthumousHistoryData; tableName = '死後経歴表'; break;
+                    }
+                    const diceResultAsNumber = finalResult;
+                    const foundKey = Object.keys(data).find(key => {
+                        let keyAsNumber = (key === '0') ? 10 : (key === '00') ? 100 : parseInt(key, 10);
+                        return keyAsNumber === diceResultAsNumber;
+                    });
+                    item = foundKey ? data[foundKey] : null;
+                    const displayKey = foundKey || finalResult;
+                    return item ? `🎲 ${tableName}(${displayKey})<br>【${item.name}】 ${item.description}` : `${tableName}データ[${displayKey}]が見つかりませんでした。`;
+                }
+            });
+        }, 500); // 遅延時間
+
     } else {
         // --- システムコマンドとD10系以外 (1d8 など) の場合 ---
         // これらは3D演出の対象外

@@ -6,7 +6,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.20.3";
+export const version = "1.20.4";
 
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
@@ -584,6 +584,47 @@ function updateStatusPanel(state, characters) {
         }
     }
 
+    // 1. フォーカスすべきUI要素を決定する (これは変更なし)
+    let focusElement = null;
+    switch (phase) {
+        case 'RAPID_RESOLUTION':
+            focusElement = document.getElementById('rapidDeclarationArea');
+            break;
+        case 'ACTION_RESOLUTION':
+        case 'JUDGE_RESOLUTION':
+            focusElement = document.getElementById('actionDeclarationArea');
+            break;
+        case 'DAMAGE_RESOLUTION':
+            focusElement = document.getElementById('damageProcessingArea');
+            break;
+    }
+
+    // 2. 縦スクロールを実行する
+    if (focusElement) {
+        // scrollIntoViewを使いつつ、挙動を制御する
+        // block: 'center' で要素が中央に来るように
+        // inline: 'nearest' で横スクロールは最小限に
+        focusElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+            inline: 'nearest'
+        });
+    }
+
+    // 3. 盤面(.scroll-wrapper)の横スクロールを中央に補正する（これは維持）
+    const scrollWrapper = document.querySelector('.scroll-wrapper');
+    const mainPanel = document.querySelector('.grid-area-main-panel');
+
+    if (scrollWrapper && mainPanel) {
+        const wrapperWidth = scrollWrapper.clientWidth;
+        const panelWidth = mainPanel.offsetWidth;
+        const targetScrollLeft = (panelWidth - wrapperWidth) / 2;
+        
+        if (scrollWrapper.scrollLeft !== targetScrollLeft) {
+            scrollWrapper.scrollLeft = targetScrollLeft;
+        }
+    }
+
     const potentialActorIds = new Set(potentialActors.map(char => char.id));
     characters.forEach(char => {
         clearBubbleMarkers(char.id, 'char-bubble-marker-container');
@@ -595,25 +636,6 @@ function updateStatusPanel(state, characters) {
             if (usableManeuvers.some(m => m.data.timing === 'ダメージ' && m.isUsable)) addBubbleMarker(char.id, 'DMG', 'char-bubble-marker-container', '#933', 'white');
         }
     });
-
-    // 【対策】grid-area-main-panel を scroll-wrapper の中央に強制配置する
-    const scrollWrapper = document.querySelector('.scroll-wrapper');
-    const mainPanel = document.querySelector('.grid-area-main-panel');
-
-    if (scrollWrapper && mainPanel) {
-        // 1. scrollWrapperとmainPanelの幅を取得
-        const wrapperWidth = scrollWrapper.clientWidth;
-        const panelWidth = mainPanel.offsetWidth;
-
-        // 2. 中央に配置するためのスクロール位置を計算
-        // (パネルの幅 - ラッパーの幅) / 2
-        const targetScrollLeft = (panelWidth - wrapperWidth) / 2;
-
-        // 3. スクロール位置が現在位置と異なる場合のみ、即座に設定する
-        if (scrollWrapper.scrollLeft !== targetScrollLeft) {
-            scrollWrapper.scrollLeft = targetScrollLeft;
-        }
-    }
 
     updatePhaseUI(state);
     updateAllQueuesUI();

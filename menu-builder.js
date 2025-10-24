@@ -2,7 +2,7 @@
  * @file menu-builder.js
  * @description メニューやモーダルなど、動的なUIの構築を担当するモジュール
  */
-export const version = "1.23.2"; // 安定版への復元
+export const version = "1.23.3"; // 安定版への復元
 
 import * as data from './data-handler.js';
 import * as charManager from './character-manager.js';
@@ -2091,27 +2091,37 @@ async function selectTargetForAction(actor, maneuver, handleGlobalClick) {
              return;
         }
 
-        // ui.addLog(`>> ${actor.name}のターゲットを選択してください。(対象外クリックでキャンセル)`);
-        // if (targets.length > 0) ui.scrollToFirstCharacter(targets);
         if (targets.length > 0) {
-            // 1. 最初のターゲットキャラクターカードを取得
             const firstTargetCard = document.querySelector(`.char[data-id="${targets[0].id}"]`);
             if (firstTargetCard) {
-                const container = firstTargetCard.closest('.char-container');
-                if (container) {
-                    // 2. キャラクターコンテナ内を中央にスクロールさせる
-                    const targetScrollLeft = firstTargetCard.offsetLeft - (container.offsetWidth / 2) + (firstTargetCard.offsetWidth / 2);
-                    
-                    container.scrollTo({
-                        left: targetScrollLeft,
-                        behavior: 'smooth'
+                
+                // --- ① まず、対象のエリアパネルまで縦スクロール ---
+                const areaPanel = firstTargetCard.closest('.grid-area-pc-panel, .grid-area-enemy-panel');
+                if (areaPanel) {
+                    areaPanel.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center',
+                        inline: 'nearest'
                     });
+                }
+
+                // --- ② 次に、コンテナ内を横スクロール ---
+                const charContainer = firstTargetCard.closest('.char-container');
+                if (charContainer) {
+                    const targetScrollLeft = firstTargetCard.offsetLeft - (charContainer.offsetWidth / 2) + (firstTargetCard.offsetWidth / 2);
+                    
+                    // 縦スクロールとタイミングを少しずらす
+                    setTimeout(() => {
+                        charContainer.scrollTo({
+                            left: targetScrollLeft,
+                            behavior: 'smooth'
+                        });
+                    }, 300); 
                 }
             }
         }
         
-        // 3. scroll-wrapper の中央揃えを強制する
-        //    (ui-manager.jsに追加したロジックと同様のものをこちらでも実行)
+        // --- ③ 最後に、強制中央揃えを実行 ---
         const scrollWrapper = document.querySelector('.scroll-wrapper');
         const mainPanel = document.querySelector('.grid-area-main-panel');
         if (scrollWrapper && mainPanel) {
@@ -2119,8 +2129,8 @@ async function selectTargetForAction(actor, maneuver, handleGlobalClick) {
             const panelWidth = mainPanel.offsetWidth;
             const targetScrollLeft = (panelWidth - wrapperWidth) / 2;
             
-            // ターゲット選択時はアニメーションさせず、即座に位置を補正
             if (scrollWrapper.scrollLeft !== targetScrollLeft) {
+                // こちらは即時実行
                 scrollWrapper.scrollLeft = targetScrollLeft;
             }
         }

@@ -11,8 +11,8 @@
     background-color: var(--color-background-2);
     border-radius: 10px;
     padding: 10px;
-    box-shadow: 0 0 5px var(--color-7);
-    border: 1px solid var(--color-8);
+    /* box-shadow: 0 0 5px var(--color-7); */
+    border: 1px solid var(--color-background-4);
     gap: 5px;
 }
 #sessionNcPanel.settings-container {
@@ -124,7 +124,7 @@
 .session-join-container {
     display: flex; /* ★ SP表示用に flex に変更 */
     flex-direction: column; /* 縦に並べる */
-    box-shadow: 0 0 5px var(--color-shadow);
+    /* box-shadow: 0 0 5px var(--color-shadow); */
 }
 
 /* PL名の入力欄 */

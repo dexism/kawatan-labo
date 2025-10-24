@@ -1,7 +1,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "2.1.11"; // パッチバージョンを更新
+export const version = "2.1.12"; // パッチバージョンを更新
 
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
@@ -20,7 +20,7 @@ const settings = {
         initialPosition: { xPercent: 80, yPercent: 80 }, // 右下(%)
         initialHeight:   0.05,    // 投擲する高さ (m)
         throw: {
-            speed:           { min: 0.3, max: 0.4 }, // 初速 [m/s]
+            speed:           { min: 0.4, max: 0.5 }, // 初速 [m/s]
             azimuth:         { min: 280, max: 350 }, // 水平方向 [deg]
             elevation:       { min: -10, max:   0 }, // 射出角度 [deg]
             angularVelocity: { min:  -5, max:   5 }  // [rad/s]
@@ -28,9 +28,9 @@ const settings = {
     },
     physics: {
         frictionGround:    0.1, // 床の摩擦
-        frictionWall:      0.0, // 壁の摩擦
+        frictionWall:      0.1, // 壁の摩擦
         restitutionDice:   0.8, // ダイスの反発係数
-        restitutionGround: 0.5, // 床の反発係数
+        restitutionGround: 0.3, // 床の反発係数
         restitutionWall:   0.9  // 壁の反発係数
     },
     camera: {

@@ -176,7 +176,7 @@ body {
     pointer-events: auto;
 
     /* ★ 3D要素 */
-    perspective: 2000px;
+    perspective: var(--perspective);
     /* 2.65cm / 100px */
     perspective-origin: center center;
 }
