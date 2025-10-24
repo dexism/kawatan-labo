@@ -6,7 +6,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.20.2";
+export const version = "1.20.3";
 
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
@@ -522,7 +522,8 @@ function updateStatusPanel(state, characters) {
             const scrollWrapper = document.querySelector('.battle-grid-scroll-wrapper');
             const targetColHeader = battleWrap.querySelector(`.col-header[data-col="${count}"]`);
             if (scrollWrapper && targetColHeader) {
-                scrollWrapper.scrollTo({ left: targetColHeader.offsetLeft - scrollWrapper.offsetLeft -97, behavior: 'smooth' });
+                // 水平スクロールを実行
+                scrollWrapper.scrollTo({ left: targetColHeader.offsetLeft - scrollWrapper.offsetLeft - 104, behavior: 'smooth' });
             }
             battleLogic.clearScrollFlag();
         }
@@ -535,6 +536,7 @@ function updateStatusPanel(state, characters) {
 
     // ▼▼▼ ここからが今回の修正箇所です ▼▼▼
     // --- 現在のフェーズに応じてUI要素へ自動スクロール ---
+    /*
     let focusElement = null;
     switch (phase) {
         case 'ACTION_DECLARATION':
@@ -561,7 +563,26 @@ function updateStatusPanel(state, characters) {
             inline: 'nearest'
         });
     }
+    */
     // ▲▲▲ 修正はここまでです ▲▲▲
+    // 新しい実装（横スクロールに限定）
+    if (phase === 'ACTION_DECLARATION' && activeActors.length > 0) {
+        const activeCharCard = document.querySelector(`.char[data-id="${activeActors[0].id}"]`);
+        if (activeCharCard) {
+            const container = activeCharCard.closest('.char-container');
+            if (container) {
+                // 1. スクロール先の中心位置を計算
+                //    = (カードの左端位置) - (コンテナの半分の幅) + (カードの半分の幅)
+                const targetScrollLeft = activeCharCard.offsetLeft - (container.offsetWidth / 2) + (activeCharCard.offsetWidth / 2);
+                
+                // 2. 計算した位置にスクロールする
+                container.scrollTo({
+                    left: targetScrollLeft,
+                    behavior: 'smooth'
+                });
+            }
+        }
+    }
 
     const potentialActorIds = new Set(potentialActors.map(char => char.id));
     characters.forEach(char => {
@@ -574,6 +595,25 @@ function updateStatusPanel(state, characters) {
             if (usableManeuvers.some(m => m.data.timing === 'ダメージ' && m.isUsable)) addBubbleMarker(char.id, 'DMG', 'char-bubble-marker-container', '#933', 'white');
         }
     });
+
+    // 【対策】grid-area-main-panel を scroll-wrapper の中央に強制配置する
+    const scrollWrapper = document.querySelector('.scroll-wrapper');
+    const mainPanel = document.querySelector('.grid-area-main-panel');
+
+    if (scrollWrapper && mainPanel) {
+        // 1. scrollWrapperとmainPanelの幅を取得
+        const wrapperWidth = scrollWrapper.clientWidth;
+        const panelWidth = mainPanel.offsetWidth;
+
+        // 2. 中央に配置するためのスクロール位置を計算
+        // (パネルの幅 - ラッパーの幅) / 2
+        const targetScrollLeft = (panelWidth - wrapperWidth) / 2;
+
+        // 3. スクロール位置が現在位置と異なる場合のみ、即座に設定する
+        if (scrollWrapper.scrollLeft !== targetScrollLeft) {
+            scrollWrapper.scrollLeft = targetScrollLeft;
+        }
+    }
 
     updatePhaseUI(state);
     updateAllQueuesUI();

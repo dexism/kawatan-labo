@@ -2,7 +2,7 @@
  * @file menu-builder.js
  * @description メニューやモーダルなど、動的なUIの構築を担当するモジュール
  */
-export const version = "1.23.1"; // 安定版への復元
+export const version = "1.23.2"; // 安定版への復元
 
 import * as data from './data-handler.js';
 import * as charManager from './character-manager.js';
@@ -2092,7 +2092,38 @@ async function selectTargetForAction(actor, maneuver, handleGlobalClick) {
         }
 
         // ui.addLog(`>> ${actor.name}のターゲットを選択してください。(対象外クリックでキャンセル)`);
-        if (targets.length > 0) ui.scrollToFirstCharacter(targets);
+        // if (targets.length > 0) ui.scrollToFirstCharacter(targets);
+        if (targets.length > 0) {
+            // 1. 最初のターゲットキャラクターカードを取得
+            const firstTargetCard = document.querySelector(`.char[data-id="${targets[0].id}"]`);
+            if (firstTargetCard) {
+                const container = firstTargetCard.closest('.char-container');
+                if (container) {
+                    // 2. キャラクターコンテナ内を中央にスクロールさせる
+                    const targetScrollLeft = firstTargetCard.offsetLeft - (container.offsetWidth / 2) + (firstTargetCard.offsetWidth / 2);
+                    
+                    container.scrollTo({
+                        left: targetScrollLeft,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+        }
+        
+        // 3. scroll-wrapper の中央揃えを強制する
+        //    (ui-manager.jsに追加したロジックと同様のものをこちらでも実行)
+        const scrollWrapper = document.querySelector('.scroll-wrapper');
+        const mainPanel = document.querySelector('.grid-area-main-panel');
+        if (scrollWrapper && mainPanel) {
+            const wrapperWidth = scrollWrapper.clientWidth;
+            const panelWidth = mainPanel.offsetWidth;
+            const targetScrollLeft = (panelWidth - wrapperWidth) / 2;
+            
+            // ターゲット選択時はアニメーションさせず、即座に位置を補正
+            if (scrollWrapper.scrollLeft !== targetScrollLeft) {
+                scrollWrapper.scrollLeft = targetScrollLeft;
+            }
+        }
 
         const targetIds = new Set(targets.map(t => t.id));
         document.querySelectorAll('.char, .marker').forEach(el => {

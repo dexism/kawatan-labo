@@ -50,6 +50,7 @@ body {
     align-content: start;
     justify-content: start;
     overflow: hidden;
+    position: relative;
 }
 .left-column {
     grid-area: left;
@@ -60,95 +61,19 @@ body {
     grid-template-areas:
         "header"
         "scroll";
+    align-content: start;
+    justify-items: start;
+
+    width: calc(100dvw - var(--right-width));
     height: 100dvh;
-    width: auto;
+
     margin:  0;
     padding: 0;
     gap:     0;
     box-sizing: border-box;
-    align-items: start;
-    align-content: start;
-    justify-content: center;
-}
-/* --- ヘッダー・フッター --- */
-.app-header {
-    grid-area: header;
-    display: grid;
-    /* background-color:        var(--color-title-bg);*/
-    background-color: color-mix(in srgb, var(--color-background-2) 50%, transparent); 
-    color:          var(--color-fore-4);
-    text-shadow: 
-        0 0 1px var(--color-background-1),
-        0 0 2px var(--color-background-1),
-        0 0 4px var(--color-background-1),
-        0 0 8px var(--color-background-1);
-    /* border-bottom: 1px solid var(--color-border); */
-    margin: 0;
-    padding: 5px 10px;
-    width: auto;
-    box-sizing: border-box;
-    /* box-shadow: 0 0 10px black; */
-    z-index: 70;
-    z-index: 1;
-    font-size: 0.9rem;
-    position: sticky;
-}
-.app-header:hover {
-    background-color: color-mix(in srgb, var(--color-fore-2) 10%, transparent); 
-}
-.app-header h1 {
-    font-size: 0.9rem;
-    margin: 0;
-    padding: 0;
-}
-.scroll-wrapper {
-    grid-area: scroll;
-    display: grid;
-    overflow-x: hidden; /* 横スクロールはさせない */
-    overflow-y: visible; /* ★ 縦スクロールをこの要素に担当させる */
-    -webkit-overflow-scrolling: touch; /* iOSでの慣性スクロール */
-    
-    /* ★ 3D効果はこちらに適用する */
-    perspective: 1000px;
-    perspective-origin: center center;
 
-    
-    align-items: start;
-    justify-content: start;
-    height: 100%;
-    width: 100%;
-
-    pointer-events: auto;
-}
-.grid-area-main-panel {
-    grid-area: main;
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: 
-        auto 
-        auto
-        auto;
-    grid-template-areas:
-        "enemy"
-        "battle"
-        "player";
-    height: auto;
-    width: 120%;
-    margin-left: -10%;
-    padding: 0;
-    gap:     0;
-    box-sizing: border-box;
     overflow-x: hidden;
-    overflow-y: visible;
-
-    align-content: start;
-    align-items: start;
-    justify-items: start;
-    justify-content: start;
-
-    pointer-events: auto;
-rotate: x 20deg;
-transform-style: preserve-3d; /* 子要素に3D空間を引き継がせる */
+    overflow-y: auto;
 }
 .right-column {
     grid-area: right;
@@ -177,8 +102,7 @@ transform-style: preserve-3d; /* 子要素に3D空間を引き継がせる */
         "settings"
         "footer";
     align-content: start;
-    /* border-left: 1px solid var(--color-border); */
-    /* border-radius: 10px 0 0 10px; */
+
     margin:  0;
     padding: 0;
     gap:     0;
@@ -186,7 +110,110 @@ transform-style: preserve-3d; /* 子要素に3D空間を引き継がせる */
     box-shadow: 0 0 10px black;
     height: 100dvh;
     z-index: 60;
+    position: fixed;
+    right: 0;
+    width: var(--right-width);
+    overflow-x: hidden;
     overflow-y: auto;
+}
+/* ================================
+  left-column
+================================ */
+/* --- ヘッダー・フッター --- */
+.app-header {
+    grid-area: header;
+    display: grid;
+    /* background-color:        var(--color-title-bg);*/
+    background-color: color-mix(in srgb, var(--color-background-2) 50%, transparent); 
+    color:          var(--color-fore-4);
+    text-shadow: 
+        0 0 1px var(--color-background-1),
+        0 0 2px var(--color-background-1),
+        0 0 4px var(--color-background-1),
+        0 0 8px var(--color-background-1);
+    /* border-bottom: 1px solid var(--color-border); */
+    margin: 0;
+    padding: 5px 10px;
+    width: auto;
+
+    box-sizing: border-box;
+    /* box-shadow: 0 0 10px black; */
+    z-index: 10;
+    font-size: 0.9rem;
+    position: sticky;
+    top: 0;
+}
+.app-header:hover {
+    background-color: color-mix(in srgb, var(--color-fore-2) 10%, transparent); 
+}
+.app-header h1 {
+    font-size: 0.9rem;
+    margin: 0;
+    padding: 0;
+}
+.scroll-wrapper {
+    grid-area: scroll;
+    display: grid;
+    overflow-x: hidden; /* 横スクロールはさせない */
+    overflow-y: auto; /* ★ 縦スクロールをこの要素に担当させる */
+    -webkit-overflow-scrolling: touch; /* iOSでの慣性スクロール */
+    
+    /* JSからの即時スクロールを可能にするため、smoothスクロールを無効化 */
+    scroll-behavior: auto; 
+
+    align-items: start;
+    justify-content: center;
+
+    height: 100%;
+    width: calc(100dvw - var(--right-width));
+    margin: 0;
+    padding: 0;
+    gap: 0;
+    box-sizing: border-box;
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: auto;
+
+    /* ★ 3D要素 */
+    perspective: 2000px;
+    /* 2.65cm / 100px */
+    perspective-origin: center center;
+}
+.grid-area-main-panel {
+    grid-area: main;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 
+        auto 
+        auto
+        1fr;
+    grid-template-areas:
+        "enemy"
+        "battle"
+        "player";
+    align-content: start;
+    justify-items: center;
+
+    height: auto;
+    /* width: calc((100dvw - var(--right-width)) * 1.2); */
+    width: 120%;
+    /* margin: 0 auto 0 calc(-(100dvw - var(--right-width)) * 0.2); */
+    max-width: 1200px;
+
+    margin: -70px auto -20px -10%;
+    margin: 0 auto 0 auto;
+    padding: 0;
+    gap:     0;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    pointer-events: auto;
+
+    /* 3D要素 */
+    rotate: x 30deg;
+    /* transform-style: preserve-3d; /* 子要素に3D空間を引き継がせる */
 }
 /* ================================
   グリッドコンテンツ
@@ -198,7 +225,7 @@ transform-style: preserve-3d; /* 子要素に3D空間を引き継がせる */
     margin:  0;
     padding: 0;
     box-sizing: border-box;
-    overflow-x: visible;
+    overflow-x: hidden;
     pointer-events: auto;
     rotate: 180deg;
     z-index: 2;
@@ -207,25 +234,24 @@ transform-style: preserve-3d; /* 子要素に3D空間を引き継がせる */
     grid-area: battle;
     min-width: 0;
     width: 80%;
-    margin-left: 10%;
-    padding: 0 5px;
+    max-width: 1230px;
+    margin: 0;
+    padding: 0;
     box-sizing: border-box;
-    overflow-x: auto;
+    overflow-x: hidden;
     z-index: 1;
     left: 0;
-    /*
-    border-top: 1px solid var(--color-border);
-    border-bottom: 1px solid var(--color-border);
-    */
+
+    /* transform-style: preserve-3d; */
 }
 .grid-area-pc-panel {
     grid-area: player;
     min-width: 0;
     width: 100%;
-    margin:  0;
+    margin: 0;
     padding: 0;
     box-sizing: border-box;
-    overflow-x: visible;
+    overflow-x: hidden;
     pointer-events: auto;
     z-index: 2;
 }
@@ -275,18 +301,23 @@ transform-style: preserve-3d; /* 子要素に3D空間を引き継がせる */
    SP対応 (画面幅768px以下)
 ================================ */
 @media screen and (max-width: 768px) {
-    .app-header {
-        box-shadow: none;
-        z-index: 90;
+    .left-column,
+    .right-column {
+        display: contents; /* ラッパーを消して孫要素を直接扱う */
     }
-    .app-header h1 {
-        font-size: 0.7rem;
+    .responsive-item {
+        display: block;
     }
+    /* スマホ表示では非表示にする */
+    .hide-on-mobile {
+        display: none;
+    }
+
     .main-container {
         display: grid;
         grid-template-areas:
-            "header"
             "timing"
+            "header"
             "scroll"
             "rapid"
             "judge"
@@ -318,20 +349,30 @@ transform-style: preserve-3d; /* 子要素に3D空間を引き継がせる */
         margin: 0;
         overflow-x: hidden;
         overflow-y: auto;
-perspective: 1000px; /* グリッド全体を見渡すため、大きめの値を設定 */
-perspective-origin: center center; /* 視点の中心を設定 */
+    }
+    .app-header h1 {
+        font-size: 0.7rem;
+    }
+    .grid-area-timing-panel {
+        position: sticky;
+        top: 0;
+        border: none;
+        box-shadow: 0 0 10px black;
     }
     .scroll-wrapper {
         width: 100%;
-        height: 100%;
-        margin-bottom: 160px;
+        height: auto;
         overflow: hidden;
         align-items: start;
         justify-content: start;
+        position: static;
+        z-index: 1;
     }
     .grid-area-main-panel {
         width: 120%;
-        margin-left: -10%;
+        height: auto;
+        margin: -120px auto 0 -10%;
+        margin: 0 auto 0 auto;
         align-content: start;
         align-items: start;
         justify-items: start;
@@ -363,24 +404,6 @@ perspective-origin: center center; /* 視点の中心を設定 */
         position: sticky;
         bottom: 0;
         box-shadow: 0 0 10px black;
-    }
-    .grid-area-timing-panel {
-        position: sticky;
-        top: 0;
-        border: none;
-        box-shadow: 0 0 10px black;
-        /* border-radius: 10px 10px 0 0; */
-    }
-    .left-column,
-    .right-column {
-        display: contents; /* ラッパーを消して孫要素を直接扱う */
-    }
-    .responsive-item {
-        display: block;
-    }
-    /* スマホ表示では非表示にする */
-    .hide-on-mobile {
-        display: none;
     }
 }
 

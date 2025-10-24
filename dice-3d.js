@@ -1,7 +1,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "2.1.10"; // パッチバージョンを更新
+export const version = "2.1.11"; // パッチバージョンを更新
 
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
@@ -34,7 +34,7 @@ const settings = {
         restitutionWall:   0.9  // 壁の反発係数
     },
     camera: {
-        height:               0.5,    // 視点高
+        height:               0.4,    // 視点高 デフォルト0.5
         breakpoint_px:      768,      // ★ 追加：PC/スマホを切り替える画面幅
         scaleMobile_m_per_px: 0.0002, // ★ スマホ時のスケール (2cm / 100px)
         scalePC_m_per_px:     0.0002  // ★ PC時のスケール (2cm / 100px)
@@ -115,10 +115,24 @@ export async function init(container) {
 
     scene = new THREE.Scene();
 
-    // camera = new THREE.PerspectiveCamera(1, (width / height) || 1, 0.1, 10);
+    // 1. PerspectiveCameraの初期設定は変更なし
+    camera = new THREE.PerspectiveCamera(1, (width / height) || 1, 0.1, 1);
+    
+    // 2. カメラの位置と向きを調整して、斜め上からの視点にする
+    const cameraDistance = settings.camera.height; // カメラと中心点の距離
+    const cameraAngleRad = THREE.MathUtils.degToRad(30); // 30度の角度
+    
+    camera.position.set(
+        0,
+        cameraDistance * Math.cos(cameraAngleRad), // Y座標 (高さ)
+        cameraDistance * Math.sin(cameraAngleRad)  // Z座標 (手前)
+    );
+    camera.lookAt(0, 0, 0); // カメラは常に原点(0,0,0)を見つめる
+/*    
     camera = new THREE.PerspectiveCamera(1, (width / height) || 1, 0.1, 1);
     camera.position.set(0, settings.camera.height, 0);
     camera.lookAt(0, 0, 0);
+*/    
 
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(width, height);
@@ -530,6 +544,52 @@ function createWalls() {
 
     if (!viewportSize) return;
 }
+/*
+function onWindowResize() {
+    if (!containerElement) return;
+
+    const width = containerElement.clientWidth;
+    const height = containerElement.clientHeight;
+
+    if (width === 0 || height === 0) return;
+
+    // --- 画面サイズに応じたスケールを決定 ---
+    const scaleFactor = (width <= settings.camera.breakpoint_px)
+        ? settings.camera.scaleMobile_m_per_px
+        : settings.camera.scalePC_m_per_px;
+
+    // --- 3D空間で見えるべき範囲を計算 ---
+    const visibleHeight3D = height * scaleFactor;
+    const visibleWidth3D = width * scaleFactor;
+
+    // --- カメラの角度に基づいて、必要な高さを逆算 ---
+    // tan(fov/2) = (visibleHeight3D / 2) / distance_y
+    // distance_y = (visibleHeight3D / 2) / tan(fov/2)
+    const fovRad = THREE.MathUtils.degToRad(camera.fov);
+    const newCameraY = (visibleHeight3D / 2) / Math.tan(fovRad / 2);
+
+    // --- 角度を維持したままカメラの位置を更新 ---
+    const cameraAngleRad = THREE.MathUtils.degToRad(30);
+    const totalDistance = newCameraY / Math.cos(cameraAngleRad);
+    
+    camera.position.set(
+        0,
+        totalDistance * Math.cos(cameraAngleRad),
+        totalDistance * Math.sin(cameraAngleRad)
+    );
+
+    // --- ビューポートと境界線の更新 ---
+    viewportSize = { width: visibleWidth3D, height: visibleHeight3D };
+    boundaries.x = (viewportSize.width * settings.tray.sizeRatio) / 2;
+    boundaries.z = (viewportSize.height * settings.tray.sizeRatio) / 2;
+
+    // --- レンダラーとカメラのマトリックスを更新 ---
+    createWalls(); // 壁を再生成
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    renderer.setSize(width, height);
+}
+*/
 
 function onWindowResize() {
     if (!containerElement) return;

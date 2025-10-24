@@ -4,12 +4,8 @@
 .settings {
     display: flex;
     flex-direction: column;
-    background-color: var(--color-background-3);
-    padding: 10px;
+    padding: 5px;
     gap: 10px;
-    border-radius: 10px;
-    /*box-shadow: 0 0 5px inset var(--color-7);*/
-    border: 1px solid var(--color-a);
 }
 .settings-container {
     background-color: var(--color-background-2);

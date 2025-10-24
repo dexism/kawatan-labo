@@ -6,7 +6,7 @@
     background-color: var(--color-background-2);
     color:            var(--color-text-2);
     padding: 0 5px 5px 5px;
-transform-style: preserve-3d;
+/* transform-style: preserve-3d; */
 }
 .section-title {
     font-size: 0.8rem;

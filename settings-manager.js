@@ -2,7 +2,7 @@
  * @file settings-manager.js
  * @description アプリケーションの設定（テーマ、セッション管理など）を統括するモジュール
  */
-export const version = "3.0.2"; // 責務分離リファクタリング版
+export const version = "3.0.3"; // 責務分離リファクタリング版
 
 import * as stateManager from './state-manager.js';
 import * as p2p from './p2p-manager.js';
@@ -32,6 +32,7 @@ const uiElements = {
 let currentSessionMode = 'offline';
 const HOST_ROOM_ID_KEY = 'nechronica-session-host-room-id';
 const PLAYER_NAME_KEY = 'nechronica-pl-name';
+let resizeTimer = null;
 
 // ===============================================
 // 1. 初期化処理
@@ -146,6 +147,27 @@ function setupStaticEventListeners() {
             // ▲▲▲ 修正ここまで ▲▲▲
         });
     }
+
+    // --- ウィンドウリサイズ時のレイアウト補正 ---
+    window.addEventListener('resize', () => {
+        // 既存のタイマーがあればクリア
+        clearTimeout(resizeTimer);
+        
+        // 250ミリ秒後に一度だけ中央揃え処理を実行するように予約する
+        resizeTimer = setTimeout(() => {
+            const scrollWrapper = document.querySelector('.scroll-wrapper');
+            const mainPanel = document.querySelector('.grid-area-main-panel');
+
+            if (scrollWrapper && mainPanel) {
+                const wrapperWidth = scrollWrapper.clientWidth;
+                const panelWidth = mainPanel.offsetWidth;
+                const targetScrollLeft = (panelWidth - wrapperWidth) / 2;
+                
+                // スクロール位置を即座に設定
+                scrollWrapper.scrollLeft = targetScrollLeft;
+            }
+        }, 250); // 250ミリ秒のディレイ
+    });
 }
 
 /**

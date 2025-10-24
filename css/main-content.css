@@ -15,6 +15,8 @@
     margin: 0;
     padding: 0;
     justify-content: center;
+
+/* transform-style: preserve-3d; */
 }
 .char-container {
     display: flex;
@@ -33,6 +35,8 @@
     padding: 20px 0;
     box-sizing: border-box;
     position: relative;
+
+/* transform-style: preserve-3d; */
 perspective: 1000px; /* グリッド全体を見渡すため、大きめの値を設定 */
 perspective-origin: center center; /* 視点の中心を設定 */
 }
@@ -563,9 +567,10 @@ body.is-dragging .char.hover-highlight {
     box-sizing: border-box;
     overflow: auto hidden; /* 中身がはみ出たら、横方向のみスクロールバーを表示 */
     -webkit-overflow-scrolling: touch; /* iOSでスムーズなスクロールを有効にする */
-    position: relative;
     overscroll-behavior-x: contain;
-transform-style: preserve-3d;
+    position: relative;
+
+/* transform-style: preserve-3d; */
 }
 /* このクラスが付与されている間、横スクロールを無効化する
 .battle-grid-scroll-wrapper.scroll-disabled {
@@ -586,12 +591,15 @@ transform-style: preserve-3d;
     transition: all 0.2s ease-out;
     background-color: var(--color-background-2);
     gap: 3px;
-transform-style: preserve-3d;
-perspective: 1000px; /* グリッド全体を見渡すため、大きめの値を設定 */
-perspective-origin: center center; /* 視点の中心を設定 */
+
+/* transform-style: preserve-3d; */
+/* perspective: 600px; /* グリッド全体を見渡すため、大きめの値を設定 */
+/* perspective-origin: center center; /* 視点の中心を設定 */
 }
 #battleWrap {
-    transform-style: preserve-3d;
+    /* transform-style: preserve-3d; */
+    perspective: 1000px; /* グリッド全体を見渡すため、大きめの値を設定 */
+    perspective-origin: center center; /* 視点の中心を設定 */
 }
 /* グリッドのヘッダーとセル */
 .current-action-cell {
