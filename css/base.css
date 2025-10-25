@@ -72,8 +72,8 @@ h2 {
 :root {
     accent-color: auto; /* ブラウザ/OSのアクセントカラーを自動で採用 */
 
-    --perspective: 1600px;
-    --rotate:        40deg;
+    --perspective: 1700px;
+    --rotate:        30deg;
     --header-width: 100px;
     --cell-width:    40px;
     --cell-height:   40px;
@@ -112,7 +112,7 @@ h2 {
     --color-naraku:   #500;
     --color-jigoku:   #300;
     --color-rengoku:  #111;
-    --color-hanazono: #222;
+    --color-hanazono: #333;
     --color-rakuen:   #444;
 /* ================================
   　ライトモード
@@ -343,7 +343,7 @@ html[data-theme="dark"] {
 /* モダンブラウザ向け (Firefoxなど) */
 * {
     scrollbar-width: thin;
-    scrollbar-color: var(--color-background-7) var(--color-background-2);
+    scrollbar-color: var(--color-background-5) var(--color-background-3);
 }
 
 /* Webkit系ブラウザ向け (Chrome, Safari, Edgeなど) */

@@ -169,7 +169,7 @@ body {
     padding: 0;
     gap: 0;
     box-sizing: border-box;
-    position: absolute;
+    position: static;
     top: 0;
     left: 0;
 /* border: 3px solid cyan; */
@@ -216,20 +216,32 @@ perspective-origin: center center;
     /* margin: 0 auto 0 calc(-(100dvw - var(--right-width)) * 0.2); */
     max-width: 1200px;
 
-    margin: -70px auto -20px -10%;
-    margin: 0 auto 0 auto;
+    margin: -110px auto 0 auto;
     padding: 0;
     gap:     0;
     box-sizing: border-box;
     /* overflow-x: hidden;
     overflow-y: auto; */
     overflow: auto;
-
+    position: relative;
     pointer-events: auto;
+    background-color: var(--color-background-3);
 
 /* 3D要素 */
 /* transform-style: preserve-3d; */
 rotate: x var(--rotate);
+}
+.scroll-bar {
+    display: none;
+    position: absolute;
+    top: 0;
+    right: -10%;
+    height: 100%;
+    width: 40px;
+    background-color: var(--color-background-2);
+    background-color: color-mix(in srgb, var(--color-fore-1) 10%, transparent); 
+    pointer-events: auto;
+    z-index: 1000;
 }
 /* ================================
   グリッドコンテンツ
@@ -255,10 +267,11 @@ rotate: x var(--rotate);
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    overflow: auto;
-    z-index: 3;
+    overflow: hidden auto;
+    z-index: 1;
     left: 0;
 
+/* rotate: z -60deg; */
 /* transform-style: preserve-3d; */
 }
 .grid-area-pc-panel {
@@ -378,45 +391,24 @@ rotate: x var(--rotate);
         box-shadow: 0 0 10px black;
     }
     .scroll-wrapper {
-        width: 100%;
+        overflow: auto;
+
         height: auto;
-        overflow: hidden;
-        align-items: start;
-        justify-content: start;
+        width: 100%;
         position: static;
         z-index: 1;
     }
+
     .grid-area-main-panel {
-        width: 120%;
-        height: auto;
-        margin: -120px auto 0 -10%;
-        margin: 0 auto 0 auto;
         align-content: start;
-        align-items: start;
-        justify-items: start;
-        justify-content: start;
-        overflow-x: hidden;
-        overflow-y: auto;
-        translate: 0%;
+        justify-items: center;
+        height: auto;
+        width: 120%;
+        margin: -110px auto 0 auto;
+        overflow: auto;
     }
-    .grid-area-enemy-panel {
-        width: 100%;
-        margin:  0 auto 0 0%;
-        padding: 0;
-        translate: 0%;
-    }
-    .grid-area-battle-panel {
-        width: 80%;
-        margin-left: 10%;
-        padding: 0;
-        translate: 0%;
-        overflow-x: hidden;
-    }
-    .grid-area-pc-panel {
-        width: 80%;
-        margin:  0 auto 0 10%;
-        padding: 0;
-        translate: 0%;
+    .scroll-bar {
+        display: flex;
     }
     .grid-area-status-panel {
         position: sticky;

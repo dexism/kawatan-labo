@@ -1211,13 +1211,13 @@
 
     /* 以前のスタイル指定を上書き・調整 */
     font-size: 18px;
-    font-weight: bold;
+    font-weight: 900;
     color: var(--color-text);
     color: var(--color-fore-2);
     background-color: transparent; /* 背景色をなくす */
     text-shadow:
-        0 0 1px var(--color-fore-2),
-        0 0 1px var(--color-fore-2),
+        0 0 1px var(--color-background-2),
+        0 0 2px var(--color-background-2),
         0 0 4px var(--color-background-2),
         0 0 8px var(--color-background-2); /* 読みやすくするための影 */
     padding: 0 5px;

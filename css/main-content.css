@@ -6,6 +6,7 @@
 .grid-area-enemy-panel h2.section-title, 
 .grid-area-pc-panel h2.section-title {
     justify-content: center;
+    color: var(--color-fore-7)
 }
 /* アンデッド表示領域 */
 .char-area-wrapper {
@@ -66,19 +67,23 @@ perspective-origin: center center; /* 視点の中心を設定 */
     text-align: center;
     background-color: var(--color-background-1);
     border: none;
-    outline: 1px solid var(--color-background-7);
+    outline: 1px solid var(--color-background-4);
     border-radius: 10px;
     margin: 0;
     padding: 5px;
     box-sizing: border-box;
-    box-shadow: 0 5px 5px var(--color-7);
-    transition: all 0.3s ease-out;
+    box-shadow: 
+        0 1px 0px var(--color-8),
+        0 2px 5px var(--color-0);
+    transition: all 0.2s ease-out;
     overflow: visible;
     transform: translateY(10px);
 /* transform-style: preserve-3d; */
 }
 .grid-area-enemy-panel .char:not(.hover-highlight) {
-    box-shadow: 0 -5px 5px var(--color-7);
+    box-shadow: 
+        0 -1px  0px var(--color-8),
+        0 -2px 10px var(--color-0);
 }
 .hover-highlight {
     background-color: color-mix(in srgb, cyan 20%, transparent); 
@@ -110,7 +115,7 @@ perspective-origin: center center; /* 視点の中心を設定 */
         0 0 10px inset gold,
         0 0 10px       gold;
     outline: 2px solid gold;
-    transform: scale(1) translateY(0px) translateZ(0px) rotateX(0deg);
+    transform: scale(1) translateY(-10px) translateZ(0px) rotateX(0deg);
     z-index: 11;
 }
 .highlight-char.hover-highlight {
@@ -236,9 +241,9 @@ body.is-dragging .char.hover-highlight {
     border: 2px solid     white;
     text-shadow: 0 0 3px  black;
     box-shadow: 
-        0 -2px 5px inset black,
-        0  2px 5px inset white,
-        0  1px 3px black;
+        0  2px 5px inset black,
+        0 -1px 5px inset white,
+        0 -2px 3px black;
     z-index: 6;
 }
 /* 狂気点とパーツ状態の表示 */
@@ -568,21 +573,13 @@ body.is-dragging .char.hover-highlight {
     =================== */
 .battle-grid-scroll-wrapper {
     width: 100%; /* 親要素(画面幅)いっぱいに広がる */
-    padding: 15px 0 0 0;
+    padding: 5px 0;
     margin: 0;
     box-sizing: border-box;
     overflow: auto hidden; /* 中身がはみ出たら、横方向のみスクロールバーを表示 */
     -webkit-overflow-scrolling: touch; /* iOSでスムーズなスクロールを有効にする */
     overscroll-behavior-x: contain;
-    position: relative;
-
-/* transform-style: preserve-3d; */
 }
-/* このクラスが付与されている間、横スクロールを無効化する
-.battle-grid-scroll-wrapper.scroll-disabled {
-    overflow-x: hidden;
-}
-*/
 .battle-wrap {
     display: grid;
     grid-template-columns: var(--header-width) repeat(var(--col-count), minmax(var(--cell-width), auto));
@@ -595,19 +592,16 @@ body.is-dragging .char.hover-highlight {
     font-weight: bold;
     position: relative;
     transition: all 0.2s ease-out;
-    background-color: var(--color-background-2);
+    background-color: var(--color-background-3);
     gap: 3px;
-
-/* transform-style: preserve-3d; */
-/* perspective: 600px; /* グリッド全体を見渡すため、大きめの値を設定 */
-/* perspective-origin: center center; /* 視点の中心を設定 */
 }
 #battleWrap {
-    /* transform-style: preserve-3d; */
-    perspective: var(--perspective);
-    perspective-origin: center center; /* 視点の中心を設定 */
+/* transform-style: preserve-3d; */
+perspective: var(--perspective);
+perspective-origin: center center; /* 視点の中心を設定 */
 }
-/* グリッドのヘッダーとセル */
+
+/* グリッドの左上セル */
 .current-action-cell {
     display: flex;
     align-items: center;
@@ -619,9 +613,9 @@ body.is-dragging .char.hover-highlight {
     position: sticky;
     left: 0;
     border-radius: 3px;
-    z-index: 1;
+    z-index: -1;
 }
-/* エリア名 */
+/* 左エリア名 */
 .row-header {
     display: flex;
     align-items: center;
@@ -632,9 +626,9 @@ body.is-dragging .char.hover-highlight {
     left: 0;
     border-radius: 3px;
     opacity: 0.9;
-    z-index: 1;
+    z-index: -1;
 }
-/* カウント */
+/* 上カウント */
 .col-header {
     display: flex;
     align-items: center;
@@ -643,7 +637,7 @@ body.is-dragging .char.hover-highlight {
     color:      #e33;
     position: sticky;
     border-radius: 3px;
-    z-index: 0;
+    z-index: -2;
 }
 .cell {
     display: flex;
@@ -667,13 +661,9 @@ body.is-dragging .char.hover-highlight {
 
     flex-shrink: 0;
 
-    z-index: 0;
+    z-index: -2;
 
-    /* text-align: center; を削除（マーカーを左詰めにするため）*/
-perspective: var(--perspective);
-perspective-origin: center center; /* 視点の中心を設定 */
-/* perspective: var(--perspective);
-perspective-origin: center center; /* 視点の中心を設定 */
+    transform-style: preserve-3d;
 }
 /* --- グリッドセルのエリアカラー --- */
 /* 透明度を加えて、ヘッダーより少し薄い色にする */
@@ -721,17 +711,22 @@ perspective-origin: center center; /* 視点の中心を設定 */
     transition: all 0.2s ease;
 
     width: var(--cell-width);     /* 幅を40pxに固定 */
-    height: var(--cell-height);   /* 高さを40pxに固定 */
-    height: 25px;   /* 高さを40pxに固定 */
+    /* height: var(--cell-height);   /* 高さを40pxに固定 */
+    height: 30px;   /* 高さを40pxに固定 */
     display: flex;
     flex-shrink: 0;               /* ★★★ マーカーが縮むのを防ぐ最重要設定 ★★★ */
     z-index: 10;
-transition: all 0.3s ease;
-transform: translateY(-15px) translateZ(10px) rotateX(-10deg) rotateY(-20deg);
+    transition: all 0.2s ease;
+    /*
+    transform: translateY(-15px) translateZ(10px) rotateX(-10deg) rotateY(-20deg);
+    transform: translateY(-15px) translateZ(30px) rotateX(-30deg) rotateY(-30deg) rotateZ(0deg);
+    transform: translateZ(20px) rotateZ(60deg) rotateX(-10deg) translateY(-15px) rotateY(0deg);
+    */
+    transform: translateZ(20px) rotateX(-30deg) translateY(-15px) rotateY(-20deg);
 }
 .marker:hover {
   /* 例：さらに手前に浮き上がらせて回転させる */
-  transform: translateZ(20px) translateY(-20px) rotateX(-10deg) scale(1.1);
+  transform: translateZ(50px) translateY(-20px) rotateX(-10deg) scale(1.2);
   z-index: 1000;
 }
 .marker-img {
@@ -745,9 +740,8 @@ transform: translateY(-15px) translateZ(10px) rotateX(-10deg) rotateY(-20deg);
 .marker::after {
     content: attr(data-name);
     position: absolute;
-    bottom: 130%;
-    left: 50%;
-    transform: translateX(-50%);
+    bottom: 0;
+    left: 0;
     border-radius: 5px;
     background: #000a;
     color:      #eee;
@@ -756,9 +750,10 @@ transform: translateY(-15px) translateZ(10px) rotateX(-10deg) rotateY(-20deg);
     white-space: pre;
     opacity: 0;
     pointer-events: none;
-    transition: all 0.2s;
+    /* transition: all 0.2s; */
     margin-bottom: 4px;
-    z-index: 10;
+    z-index: 11;
+    transform: translate(-110%, 60%);
 }
 .marker:hover::after {
     opacity: 1;
