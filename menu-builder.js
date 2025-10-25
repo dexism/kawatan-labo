@@ -2122,7 +2122,8 @@ async function selectTargetForAction(actor, maneuver, handleGlobalClick) {
         }
         
         // --- ③ 最後に、強制中央揃えを実行 ---
-        const scrollWrapper = document.querySelector('.scroll-wrapper');
+        // const scrollWrapper = document.querySelector('.scroll-wrapper');
+        const scrollWrapper = document.querySelector('.perspective-wrapper');
         const mainPanel = document.querySelector('.grid-area-main-panel');
         if (scrollWrapper && mainPanel) {
             const wrapperWidth = scrollWrapper.clientWidth;

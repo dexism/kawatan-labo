@@ -622,7 +622,8 @@ function updateStatusPanel(state, characters) {
     }
 
     // 3. 盤面(.scroll-wrapper)の横スクロールを中央に補正する（これは維持）
-    const scrollWrapper = document.querySelector('.scroll-wrapper');
+    // const scrollWrapper = document.querySelector('.scroll-wrapper');
+    const scrollWrapper = document.querySelector('.perspective-wrapper');
     const mainPanel = document.querySelector('.grid-area-main-panel');
 
     if (scrollWrapper && mainPanel) {

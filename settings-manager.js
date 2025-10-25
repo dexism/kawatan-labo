@@ -157,7 +157,8 @@ function setupStaticEventListeners() {
         
         // 250ミリ秒後に一度だけ中央揃え処理を実行するように予約する
         resizeTimer = setTimeout(() => {
-            const scrollWrapper = document.querySelector('.scroll-wrapper');
+            // const scrollWrapper = document.querySelector('.scroll-wrapper');
+            const scrollWrapper = document.querySelector('.perspective-wrapper');
             const mainPanel = document.querySelector('.grid-area-main-panel');
 
             if (scrollWrapper && mainPanel) {

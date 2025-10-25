@@ -174,11 +174,28 @@ body {
     top: 0;
     left: 0;
     pointer-events: auto;
+border: 3px solid cyan;
+/* ★ 3D要素 */
+/* perspective: var(--perspective); /* 2.65cm / 100px */
+/* perspective-origin: center center; */
+}
+.perspective-wrapper {
+    display: contents;
+    display: block;
+    height: auto;
+    width: auto;
+    pointer-events: none;
+    overflow: auto;
+    overflow: hidden;
+    /* JSからの即時スクロールを可能にするため、smoothスクロールを無効化 */
+    scroll-behavior: auto; 
 
-    /* ★ 3D要素 */
-    perspective: var(--perspective);
-    /* 2.65cm / 100px */
-    perspective-origin: center center;
+/* ★ 3D要素 */
+perspective: var(--perspective); /* 2.65cm / 100px */
+perspective-origin: center center;
+
+/* background-color: #0ff8; */
+border: 3px solid red;
 }
 .grid-area-main-panel {
     grid-area: main;
@@ -212,9 +229,9 @@ body {
 
     pointer-events: auto;
 
-    /* 3D要素 */
-    rotate: x 30deg;
-    /* transform-style: preserve-3d; /* 子要素に3D空間を引き継がせる */
+/* 3D要素 */
+/* transform-style: preserve-3d; */
+rotate: x 30deg;
 }
 /* ================================
   グリッドコンテンツ
@@ -248,7 +265,7 @@ body {
 .grid-area-pc-panel {
     grid-area: player;
     min-width: 0;
-    width: 100%;
+    width: 80%;
     margin: 0;
     padding: 0;
     box-sizing: border-box;
