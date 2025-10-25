@@ -7,7 +7,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-const appVersion = "7.10.2415";
+const appVersion = "7.10.2510";
 
 // --- モジュールのインポート ---
 import * as data from './data-handler.js';
@@ -44,6 +44,7 @@ import { version as menuBuilderVersion } from './menu-builder.js';
 import { version as referenceVersion } from './reference.js';
 import { version as Dice3dVersion } from './dice-3d.js';
 import { version as p2pManagerVersion } from './p2p-manager.js';
+import { version as p2pProtocolVersion } from './p2p-protocol.js';
 import { version as personalityGeneratorVersion } from './personality-generator.js';
 
 // ===================================================================================
@@ -54,8 +55,14 @@ window.onload = function() {
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
+    console.log(`%c[Versions] App: ${appVersion}, p2p: ${p2pManagerVersion}, settings: ${settingsManagerVersion}, state: ${stateManagerVersion}`, 'color: gray');
     try {
-        // 1. マスターデータの読み込みと各モジュールの初期化
+        // 1. URLパラメータとlocalStorageを先にチェックして、起動モードを判定
+        const params = new URLSearchParams(window.location.search);
+        const isPlMode = params.has('room');
+        const isNcReconnect = localStorage.getItem('nechronica-session-host-room-id') !== null; // ★ NC復帰かを判定
+
+        // 2. 常に実行する初期化処理 (変更なし)
         await data.loadAllData();
         characterManager.initialize(data.getUndeadTemplates());
         initializeUI();
@@ -65,44 +72,40 @@ document.addEventListener('DOMContentLoaded', async () => {
             hintMasterData: data.getHintData(),
             regretMasterData: data.getRegretData(),
             takaramonoMasterData: data.getTakaramonoData(),
-            memoryFragmentsData: data.getMemoryFragmentsData(), // 正しい関数名でデータ取得
-            memoryFragmentsAlphaData: data.getMemoryFragmentsAlphaData(), // 追加
-            memoryFragmentsBetaData: data.getMemoryFragmentsBetaData(), // 追加
-            awakeningLocationsData: data.getAwakeningLocationsData(), // 追加
-            posthumousHistoryData: data.getPosthumousHistoryData(), // 追加
+            memoryFragmentsData: data.getMemoryFragmentsData(),
+            memoryFragmentsAlphaData: data.getMemoryFragmentsAlphaData(),
+            memoryFragmentsBetaData: data.getMemoryFragmentsBetaData(),
+            awakeningLocationsData: data.getAwakeningLocationsData(),
+            posthumousHistoryData: data.getPosthumousHistoryData(),
             addLog: uiAddLog 
         });
-
-        // 2. UIの骨格を先に描画
+        
+        // 3. UIの骨格を描画 (変更なし)
         initializeAppUI();
 
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
-        // 3. バージョンチェックを実行し、関連モーダルが閉じるのを待つ
-        await checkAppVersion();
-        
-        // 4. ウェルカムモーダルを表示し、ユーザーが閉じるのを待つ
-        await showWelcomeModal();
-
-        // 5. 更新情報を表示し、ユーザーが閉じるのを待つ
-        await showUpdateNotesModal();
-        
-        // 6. 保存データがあれば復元モーダルを表示
-        if (stateManager.hasSavedState()) {
-            await showRestoreModal();
+        // 4. PLモードまたはNC復帰モードでない場合のみ、モーダル表示などの通常フローを実行
+        if (!isPlMode && !isNcReconnect) {
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            await checkAppVersion();
+            await showWelcomeModal();
+            await showUpdateNotesModal();
+            if (stateManager.hasSavedState()) {
+                await showRestoreModal();
+            }
+        } else if (isNcReconnect && stateManager.hasSavedState()) {
+            // ★ NC復帰時、かつ保存データがある場合は、自動で「はい」を選択したことにする
+            console.log("[Script] NC復帰モードを検出。セッションを自動で復元します。");
+            const success = await stateManager.loadState(data.getUndeadTemplates());
+            if (success) {
+                updateAllUI();
+            }
         }
-
-        // 7. すべての初期化モーダルが完了した後、バージョン情報を表示
+        
+        // 5. すべての初期化処理が終わった後に共通で実行する処理 (変更なし)
         displayAppVersionInfo();
-
-        // 8. スプラッシュ消去
         const splash = document.getElementById('splash');
         splash.classList.add('fade-out');
-
-        // 9. すべての処理の最後に更新完了通知をチェック ★★★
         handleVersionNotification();
-
-        // setTimeout(() => splash.remove(), 1000);
 
     } catch (error) {
         console.error("アプリケーションの初期化に失敗しました。", error);
@@ -340,6 +343,7 @@ function displayAppVersionInfo() {
         "reference": referenceVersion,
         "character-converter": characterConverterVersion,
         "p2p-manager": p2pManagerVersion,
+        "p2p-protocol": p2pProtocolVersion,
         "personality-generator": personalityGeneratorVersion
     };
     displayVersionInfo(versionInfo);

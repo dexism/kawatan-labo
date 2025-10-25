@@ -6,7 +6,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.20.4";
+export const version = "1.20.5";
 
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
@@ -587,6 +587,16 @@ function updateStatusPanel(state, characters) {
     // 1. フォーカスすべきUI要素を決定する (これは変更なし)
     let focusElement = null;
     switch (phase) {
+        case 'ACTION_DECLARATION':
+            if (activeActors.length > 0) {
+                const firstActorType = activeActors[0].type;
+                if (firstActorType === 'pc') {
+                    focusElement = document.querySelector('.grid-area-pc-panel');
+                } else {
+                    focusElement = document.querySelector('.grid-area-enemy-panel');
+                }
+            }
+            break;
         case 'RAPID_RESOLUTION':
             focusElement = document.getElementById('rapidDeclarationArea');
             break;
@@ -980,6 +990,7 @@ export function displayVersionInfo(versionInfo) {
             'ui-helpers', 
             'reference', 
             'p2p-manager',
+            'p2p-protocol',
             'character-converter',
             'personality-generator'
         ];

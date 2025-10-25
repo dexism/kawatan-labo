@@ -273,16 +273,22 @@
 /* 各PLの表示項目 */
 .peer-list-item {
     display: flex;
-    justify-content: space-between;
+    /* justify-content: space-between; */
     align-items: center;
-    padding: 5px 10px 5px 15px;
+    padding: 5px 15px 5px 10px;
     background-color: var(--color-background-3);
     color: var(--color-fore-5);
     border-radius: 20px;
     font-size: 12px;
 }
+.peer-status {
+    font-size: 8px;
+    margin-right: 8px;
+    line-height: 1;
+}
 .peer-name {
     font-weight: bold;
+    margin-right: auto; /* ▼▼▼ この行を追加 ▼▼▼ */
 }
 /* 追放ボタン */
 .kick-btn {
@@ -290,10 +296,10 @@
     color:            yellow;
     border: none;
     border: 1px solid var(--color-accent-red);
-    padding: 3px 5px;
-    border-radius: 5px;
+    padding: 2px 10px;
+    border-radius: 15px;
     cursor: pointer;
-    font-size: 10px;
+    font-size: 12px;
 }
 .kick-btn:hover {
     background-color: gold;

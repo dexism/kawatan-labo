@@ -2,7 +2,7 @@
  * @file state-manager.js
  * @description アプリケーションのセッション状態の保存と復元を担当するモジュール
  */
-export const version = "2.5.3"; // 保存・復元ロジックの最終修正版
+export const version = "2.5.4"; // 保存・復元ロジックの最終修正版
 
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
@@ -93,7 +93,7 @@ function createSaveObject() {
             isDestroyed: char.isDestroyed || false,
             hasWithdrawn: char.hasWithdrawn || false,
             damagedPartNames: Object.values(char.partsStatus || {}).flat().filter(p => p.damaged).map(p => p.name),
-            usedManeuvers: Array.from(char.usedManeuvers || [])
+            usedManeuvers: Array.from(char.usedManeuvers || []) // Setを配列に変換
         };
 
         return { initialState, currentState };
@@ -253,7 +253,7 @@ async function executeLoad(stateObject, undeadTemplates) {
                     actionValue: currentState.actionValue,
                     isDestroyed: currentState.isDestroyed,
                     hasWithdrawn: currentState.hasWithdrawn,
-                    usedManeuvers: new Set(currentState.usedManeuvers || [])
+                    usedManeuvers: new Set(currentState.usedManeuvers || []) // 配列からSetに変換
                 });
                 const damagedNames = new Set(currentState.damagedPartNames);
                 Object.values(newChar.partsStatus).flat().forEach(part => {

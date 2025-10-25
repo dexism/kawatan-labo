@@ -2,11 +2,13 @@
  * @file settings-manager.js
  * @description アプリケーションの設定（テーマ、セッション管理など）を統括するモジュール
  */
-export const version = "3.0.3"; // 責務分離リファクタリング版
+export const version = "3.0.5"; // 責務分離リファクタリング版
 
 import * as stateManager from './state-manager.js';
 import * as p2p from './p2p-manager.js';
+// import * as protocol from './p2p-protocol.js';
 import * as ui from './ui-manager.js';
+import * as battleLogic from './battle-logic.js';
 import * as charManager from './character-manager.js';
 
 // --- モジュール内変数 ---
@@ -207,31 +209,20 @@ async function determineInitialSessionMode() {
     const plNameFromUrl = params.get('plName');
     const hostRoomIdFromStorage = localStorage.getItem(HOST_ROOM_ID_KEY);
 
-    if (roomIdFromUrl && plNameFromUrl) {
-        // PLとして参加するフロー（変更なし）
-        await switchToPlMode(roomIdFromUrl, decodeURIComponent(plNameFromUrl));
-    } else if (hostRoomIdFromStorage) {
-        // ▼▼▼ ここからが今回の修正箇所 ▼▼▼
-        
-        // 以前の実装（confirmダイアログを表示）
-        /*
-        if (confirm(`前回のセッション[${hostRoomIdFromStorage}]が中断されています。復帰しますか？`)) {
-            await switchToNcMode(hostRoomIdFromStorage);
-        } else {
-            localStorage.removeItem(HOST_ROOM_ID_KEY);
-            p2p.database.ref(`rooms/${hostRoomIdFromStorage}`).remove();
-            switchToOfflineMode();
-        }
-        */
+    if (roomIdFromUrl) {
+        // PLとして参加するが、ここではモードを切り替えるだけ。
+        // 実際の初期化は script.js に任せる。
+        console.log(`[Settings] URLパラメータを検知。PLモードでルーム[${roomIdFromUrl}]に参加します。`);
+        const plName = plNameFromUrl ? decodeURIComponent(plNameFromUrl) : (localStorage.getItem(PLAYER_NAME_KEY) || '名無し');
+        await switchToPlMode(roomIdFromUrl, plName);
 
-        // 新しい実装（自動で復帰）
-        console.log(`中断されたセッション[${hostRoomIdFromStorage}]に自動で復帰します。`);
+    } else if (hostRoomIdFromStorage) {
+        // NCとしての自動復帰処理
+        console.log(`[Settings] 中断されたセッション[${hostRoomIdFromStorage}]に自動で復帰します。`);
         await switchToNcMode(hostRoomIdFromStorage);
-        
-        // ▲▲▲ 修正ここまで ▲▲▲
 
     } else {
-        // 通常のオフラインモードで起動（変更なし）
+        // 通常のオフラインモードで起動
         switchToOfflineMode();
     }
 }
@@ -310,13 +301,16 @@ async function switchToPlMode(roomId, plName) {
     document.body.classList.remove('nc-mode');
     document.body.classList.add('pl-mode');
     
-    // uiElements.sessionStartBtn.style.display = 'none';
     uiElements.sessionJoinContainer.style.display = 'none';
     uiElements.sessionPlPanel.style.display = 'block';
     uiElements.plRoomId.textContent = roomId;
 
     try {
         await p2p.joinClientSession(roomId, plName);
+
+        // ▼▼▼ この行を削除 ▼▼▼
+        // protocol.sendRequestInitialState();
+
     } catch (error) {
         alert(error.message + "\nオフラインモードで起動します。");
         window.location.href = window.location.pathname;
@@ -424,18 +418,50 @@ async function handleSetPasscode() {
 // --- P2Pコールバックハンドラ ---
 function handleDataReceived(data) {
     console.log('受信:', data);
-    if (data.type === 'notification') {
-        ui.showToastNotification(data.payload, 3000);
-    } else if (data.type === 'kicked') {
-        alert("ルームから追放されました。");
-        p2p.disconnectSession();
-        window.location.href = window.location.pathname;
-    // ▼▼▼ 以下の else if ブロックを追加 ▼▼▼
-    } else if (data.type === 'peerListUpdate') {
-        // NCから送られてきた最新の参加者リストでUIを更新する
-        handlePeerListChange(data.payload);
-    // ▲▲▲ 追加はここまで ▲▲▲
+    
+    // ▼▼▼ ここからが今回の修正箇所 (2/3) ▼▼▼
+    switch (data.type) {
+        case 'notification':
+            ui.showToastNotification(data.payload, 3000);
+            break;
+        case 'kicked':
+            alert("ルームから追放されました。");
+            p2p.disconnectSession();
+            window.location.href = window.location.pathname;
+            break;
+        case 'peerListUpdate':
+            // PL側でNCからブロードキャストされたリストを受け取る (現在は使用していないが念のため残す)
+            // handlePeerListChange(data.payload); 
+            break;
+        case 'gameStateUpdate':
+            if (currentSessionMode === 'pl') {
+                console.log("[Settings] 現況データを受信しました。画面を同期します。");
+                
+                const { battleState, characters: receivedCharacters } = data.payload;
+
+                // 1. まずローカルのキャラクターをクリアする
+                charManager.clearCharacters();
+                
+                // 2. 受信したキャラクターデータを1体ずつ再生成する
+                //    usedManeuvers を Set に変換しつつ、character-manager に追加させる
+                receivedCharacters.forEach(charData => {
+                    const characterWithSet = {
+                        ...charData,
+                        usedManeuvers: new Set(charData.usedManeuvers || [])
+                    };
+                    charManager.addCharacterFromObject(characterWithSet, characterWithSet.type);
+                });
+                
+                // 3. battleStateを復元する
+                battleLogic.restoreBattleState(battleState);
+                
+                // 4. UIを完全に再描画する
+                ui.updateAllUI();
+                console.log("[Settings] 現況データに基づき、UIを更新しました。");
+            }
+            break;
     }
+    // ▲▲▲ 修正ここまで ▲▲▲
 }
 
 function handleConnectionChange(id, state) {
@@ -445,60 +471,71 @@ function handleConnectionChange(id, state) {
     }
 }
 
-function handlePeerListChange(peerList) {
+function handlePeerListChange(peerList) { // 引数名を peerStatusList から peerList に戻す
     const isNc = (currentSessionMode === 'nc');
-    
-    // リストコンテナを取得
     const listEl = uiElements.plPeerList;
-
-    // NC/PL両方のルームID表示要素からIDを取得
-    const ncRoomId = uiElements.ncRoomId.textContent;
-    const plRoomId = uiElements.plRoomId.textContent;
-
-    // 現在のモードに応じた正しいルームIDを使用
-    const roomId = isNc ? ncRoomId : plRoomId;
-
-    // NCモード用のカウント表示要素
     const countEl = uiElements.ncPeerCount;
-
-    // ルームIDがなければ処理を中断
+    const roomId = isNc ? uiElements.ncRoomId.textContent : uiElements.plRoomId.textContent;
     if (!roomId) return;
-
-    // if (ncListEl) ncListEl.innerHTML = '';
     if (listEl) listEl.innerHTML = '';
 
-    peerList.forEach(plId => {
-        p2p.database.ref(`rooms/${roomId}/pls/${plId}/profile`).once('value', snapshot => {
-            const profile = snapshot.val();
-            if (profile) {
-                // NCモードの場合のみ追放ボタンを生成
-                const kickButtonHtml = isNc ? `<button class="kick-btn" data-pl-id="${plId}">追放</button>` : '';
-                
-                const itemHtml = `<span class="peer-name">${profile.name}</span>${kickButtonHtml}`;
+    // ▼▼▼ ここからが今回の修正箇所です ▼▼▼
 
-                // 両方のリストに同じ内容のアイテムを追加
-                if (listEl) {
-                    const ncItemEl = document.createElement('div');
-                    ncItemEl.className = 'peer-list-item';
-                    ncItemEl.innerHTML = itemHtml;
-                    listEl.appendChild(ncItemEl);
+    if (isNc) {
+        // NCの場合: peerList は [[plId, statusData], ...] という形式の配列
+        const peerStatusList = peerList; 
+        
+        peerStatusList.forEach(([plId, statusData]) => {
+            const { status, name } = statusData;
+            
+            let indicator = '⚪';
+            if (status === 'online') indicator = '🟢';
+            else if (status === 'waiting') indicator = '🟡';
+            else if (status === 'offline') indicator = '🔴';
+            
+            const kickButtonHtml = `<button class="kick-btn" data-pl-id="${plId}">追放</button>`;
+            const itemHtml = `<span class="peer-status">${indicator}</span> <span class="peer-name">${name}</span>${kickButtonHtml}`;
 
-                    // NCの場合のみ、追放ボタンにイベントリスナーを設定
-                    if (isNc) {
-                        ncItemEl.querySelector('.kick-btn').addEventListener('click', () => {
-                            if (confirm(`PL「${profile.name}」を追放しますか？`)) {
-                                p2p.kickPlayer(plId);
-                            }
-                        });
-                    }
+            const itemEl = document.createElement('div');
+            itemEl.className = 'peer-list-item';
+            itemEl.innerHTML = itemHtml;
+            listEl.appendChild(itemEl);
+
+            itemEl.querySelector('.kick-btn').addEventListener('click', () => {
+                if (confirm(`PL「${name}」を追放しますか？`)) {
+                    p2p.kickPlayer(plId);
                 }
-            }
+            });
         });
-    });
+        
+        if (countEl) {
+            countEl.textContent = peerStatusList.length;
+        }
 
-    if (isNc && countEl) {
-        countEl.textContent = peerList.length;
+     } else {
+        // PLの場合: peerList は [plId1, plId2, ...] という形式のID文字列の配列
+        const peerIdList = peerList;
+        
+        // ▼▼▼ この3行を追加 ▼▼▼
+        // 接続状態表示を更新
+        if (uiElements.plConnectionStatus) {
+            uiElements.plConnectionStatus.textContent = '接続完了';
+        }
+
+        peerIdList.forEach(plId => {
+            p2p.database.ref(`rooms/${roomId}/pls/${plId}/profile`).once('value', snapshot => {
+                const profile = snapshot.val();
+                if (profile) {
+                    const itemHtml = `<span class="peer-name">${profile.name}</span>`;
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'peer-list-item';
+                    itemEl.innerHTML = itemHtml;
+                    listEl.appendChild(itemEl);
+                }
+            });
+        });
     }
+    // ▲▲▲ 修正はここまでです ▲▲▲
 }
 
 // ===============================================

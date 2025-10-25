@@ -6,7 +6,7 @@
 /**
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.5.29";
+export const version = "1.5.30";
 
 // import { showModal } from './ui-manager.js';
 import { showModal, showToastNotification } from './ui-manager.js';
@@ -200,6 +200,7 @@ function formatSimpleTableResult(tableName, masterData, diceResult) {
     return { resultText, selectedMasterData: item };
 }
 
+const ROLL_DELAY_MS = 400; // ▼▼▼ この行を追加 ▼▼▼
 export function performDiceRoll(rollData) {
     const input = (typeof rollData === 'string') ? rollData : rollData.command;
     const callback = (typeof rollData === 'object' && rollData.callback) ? rollData.callback : null;
@@ -305,7 +306,7 @@ export function performDiceRoll(rollData) {
                     callback(bestResult, bestHitLocation, resultText, maxFinalValue);
                 }
             });
-        }, 500); // 遅延時間
+        }, ROLL_DELAY_MS); // 遅延時間
     } else if (d10Match) {
         const command = d10Match[1];
         
@@ -368,7 +369,7 @@ export function performDiceRoll(rollData) {
                     callback(resultValue, null, resultText, selectedMasterData);
                 }
             });
-        }, 500); // 遅延時間
+        }, ROLL_DELAY_MS); // 遅延時間
     } else if (d100Match || table100Match) {
         // --- D100系コマンドの場合 ---
         // 500msの遅延を入れてから performD100Roll を呼び出す
@@ -394,7 +395,7 @@ export function performDiceRoll(rollData) {
                     return item ? `🎲 ${tableName}(${displayKey})<br>【${item.name}】 ${item.description}` : `${tableName}データ[${displayKey}]が見つかりませんでした。`;
                 }
             });
-        }, 500); // 遅延時間
+        }, ROLL_DELAY_MS); // 遅延時間
 
     } else {
         // --- システムコマンドとD10系以外 (1d8 など) の場合 ---

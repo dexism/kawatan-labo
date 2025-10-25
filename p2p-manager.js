@@ -2,7 +2,11 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.2.9";
+export const version = "1.2.13";
+
+import * as protocol from './p2p-protocol.js'; // ★ p2p-protocolをインポート
+import * as battleLogic from './battle-logic.js'; // ★ battle-logicをインポート
+import * as charManager from './character-manager.js'; // ★ character-managerをインポート
 
 // --- Firebaseの初期化 ---
 const firebaseConfig = {
@@ -31,8 +35,14 @@ let onPeerListChangeCallback; // 接続中のピアリストが変更された�
 let localId; // 自身のユニークID
 let sessionRef = null; // ★セッションの参照を保持するための変数を追加
 let myRef = null;      // ★自身の参照を保持するための変数を追加
-const plsListener = null; // ★ NC用のリスナーを保持する変数を追加
 const HOST_ROOM_ID_KEY = 'nechronica-session-host-room-id';
+
+const HEARTBEAT_INTERVAL = 5000; // 5秒ごとにpingを送信
+const OFFLINE_THRESHOLD = 15000; // 15秒応答がなければ「切断」
+const WAITING_THRESHOLD = 7000;  // 7秒応答がなければ「待機中」
+
+let heartbeatInterval = null; // ハートビートのタイマーID
+const peerStatus = new Map(); // 各PLの状態を管理: { status, lastPong, name }
 
 /**
  * 文字列をSHA-256ハッシュ化し、Base64文字列として返す
@@ -130,68 +140,123 @@ export async function createHostSession(sessionId = null, hostName = 'NC') { // 
         console.log(`Firebase: 既存セッション[${sessionId}]に復帰します。`);
     }
 
+    console.log(`[P2P NC] ホストセッションを開始します。ルームID: ${sessionId}`);
+
     // ローカルストレージにホストしたルーム番号を保存
     localStorage.setItem(HOST_ROOM_ID_KEY, sessionId);
 
     const plsRef = sessionRef.child('pls');
-
-    // 参加者リスト(/pls)のあらゆる変更（追加、削除、子の変更）をこのリスナーで一元管理する
+    // 参加者リストのリスナーを変更
     plsRef.on('value', (snapshot) => {
-        const connectedPlsData = snapshot.val();
-        const connectedPlIds = connectedPlsData ? Object.keys(connectedPlsData) : [];
+        const connectedPlsData = snapshot.val() || {};
+        const connectedPlIds = Object.keys(connectedPlsData);
 
-        // 【重要】この時点で plId のリストは必ず一意になる
-        console.log('接続中のPL IDリスト（重複排除済）:', connectedPlIds);
+        console.log('[P2P NC] /pls 変更を検知。現在の参加者IDリスト:', connectedPlIds);
 
-        // 1. NC自身のUIを更新するためのコールバックを呼び出す
-        //    渡すのは一意なIDの配列のみ。名前の取得やUI構築はコールバック側で行う。
-        if (onPeerListChangeCallback) {
-            onPeerListChangeCallback(connectedPlIds);
-        }
-
-        // 2. 接続している全クライアントに参加者リストをブロードキャストする
-        //    これにより、全PLの画面も同期される。
-        broadcastToAll({ type: 'peerListUpdate', payload: connectedPlIds });
-
-        // 3. 新規接続者に対するPeerConnectionのセットアップを行う
-        connectedPlIds.forEach(plId => {
-            // peerConnectionsにまだ存在しないIDは新規接続者とみなす
-            if (!peerConnections.has(plId)) {
-                console.log(`Firebase: 新規PL[${plId}]との接続を開始します。`);
-                setupPeerConnectionForPl(plId, sessionRef);
-            }
-        });
-        
-        // 切断されたPLの接続情報とリスナーをクリーンアップする
-        const currentPeerIds = new Set(peerConnections.keys());
+        // --- 1. 切断されたPLのクリーンアップ ---
         const connectedPlIdsSet = new Set(connectedPlIds);
-        
-        currentPeerIds.forEach(plId => {
+        peerConnections.forEach((pc, plId) => {
             if (!connectedPlIdsSet.has(plId)) {
-                console.log(`Firebase: PL[${plId}]の接続が切断されました。クリーンアップします。`);
-                
-                // 1. PeerConnectionを閉じる
-                peerConnections.get(plId)?.close();
+                console.log(`%c[P2P NC] DBからPLが消失したため接続をクリーンアップ: ${plId}`, 'color: lightgray');
+                pc.close();
                 peerConnections.delete(plId);
                 dataChannels.delete(plId);
-
-                // 2. 関連するFirebaseリスナーを全て解除する
                 if (plListeners.has(plId)) {
                     plListeners.get(plId).forEach(listener => {
-                        // 'child_added' イベントの場合は3つの引数が必要
-                        if (listener.ref.toString().includes('iceCandidates')) {
-                            listener.ref.off('child_added', listener.callback);
-                        } else {
-                            listener.ref.off('value', listener.callback);
-                        }
+                        listener.ref.off('value', listener.callback);
+                        listener.ref.off('child_added', listener.callback);
                     });
                     plListeners.delete(plId);
-                    console.log(`[${plId}] のFirebaseリスナーを全て解除しました。`);
+                }
+                // peerStatusからは削除せず、offlineとして残す
+                if (peerStatus.has(plId)) {
+                    peerStatus.get(plId).status = 'offline';
                 }
             }
         });
+
+        // --- 2. 新規 or 再接続PLのセットアップ ---
+        connectedPlIds.forEach(plId => {
+            if (!peerConnections.has(plId)) {
+                console.log(`%c[P2P NC] 新規または再接続のPLを検知。接続セットアップを開始 -> ${plId}`, 'color: cyan');
+
+                // peerStatusマップにエントリを作成または更新
+                peerStatus.set(plId, { 
+                    status: 'connecting', 
+                    lastPong: Date.now(), 
+                    name: connectedPlsData[plId].profile?.name || '読込中...'
+                });
+
+                setupPeerConnectionForPl(plId, sessionRef);
+            }
+            // 既存の接続の名前を更新
+            else if (peerStatus.has(plId)) {
+                 peerStatus.get(plId).name = connectedPlsData[plId].profile?.name || peerStatus.get(plId).name;
+            }
+        });
+
+        // --- 3. ハートビートの開始/停止判定 ---
+        if (connectedPlIds.length > 0 && !heartbeatInterval) {
+            startHeartbeat();
+        }
     });
     return sessionId;
+}
+
+// ▼▼▼ ここからが今回の修正箇所 (3/4) ▼▼▼
+/**
+ * 【新設】ハートビートを開始する (NC専用)
+ */
+function startHeartbeat() {
+    if (heartbeatInterval) return;
+    console.log('%c[P2P NC] ハートビートを開始します。', 'color: green');
+
+    heartbeatInterval = setInterval(() => {
+        // ▼▼▼ ここからが今回の修正箇所 (1/2) ▼▼▼
+
+        // --- ハートビート停止条件のチェック ---
+        const activePeers = Array.from(peerStatus.values()).filter(p => p.status !== 'offline');
+        if (activePeers.length === 0) {
+            console.log('%c[P2P NC] アクティブなPLがいないため、ハートビートを停止します。', 'color: red');
+            clearInterval(heartbeatInterval);
+            heartbeatInterval = null;
+            return; // この回のチェックはここで終了
+        }
+
+        // --- ping送信と状態チェック ---
+        broadcastToAll({ type: 'ping' });
+
+        const now = Date.now();
+        let hasUnresponsivePeer = false; // ★ 返事がないユーザーがいるかどうかのフラグ
+
+        peerStatus.forEach((peer, plId) => {
+            const timeSinceLastPong = now - peer.lastPong;
+            let newStatus = 'online';
+
+            if (!dataChannels.has(plId) || dataChannels.get(plId).readyState !== 'open') {
+                newStatus = 'connecting';
+            } else if (timeSinceLastPong > OFFLINE_THRESHOLD) {
+                newStatus = 'offline';
+            } else if (timeSinceLastPong > WAITING_THRESHOLD) {
+                newStatus = 'waiting';
+                hasUnresponsivePeer = true; // ★ 返事がないユーザーがいた
+            }
+            peer.status = newStatus;
+        });
+
+        // ★ 返事がないユーザーがいる場合のみログを出力
+        if (hasUnresponsivePeer) {
+            console.warn('[P2P NC] 一部のPLから応答がありません。状態:', Array.from(peerStatus.entries()));
+        }
+
+        // --- UI更新コールバック ---
+        if (onPeerListChangeCallback && myRef === null) { 
+            const statusArray = Array.from(peerStatus.entries());
+            // ▼▼▼ ログ追加 ▼▼▼
+            console.log('[P2P NC] UI更新コールバックを呼び出します。現在のステータス:', statusArray);
+            onPeerListChangeCallback(statusArray);
+        }
+    }, HEARTBEAT_INTERVAL);
 }
 
 /**
@@ -282,17 +347,30 @@ async function setupPeerConnectionForPl(plId, sessionRef) {
 export async function joinClientSession(sessionId, plName) {
     sessionRef = database.ref(`rooms/${sessionId}`);
 
-    // ▼▼▼ ルームチェックのロジックを全面的に書き換え ▼▼▼
+    // --- 1. 既存の接続情報があれば、すべてクリアする ---
+    if (peerConnections.has('nc')) {
+        peerConnections.get('nc').close();
+        peerConnections.delete('nc');
+    }
+    if (dataChannels.has('nc')) {
+        dataChannels.get('nc').close();
+        dataChannels.delete('nc');
+    }
+    // 既存のリスナーも全て解除
+    sessionRef.child('nc/sdp').off();
+    sessionRef.child('nc/iceCandidates').off();
+    
+    console.log('[P2P PL] 既存の接続情報をクリアし、再接続を開始します。');
+
+    // --- 2. ルームの存在と状態をチェック (変更なし) ---
     const metaSnapshot = await sessionRef.child('meta').once('value');
     if (!metaSnapshot.exists()) {
         throw new Error(`ルーム番号「${sessionId}」は存在しないか、準備ができていません。`);
     }
     const meta = metaSnapshot.val();
-
     if (meta.status === 'restricted') {
         throw new Error("このルームは現在、新しい参加者を募集していません。");
     }
-
     if (meta.status === 'locked') {
         let isAuthorized = false;
         while (!isAuthorized) {
@@ -308,58 +386,60 @@ export async function joinClientSession(sessionId, plName) {
             }
         }
     }
-    // ▲▲▲ 修正ここまで ▲▲▲
 
-    writeAuditLog(plName, 'ルーム入室', sessionId);
-
+    // --- 3. 自身の情報をFirebaseに登録 (変更なし) ---
     myRef = sessionRef.child(`pls/${localId}`);
-    console.log(`Firebase: ルーム[${sessionId}]への参加を開始します。`);
-
-    // **【重要】接続が切断された場合に、自身のデータをDBから削除するようFirebaseに予約する**
     myRef.onDisconnect().remove();
+    await myRef.child('profile').set({
+        name: plName,
+        joinedAt: firebase.database.ServerValue.TIMESTAMP
+    });
+    writeAuditLog(plName, 'ルーム入室', sessionId);
+    console.log(`[P2P PL] ルーム[${sessionId}]への参加を開始します。`);
 
-    // --- 1. PeerConnectionのセットアップ ---
+    // --- 4. 参加者リストの監視を開始 (変更なし) ---
+    const plsRef = sessionRef.child('pls');
+    plsRef.on('value', (snapshot) => {
+        const connectedPlsData = snapshot.val();
+        const connectedPlIds = connectedPlsData ? Object.keys(connectedPlsData) : [];
+        if (onPeerListChangeCallback) {
+            onPeerListChangeCallback(connectedPlIds);
+        }
+    });
+
+    // --- 5. 新しいPeerConnectionをセットアップ ---
     const pc = new RTCPeerConnection(iceConfiguration);
     peerConnections.set('nc', pc);
 
-    // ICE候補を収集し、Firebaseに書き込む
     pc.onicecandidate = event => {
         if (event.candidate) {
             myRef.child('iceCandidates').push(event.candidate.toJSON());
         }
     };
     
-    // NCからのデータチャネル接続を待機
     pc.ondatachannel = event => {
-        const channel = event.channel;
-        setupDataChannel('nc', channel);
+        setupDataChannel('nc', event.channel);
     };
 
-    // --- 2. NCの接続情報をリッスン ---
-    // SDP(オファー)をリッスン
+    // --- 6. NCからの接続情報をリッスン ---
     sessionRef.child('nc/sdp').on('value', async (sdpSnapshot) => {
-        if (sdpSnapshot.exists()) {
-            await pc.setRemoteDescription(new RTCSessionDescription(sdpSnapshot.val()));
-
-            // --- 3. アンサーを作成してFirebaseに書き込む ---
-            const answerDescription = await pc.createAnswer();
-            await pc.setLocalDescription(answerDescription);
-
-            const answer = { sdp: answerDescription.sdp, type: answerDescription.type };
-            await myRef.child('sdp').set(answer);
+        if (sdpSnapshot.exists() && pc.signalingState === 'stable') {
+            try {
+                await pc.setRemoteDescription(new RTCSessionDescription(sdpSnapshot.val()));
+                const answerDescription = await pc.createAnswer();
+                await pc.setLocalDescription(answerDescription);
+                const answer = { sdp: answerDescription.sdp, type: answerDescription.type };
+                await myRef.child('sdp').set(answer);
+            } catch (error) {
+                console.error('[P2P PL] SDP処理中にエラー:', error);
+            }
         }
     });
-    // ICE候補をリッスン
+    
     sessionRef.child('nc/iceCandidates').on('child_added', iceSnapshot => {
-        if (iceSnapshot.exists()) {
+        if (iceSnapshot.exists() && pc.remoteDescription) {
             pc.addIceCandidate(new RTCIceCandidate(iceSnapshot.val()));
         }
-    });
-
-    // 自分の存在をNCに通知
-    await myRef.child('profile').set({
-        name: plName,
-        joinedAt: firebase.database.ServerValue.TIMESTAMP
     });
 }
 
@@ -380,17 +460,82 @@ export function updateMyProfile(profileData) {
 // データチャネルの共通セットアップ
 function setupDataChannel(remoteId, channel) {
     channel.onopen = () => {
-        console.log(`Data channel with [${remoteId}] is open!`);
+        console.log(`%c[P2P] データチャネル開通: ${remoteId}`, 'color: lime; font-weight: bold;');
         dataChannels.set(remoteId, channel);
         if (onConnectionStateChangeCallback) onConnectionStateChangeCallback(remoteId, 'connected');
+        
+        // ▼▼▼ この if ブロックを修正 ▼▼▼
+        // PL側の場合、データチャネル開通後に「現況要求」を送信する
+        if (remoteId === 'nc') {
+            // PL側: 現況要求を送信する (変更なし)
+            protocol.sendRequestInitialState();
+        } else {
+            // NC側: PLとのチャネルが開通したことを検知
+            console.log(`[P2P NC] ${remoteId} とのデータチャネル確立。ステータスを更新します。`);
+            if (peerStatus.has(remoteId)) {
+                peerStatus.get(remoteId).status = 'online';
+                peerStatus.get(remoteId).lastPong = Date.now();
+            }
+        }
     };
     channel.onclose = () => {
-        console.log(`Data channel with [${remoteId}] is closed.`);
+        // ▼▼▼ ログ修正 ▼▼▼
+        console.log(`%c[P2P] データチャネル閉鎖: ${remoteId}`, 'color: orange;');
         if (onConnectionStateChangeCallback) onConnectionStateChangeCallback(remoteId, 'disconnected');
     };
     channel.onmessage = event => {
+        const data = JSON.parse(event.data);
+        
+        const sender = (myRef === null) ? 'NC' : 'PL';
+        const recipient = (myRef === null) ? `PL(${remoteId})` : 'NC';
+        if (data.type !== 'pong' && data.type !== 'ping') {
+             console.log(`[P2P ${sender}] メッセージ受信 <- ${recipient} | type: ${data.type}`);
+        }
+
+        if (data.type === 'pong' && peerStatus.has(remoteId)) {
+            peerStatus.get(remoteId).lastPong = Date.now();
+            // console.log(`[P2P NC] pongを受信 <- ${remoteId}`);
+            return;
+        }
+
+        if (data.type === 'ping') {
+            sendToHost({ type: 'pong' });
+            return;
+        }
+
+        if (data.type === 'channelOpened' && myRef === null) {
+            console.log(`[P2P NC] ${remoteId} のチャネル開通通知を受信。リスト更新をトリガーします。`);
+            // ハートビートを待たずに即時更新
+            if (onPeerListChangeCallback) {
+                onPeerListChangeCallback(Array.from(peerStatus.entries()));
+            }
+            return;
+        }
+
+        // NC側でPLからの現況データ要求を受信した場合の処理
+        if (data.type === 'requestInitialState' && myRef === null) {
+            console.log(`[P2P NC] 現況要求を受信 <- ${remoteId}`);
+            
+            const charactersForSend = charManager.getCharacters().map(char => {
+                // usedManeuvers を Set から Array に変換する
+                return {
+                    ...char,
+                    usedManeuvers: Array.from(char.usedManeuvers || [])
+                };
+            });
+
+            const currentState = {
+                battleState: battleLogic.getBattleState(),
+                characters: charactersForSend // 変換後のキャラクター配列を使用
+            };
+            
+            console.log(`[P2P NC] 現況情報を送信 -> ${remoteId}`);
+            protocol.sendGameStateToClient(remoteId, currentState);
+            return;
+        }
+        
         if (onDataReceivedCallback) {
-            onDataReceivedCallback(JSON.parse(event.data));
+            onDataReceivedCallback(data); // ★ JSON.parse() を削除
         }
     };
 }
@@ -413,11 +558,27 @@ export function sendToHost(data) {
 }
 
 /**
+ * 【新設】NCから特定のPLクライアントへデータを送信する
+ * @param {string} plId - 宛先のPLのユニークID
+ * @param {object} data - 送信するデータオブジェクト
+ */
+export function sendToClient(plId, data) {
+    const channel = dataChannels.get(plId);
+    if (channel && channel.readyState === 'open') {
+        channel.send(JSON.stringify(data));
+    } else {
+        console.warn(`PL[${plId}]へのデータチャネルが存在しないか、開いていません。`);
+    }
+}
+
+/**
  * 【新設】指定されたPLをセッションから追放する (NC専用)
  * @param {string} plId - 追放するPLのユニークID
  */
 export async function kickPlayer(plId) {
     if (!sessionRef) return;
+
+    console.log(`%c[P2P NC] PLを追放します: ${plId}`, 'color: red; font-weight: bold;');
 
     // ▼▼▼ ここからが修正箇所です ▼▼▼
 
@@ -441,11 +602,12 @@ export async function kickPlayer(plId) {
     peerConnections.get(plId)?.close();
     peerConnections.delete(plId);
     dataChannels.delete(plId);
+    peerStatus.delete(plId);
 
     // 4. FirebaseからPLのデータを完全に削除
     await plRef.remove();
 
-    console.log(`Firebase: PL「${plNameToLog}」を追放しました。`);
+    console.log(`[P2P NC] FirebaseからPLデータを削除しました: ${plNameToLog}`);
 
     // 5. 追放ログを全端末にブロードキャスト
     broadcastToAll({ type: 'notification', payload: `PL「${plNameToLog}」がセッションから追放されました。` });
@@ -461,12 +623,17 @@ export function disconnectSession() {
     peerConnections.forEach(pc => pc.close());
     peerConnections.clear();
 
+    const role = myRef ? 'PL' : 'NC';
+    console.log(`%c[P2P ${role}] セッションから切断します。`, 'color: red; font-weight: bold;');
+
     // 2. Firebaseのリスナーを全て解除し、データを削除
     if (sessionRef) {
         sessionRef.off(); // この参照に紐づく全てのリスナーを解除
 
         if (myRef) {
             // PLの場合、自分のデータをDBから削除して退席を通知
+            // PLの場合、onDisconnectを即座に発火させてから、参照を削除する
+            myRef.onDisconnect().cancel(); // 予約をキャンセル
             myRef.remove()
                 .then(() => console.log("Firebaseから自身のデータを削除しました。"))
                 .catch(err => console.error("データ削除エラー:", err));
@@ -487,6 +654,14 @@ export function disconnectSession() {
         }
         sessionRef = null;
     }
+
+    // ▼▼▼ ハートビート停止処理を追加 ▼▼▼
+    if (heartbeatInterval) {
+        console.log('%c[P2P NC] セッション終了のため、ハートビートを停止します。', 'color: red');
+        clearInterval(heartbeatInterval);
+        heartbeatInterval = null;
+    }
+    peerStatus.clear();
 
     console.log("セッションから切断しました。");
 }

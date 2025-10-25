@@ -2,7 +2,7 @@
  * @file battle-logic.js
  * @description 戦闘の進行、状態管理、ルール判定、アクション解決を担当するモジュール。
  */
-export const version = "1.26.98"; // UI分離リファクタリング完了版
+export const version = "1.26.99"; // UI分離リファクタリング完了版
 
 import * as charManager from './character-manager.js';
 import * as ui from './ui-manager.js';
@@ -648,11 +648,24 @@ export function redirectDamage(damageId, newTarget) {
     //   呼び出し元の handleDamageItemClick で宣言をチェック済みにした後に呼び出されるためです。
 }
 
-export function restoreBattleState(turn, characters) {
-    battleState.isStarted = true;
-    battleState.turn = turn;
-    const newCount = Math.max(0, ...characters.map(c => c.actionValue));
-    startCount(newCount);
+/**
+ * 【修正】受信した戦闘状態でローカルの状態を上書き、または復元する
+ * @param {object|number} stateOrTurn - PLが受信したbattleStateオブジェクト、またはセッション復元時のターン数
+ * @param {Array<object>} [characters] - セッション復元時のキャラクター配列
+ */
+export function restoreBattleState(stateOrTurn, characters) {
+    if (typeof stateOrTurn === 'object' && stateOrTurn !== null) {
+        // ケース1: PLがNCから現況データ(battleStateオブジェクト)を受信した場合
+        battleState = { ...stateOrTurn };
+    } else if (typeof stateOrTurn === 'number' && characters) {
+        // ケース2: 従来のセッション復元フロー (state-managerから呼ばれる)
+        battleState.isStarted = true;
+        battleState.turn = stateOrTurn;
+        const newCount = Math.max(0, ...characters.map(c => c.actionValue));
+        startCount(newCount);
+    } else {
+        console.error("restoreBattleStateの引数が不正です:", stateOrTurn);
+    }
 }
 
 export function resetToSetupPhase() {

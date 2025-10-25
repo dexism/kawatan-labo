@@ -206,8 +206,9 @@ body {
     padding: 0;
     gap:     0;
     box-sizing: border-box;
-    overflow-x: hidden;
-    overflow-y: auto;
+    /* overflow-x: hidden;
+    overflow-y: auto; */
+    overflow: auto;
 
     pointer-events: auto;
 
@@ -225,7 +226,7 @@ body {
     margin:  0;
     padding: 0;
     box-sizing: border-box;
-    overflow-x: hidden;
+    overflow: auto;
     pointer-events: auto;
     rotate: 180deg;
     z-index: 2;
@@ -238,7 +239,7 @@ body {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    overflow-x: hidden;
+    overflow: auto;
     z-index: 1;
     left: 0;
 
@@ -251,7 +252,7 @@ body {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    overflow-x: hidden;
+    overflow: auto;
     pointer-events: auto;
     z-index: 2;
 }
@@ -289,7 +290,7 @@ body {
 }
 .grid-area-room-panel {
     grid-area: room;
-    margin-top: -3px;
+    margin-top: -4px;
     z-index: 90;
 }
 .grid-area-settings-panel {

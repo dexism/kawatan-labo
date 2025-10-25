@@ -6,7 +6,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.9.17";
+export const version = "1.9.19";
 
 // --- モジュールのインポート ---
 import * as data from './data-handler.js';
@@ -25,6 +25,15 @@ let nextUniqueId = 1;
 // ===================================================================================
 //  内部ヘルパー関数
 // ===================================================================================
+
+/**
+ * 【新設】受信したキャラクター配列でローカルの状態を完全に上書きする
+ * @param {Array<object>} receivedCharacters - PLが受信したキャラクターの配列
+ */
+export function setCharacters(receivedCharacters) {
+    characters = receivedCharacters;
+    // UI更新は呼び出し元(settings-manager)の責務
+}
 
 export function recalculateMaxActionValue(character) {
     let bonus = 0;
@@ -276,7 +285,17 @@ export function addCharacterFromTemplate(templateId, type, initialArea) {
 }
 
 export function addCharacterFromObject(characterObject, type) {
-    const newChar = createCharacterInstanceFromObject(characterObject, type);
+    //　const newChar = createCharacterInstanceFromObject(characterObject, type);
+
+    let newChar;
+    if (characterObject.id) {
+        // IDがすでにあれば、それは復元データなのでそのまま使う
+        newChar = JSON.parse(JSON.stringify(characterObject));
+    } else {
+        // IDがなければ、新規作成なのでIDを採番する
+        newChar = createCharacterInstanceFromObject(characterObject, type);
+    }
+    
     newChar.area = characterObject.area || characterObject.initialArea || ((type === 'pc') ? '煉獄' : '奈落');
     
     if (type === 'pc' && newChar.treasures && newChar.treasures.length > 0) {
