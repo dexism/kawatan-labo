@@ -157,9 +157,7 @@ body {
     overflow-x: hidden; /* 横スクロールはさせない */
     overflow-y: auto; /* ★ 縦スクロールをこの要素に担当させる */
     -webkit-overflow-scrolling: touch; /* iOSでの慣性スクロール */
-    
-    /* JSからの即時スクロールを可能にするため、smoothスクロールを無効化 */
-    scroll-behavior: auto; 
+    scroll-behavior: smooth; 
 
     align-items: start;
     justify-content: center;
@@ -173,7 +171,7 @@ body {
     position: absolute;
     top: 0;
     left: 0;
-    pointer-events: none;
+    pointer-events: auto;
 /* border: 3px solid cyan; */
 /* ★ 3D要素 */
 /* perspective: var(--perspective); /* 2.65cm / 100px */
@@ -184,7 +182,7 @@ body {
     display: block;
     height: auto;
     width: auto;
-    pointer-events: none;
+    pointer-events: auto;
     overflow: auto;
     overflow: hidden;
     /* JSからの即時スクロールを可能にするため、smoothスクロールを無効化 */
