@@ -73,6 +73,7 @@ h2 {
     accent-color: auto; /* ブラウザ/OSのアクセントカラーを自動で採用 */
 
     --perspective: 2000px;
+    --rotate:        30deg;
     --header-width: 100px;
     --cell-width:    40px;
     --cell-height:   40px;

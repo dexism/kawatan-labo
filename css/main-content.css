@@ -71,10 +71,13 @@ perspective-origin: center center; /* 視点の中心を設定 */
     margin: 0;
     padding: 5px;
     box-sizing: border-box;
-    box-shadow: 0 0 10px var(--color-7);
+    box-shadow: 0 5px 5px var(--color-7);
     transition: all 0.3s ease-out;
     overflow: visible;
     transform: translateY(10px);
+}
+.grid-area-enemy-panel .char {
+    box-shadow: 0 -5px 5px var(--color-7);
 }
 .hover-highlight {
     background-color: color-mix(in srgb, cyan 20%, transparent); 
@@ -730,13 +733,13 @@ transform-style: preserve-3d;
     height: var(--cell-height);   /* 高さを40pxに固定 */
     display: flex;
     flex-shrink: 0;               /* ★★★ マーカーが縮むのを防ぐ最重要設定 ★★★ */
-    z-index: 1;
+    z-index: 0;
 transition: all 0.3s ease;
-transform: translateZ(15px) rotateX(0deg);
+transform: translateZ(15px) rotateX(30deg);
 }
 .marker:hover {
   /* 例：さらに手前に浮き上がらせて回転させる */
-  transform: translateY(-20px) translateZ(20px) rotateX(-20deg) scale(1.2);
+  transform: translateY(-20px) translateZ(10px) rotateX(-20deg) scale(1.2);
   z-index: 1000;
 }
 .marker-img {

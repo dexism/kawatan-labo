@@ -173,8 +173,8 @@ body {
     position: absolute;
     top: 0;
     left: 0;
-    pointer-events: auto;
-border: 3px solid cyan;
+    pointer-events: none;
+/* border: 3px solid cyan; */
 /* ★ 3D要素 */
 /* perspective: var(--perspective); /* 2.65cm / 100px */
 /* perspective-origin: center center; */
@@ -195,7 +195,7 @@ perspective: var(--perspective); /* 2.65cm / 100px */
 perspective-origin: center center;
 
 /* background-color: #0ff8; */
-border: 3px solid red;
+/* border: 3px solid red; */
 }
 .grid-area-main-panel {
     grid-area: main;
@@ -231,7 +231,7 @@ border: 3px solid red;
 
 /* 3D要素 */
 /* transform-style: preserve-3d; */
-rotate: x 30deg;
+rotate: x var(--rotate);
 }
 /* ================================
   グリッドコンテンツ
