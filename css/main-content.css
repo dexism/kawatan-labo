@@ -16,7 +16,7 @@
     padding: 0;
     justify-content: center;
 
-/* transform-style: preserve-3d; */
+transform-style: preserve-3d;
 }
 .char-container {
     display: flex;
@@ -75,8 +75,9 @@ perspective-origin: center center; /* 視点の中心を設定 */
     transition: all 0.3s ease-out;
     overflow: visible;
     transform: translateY(10px);
+/* transform-style: preserve-3d; */
 }
-.grid-area-enemy-panel .char {
+.grid-area-enemy-panel .char:not(.hover-highlight) {
     box-shadow: 0 -5px 5px var(--color-7);
 }
 .hover-highlight {
@@ -85,7 +86,7 @@ perspective-origin: center center; /* 視点の中心を設定 */
         0 0 10px inset cyan,
         0 0 10px       cyan;
     outline: 2px solid cyan;
-    transform: scale(1) translateY(10px) translateZ(80px) rotateX(-20deg);
+    transform: scale(1) translateY(0px) translateZ(80px) rotateX(-20deg);
     z-index: 11;
 }
 .target-selectable {
@@ -109,12 +110,12 @@ perspective-origin: center center; /* 視点の中心を設定 */
         0 0 10px inset gold,
         0 0 10px       gold;
     outline: 2px solid gold;
-    transform: scale(1) translateY(-10px) translateZ(0px) rotateX(0deg);
+    transform: scale(1) translateY(0px) translateZ(0px) rotateX(0deg);
     z-index: 11;
 }
 .highlight-char.hover-highlight {
     background-color: color-mix(in srgb, gold 20%, transparent); 
-    transform: scale(1) translateY(10px) translateZ(80px) rotateX(-20deg);
+    transform: scale(1) translateY(0px) translateZ(80px) rotateX(-20deg);
 }
 body.is-dragging .char.hover-highlight {
     transform: scale(1);
@@ -567,7 +568,7 @@ body.is-dragging .char.hover-highlight {
     =================== */
 .battle-grid-scroll-wrapper {
     width: 100%; /* 親要素(画面幅)いっぱいに広がる */
-    padding: 5px 0;
+    padding: 15px 0 0 0;
     margin: 0;
     box-sizing: border-box;
     overflow: auto hidden; /* 中身がはみ出たら、横方向のみスクロールバーを表示 */
@@ -618,7 +619,7 @@ body.is-dragging .char.hover-highlight {
     position: sticky;
     left: 0;
     border-radius: 3px;
-    z-index: 3;
+    z-index: 1;
 }
 /* エリア名 */
 .row-header {
@@ -631,7 +632,7 @@ body.is-dragging .char.hover-highlight {
     left: 0;
     border-radius: 3px;
     opacity: 0.9;
-    z-index: 19;
+    z-index: 1;
 }
 /* カウント */
 .col-header {
@@ -642,23 +643,8 @@ body.is-dragging .char.hover-highlight {
     color:      #e33;
     position: sticky;
     border-radius: 3px;
-    z-index: 2;
+    z-index: 0;
 }
-/*
-.cell {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    align-content: flex-start;
-    justify-items: flex-start;
-    justify-content: flex-start;
-    background-color: var(--color-card);
-    overflow: visible;
-    min-width: var(--cell-width);
-    min-height: var(--cell-height);
-    border-radius: 3px;
-}
-*/
 .cell {
     display: flex;
     flex-direction: row;
@@ -681,8 +667,13 @@ body.is-dragging .char.hover-highlight {
 
     flex-shrink: 0;
 
+    z-index: 0;
+
     /* text-align: center; を削除（マーカーを左詰めにするため）*/
-transform-style: preserve-3d;
+perspective: var(--perspective);
+perspective-origin: center center; /* 視点の中心を設定 */
+/* perspective: var(--perspective);
+perspective-origin: center center; /* 視点の中心を設定 */
 }
 /* --- グリッドセルのエリアカラー --- */
 /* 透明度を加えて、ヘッダーより少し薄い色にする */
@@ -731,29 +722,30 @@ transform-style: preserve-3d;
 
     width: var(--cell-width);     /* 幅を40pxに固定 */
     height: var(--cell-height);   /* 高さを40pxに固定 */
+    height: 25px;   /* 高さを40pxに固定 */
     display: flex;
     flex-shrink: 0;               /* ★★★ マーカーが縮むのを防ぐ最重要設定 ★★★ */
-    z-index: 0;
+    z-index: 10;
 transition: all 0.3s ease;
-transform: translateZ(15px) rotateX(30deg);
+transform: translateY(-15px) translateZ(10px) rotateX(-10deg) rotateY(-20deg);
 }
 .marker:hover {
   /* 例：さらに手前に浮き上がらせて回転させる */
-  transform: translateY(-20px) translateZ(10px) rotateX(-20deg) scale(1.2);
+  transform: translateZ(20px) translateY(-20px) rotateX(-10deg) scale(1.1);
   z-index: 1000;
 }
 .marker-img {
-    width: 100%; /* 親である.markerの幅(40px)に追従 */
-    height: 100%; /* 親である.markerの高さ(40px)に追従 */
+    width: 50px;
+    height: 50px;
     object-fit: contain;
     display: flex;
-    /* 以前のwidth, height, aspect-ratio指定は不要になるので削除・上書き */
+    z-index: 10;
 }
 /* 名前のポップアップ */
 .marker::after {
     content: attr(data-name);
     position: absolute;
-    bottom: 100%;
+    bottom: 130%;
     left: 50%;
     transform: translateX(-50%);
     border-radius: 5px;
@@ -773,19 +765,17 @@ transform: translateZ(15px) rotateX(30deg);
 }
 .marker-stack-count {
     position: absolute;
-    bottom: -5px;
-    right: -5px;
+    bottom: -15px;
+    right: 0;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 15px;
-    font-weight: bold;
+    font-size: 16px;
+    font-weight: 900;
     text-shadow:
-        0 0 2px white,
-        0 0 2px white,
-        0 0 2px white,
-        0 0 2px white;
-    color:    #25a;
-    z-index: 7;
+        0 0 1px black,
+        0 0 2px black,
+        0 0 3px black,
+        0 0 4px black;
+    color:      #0ff;
+    z-index: 10;
     pointer-events: none;
 }

@@ -39,7 +39,7 @@
     display: flex;
     justify-content: center; /* 水平方向 */
     align-items: center;     /* 垂直方向 */
-    padding: 20px;             /* 画面の端からの余白 */
+    padding: 0;             /* 画面の端からの余白 */
     box-sizing: border-box;    /* paddingをwidth/heightに含める */
     
     /* 表示/非表示のアニメーション */

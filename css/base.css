@@ -72,8 +72,8 @@ h2 {
 :root {
     accent-color: auto; /* ブラウザ/OSのアクセントカラーを自動で採用 */
 
-    --perspective: 2000px;
-    --rotate:        30deg;
+    --perspective: 1600px;
+    --rotate:        40deg;
     --header-width: 100px;
     --cell-width:    40px;
     --cell-height:   40px;
@@ -343,7 +343,7 @@ html[data-theme="dark"] {
 /* モダンブラウザ向け (Firefoxなど) */
 * {
     scrollbar-width: thin;
-    scrollbar-color: var(--color-text-muted) var(--color-surface-dark);
+    scrollbar-color: var(--color-background-7) var(--color-background-2);
 }
 
 /* Webkit系ブラウザ向け (Chrome, Safari, Edgeなど) */

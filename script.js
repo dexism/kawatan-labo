@@ -7,7 +7,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-const appVersion = "7.10.2513";
+const appVersion = "7.10.2515";
 
 // --- モジュールのインポート ---
 import * as data from './data-handler.js';
@@ -51,7 +51,7 @@ import { version as personalityGeneratorVersion } from './personality-generator.
 //  アプリケーション初期化フロー
 // ===================================================================================
 window.onload = function() {
-    document.title = `『永い後日談のネクロニカ』バトルパート支援ツール Ver.${appVersion}`;
+    document.title = `『永い後日談のネクロニカ』セッションサポートツール Ver.${appVersion}`;
 };
 
 document.addEventListener('DOMContentLoaded', async () => {

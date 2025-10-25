@@ -152,6 +152,7 @@ body {
     padding: 0;
 }
 .scroll-wrapper {
+    pointer-events: auto;
     grid-area: scroll;
     display: grid;
     overflow-x: hidden; /* 横スクロールはさせない */
@@ -171,18 +172,17 @@ body {
     position: absolute;
     top: 0;
     left: 0;
-    pointer-events: auto;
 /* border: 3px solid cyan; */
 /* ★ 3D要素 */
 /* perspective: var(--perspective); /* 2.65cm / 100px */
 /* perspective-origin: center center; */
 }
 .perspective-wrapper {
+    pointer-events: auto;
     display: contents;
     display: block;
     height: auto;
     width: auto;
-    pointer-events: auto;
     overflow: auto;
     overflow: hidden;
     /* JSからの即時スクロールを可能にするため、smoothスクロールを無効化 */
@@ -245,6 +245,7 @@ rotate: x var(--rotate);
     pointer-events: auto;
     rotate: 180deg;
     z-index: 2;
+/* transform-style: preserve-3d; */
 }
 .grid-area-battle-panel {
     grid-area: battle;
@@ -255,10 +256,10 @@ rotate: x var(--rotate);
     padding: 0;
     box-sizing: border-box;
     overflow: auto;
-    z-index: 1;
+    z-index: 3;
     left: 0;
 
-    /* transform-style: preserve-3d; */
+/* transform-style: preserve-3d; */
 }
 .grid-area-pc-panel {
     grid-area: player;
@@ -269,7 +270,8 @@ rotate: x var(--rotate);
     box-sizing: border-box;
     overflow: auto;
     pointer-events: auto;
-    z-index: 2;
+    z-index: 4;
+/* transform-style: preserve-3d; */
 }
 .grid-area-status-panel {
     grid-area: status;
