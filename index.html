@@ -56,7 +56,7 @@
             <div class="char-area-wrapper" id="enemyAreaWrapper">
               <div class="char-container" id="enemyContainer"></div>
             </div>
-            <h2 class="section-title">▲ ネクロマンサーの手駒 ▲</h2>
+            <h2 class="char-area-title">▲ ネクロマンサーの手駒 ▲</h2>
           </aside>
 
           <!-- ② 舞台見取図コンテンツ -->
@@ -69,11 +69,12 @@
             <div class="char-area-wrapper" id="pcAreaWrapper">
               <div class="char-container" id="pcContainer"></div>
             </div>
-            <h2 class="section-title">▲ 姉妹ドール ▲</h2>
+            <h2 class="char-area-title">▲ 姉妹ドール ▲</h2>
           </aside>
 
         </div>
-        <div class="scroll-bar"></div>
+        <div class="scroll-bar">← SCROLL →</div>
+        <div class="scroll-bar scroll-bar-left">← SCROLL →</div>
       </div>
     </div>
     
@@ -85,7 +86,7 @@
     <!-- バトルステータス表示パネル -->
     <aside class="grid-area-status-panel">
       <div class="section status" id="statusArea">
-        <span class="hide-on-mobile"><h2 class="section-title">バトルステータス</h2></span>
+        <!--span class="hide-on-mobile"><h2 class="section-title">バトルステータス</h2></span-->
         <div class="status-grid">
           <div class="status-item">
             <div class="status-label">勝利条件</div>
@@ -129,45 +130,62 @@
 
     <!-- ラピッド宣言パネル -->
     <aside class="grid-area-rapid-panel">
-      <div class="section accordion-container is-closed" id="rapidDeclarationArea">
-          <h2 class="section-title accordion-header">ラピッド宣言はありません</h2>
-          <div class="accordion-content">
-              <div id="rapidDeclarationList" class="action-queue-list is-stack-style"></div>
-          </div>
-      </div>
+      <!--div class="section accordion-container is-closed" id="rapidDeclarationArea">
+        <h2 class="section-title accordion-header">ラピッド宣言はありません</h2>
+        <div class="accordion-content">
+            <div id="rapidDeclarationList" class="action-queue-list is-stack-style"></div>
+        </div>
+      </div-->
     </aside>
     
     <!-- ジャッジ宣言 ★★★ -->
     <aside class="grid-area-judge-panel">
-      <div class="section accordion-container is-closed" id="judgeDeclarationArea">
-          <h2 class="section-title accordion-header">ジャッジ宣言はありません</h2>
-
-          <div class="accordion-content">
-              <div id="judgeDeclarationList" class="action-queue-list is-stack-style"></div>
-          </div>
-      </div>
+      <!--div class="section accordion-container is-closed" id="judgeDeclarationArea">
+        <h2 class="section-title accordion-header">ジャッジ宣言はありません</h2>
+        <div class="accordion-content">
+            <div id="judgeDeclarationList" class="action-queue-list is-stack-style"></div>
+        </div>
+      </div-->
     </aside>
 
     <!-- アクション宣言パネル -->
     <aside class="grid-area-action-panel">
-      <div class="section accordion-container is-closed" id="actionDeclarationArea">
+      <!--div class="section accordion-container is-closed" id="actionDeclarationArea">
         <h2 class="section-title accordion-header">アクション宣言はありません</h2>
-
         <div class="accordion-content">
-            <div id="actionDeclarationList" class="action-queue-list">
-            </div>
+          <div id="actionDeclarationList" class="action-queue-list"></div>
         </div>
-      </div>
+      </div-->
     </aside>
 
     <!-- ダメージ宣言パネル -->
     <aside class="grid-area-damage-panel">
-      <div class="section accordion-container is-closed" id="damageProcessingArea">
+      <!--div class="section accordion-container is-closed" id="damageProcessingArea">
         <h2 class="section-title accordion-header">ダメージ宣言はありません</h2>
-
         <div class="accordion-content">
-            <div id="damageProcessingList" class="action-queue-list is-stack-style">
-            </div>
+            <div id="damageProcessingList" class="action-queue-list is-stack-style"></div>
+        </div>
+      </div-->
+    </aside>
+
+    <aside class="grid-area-call-panel">
+      <!--h2 class="section-title">宣言リスト</h2-->
+      <div class="call">
+        <div id="rapidDeclarationArea">
+          <h3 class="call-title">RAPID</h3>
+          <div id="rapidDeclarationList" class="action-queue-list is-stack-style"></div>
+        </div>
+        <div id="judgeDeclarationArea">
+          <h3 class="call-title">JUDGE</h3>
+          <div id="judgeDeclarationList" class="action-queue-list is-stack-style"></div>
+        </div>
+        <div id="actionDeclarationArea">
+          <h3 class="call-title">ACTION</h3>
+          <div id="actionDeclarationList" class="action-queue-list"></div>
+        </div>
+        <div id="damageProcessingArea">
+          <h3 class="call-title">DAMAGE</h3>
+          <div id="damageProcessingList" class="action-queue-list is-stack-style"></div>
         </div>
       </div>
     </aside>

@@ -117,6 +117,8 @@ h2 {
 /* ================================
   　ライトモード
 ================================ */
+    --color-scroll:       var(--color-a);
+    --color-scroll-bg:    var(--color-2);
     --color-text:         var(--color-3);
     --color-text-2:       var(--color-5);
     --color-text-3:       var(--color-1);
@@ -190,73 +192,75 @@ h2 {
    <html> タグに data-theme="dark" が付いたときに適用される
 ================================ */
 html[data-theme="dark"] {
-      /* Dark Mode Variables */
-      --color-text:         var(--color-d);
-      --color-text-2:       var(--color-b);
-      --color-text-3:       var(--color-e);
-      --color-text-light:   var(--color-1);
-      --color-text-muted:   var(--color-8);
-      --color-fore-1:       var(--color-f);
-      --color-fore-2:       var(--color-e);
-      --color-fore-3:       var(--color-d);
-      --color-fore-4:       var(--color-c);
-      --color-fore-5:       var(--color-b);
-      --color-fore-6:       var(--color-a);
-      --color-fore-7:       var(--color-9);
-      --color-background-1: var(--color-0);
-      --color-background-2: var(--color-1);
-      --color-background-3: var(--color-2);
-      --color-background-4: var(--color-3);
-      --color-background-5: var(--color-4);
-      --color-background-6: var(--color-5);
-      --color-background-7: var(--color-6);
-      --color-panel:        var(--color-3);
-      --color-surface-1:    var(--color-5);
-      --color-surface-2:    var(--color-4);
-      --color-surface-dark: var(--color-2);
-      --color-dice-bg:      var(--color-1);
-      --color-dice-bd:      var(--color-5);
-      --color-log-bg:       var(--color-0);
-      --color-border:       var(--color-6);
-      --color-shadow-1:     #0008;
-      --color-accent:       #a00;
-      --color-accent-red:   #ff5555;
-      --color-accent-gold:  #ffd700;
-      --color-accent-cyan:  #00ffff;
-      --color-accent-blue:  #58a6ff;
-      --color-card:         var(--color-6);
-      --color-title-text:   var(--color-8);
-      --color-title-bg:     #300;
-      --color-footer-bg:    #100;
-      --color-sub-text:     var(--color-8);
-      --color-sub-bg:       #200;
-      --color-btn-text:     var(--color-c);
-      --color-btn-bg:       var(--color-0);
-      --color-level-1:      #fff1; 
-      --color-level-3:      #fff4; 
-      --color-level-f:      #000d; 
+        /* Dark Mode Variables */
+        --color-scroll:       var(--color-5);
+        --color-scroll-bg:    var(--color-2);
+        --color-text:         var(--color-d);
+        --color-text-2:       var(--color-b);
+        --color-text-3:       var(--color-e);
+        --color-text-light:   var(--color-1);
+        --color-text-muted:   var(--color-8);
+        --color-fore-1:       var(--color-f);
+        --color-fore-2:       var(--color-e);
+        --color-fore-3:       var(--color-d);
+        --color-fore-4:       var(--color-c);
+        --color-fore-5:       var(--color-b);
+        --color-fore-6:       var(--color-a);
+        --color-fore-7:       var(--color-9);
+        --color-background-1: var(--color-0);
+        --color-background-2: var(--color-1);
+        --color-background-3: var(--color-2);
+        --color-background-4: var(--color-3);
+        --color-background-5: var(--color-4);
+        --color-background-6: var(--color-5);
+        --color-background-7: var(--color-6);
+        --color-panel:        var(--color-3);
+        --color-surface-1:    var(--color-5);
+        --color-surface-2:    var(--color-4);
+        --color-surface-dark: var(--color-2);
+        --color-dice-bg:      var(--color-1);
+        --color-dice-bd:      var(--color-5);
+        --color-log-bg:       var(--color-0);
+        --color-border:       var(--color-6);
+        --color-shadow-1:     #0008;
+        --color-accent:       #a00;
+        --color-accent-red:   #ff5555;
+        --color-accent-gold:  #ffd700;
+        --color-accent-cyan:  #00ffff;
+        --color-accent-blue:  #58a6ff;
+        --color-card:         var(--color-6);
+        --color-title-text:   var(--color-8);
+        --color-title-bg:     #300;
+        --color-footer-bg:    #100;
+        --color-sub-text:     var(--color-8);
+        --color-sub-bg:       #200;
+        --color-btn-text:     var(--color-c);
+        --color-btn-bg:       var(--color-0);
+        --color-level-1:      #fff1; 
+        --color-level-3:      #fff4; 
+        --color-level-f:      #000d; 
 
-      /* カテゴリ色分け */
-      --color-difficulty-change: #5a7f4a;
-      --color-move:              #3a6b8c;
-      --color-move-debuff:       #6c7a4a;
-      --color-staffing:          #2E86C1;
-      --color-attack:            #a65c58;
-      --color-defense:           #3d7f73;
-      --color-support:           #7a5b86;
-      --color-debuff:            #a68f3a;
-      --color-action-boost:      #3d7c70;
-      --color-heal:              #a6784a;
-      --color-utility:           #6b6e72;
-      --color-sacrifice:         #8c5c58;
-      --color-enhancement:       #a6823a;
-      --color-vulnerability:     #a15149;
-      --color-dialogue:          #7c7059;
-      --color-reinforcement:     #4e815d;
-      --color-madness:           #9c4942;
-      --color-negation:          #34658A;
-      --color-cost:              #B9770E;
-      --color-other:             #5a6066;
+        /* カテゴリ色分け */
+        --color-difficulty-change: #5a7f4a;
+        --color-move:              #3a6b8c;
+        --color-move-debuff:       #6c7a4a;
+        --color-staffing:          #2E86C1;
+        --color-attack:            #a65c58;
+        --color-defense:           #3d7f73;
+        --color-support:           #7a5b86;
+        --color-debuff:            #a68f3a;
+        --color-action-boost:      #3d7c70;
+        --color-heal:              #a6784a;
+        --color-utility:           #6b6e72;
+        --color-sacrifice:         #8c5c58;
+        --color-enhancement:       #a6823a;
+        --color-vulnerability:     #a15149;
+        --color-dialogue:          #7c7059;
+        --color-reinforcement:     #4e815d;
+        --color-madness:           #9c4942;
+        --color-negation:          #34658A;
+        --color-cost:              #B9770E;
+        --color-other:             #5a6066;
 }
 
 /* ================================
@@ -266,6 +270,8 @@ html[data-theme="dark"] {
 @media (prefers-color-scheme: dark) { 
     html:not([data-theme]) {
         /* Dark Mode Variables (上記と全く同じ内容をコピー) */
+        --color-scroll:       var(--color-5);
+        --color-scroll-bg:    var(--color-2);
         --color-text:         var(--color-d);
         --color-text-2:       var(--color-b);
         --color-text-3:       var(--color-e);
@@ -344,6 +350,7 @@ html[data-theme="dark"] {
 * {
     scrollbar-width: thin;
     scrollbar-color: var(--color-background-5) var(--color-background-3);
+    scrollbar-color: var(--color-background-5) transparent;
 }
 
 /* Webkit系ブラウザ向け (Chrome, Safari, Edgeなど) */

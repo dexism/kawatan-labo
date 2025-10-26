@@ -6,7 +6,7 @@
 /*
  * このファイルを修正した場合は、必ずパッチバージョンを上げてください。(例: 1.23.456 -> 1.23.457)
  */
-export const version = "1.20.5";
+export const version = "1.20.6";
 
 import * as charManager from './character-manager.js';
 import * as battleLogic from './battle-logic.js';
@@ -220,7 +220,7 @@ function createCharacterCard(char, isSetupPhase) {
             let line = '';
             
             // 1. 未練の種類に応じて、満たされている場合のシンボルを決定
-            const filledSymbol = regret.isForTreasure ? '♥' : '◆';
+            const filledSymbol = regret.isForTreasure ? '★' : '◆';
 
             // 2. シンボルを使ってゲージを生成
             for (let i = 0; i < 4; i++) {
@@ -263,7 +263,7 @@ function createCharacterCard(char, isSetupPhase) {
                 
                 const symbols = sortedParts.map(item => {
                     if (item.isTreasure) {
-                        return item.damaged ? '・' : '♥';
+                        return item.damaged ? '・' : '★';
                     }
                     if (item.isBasicPart) {
                         return item.damaged ? '・' : '■';
@@ -534,37 +534,6 @@ function updateStatusPanel(state, characters) {
         card.classList.toggle('highlight-char', activeActorIds.has(card.dataset.id));
     });
 
-    // ▼▼▼ ここからが今回の修正箇所です ▼▼▼
-    // --- 現在のフェーズに応じてUI要素へ自動スクロール ---
-    /*
-    let focusElement = null;
-    switch (phase) {
-        case 'ACTION_DECLARATION':
-            if (activeActors.length > 0) {
-                focusElement = document.querySelector(`.char[data-id="${activeActors[0].id}"]`);
-            }
-            break;
-        case 'RAPID_RESOLUTION':
-            focusElement = document.getElementById('rapidDeclarationArea');
-            break;
-        case 'ACTION_RESOLUTION':
-            // アクションキューとジャッジキューは同じエリアにあるため、親コンテナにスクロール
-            focusElement = document.getElementById('actionDeclarationArea');
-            break;
-        case 'DAMAGE_RESOLUTION':
-            focusElement = document.getElementById('damageProcessingArea');
-            break;
-    }
-
-    if (focusElement) {
-        focusElement.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center',
-            inline: 'nearest'
-        });
-    }
-    */
-    // ▲▲▲ 修正はここまでです ▲▲▲
     // 新しい実装（横スクロールに限定）
     if (phase === 'ACTION_DECLARATION' && activeActors.length > 0) {
         const activeCharCard = document.querySelector(`.char[data-id="${activeActors[0].id}"]`);
@@ -724,24 +693,25 @@ export function updateAllQueuesUI() {
     updateQueueUI('judgeDeclarationList', judgeQueue, "ジャッジ宣言");
     updateDamageQueueUI(damageQueue);
     
-    document.getElementById('actionDeclarationArea').classList.toggle('is-closed', actionQueue.length === 0);
-    document.getElementById('rapidDeclarationArea').classList.toggle('is-closed', rapidQueue.length === 0);
-    document.getElementById('judgeDeclarationArea').classList.toggle('is-closed', judgeQueue.length === 0);
-    document.getElementById('damageProcessingArea').classList.toggle('is-closed', damageQueue.length === 0);
+    // document.getElementById('actionDeclarationArea').classList.toggle('is-closed', actionQueue.length === 0);
+    // document.getElementById('rapidDeclarationArea').classList.toggle('is-closed', rapidQueue.length === 0);
+    // document.getElementById('judgeDeclarationArea').classList.toggle('is-closed', judgeQueue.length === 0);
+    // document.getElementById('damageProcessingArea').classList.toggle('is-closed', damageQueue.length === 0);
 }
 
 function updateQueueUI(elementId, queue, headerText) {
     const listEl = document.getElementById(elementId);
     if (!listEl) return;
     const container = listEl.closest('.accordion-container');
-    const header = container ? container.querySelector('.accordion-header') : null;
-    if (!header) return;
+    // const header = container ? container.querySelector('.accordion-header') : null;
+    // if (!header) return;
     const state = battleLogic.getBattleState();
     
     const isActionTimingActive = state.activeActors.length > 0;
     const hasUncheckedRapids = state.rapidQueue.some(r => !r.checked);
     const hasUncheckedJudges = state.judgeQueue.some(j => !j.checked);
 
+    /*
     let textSpan = header.querySelector('span');
     if (!textSpan) {
         const originalText = header.textContent;
@@ -750,11 +720,12 @@ function updateQueueUI(elementId, queue, headerText) {
         textSpan.textContent = originalText;
         header.appendChild(textSpan);
     }
+    */
     if (queue.length === 0) {
         listEl.innerHTML = ''; 
-        textSpan.textContent = headerText + "はありません";
+        // textSpan.textContent = headerText + "はありません";
     } else {
-        textSpan.textContent = headerText;
+        // textSpan.textContent = headerText;
         listEl.innerHTML = ''; 
         queue.forEach((declaration, index) => {
             const labelEl = document.createElement('label');
@@ -770,7 +741,7 @@ function updateQueueUI(elementId, queue, headerText) {
             }
             // インデックスを data-index 属性として設定
             labelEl.dataset.index = index;
-            // ▲▲▲ 変更ここまで ▲▲▲
+
             let isDisabled = false;
             // 新しい有効化条件を適用
             if (elementId === 'rapidDeclarationList') {
@@ -794,7 +765,6 @@ function updateQueueUI(elementId, queue, headerText) {
             const textContentSpan = document.createElement('span');
             let text = `<b>${declaration.performer.name}</b>【${declaration.summary.name}】`;
             
-            // ▼▼▼ 変更箇所 ▼▼▼
             let targetObject = null;
             // ジャッジ宣言の場合、judgeTargetが対象
             if (declaration.judgeTarget) {
@@ -819,29 +789,6 @@ function updateQueueUI(elementId, queue, headerText) {
             if (targetObject) {
                 text += `→ <b>${targetObject.name}</b>`;
             }
-            // ▲▲▲ 変更ここまで ▲▲▲
-
-            /*
-            if (declaration.target) {
-                // targetがキャラクターオブジェクト（nameプロパティを持つ）の場合
-                if (declaration.target.name) {
-                    text += ` → <b>${declaration.target.name}</b>`;
-                }
-                // targetが宣言オブジェクト（移動妨害の対象）の場合
-                else if (declaration.target.performer && declaration.target.sourceManeuver) {
-                    const moveDecl = declaration.target; // 妨害対象の移動宣言
-                    
-                    // 【ワイヤーリール】のように、移動の実行者と対象が異なる場合
-                    if (moveDecl.target && moveDecl.target.id !== moveDecl.performer.id) {
-                        text += ` → <b>${moveDecl.target.name}</b>（${moveDecl.performer.name}【${moveDecl.sourceManeuver.name}】）`;
-                    } 
-                    // 【ほね】のように、自身を移動させる場合
-                    else {
-                        text += ` → <b>${moveDecl.performer.name}【${moveDecl.sourceManeuver.name}】</b>`;
-                    }
-                }
-            }
-            */
 
             textContentSpan.innerHTML = text;
             labelEl.appendChild(textContentSpan);

@@ -5,18 +5,20 @@
 .section {
     background-color: var(--color-background-2);
     color:            var(--color-text-2);
-    padding: 0 5px 5px 5px;
-/* transform-style: preserve-3d; */
+    margin: 0;
+    padding: 5px;
 }
 .section-title {
-    font-size: 0.8rem;
+    margin: 0;
+    padding: 0;
+    font-size: 14px;
     font-weight: bold;
     display: flex;
     align-items: baseline;
 }
 h2.section-title {
-    padding: 0 5px;
-    margin: 3px;
+    margin: 0;
+    padding: 5px 5px;
     width: auto;
 }
 /* --- バトルステータス --- */
@@ -122,11 +124,32 @@ h2.section-title {
     pointer-events: none;
     box-shadow: none;
 }
+/* ==== 宣言 ================================================================ */
 /* 宣言アイテムリストの「共通」スタイル */
-.action-queue-list {
-    background-color: var(--color-log-bg);
-    border: 1px solid var(--color-border);
+.call {
+    margin: 10px;
+    padding: 5px;
+    gap: 2px;
+    width: auto;
+    font-size: 12px;
+    font-weight: 900;
+    color: var(--color-border);
     border-radius: 10px;
+    border: 1px solid var(--color-background-4);
+    overflow: hidden;
+    background-color: var(--color-background-3);
+}
+h3.call-title {
+    margin: 0;
+    padding: 0 10px;
+    width: auto;
+    font-size: 12px;
+    font-weight: 900;
+    color: var(--color-border);
+}
+.action-queue-list {
+    margin: 1px;
+
     padding: 5px;
     font-size: 12px;
     display: flex;
@@ -134,11 +157,14 @@ h2.section-title {
     gap: 5px;
     overflow-y: auto;
     /* 最小の高さを設定。項目が0個でもこの高さは維持される。 */
-    min-height: 30px; 
+    min-height: 0px;
     /* 最大の高さを400pxに設定。これを超えるとスクロールバーが表示される。 */
     /* max-height: 400px; */
     /* height: auto; を暗黙的に指定し、中身に合わせて高さが変わるようにする */
+
     height: auto;
+    border: none;
+    background-color: transparent;
 }
 /* アクション宣言以外の「積み上げ」スタイル */
 .action-queue-list.is-stack-style {
@@ -192,11 +218,12 @@ label.action-queue-item.is-checked span {
     flex-grow: 1;
     height: 100%;
     font-size: 14px;
-    padding-bottom: 10px;
+    padding: 5px;
     box-sizing: border-box;
 }
 .log-entries-container {
     flex-grow: 1;
+    margin: 5px;
     max-height: 500px;
     background-color: var(--color-log-bg);
     border: 1px solid var(--color-background-4);
